@@ -127,7 +127,7 @@ function getSubServiceIcon(idx: number, titleEn: string) {
   return ICON_MAP[titleEn] || FileText;
 }
 
-function Logo({ isUrdu, isDark }: { isUrdu: boolean; isDark: boolean }) {
+function Logo({ isUrdu = false, isDark = false }: { isUrdu?: boolean; isDark?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2.5">
       <span className="flex h-10 w-10 items-center justify-center rounded-md bg-navy-900 shadow-sm border border-gold-500/20">
