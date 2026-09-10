@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import path from "path";
 
-const outputDir = "C:\\Users\\HP\\.gemini\\antigravity\\brain\\b2396df3-7b4c-4364-8a07-e99e1765664e";
+const outputDir = "C:\\Users\\HP\\.gemini\\antigravity\\brain\\4d4e663e-b6c2-4b49-9861-0e26f75e8349";
 
 console.log("Launching Chrome via Puppeteer...");
 const browser = await puppeteer.launch({
@@ -120,7 +120,42 @@ if (taxUrduBtn) {
 await themeBtn.click();
 await new Promise((r) => setTimeout(r, 800));
 await page.screenshot({ path: path.join(outputDir, "home-light-ur.png"), fullPage: false });
-console.log("Captured Urdu light mode screenshot");
+// Switch back to Dark mode
+await themeBtn.click();
+await new Promise((r) => setTimeout(r, 600));
+
+// Capture e-Stamping in Urdu & Dark Mode
+console.log("Navigating to e-stamping in Urdu...");
+await page.goto("http://localhost:3000/services/e-stamping", { waitUntil: "networkidle2" });
+await new Promise((r) => setTimeout(r, 1000));
+await page.screenshot({ path: path.join(outputDir, "service-estamp-dark-ur.png"), fullPage: false });
+console.log("Captured service-estamp-dark-ur.png");
+
+// Switch to English and capture Tax service
+console.log("Navigating to Tax in English...");
+const enBtn = await page.evaluateHandle(() => {
+  const buttons = Array.from(document.querySelectorAll("header button"));
+  return buttons.find((b) => b.innerText.includes("English"));
+});
+if (enBtn) {
+  await enBtn.click();
+  await new Promise((r) => setTimeout(r, 800));
+}
+await page.goto("http://localhost:3000/services/tax", { waitUntil: "networkidle2" });
+await new Promise((r) => setTimeout(r, 1000));
+await page.screenshot({ path: path.join(outputDir, "service-tax-dark-en.png"), fullPage: false });
+console.log("Captured service-tax-dark-en.png");
+
+// Capture Home Consultation Form
+console.log("Navigating to Home and scrolling to Consultation form...");
+await page.goto("http://localhost:3000/", { waitUntil: "networkidle2" });
+await new Promise((r) => setTimeout(r, 1000));
+await page.evaluate(() => {
+  window.scrollTo(0, document.body.scrollHeight - 1400);
+});
+await new Promise((r) => setTimeout(r, 800));
+await page.screenshot({ path: path.join(outputDir, "consultation-form-dark.png"), fullPage: false });
+console.log("Captured consultation-form-dark.png");
 
 await browser.close();
-console.log("Verification finished successfully!");
+console.log("Verification and captures finished successfully!");
