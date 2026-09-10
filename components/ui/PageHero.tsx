@@ -37,7 +37,11 @@ export default function PageHero({
 }: PageHeroProps) {
   const { t } = useLanguage();
   const effectiveBackLabel = backLabel || t.common.backToHome;
-  const effectivePrimaryCta = primaryCta || { label: t.common.visitOurOffice, href: "#contact" };
+  const rawPrimaryCta = primaryCta || { label: t.common.visitOurOffice, href: "/#office" };
+  const effectivePrimaryCta = {
+    ...rawPrimaryCta,
+    href: rawPrimaryCta.href === "#contact" || rawPrimaryCta.href === "#office" ? "/#office" : rawPrimaryCta.href,
+  };
   return (
     <section
       className={`relative flex items-center overflow-hidden ${

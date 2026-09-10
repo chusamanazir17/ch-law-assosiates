@@ -65,19 +65,19 @@ html[lang="ur"] .font-serif {
   }
 
   .btn-gold {
-    @apply inline-flex items-center justify-center gap-2 rounded bg-gold-400 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-gold-500 hover:shadow-lg hover:shadow-gold-400/30;
+    @apply inline-flex items-center justify-center gap-2 rounded bg-gold-400 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-gold-500 hover:shadow-lg hover:shadow-gold-400/30 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:outline-none;
   }
 
   .btn-outline-light {
-    @apply inline-flex items-center justify-center gap-2 rounded border border-white/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:border-white hover:bg-white/10;
+    @apply inline-flex items-center justify-center gap-2 rounded border border-white/40 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:border-white hover:bg-white/10 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none;
   }
 
   .btn-outline-navy {
-    @apply inline-flex items-center justify-center gap-2 rounded border border-navy-800/30 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-navy-800 transition-all duration-300 hover:border-navy-800 hover:bg-navy-800 hover:text-white;
+    @apply inline-flex items-center justify-center gap-2 rounded border border-navy-800/30 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-navy-800 transition-all duration-300 hover:border-navy-800 hover:bg-navy-800 hover:text-white active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:outline-none;
   }
 
   .btn-navy {
-    @apply inline-flex items-center justify-center gap-2 rounded bg-navy-900 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-navy-800 hover:shadow-lg;
+    @apply inline-flex items-center justify-center gap-2 rounded bg-navy-900 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-navy-800 hover:shadow-lg active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:outline-none;
   }
 
   .eyebrow {

@@ -82,7 +82,7 @@ export function ContactCards({
       title: t.common.visitOurOffice,
       lines: [isUrdu ? "آفس 402، بزنس ٹاور" : "Office 402, Business Tower", ""],
       actionLabel: isUrdu ? "اوقات دیکھیں" : "See Schedule",
-      href: "#office",
+      href: "/#office",
     },
   ];
 
@@ -141,18 +141,35 @@ export function ContactCards({
                 {l}
               </p>
             ))}
-            <a
-              href={o.href}
-              className={`mt-5 inline-flex items-center justify-center gap-1.5 rounded px-5 py-2.5 text-xs font-bold uppercase tracking-wide transition ${
-                featured
-                  ? "bg-white text-gold-700 hover:bg-gold-50"
-                  : dark
-                  ? "bg-gold-400 text-white hover:bg-gold-500"
-                  : "border border-navy-900/20 dark:border-white/20 text-navy-900 dark:text-white hover:border-navy-900 hover:bg-navy-900 hover:text-white dark:hover:bg-white/10"
-              }`}
-            >
-              {o.actionLabel}
-            </a>
+            {o.href.startsWith("/") ? (
+              <Link
+                href={o.href}
+                className={`mt-5 inline-flex items-center justify-center gap-1.5 rounded px-5 py-2.5 text-xs font-bold uppercase tracking-wide transition ${
+                  featured
+                    ? "bg-white text-gold-700 hover:bg-gold-50"
+                    : dark
+                    ? "bg-gold-400 text-white hover:bg-gold-500"
+                    : "border border-navy-900/20 dark:border-white/20 text-navy-900 dark:text-white hover:border-navy-900 hover:bg-navy-900 hover:text-white dark:hover:bg-white/10"
+                }`}
+              >
+                {o.actionLabel}
+              </Link>
+            ) : (
+              <a
+                href={o.href}
+                target={o.href.startsWith("http") ? "_blank" : undefined}
+                rel={o.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className={`mt-5 inline-flex items-center justify-center gap-1.5 rounded px-5 py-2.5 text-xs font-bold uppercase tracking-wide transition ${
+                  featured
+                    ? "bg-white text-gold-700 hover:bg-gold-50"
+                    : dark
+                    ? "bg-gold-400 text-white hover:bg-gold-500"
+                    : "border border-navy-900/20 dark:border-white/20 text-navy-900 dark:text-white hover:border-navy-900 hover:bg-navy-900 hover:text-white dark:hover:bg-white/10"
+                }`}
+              >
+                {o.actionLabel}
+              </a>
+            )}
           </motion.div>
         );
       })}
@@ -202,7 +219,7 @@ export function ConsultationPanel({
           )}
 
           <div className="mt-9 flex flex-wrap gap-4">
-            <Link href="#office" className="btn-gold">
+            <Link href="/#office" className="btn-gold">
               <MapPin className="h-4 w-4" /> {t.common.visitOurOffice}
             </Link>
             <a
