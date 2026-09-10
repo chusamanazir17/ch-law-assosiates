@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, MessageCircle } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export type Crumb = { label: string; href?: string };
 
@@ -28,12 +29,15 @@ export default function PageHero({
   description,
   image,
   crumbs,
-  backLabel = "Back to Home",
+  backLabel,
   backHref = "/",
-  primaryCta = { label: "Visit Our Office", href: "#contact" },
+  primaryCta,
   whatsapp = true,
   tall = false,
 }: PageHeroProps) {
+  const { t } = useLanguage();
+  const effectiveBackLabel = backLabel || t.common.backToHome;
+  const effectivePrimaryCta = primaryCta || { label: t.common.visitOurOffice, href: "#contact" };
   return (
     <section
       className={`relative flex items-center overflow-hidden ${
@@ -77,8 +81,8 @@ export default function PageHero({
               href={backHref}
               className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white/70 transition hover:text-gold-300"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              {backLabel}
+              <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
+              {effectiveBackLabel}
             </Link>
           )}
         </motion.div>
@@ -119,9 +123,9 @@ export default function PageHero({
           transition={{ duration: 0.65, delay: 0.38 }}
           className="mt-9 flex flex-wrap gap-4"
         >
-          <Link href={primaryCta.href} className="btn-gold">
+          <Link href={effectivePrimaryCta.href} className="btn-gold">
             <MapPin className="h-4 w-4" />
-            {primaryCta.label}
+            {effectivePrimaryCta.label}
           </Link>
           {whatsapp && (
             <a
@@ -131,14 +135,14 @@ export default function PageHero({
               className="btn-outline-light"
             >
               <MessageCircle className="h-4 w-4" />
-              WhatsApp Us
+              {t.common.whatsappUs}
             </a>
           )}
         </motion.div>
       </div>
 
       {/* bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f5f7fa] to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f5f7fa] dark:from-[#071224] to-transparent" />
     </section>
   );
 }

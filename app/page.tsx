@@ -21,6 +21,7 @@ import { HOME_SERVICES, HERO_IMAGES, SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import Stagger, { StaggerItem } from "@/components/motion/Stagger";
 import OfficeSection from "@/components/ui/OfficeSection";
+import { ConsultationForm } from "@/components/ui/ContactBlocks";
 import { useLanguage } from "@/lib/LanguageContext";
 
 const BUILDING_IMG =
@@ -434,7 +435,11 @@ function FinalCta() {
           ))}
         </Stagger>
 
-        <FadeIn delay={0.2} className="mt-12 text-center">
+        <FadeIn delay={0.2} className="mt-14 max-w-2xl mx-auto">
+          <ConsultationForm />
+        </FadeIn>
+
+        <FadeIn delay={0.3} className="mt-10 text-center">
           <Link href="#office" className="btn-gold px-10 py-4 text-sm">
             <MapPin className="h-4 w-4" /> {t.finalCta.visitOfficeBtn}
           </Link>

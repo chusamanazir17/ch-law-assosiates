@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -10,10 +11,13 @@ import {
   Navigation,
   ArrowRight,
   Home,
+  CheckCircle2,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const cardAnim = {
   hidden: { opacity: 0, y: 28 },
@@ -24,7 +28,7 @@ const cardAnim = {
   }),
 };
 
-type Option = {
+export type ContactOption = {
   icon: LucideIcon;
   title: string;
   lines: string[];
@@ -33,50 +37,60 @@ type Option = {
   featured?: boolean;
 };
 
-export const contactOptions: Option[] = [
-  {
-    icon: Phone,
-    title: "Call Now",
-    lines: ["Talk to an agent about specific legal", "documentation needs."],
-    actionLabel: "Call Support",
-    href: SITE.phoneHref,
-  },
-  {
-    icon: MessageCircle,
-    title: "WhatsApp Us",
-    lines: ["Instant replies for quick queries and", "checklist requests."],
-    actionLabel: "Message Now",
-    href: SITE.whatsappHref,
-    featured: true,
-  },
-  {
-    icon: MapPin,
-    title: "Get Directions",
-    lines: ["Blue Area, Islamabad", ""],
-    actionLabel: "Open Maps",
-    href: SITE.mapsUrl,
-  },
-  {
-    icon: Home,
-    title: "Visit Our Office",
-    lines: ["Office 402, Business Tower", ""],
-    actionLabel: "See Schedule",
-    href: "#office",
-  },
-];
-
 export function ContactCards({
-  items = contactOptions,
+  items,
   dark = false,
   featuredFirst = false,
 }: {
-  items?: Option[];
+  items?: ContactOption[];
   dark?: boolean;
   featuredFirst?: boolean;
 }) {
+  const { isUrdu, t } = useLanguage();
+
+  const defaultOptions: ContactOption[] = [
+    {
+      icon: Phone,
+      title: t.common.callNow,
+      lines: [
+        isUrdu ? "قانونی دستاویزات کی معلومات کے لیے" : "Talk to an agent about specific legal",
+        isUrdu ? "ہمارے نمائندے سے بات کریں۔" : "documentation needs.",
+      ],
+      actionLabel: t.common.callSupport,
+      href: SITE.phoneHref,
+    },
+    {
+      icon: MessageCircle,
+      title: t.common.whatsappUs,
+      lines: [
+        isUrdu ? "فوری معلومات اور مطلوبہ دستاویزات" : "Instant replies for quick queries and",
+        isUrdu ? "کی چیک لسٹ کے لیے۔" : "checklist requests.",
+      ],
+      actionLabel: isUrdu ? "پیغام بھیجیں" : "Message Now",
+      href: SITE.whatsappHref,
+      featured: true,
+    },
+    {
+      icon: MapPin,
+      title: t.common.getDirections,
+      lines: [isUrdu ? "بلیو ایریا، اسلام آباد" : "Blue Area, Islamabad", ""],
+      actionLabel: isUrdu ? "نقشہ دیکھیں" : "Open Maps",
+      href: SITE.mapsUrl,
+    },
+    {
+      icon: Home,
+      title: t.common.visitOurOffice,
+      lines: [isUrdu ? "آفس 402، بزنس ٹاور" : "Office 402, Business Tower", ""],
+      actionLabel: isUrdu ? "اوقات دیکھیں" : "See Schedule",
+      href: "#office",
+    },
+  ];
+
+  const displayItems = items || defaultOptions;
+
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {items.map((o, i) => {
+      {displayItems.map((o, i) => {
         const featured = featuredFirst ? i === 0 : o.featured;
         return (
           <motion.div
@@ -87,28 +101,28 @@ export function ContactCards({
             viewport={{ once: true, margin: "-60px" }}
             variants={cardAnim}
             whileHover={{ y: -6 }}
-            className={`flex flex-col items-center rounded-lg border p-7 text-center transition-shadow duration-300 hover:shadow-card-hover ${
+            className={`flex flex-col items-center rounded-lg border p-7 text-center transition-all duration-300 hover:shadow-card-hover ${
               featured
-                ? "border-gold-400/50 bg-gold-400 text-white"
+                ? "border-gold-400/50 bg-gold-400 text-white shadow-card"
                 : dark
-                  ? "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
-                  : "border-navy-900/8 bg-white text-navy-900"
+                ? "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"
+                : "border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] text-navy-900 dark:text-white shadow-soft"
             }`}
           >
             <span
-              className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
+              className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
                 featured
                   ? "bg-white/20 text-white"
                   : dark
-                    ? "bg-white/10 text-gold-400"
-                    : "bg-navy-900/[0.05] text-navy-900"
+                  ? "bg-white/10 text-gold-400"
+                  : "bg-navy-900/[0.05] dark:bg-white/10 text-navy-900 dark:text-gold-400"
               }`}
             >
               <o.icon className="h-5 w-5" />
             </span>
             <h4
               className={`text-[11px] font-bold uppercase tracking-[0.16em] ${
-                featured || dark ? "text-white" : "text-navy-800/50"
+                featured || dark ? "text-white" : "text-navy-800/50 dark:text-slate-400"
               }`}
             >
               {o.title}
@@ -120,8 +134,8 @@ export function ContactCards({
                   featured
                     ? "text-white/90"
                     : dark
-                      ? "text-white/65"
-                      : "text-navy-800/65"
+                    ? "text-white/65"
+                    : "text-navy-800/65 dark:text-slate-300"
                 }`}
               >
                 {l}
@@ -133,8 +147,8 @@ export function ContactCards({
                 featured
                   ? "bg-white text-gold-700 hover:bg-gold-50"
                   : dark
-                    ? "bg-gold-400 text-white hover:bg-gold-500"
-                    : "border border-navy-900/20 text-navy-900 hover:border-navy-900 hover:bg-navy-900 hover:text-white"
+                  ? "bg-gold-400 text-white hover:bg-gold-500"
+                  : "border border-navy-900/20 dark:border-white/20 text-navy-900 dark:text-white hover:border-navy-900 hover:bg-navy-900 hover:text-white dark:hover:bg-white/10"
               }`}
             >
               {o.actionLabel}
@@ -146,7 +160,7 @@ export function ContactCards({
   );
 }
 
-/* Dark split consultation panel with a white contact card on the right */
+/* Dark split consultation panel with a clean contact/consultation card on the right */
 export function ConsultationPanel({
   title,
   text,
@@ -160,6 +174,8 @@ export function ConsultationPanel({
   children?: React.ReactNode;
   id?: string;
 }) {
+  const { t } = useLanguage();
+
   return (
     <section id={id} className="relative overflow-hidden bg-navy-900 py-20 texture-grid">
       <div className="container-x grid items-center gap-12 lg:grid-cols-2">
@@ -187,7 +203,7 @@ export function ConsultationPanel({
 
           <div className="mt-9 flex flex-wrap gap-4">
             <Link href="#office" className="btn-gold">
-              <MapPin className="h-4 w-4" /> Visit Our Office
+              <MapPin className="h-4 w-4" /> {t.common.visitOurOffice}
             </Link>
             <a
               href={SITE.whatsappHref}
@@ -195,49 +211,52 @@ export function ConsultationPanel({
               rel="noopener noreferrer"
               className="btn-outline-light"
             >
-              <MessageCircle className="h-4 w-4" /> WhatsApp Us
+              <MessageCircle className="h-4 w-4" /> {t.common.whatsappUs}
             </a>
           </div>
         </FadeIn>
 
         <FadeIn direction="left" delay={0.15}>
           {children ?? (
-            <div className="rounded-xl bg-white p-8 shadow-card-hover">
-              <h3 className="text-center font-serif text-xl font-bold text-navy-900">
-                Fast Contact Options
+            <div className="rounded-xl bg-white dark:bg-[#0c1c33] border border-transparent dark:border-white/10 p-8 shadow-card-hover text-navy-900 dark:text-white transition-colors duration-200">
+              <h3 className="text-center font-serif text-xl font-bold text-navy-900 dark:text-white">
+                {t.common.fastContact}
               </h3>
               <div className="mt-6 space-y-3">
                 <a
                   href={SITE.phoneHref}
-                  className="flex items-center justify-between rounded-lg bg-navy-900 px-5 py-4 text-sm font-semibold text-white transition hover:bg-navy-800"
+                  className="flex items-center justify-between rounded-lg bg-navy-900 dark:bg-[#071224] border border-transparent dark:border-white/15 px-5 py-4 text-sm font-semibold text-white transition hover:bg-navy-800 dark:hover:bg-[#0a1b35]"
                 >
                   <span className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-gold-400" /> Call Support Now
+                    <Phone className="h-4 w-4 text-gold-400" /> {t.common.callSupport}
                   </span>
-                  <span className="text-white/50">{SITE.phone}</span>
+                  <span className="text-white/60 text-xs font-mono">{SITE.phone}</span>
                 </a>
                 <a
                   href={SITE.whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-lg bg-[#25d366] px-5 py-4 text-sm font-semibold text-white transition hover:brightness-95"
                 >
                   <span className="flex items-center gap-3">
-                    <MessageCircle className="h-4 w-4" /> WhatsApp Direct
+                    <MessageCircle className="h-4 w-4" /> {t.common.whatsappUs}
                   </span>
-                  <span className="text-white/80">{SITE.whatsapp}</span>
+                  <span className="text-white/80 text-xs font-mono">{SITE.whatsapp}</span>
                 </a>
                 <a
                   href={SITE.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-lg bg-gold-400 px-5 py-4 text-sm font-semibold text-white transition hover:bg-gold-500"
                 >
                   <span className="flex items-center gap-3">
-                    <Navigation className="h-4 w-4" /> Get Office Directions
+                    <Navigation className="h-4 w-4" /> {t.common.getDirections}
                   </span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 rtl:rotate-180" />
                 </a>
               </div>
-              <p className="mt-5 text-center text-[11px] leading-relaxed text-navy-800/50">
-                Note: We do not accept online applications. Physical verification
-                of original documents is required.
+              <p className="mt-5 text-center text-[11px] leading-relaxed text-navy-800/60 dark:text-slate-400">
+                {t.common.physicalVerificationNotice}
               </p>
             </div>
           )}
@@ -247,10 +266,142 @@ export function ConsultationPanel({
   );
 }
 
+/* Interactive Quick Consultation Form for users requesting document assistance */
+export function ConsultationForm() {
+  const { isUrdu, t } = useLanguage();
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    service: "tax",
+    message: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 600);
+  };
+
+  if (submitted) {
+    return (
+      <div className="rounded-xl border border-gold-400/30 bg-white dark:bg-[#0c1c33] p-8 text-center shadow-card-hover text-navy-900 dark:text-white">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h3 className="font-serif text-xl font-bold text-navy-900 dark:text-white">
+          {t.form.successTitle}
+        </h3>
+        <p className="mt-2 text-sm text-navy-800/70 dark:text-slate-300">
+          {t.form.successDesc}
+        </p>
+        <button
+          onClick={() => {
+            setSubmitted(false);
+            setFormData({ fullName: "", phone: "", service: "tax", message: "" });
+          }}
+          className="btn-gold mt-6 py-2.5 text-xs"
+        >
+          {isUrdu ? "ایک اور درخواست بھیجیں" : "Send Another Request"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-8 shadow-card-hover text-navy-900 dark:text-white transition-colors duration-200"
+    >
+      <div className="mb-6 text-center">
+        <h3 className="font-serif text-xl font-bold text-navy-900 dark:text-white">
+          {t.form.cardTitle}
+        </h3>
+        <p className="mt-1 text-xs text-navy-800/60 dark:text-slate-400">
+          {t.form.cardSubtitle}
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <label className="form-label mb-1.5">{t.form.fullName}</label>
+          <input
+            type="text"
+            required
+            placeholder={t.form.fullNamePlaceholder}
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            className="form-input"
+          />
+        </div>
+
+        <div>
+          <label className="form-label mb-1.5">{t.form.phone}</label>
+          <input
+            type="tel"
+            required
+            placeholder={t.form.phonePlaceholder}
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className="form-input"
+          />
+        </div>
+
+        <div>
+          <label className="form-label mb-1.5">{t.form.service}</label>
+          <select
+            value={formData.service}
+            onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+            className="form-input cursor-pointer"
+          >
+            <option value="tax">{t.form.services.tax}</option>
+            <option value="estamp">{t.form.services.estamp}</option>
+            <option value="property">{t.form.services.property}</option>
+            <option value="business">{t.form.services.business}</option>
+            <option value="legal">{t.form.services.legal}</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="form-label mb-1.5">{t.form.message}</label>
+          <textarea
+            rows={3}
+            placeholder={t.form.messagePlaceholder}
+            value={formData.message}
+            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+            className="form-input resize-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-gold w-full py-3 text-xs flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            t.form.submitting
+          ) : (
+            <>
+              <Send className="h-3.5 w-3.5" />
+              {t.form.submitBtn}
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 /* Compact navy banner: "Need more legal help?" */
 export function HelpBanner() {
+  const { t } = useLanguage();
+
   return (
-    <section className="bg-navy-900">
+    <section className="bg-navy-900 border-t border-white/10">
       <div className="container-x flex flex-col items-center justify-between gap-5 py-8 sm:flex-row">
         <FadeIn direction="right" className="flex items-center gap-4">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gold-400 text-white">
@@ -258,10 +409,10 @@ export function HelpBanner() {
           </span>
           <div>
             <h3 className="font-serif text-lg font-bold text-white">
-              Need more legal help?
+              {t.common.needChecklist}
             </h3>
             <p className="text-sm text-white/60">
-              Explore our full range of documentation services.
+              {t.common.needChecklistDesc}
             </p>
           </div>
         </FadeIn>
@@ -270,7 +421,7 @@ export function HelpBanner() {
             href="/"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-gold-400 transition hover:gap-3 hover:text-gold-300"
           >
-            Back to Homepage <ArrowRight className="h-4 w-4" />
+            {t.common.backToHome} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
           </Link>
         </FadeIn>
       </div>
@@ -279,36 +430,41 @@ export function HelpBanner() {
 }
 
 export function OfficeHoursCard({ dark = false }: { dark?: boolean }) {
+  const { t } = useLanguage();
+
   const items = [
-    { label: "WEEKDAYS", value: "9:00 AM - 6:00 PM", icon: Clock },
-    { label: "SATURDAYS", value: "10:00 AM - 2:00 PM", icon: Clock },
+    { label: t.common.weekdays, value: t.common.weekdaysHours, icon: Clock },
+    { label: t.common.saturdays, value: t.common.saturdayHours, icon: Clock },
   ];
+
   return (
     <div
-      className={`rounded-lg border p-6 ${
-        dark ? "border-white/10 bg-white/[0.04]" : "border-navy-900/8 bg-white shadow-soft"
+      className={`rounded-lg border p-6 transition-colors ${
+        dark
+          ? "border-white/10 bg-white/[0.04] text-white"
+          : "border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] text-navy-900 dark:text-white shadow-soft"
       }`}
     >
       <h4
         className={`mb-4 text-[11px] font-bold uppercase tracking-[0.16em] ${
-          dark ? "text-white/50" : "text-navy-800/50"
+          dark ? "text-white/50" : "text-navy-800/50 dark:text-slate-400"
         }`}
       >
-        Public Dealing Hours
+        {t.common.publicDealingHours}
       </h4>
       <div className="space-y-3">
         {items.map((i) => (
           <div key={i.label} className="flex items-center justify-between gap-4">
             <span
               className={`text-[11px] font-bold uppercase tracking-wider ${
-                dark ? "text-white/60" : "text-navy-800/60"
+                dark ? "text-white/60" : "text-navy-800/60 dark:text-slate-400"
               }`}
             >
               {i.label}
             </span>
             <span
               className={`text-xs font-semibold ${
-                dark ? "text-white" : "text-navy-900"
+                dark ? "text-white" : "text-navy-900 dark:text-slate-200"
               }`}
             >
               {i.value}

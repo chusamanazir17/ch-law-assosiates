@@ -1,134 +1,78 @@
 "use client";
 
 import {
-  Landmark, Briefcase, FileSignature, Home, ShieldCheck, Coins,
-  FileCheck2, FileBadge, CheckCircle2, Phone, MapPin,
+  FileSignature, Briefcase, FileBadge, Home,
+  Landmark, FileCheck2, ShieldCheck, Zap, Phone
 } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
+import NoticeBar from "@/components/ui/NoticeBar";
 import ServiceCard from "@/components/ui/ServiceCard";
 import SplitShowcase from "@/components/ui/SplitShowcase";
 import Stagger from "@/components/motion/Stagger";
 import FadeIn from "@/components/motion/FadeIn";
-import OfficeSection from "@/components/ui/OfficeSection";
-import { HelpBanner } from "@/components/ui/ContactBlocks";
+import { ContactCards } from "@/components/ui/ContactBlocks";
 import { HERO_IMAGES, SITE } from "@/lib/site";
+import { useLanguage } from "@/lib/LanguageContext";
 
-const bankingServices = [
-  {
-    icon: FileSignature,
-    title: "Loan Documentation",
-    description:
-      "Legal drafting and verification of all documents required for Personal, Auto, and Home loans from private and government banks.",
-    bullets: [
-      "Personal Loan Agreements",
-      "Auto Finance Contracts",
-      "Home Loan (Mortgage) Deeds",
-      "Debt Restructuring Papers",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-  {
-    icon: Briefcase,
-    title: "Corporate Finance Docs",
-    description:
-      "Specialized support for businesses seeking commercial financing, working capital loans, or equipment leasing.",
-    bullets: [
-      "Commercial Loan Agreements",
-      "Charge Creation (Form 10/12)",
-      "Bank Guarantees Support",
-      "Hypothecation Deeds",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-  {
-    icon: FileBadge,
-    title: "Official Affidavits",
-    description:
-      "Provision and attestation of various financial affidavits required by banks for account opening or limit changes.",
-    bullets: [
-      "Source of Income Affidavit",
-      "Loss of Cheque Book Forms",
-      "Account Closure Certificates",
-      "No-Objection Certificates (NOC)",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-  {
-    icon: Home,
-    title: "Mortgage & Registry",
-    description:
-      "Assistance with the legal registration of property as collateral for secure banking facilities and loans.",
-    bullets: [
-      "Equitable Mortgage Papers",
-      "Registered Mortgage Deeds",
-      "Property Title Verification",
-      "Lien Marking Assistance",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Guarantee Letters",
-    description:
-      "Legal preparation of personal and corporate guarantee letters ensuring they meet standard banking legal frameworks.",
-    bullets: [
-      "Personal Guarantee Forms",
-      "Corporate Guarantee Deeds",
-      "Indemnity Bonds",
-      "Surety Documentation",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-  {
-    icon: Coins,
-    title: "Specialized Banking",
-    description:
-      "Documentation support for specialized banking services including Islamic Finance contracts and foreign currency accounts.",
-    bullets: [
-      "Islamic Finance Agreements",
-      "Murabaha / Ijarah Contracts",
-      "FX Account Documentation",
-      "Letter of Credit Support",
-    ],
-    linkLabel: "Contact for Checklist",
-  },
-];
+const cardIcons = [FileSignature, Briefcase, FileBadge, Home];
+const featureIcons = [Landmark, FileCheck2, ShieldCheck, Zap];
 
-const requirements = [
-  "Requirements vary significantly based on the specific bank and type of instrument.",
-  "Original CNIC and relevant bank offer letters/term sheets are mandatory for all visits.",
-  "Corporate clients must bring a certified copy of the Board Resolution for the authorized signatory.",
-];
+export default function BankingFinancialPage() {
+  const { isUrdu, t } = useLanguage();
+  const sp = t.servicePages["banking-financial"];
 
-export default function BankingPage() {
+  const features = sp.whyFeatures.map((f, i) => ({
+    icon: featureIcons[i] || Landmark,
+    title: f.title,
+    text: f.text,
+  }));
+
   return (
     <>
       <PageHero
-        badge="Financial Compliance & Legal Clarity"
-        title="Banking & Financial Documentation"
+        badge={sp.heroBadge}
+        title={sp.heroTitle}
         image={HERO_IMAGES.banking}
-        description="Navigating the complexities of Pakistani financial regulations requires precision. We provide end-to-end documentation support for loans, guarantees, and corporate financial agreements."
-        crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Services", href: "/#services" },
-          { label: "Banking & Finance" },
-        ]}
+        description={sp.heroDesc}
+        backLabel={t.common.backToHome}
       />
 
-      <section className="bg-[#f5f7fa] py-20">
+      <div className="border-b border-indigo-100 dark:border-indigo-950/40 bg-indigo-50/70 dark:bg-indigo-950/25 transition-colors duration-200">
+        <div className="container-x py-5">
+          <NoticeBar
+            tone="info"
+            icon={Landmark}
+            label={sp.noticeLabel}
+            title={sp.noticeTitle}
+            text={sp.noticeText}
+            ctaLabel={sp.noticeCta}
+            ctaHref={SITE.phoneHref}
+            className="!border-0 !bg-transparent !p-0"
+          />
+        </div>
+      </div>
+
+      <section className="bg-[#f5f7fa] dark:bg-[#071224] py-20 transition-colors duration-200">
         <div className="container-x">
-          <FadeIn className="max-w-2xl">
-            <h2 className="section-title">Core Financial Services</h2>
-            <p className="mt-5 text-sm leading-relaxed text-navy-800/60">
-              Our specialists ensure that every document adheres to the latest
-              State Bank of Pakistan (SBP) guidelines and local legal
-              requirements, protecting your interests in every transaction.
+          <FadeIn className="mx-auto max-w-2xl text-center">
+            <h2 className="section-title text-navy-900 dark:text-white">{sp.portfolioTitle}</h2>
+            <p className="mt-4 text-sm text-navy-800/60 dark:text-slate-300">
+              {sp.portfolioSubtitle}
             </p>
           </FadeIn>
 
-          <Stagger className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {bankingServices.map((s) => (
-              <ServiceCard key={s.title} {...s} />
+          <Stagger className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {sp.cards.map((s, idx) => (
+              <ServiceCard
+                key={s.title}
+                icon={cardIcons[idx] || FileSignature}
+                title={s.title}
+                meta={s.meta}
+                description={s.description}
+                bullets={s.bullets}
+                linkLabel={s.linkLabel}
+                linkVariant="button"
+              />
             ))}
           </Stagger>
         </div>
@@ -136,96 +80,41 @@ export default function BankingPage() {
 
       <SplitShowcase
         bg="white"
-        title="Expert Consultation for Complex Financial Instruments"
-        paragraphs={[
-          "The Pakistani banking sector is governed by rigorous documentation standards. Whether you are an individual applying for a home loan or a corporation restructuring debt, the validity of your contracts is paramount.",
-          "LegalAssist Pakistan bridges the gap between financial institutions and clients by providing verified legal forms, accurately drafted agreements, and official attestation services that meet bank-specific requirements.",
-        ]}
-        features={[
-          {
-            icon: FileCheck2,
-            title: "Authenticated Documentation",
-            text: "All forms and agreements are reviewed for compliance with the latest SBP circulars.",
-          },
-          {
-            icon: FileBadge,
-            title: "Standardized Legal Forms",
-            text: "Pre-vetted loan agreements, mortgage deeds, and guarantee instruments.",
-          },
-        ]}
-        image="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1000&q=80"
-        imageAlt="Financial consultant reviewing banking documentation"
-        quote={{
-          text: "Precision in financial documentation is not just a requirement; it is the foundation of institutional trust and individual security.",
-          author: "Legal Advisory Team, LegalAssist Pakistan",
-        }}
+        eyebrow={sp.whyEyebrow}
+        title={sp.whyTitle}
+        paragraphs={sp.whyParagraphs}
+        features={features}
+        image="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=80"
+        imageAlt="Banking and loan legal agreements"
       />
 
-      {/* Before you visit */}
-      <section id="contact" className="relative overflow-hidden bg-navy-900 py-20 texture-grid">
-        <div className="container-x grid gap-12 lg:grid-cols-3">
-          <FadeIn direction="right" className="lg:col-span-2">
-            <span className="eyebrow">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Required Preparation
-            </span>
-            <h2 className="mt-5 font-serif text-3xl font-bold text-white">
-              Before You Visit Our Office
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
-              Banking requirements in Pakistan are subject to frequent changes
-              based on government policy. To ensure we can process your request
-              in a single visit, please note:
+      <section className="bg-white dark:bg-[#091528] py-20 transition-colors duration-200">
+        <div className="container-x">
+          <FadeIn className="mx-auto max-w-2xl text-center">
+            <h2 className="section-title text-navy-900 dark:text-white">{t.common.immediateAssistance}</h2>
+            <p className="mt-4 text-sm text-navy-800/60 dark:text-slate-300">
+              {t.common.immediateAssistanceDesc}
             </p>
-
-            <ul className="mt-8 space-y-5">
-              {requirements.map((r, i) => (
-                <FadeIn key={r} delay={i * 0.1} direction="right">
-                  <li className="flex gap-4">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gold-400/50 text-gold-400">
-                      <CheckCircle2 className="h-4 w-4" />
-                    </span>
-                    <p className="text-sm leading-relaxed text-white/75">{r}</p>
-                  </li>
-                </FadeIn>
-              ))}
-            </ul>
-
-            <div className="mt-9 flex flex-wrap gap-4">
-              <a href={SITE.phoneHref} className="btn-gold">
-                <Phone className="h-4 w-4" /> Call for Checklist
-              </a>
-              <a
-                href={SITE.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-outline-light"
-              >
-                <MapPin className="h-4 w-4" /> View Office Map
-              </a>
-            </div>
           </FadeIn>
-
-          <FadeIn direction="left" delay={0.15}>
-            <div className="flex h-full flex-col justify-center rounded-lg border border-white/10 bg-white/[0.04] p-8">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-400">Contact Hotline</p>
-              <p className="mt-2 text-xl font-bold text-white">{SITE.phone}</p>
-              <div className="my-6 h-px bg-white/10" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gold-400">WhatsApp Support</p>
-              <p className="mt-2 text-xl font-bold text-white">{SITE.whatsapp}</p>
-              <p className="mt-6 text-[11px] leading-relaxed text-white/45">
-                Our experts are available for preliminary phone consultations
-                between 10:00 AM and 4:00 PM.
-              </p>
-            </div>
-          </FadeIn>
+          <div className="mt-12">
+            <ContactCards featuredFirst />
+          </div>
         </div>
       </section>
 
-      <OfficeSection
-        title="Visit Us for Professional Service"
-        text="No online applications. All legal financial documentation must be processed physically to ensure authenticity and legal validity."
-      />
-      <HelpBanner />
+      <section className="bg-navy-900 py-10 border-t border-white/10">
+        <div className="container-x flex flex-col items-center justify-between gap-5 sm:flex-row">
+          <FadeIn>
+            <h3 className="font-serif text-xl font-bold text-gold-400">{sp.checklistBannerTitle}</h3>
+            <p className="mt-1 text-sm text-white/70">{sp.checklistBannerDesc}</p>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <a href={SITE.phoneHref} className="btn-gold whitespace-nowrap">
+              <Phone className="h-4 w-4" /> {SITE.phone}
+            </a>
+          </FadeIn>
+        </div>
+      </section>
     </>
   );
 }

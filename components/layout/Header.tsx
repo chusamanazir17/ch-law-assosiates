@@ -229,6 +229,22 @@ export default function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden items-center gap-1 xl:gap-2.5 lg:flex" onMouseLeave={handleMouseLeave}>
+              {/* Home Link */}
+              <Link
+                href="/"
+                className={`rounded-md px-3 py-2 text-[13px] font-semibold transition ${
+                  pathname === "/"
+                    ? isDark
+                      ? "text-gold-400 bg-gold-400/20"
+                      : "text-gold-600 bg-gold-400/10"
+                    : isDark
+                    ? "text-white hover:text-gold-400 hover:bg-white/10"
+                    : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
+                }`}
+              >
+                {t.nav.home}
+              </Link>
+
               {/* 1. Tax Services Dropdown */}
               <div
                 className="relative"
@@ -540,7 +556,7 @@ export default function Header() {
         }}
       >
         <div className={`flex items-center justify-between border-b ${isDark ? "border-white/10 bg-[#0a1830]" : "border-navy-900/10 bg-white"} p-4`}>
-          <Logo isUrdu={isUrdu} />
+          <Logo isUrdu={isUrdu} isDark={isDark} />
           <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu" sx={{ color: isDark ? "#ffffff" : "#0b1d38" }}>
             <X className="h-5 w-5" />
           </IconButton>
@@ -575,6 +591,26 @@ export default function Header() {
           </div>
 
           <List component="nav" disablePadding>
+            {/* Mobile Home Link */}
+            <ListItemButton
+              component={Link}
+              href="/"
+              onClick={() => setDrawerOpen(false)}
+              sx={{
+                borderRadius: 2,
+                py: 1.2,
+                mb: 1,
+                bgcolor: pathname === "/" ? (isDark ? "rgba(212,164,76,0.18)" : "rgba(200,151,61,0.12)") : "transparent",
+                fontWeight: 700,
+                color: pathname === "/" ? "#dfbb6e" : isDark ? "#ffffff" : "#0b1d38",
+              }}
+            >
+              <ListItemText
+                primary={t.nav.home}
+                primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }}
+              />
+            </ListItemButton>
+
             {/* Root Services Accordion */}
             <ListItemButton
               onClick={() => setMobileServicesRootOpen(!mobileServicesRootOpen)}

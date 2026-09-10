@@ -10,28 +10,28 @@ const tones: Record<
   { wrap: string; iconWrap: string; title: string; ctaClass: string }
 > = {
   info: {
-    wrap: "border-gold-400/40 bg-gold-50",
-    iconWrap: "bg-gold-400/15 text-gold-600",
-    title: "text-gold-700",
-    ctaClass: "bg-navy-900 text-white hover:bg-navy-800",
+    wrap: "border-gold-400/40 bg-gold-50 dark:bg-gold-950/25 dark:border-gold-500/30",
+    iconWrap: "bg-gold-400/15 text-gold-600 dark:bg-gold-400/20 dark:text-gold-400",
+    title: "text-gold-700 dark:text-gold-400",
+    ctaClass: "bg-navy-900 text-white hover:bg-navy-800 dark:bg-gold-400 dark:text-navy-950 dark:hover:bg-gold-300",
   },
   warning: {
-    wrap: "border-red-300/60 bg-red-50",
-    iconWrap: "bg-red-500/10 text-red-500",
-    title: "text-red-600",
-    ctaClass: "bg-red-500 text-white hover:bg-red-600",
+    wrap: "border-red-300/60 bg-red-50 dark:bg-red-950/30 dark:border-red-800/40",
+    iconWrap: "bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400",
+    title: "text-red-600 dark:text-red-400",
+    ctaClass: "bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500",
   },
   danger: {
-    wrap: "border-red-300/50 bg-red-50/80",
-    iconWrap: "bg-red-500/10 text-red-500",
-    title: "text-red-600",
+    wrap: "border-red-300/50 bg-red-50/80 dark:bg-red-950/40 dark:border-red-800/50",
+    iconWrap: "bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400",
+    title: "text-red-600 dark:text-red-400",
     ctaClass: "bg-red-500 text-white hover:bg-red-600",
   },
   dark: {
-    wrap: "border-navy-700 bg-navy-900 text-white",
+    wrap: "border-navy-700 bg-navy-900 dark:bg-[#071224] dark:border-white/10 text-white",
     iconWrap: "bg-gold-400/20 text-gold-400",
     title: "text-gold-400",
-    ctaClass: "bg-gold-400 text-white hover:bg-gold-500",
+    ctaClass: "bg-gold-400 text-white hover:bg-gold-500 dark:text-navy-950 dark:bg-gold-400 dark:hover:bg-gold-300",
   },
 };
 
@@ -77,7 +77,7 @@ export default function NoticeBar({
         </p>
         <p
           className={`mt-1 text-sm leading-relaxed ${
-            tone === "dark" ? "text-white/75" : "text-navy-800/70"
+            tone === "dark" ? "text-white/75" : "text-navy-800/70 dark:text-slate-300"
           }`}
         >
           {text}
