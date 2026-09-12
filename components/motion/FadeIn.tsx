@@ -15,19 +15,15 @@ type FadeInProps = {
 };
 
 const offset = (direction: string, distance: number) => {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-  if (isMobile && (direction === "left" || direction === "right")) {
-    return { y: Math.min(distance, 20) };
-  }
   switch (direction) {
     case "up":
       return { y: distance };
     case "down":
       return { y: -distance };
     case "left":
-      return { x: distance };
     case "right":
-      return { x: -distance };
+      // Avoid horizontal offsets on responsive layouts to prevent viewport overflow
+      return { y: Math.min(distance, 16) };
     default:
       return {};
   }

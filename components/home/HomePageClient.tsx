@@ -284,35 +284,39 @@ function PrepareVisit() {
           </div>
         </FadeIn>
 
-        <FadeIn direction="left" delay={0.15}>
-          <div className="relative pb-6 sm:pb-12">
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.4 }}
-              className="relative h-60 sm:h-72 lg:h-80 w-full overflow-hidden rounded-2xl shadow-card border border-navy-900/5 dark:border-white/10"
-            >
+        <FadeIn direction="up" delay={0.15}>
+          <div className="overflow-hidden rounded-2xl border border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#0c1c33] shadow-card">
+            {/* Top Building Image Banner */}
+            <div className="relative h-56 sm:h-64 lg:h-72 w-full">
               <Image
                 src={BUILDING_IMG}
                 alt="LegalAssist main office location in Blue Area Islamabad"
                 fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/50 via-transparent to-transparent" />
-              <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 rounded-full bg-navy-900/80 dark:bg-black/80 px-3 py-1 text-[10px] sm:text-xs font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/25 to-transparent" />
+              
+              {/* Location Badge */}
+              <div className="absolute top-3.5 left-3.5 rtl:left-auto rtl:right-3.5 rounded-full bg-navy-900/85 dark:bg-black/85 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Islamabad HQ &bull; Blue Area</span>
               </div>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative -mt-14 mx-3 sm:mx-0 sm:mt-0 sm:absolute sm:-bottom-8 sm:inset-x-6 rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white/95 dark:bg-[#0c1c33]/95 backdrop-blur-md p-4 sm:p-6 shadow-card-hover text-navy-900 dark:text-white z-10"
-            >
-              <div className="flex items-start sm:items-center gap-3">
+              {/* Bottom Image Overlay Title */}
+              <div className="absolute bottom-3.5 left-4 right-4 rtl:left-auto rtl:right-4 text-white">
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.16em] text-gold-400">
+                  Head Office Location
+                </p>
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-white drop-shadow-sm leading-tight">
+                  Business Tower, Blue Area
+                </h3>
+              </div>
+            </div>
+
+            {/* Card Content & Actions */}
+            <div className="p-5 sm:p-6 lg:p-7 space-y-4">
+              <div className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/15 text-gold-500 shadow-sm">
                   <MapPin className="h-5 w-5" />
                 </span>
@@ -320,26 +324,35 @@ function PrepareVisit() {
                   <h4 className="font-bold text-navy-900 dark:text-white text-base sm:text-lg leading-snug">
                     {t.prepareVisit.officeCardTitle}
                   </h4>
-                  <p className="text-[11px] font-medium text-navy-800/50 dark:text-slate-400 mt-0.5">
-                    Office 402, Business Tower, Blue Area
+                  <p className="text-xs font-medium text-navy-800/60 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Office 402, Business Tower, Jinnah Avenue, Blue Area, Islamabad
                   </p>
                 </div>
               </div>
-              <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-navy-800/70 dark:text-slate-300">
+
+              <p className="text-xs sm:text-sm leading-relaxed text-navy-800/70 dark:text-slate-300">
                 {t.prepareVisit.officeCardDesc}
               </p>
-              <div className="mt-4 pt-3 border-t border-navy-900/5 dark:border-white/10">
+
+              <div className="pt-2 border-t border-navy-900/5 dark:border-white/10 flex flex-col sm:flex-row gap-3">
                 <a
                   href={SITE.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-gold w-full py-2.5 text-xs text-center flex items-center justify-center gap-2 shadow-sm"
+                  className="btn-gold flex-1 py-3 text-xs text-center flex items-center justify-center gap-2 shadow-sm"
                 >
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   <span>{t.prepareVisit.getDirectionsBtn}</span>
                 </a>
+                <a
+                  href={SITE.phoneHref}
+                  className="btn-outline-navy dark:border-white/20 dark:text-white dark:hover:bg-white/10 flex-1 py-3 text-xs text-center flex items-center justify-center gap-2"
+                >
+                  <Phone className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t.prepareVisit.callNowBtn}</span>
+                </a>
               </div>
-            </motion.div>
+            </div>
           </div>
         </FadeIn>
       </div>
