@@ -4,6 +4,7 @@ import ThemeRegistry from "@/theme/ThemeRegistry";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
+import JsonLd from "@/components/seo/JsonLd";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,6 +20,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://legalassist.pk'),
   title: {
     default: "LegalAssist Pakistan | Premium Legal Documentation Services",
     template: "%s | LegalAssist Pakistan",
@@ -32,6 +34,8 @@ export const metadata: Metadata = {
     "NTN Registration",
     "Legal Documentation Pakistan",
   ],
+  openGraph: { type: 'website', locale: 'en_PK', siteName: 'LegalAssist Pakistan', images: [{ url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80', width: 1200, height: 630, alt: 'LegalAssist Pakistan Office' }] },
+  twitter: { card: 'summary_large_image' }
 };
 
 export default function RootLayout({
@@ -40,12 +44,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable}`}>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded-md focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">Skip to content</a>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('legalassist_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+        <JsonLd />
         <ThemeRegistry>
           <ScrollProgress />
           <Header />
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
           <Footer />
         </ThemeRegistry>
       </body>

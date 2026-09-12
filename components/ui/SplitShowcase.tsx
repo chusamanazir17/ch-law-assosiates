@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { type LucideIcon, Quote } from "lucide-react";
 import FadeIn from "@/components/motion/FadeIn";
@@ -53,10 +54,9 @@ export default function SplitShowcase({
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.5 }}
-              className="relative overflow-hidden rounded-lg shadow-card border border-navy-900/5 dark:border-white/10"
+              className="relative h-[380px] sm:h-[440px] overflow-hidden rounded-lg shadow-card border border-navy-900/5 dark:border-white/10"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt={imageAlt} className="h-[380px] w-full object-cover sm:h-[440px]" />
+              <Image src={image} alt={imageAlt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-navy-950/40 to-transparent" />
             </motion.div>
 

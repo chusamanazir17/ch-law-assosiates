@@ -8,9 +8,7 @@ const nextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // ESLint runs during builds — fix errors instead of ignoring them
 };
 
 export default nextConfig;

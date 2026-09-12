@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Navigation, Clock, Phone, MessageCircle } from "lucide-react";
 import { SITE } from "@/lib/site";
@@ -22,17 +23,17 @@ export default function OfficeSection({
   const sectionText = text || t.officeSection.subtitle;
 
   return (
-    <section id="office" className="bg-white dark:bg-[#071224] py-20 transition-colors duration-200">
+    <section id="office" className="bg-white dark:bg-[#071224] py-14 sm:py-20 transition-colors duration-200 overflow-hidden">
       <div className="container-x">
         <FadeIn className="mx-auto max-w-2xl text-center">
           <h2 className="section-title text-navy-900 dark:text-white">{sectionTitle}</h2>
-          <p className="mt-4 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">{sectionText}</p>
+          <p className="mt-3 sm:mt-4 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">{sectionText}</p>
         </FadeIn>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-12">
+        <div className="mt-10 sm:mt-12 grid gap-6 lg:grid-cols-12">
           {/* Office info card */}
           <FadeIn direction="right" className="lg:col-span-4">
-            <div className="flex h-full flex-col rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-8 shadow-card text-navy-900 dark:text-white">
+            <div className="flex h-full flex-col rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 lg:p-8 shadow-card text-navy-900 dark:text-white">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/12 text-gold-500">
                   <MapPin className="h-5 w-5" />
@@ -80,13 +81,14 @@ export default function OfficeSection({
             <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.5 }}
-              className="relative h-72 overflow-hidden rounded-lg lg:h-full shadow-card border border-navy-900/5 dark:border-white/10"
+              className="relative h-64 sm:h-72 overflow-hidden rounded-xl sm:rounded-2xl lg:h-full shadow-card border border-navy-900/5 dark:border-white/10"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={BUILDING_IMG}
                 alt="LegalAssist Pakistan office in Blue Area, Islamabad"
-                className="h-full w-full object-cover"
+                fill
+                sizes="(max-width: 1024px) 100vw, 33vw"
+                className="object-cover"
               />
               <div className="absolute bottom-4 left-4 rtl:right-4 rtl:left-auto rounded bg-navy-900/90 dark:bg-black/80 px-4 py-2 text-xs font-semibold text-white backdrop-blur">
                 <Clock className="mr-2 rtl:ml-2 rtl:mr-0 inline h-3.5 w-3.5 text-gold-400" />
@@ -98,7 +100,7 @@ export default function OfficeSection({
           {/* Contact cards */}
           <div className="grid gap-6 lg:col-span-4">
             <FadeIn direction="left">
-              <div className="rounded-lg bg-navy-900 p-7 text-white shadow-card">
+              <div className="rounded-xl sm:rounded-2xl bg-navy-900 p-5 sm:p-7 text-white shadow-card">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/20 text-gold-400">
                   <Phone className="h-5 w-5" />
                 </span>
@@ -112,7 +114,7 @@ export default function OfficeSection({
               </div>
             </FadeIn>
             <FadeIn direction="left" delay={0.1}>
-              <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-7 shadow-soft text-navy-900 dark:text-white">
+              <div className="rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 shadow-soft text-navy-900 dark:text-white">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy-900/[0.06] dark:bg-white/10 text-navy-900 dark:text-white">
                   <MessageCircle className="h-5 w-5 text-emerald-500" />
                 </span>

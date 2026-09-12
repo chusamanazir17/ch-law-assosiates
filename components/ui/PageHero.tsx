@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, MessageCircle } from "lucide-react";
@@ -50,12 +51,20 @@ export default function PageHero({
     >
       {/* Background image with Ken Burns */}
       <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${image})` }}
+        className="absolute inset-0"
         initial={{ scale: 1.15 }}
         animate={{ scale: 1 }}
         transition={{ duration: 8, ease: "easeOut" }}
-      />
+      >
+        <Image
+          src={image}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+      </motion.div>
       <div className="absolute inset-0 hero-overlay texture-grid" />
 
       <div className="container-x relative z-10 py-20">

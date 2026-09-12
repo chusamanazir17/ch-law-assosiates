@@ -29,7 +29,7 @@ export default function Stagger({
   once?: boolean;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once, margin: "-60px" });
+  const inView = useInView(ref, { once, margin: "0px" });
 
   return (
     <motion.div

@@ -32,6 +32,7 @@ export default function Footer() {
     { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/#about" },
   ];
 
+  // TODO: Replace with actual social media profile URLs before production launch
   const socials = [
     { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
     { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
@@ -157,7 +158,7 @@ export default function Footer() {
       {/* Policy Modal */}
       <AnimatePresence>
         {policyType && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="policy-title">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -187,7 +188,7 @@ export default function Footer() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-400/15 text-gold-500 dark:text-gold-400">
                   {policyType === "privacy" ? <ShieldCheck className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                 </span>
-                <h3 className="font-serif text-xl font-bold">
+                <h3 id="policy-title" className="font-serif text-xl font-bold">
                   {policyType === "privacy" ? t.footer.privacy : t.footer.terms}
                 </h3>
               </div>

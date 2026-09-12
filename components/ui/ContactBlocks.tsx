@@ -295,13 +295,31 @@ export function ConsultationForm() {
     message: "",
   });
 
+  const serviceLabels: Record<string, string> = {
+    tax: isUrdu ? "ٹیکس سروسز" : "Tax Services",
+    estamp: isUrdu ? "ای سٹامپنگ" : "E-Stamping",
+    property: isUrdu ? "پراپرٹی سروسز" : "Property Services",
+    business: isUrdu ? "بزنس رجسٹریشن" : "Business Registration",
+    legal: isUrdu ? "قانونی دستاویزات" : "Legal Documentation",
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const serviceName = serviceLabels[formData.service] || formData.service;
+    const message = isUrdu
+      ? `السلام علیکم لیگل اسسٹ پاکستان،\n\nنام: ${formData.fullName}\nفون: ${formData.phone}\nسروس: ${serviceName}\n${formData.message ? `تفصیلات: ${formData.message}` : ""}`
+      : `Hello LegalAssist Pakistan,\n\nName: ${formData.fullName}\nPhone: ${formData.phone}\nService: ${serviceName}\n${formData.message ? `Details: ${formData.message}` : ""}`;
+
+    const whatsappUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(message.trim())}`;
+
+    // Brief loading state for visual feedback, then redirect
     setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
-    }, 600);
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    }, 400);
   };
 
   if (submitted) {

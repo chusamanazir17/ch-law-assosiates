@@ -15,6 +15,10 @@ type FadeInProps = {
 };
 
 const offset = (direction: string, distance: number) => {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  if (isMobile && (direction === "left" || direction === "right")) {
+    return { y: Math.min(distance, 20) };
+  }
   switch (direction) {
     case "up":
       return { y: distance };
@@ -40,7 +44,7 @@ export default function FadeIn({
   as = "div",
 }: FadeInProps) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once, margin: "-80px" });
+  const inView = useInView(ref, { once, margin: "0px" });
   const MotionTag = motion[as] as typeof motion.div;
 
   const variants: Variants = {

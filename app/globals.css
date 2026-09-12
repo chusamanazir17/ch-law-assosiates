@@ -7,6 +7,16 @@
   --gold: #c8973d;
 }
 
+.dark {
+  --bg-primary: #071224;
+  --bg-card: #0c1c33;
+  --bg-elevated: #0a1830;
+  --bg-surface: #091528;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -57,6 +67,16 @@ html[lang="ur"] .font-serif {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #0b1d38;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0a1830;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1b3258;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2a4570;
 }
 
 @layer components {

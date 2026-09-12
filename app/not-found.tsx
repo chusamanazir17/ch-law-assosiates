@@ -13,9 +13,15 @@ export default function NotFound() {
         <h1 className="mt-4 font-serif text-3xl font-bold text-white">
           Page Not Found
         </h1>
+        <p className="mt-1 font-serif text-xl text-white/50" dir="rtl">
+          صفحہ نہیں ملا
+        </p>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/65">
           The page you are looking for may have been moved or no longer exists.
           Please return to our homepage or contact our office for assistance.
+        </p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/50" dir="rtl">
+          جو صفحہ آپ تلاش کر رہے ہیں وہ منتقل ہو چکا ہے یا موجود نہیں ہے۔ براہ کرم ہوم پیج پر واپس جائیں۔
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-4">
           <Link href="/" className="btn-gold">
