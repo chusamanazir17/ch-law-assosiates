@@ -32,7 +32,7 @@ export function CategoryDropdownPanel({
 }: CategoryDropdownPanelProps) {
   const alignClass =
     align === "center"
-      ? "left-1/2 -translate-x-1/2"
+      ? "left-1/2"
       : align === "right"
       ? "right-0"
       : "left-0";
@@ -52,11 +52,26 @@ export function CategoryDropdownPanel({
       id={id}
       role="region"
       aria-label={`${categoryTrans.title} navigation menu`}
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+      initial={{
+        opacity: 0,
+        y: 10,
+        scale: 0.98,
+        x: align === "center" ? "-50%" : 0,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        x: align === "center" ? "-50%" : 0,
+      }}
+      exit={{
+        opacity: 0,
+        y: 8,
+        scale: 0.98,
+        x: align === "center" ? "-50%" : 0,
+      }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className={`absolute top-full mt-2 w-[580px] ${alignClass} rounded-2xl border ${
+      className={`absolute top-full mt-2 w-[580px] max-w-[calc(100vw-32px)] ${alignClass} rounded-2xl border ${
         isDark
           ? "border-white/15 bg-[#0c1c33] text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           : "border-navy-900/10 bg-white text-navy-900 shadow-2xl"
@@ -198,7 +213,7 @@ export function LegalGroupDropdownPanel({
   isDark,
   id,
 }: LegalGroupDropdownPanelProps) {
-  const alignClass = isUrdu ? "right-0" : "-left-48";
+  const alignClass = isUrdu ? "left-0" : "right-0";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -219,7 +234,7 @@ export function LegalGroupDropdownPanel({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 8, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className={`absolute top-full mt-2 w-[680px] ${alignClass} rounded-2xl border ${
+      className={`absolute top-full mt-2 w-[680px] max-w-[calc(100vw-32px)] ${alignClass} rounded-2xl border ${
         isDark
           ? "border-white/15 bg-[#0c1c33] text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           : "border-navy-900/10 bg-white text-navy-900 shadow-2xl"

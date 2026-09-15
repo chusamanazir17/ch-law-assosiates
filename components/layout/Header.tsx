@@ -350,7 +350,7 @@ export default function Header() {
                       category={propertyCategory}
                       categoryTrans={t.categories["property-land"]}
                       onClose={() => setActiveDropdown(null)}
-                      align="center"
+                      align={isUrdu ? "left" : "right"}
                       isUrdu={isUrdu}
                       isDark={isDark}
                       t={t}
