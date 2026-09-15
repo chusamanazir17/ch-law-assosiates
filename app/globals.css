@@ -18,15 +18,15 @@
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden;
 }
 
 body {
-  @apply bg-[#f5f7fa] text-navy-900 antialiased transition-colors duration-200;
+  @apply bg-[#f5f7fa] text-navy-900 antialiased;
   font-feature-settings: "cv11", "ss01";
   overflow-x: hidden;
   width: 100%;
+  text-rendering: optimizeLegibility;
 }
 
 .dark body {

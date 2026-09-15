@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SERVICES } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://legalassist.pk";
+  const base = "https://chcomposing.pk";
   const lastModified = new Date();
   return [
     { url: base, lastModified, changeFrequency: "weekly", priority: 1 },

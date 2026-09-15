@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Property & Land Services | Registry, Transfer, Search",
   description:
-    "Authorized legal documentation services in Islamabad, Pakistan. Verified, transparent, and processed in person at our Blue Area office.",
+    "Authorized legal documentation and tax advisory services at Sharki Gate Chamber No 121 District Court Sahiwal. Verified, transparent, and professional.",
 };
 
 export default function ServiceLayout({ children }: { children: React.ReactNode }) {

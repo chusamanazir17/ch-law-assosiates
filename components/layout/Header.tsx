@@ -19,48 +19,13 @@ import {
   ChevronDown,
   ArrowRight,
   Phone,
-  MessageCircle,
   Menu as MenuIcon,
   X,
   Sun,
   Moon,
   Globe,
-  ContactRound,
-  FileSpreadsheet,
-  TrendingUp,
-  BadgePercent,
-  FileSearch2,
-  Building2,
-  Stamp,
-  Scale,
-  Home,
-  Handshake,
-  Landmark,
-  User,
-  ReceiptText,
-  Globe2,
-  FileBadge,
-  FileSignature,
-  Send,
-  SearchCheck,
-  ScrollText,
-  FileKey,
-  Gift,
-  CopyCheck,
-  Briefcase,
-  HeartHandshake,
-  FileX2,
-  ShieldPlus,
-  Gavel,
-  KeySquare,
-  MailWarning,
-  Search,
-  Copyright,
-  Lightbulb,
-  MessageSquareWarning,
-  FileText,
-  BadgeCheck,
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { SERVICE_CATEGORIES, ServiceCategory, SITE } from "@/lib/site";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAppTheme } from "@/lib/ThemeContext";
@@ -82,8 +47,24 @@ export default function Header() {
   const { isDark, toggleTheme } = useAppTheme();
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
+    let lastScrolled = window.scrollY > 20;
+    setScrolled(lastScrolled);
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isNowScrolled = window.scrollY > 20;
+          if (isNowScrolled !== lastScrolled) {
+            lastScrolled = isNowScrolled;
+            setScrolled(isNowScrolled);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -130,21 +111,22 @@ export default function Header() {
         sx={{
           background: scrolled
             ? isDark
-              ? "rgba(7, 18, 36, 0.96)"
-              : "rgba(255,255,255,0.97)"
+              ? "rgba(7, 18, 36, 0.98)"
+              : "rgba(255,255,255,0.98)"
             : isDark
             ? "rgba(7, 18, 36, 1)"
             : "rgba(255,255,255,1)",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
+          backdropFilter: "blur(8px)",
           boxShadow: scrolled
             ? isDark
-              ? "0 6px 30px rgba(0,0,0,0.45)"
-              : "0 6px 30px rgba(6,18,38,0.10)"
+              ? "0 4px 20px rgba(0,0,0,0.35)"
+              : "0 4px 20px rgba(6,18,38,0.08)"
             : isDark
             ? "0 1px 0 rgba(255,255,255,0.08)"
             : "0 1px 0 rgba(11,29,56,0.06)",
-          transition: "all .3s ease",
+          transition: "background-color 0.2s ease, box-shadow 0.2s ease",
           zIndex: 1100,
+          willChange: "transform",
         }}
       >
         <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
@@ -175,22 +157,23 @@ export default function Header() {
                 onMouseEnter={() => handleMouseEnter("tax")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
+                <Link
                   id="nav-button-tax"
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-tax"
+                  href="/services/tax"
+                  onClick={() => setActiveDropdown(null)}
                   onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  onClick={() => setActiveDropdown(activeDropdown === "tax" ? null : "tax")}
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname === "/services/tax" || activeDropdown === "tax"
+                    pathname.startsWith("/services/tax") || activeDropdown === "tax"
                       ? isDark
-                        ? "text-gold-400 bg-gold-400/20"
-                        : "text-gold-600 bg-gold-400/10"
+                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
+                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
                       : isDark
                       ? "text-white hover:text-gold-400 hover:bg-white/10"
                       : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
                   }`}
                   aria-expanded={activeDropdown === "tax"}
+                  aria-haspopup="true"
+                  aria-controls="nav-dropdown-tax"
                 >
                   <span>{t.nav.taxServices}</span>
                   <ChevronDown
@@ -202,7 +185,7 @@ export default function Header() {
                         : "text-navy-400"
                     }`}
                   />
-                </button>
+                </Link>
 
                 <AnimatePresence>
                   {activeDropdown === "tax" && (
@@ -226,22 +209,23 @@ export default function Header() {
                 onMouseEnter={() => handleMouseEnter("e-stamping")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
+                <Link
                   id="nav-button-e-stamping"
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-e-stamping"
+                  href="/services/e-stamping"
+                  onClick={() => setActiveDropdown(null)}
                   onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  onClick={() => setActiveDropdown(activeDropdown === "e-stamping" ? null : "e-stamping")}
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname === "/services/e-stamping" || activeDropdown === "e-stamping"
+                    pathname.startsWith("/services/e-stamping") || activeDropdown === "e-stamping"
                       ? isDark
-                        ? "text-gold-400 bg-gold-400/20"
-                        : "text-gold-600 bg-gold-400/10"
+                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
+                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
                       : isDark
                       ? "text-white hover:text-gold-400 hover:bg-white/10"
                       : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
                   }`}
                   aria-expanded={activeDropdown === "e-stamping"}
+                  aria-haspopup="true"
+                  aria-controls="nav-dropdown-e-stamping"
                 >
                   <span>{t.nav.eStamping}</span>
                   <ChevronDown
@@ -253,7 +237,7 @@ export default function Header() {
                         : "text-navy-400"
                     }`}
                   />
-                </button>
+                </Link>
 
                 <AnimatePresence>
                   {activeDropdown === "e-stamping" && (
@@ -277,22 +261,23 @@ export default function Header() {
                 onMouseEnter={() => handleMouseEnter("business")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
+                <Link
                   id="nav-button-business"
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-business"
+                  href="/services/business-registration"
+                  onClick={() => setActiveDropdown(null)}
                   onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  onClick={() => setActiveDropdown(activeDropdown === "business" ? null : "business")}
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname === "/services/business-registration" || activeDropdown === "business"
+                    pathname.startsWith("/services/business-registration") || activeDropdown === "business"
                       ? isDark
-                        ? "text-gold-400 bg-gold-400/20"
-                        : "text-gold-600 bg-gold-400/10"
+                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
+                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
                       : isDark
                       ? "text-white hover:text-gold-400 hover:bg-white/10"
                       : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
                   }`}
                   aria-expanded={activeDropdown === "business"}
+                  aria-haspopup="true"
+                  aria-controls="nav-dropdown-business"
                 >
                   <span>{t.nav.business}</span>
                   <ChevronDown
@@ -304,7 +289,7 @@ export default function Header() {
                         : "text-navy-400"
                     }`}
                   />
-                </button>
+                </Link>
 
                 <AnimatePresence>
                   {activeDropdown === "business" && (
@@ -328,22 +313,23 @@ export default function Header() {
                 onMouseEnter={() => handleMouseEnter("property")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
+                <Link
                   id="nav-button-property"
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-property"
+                  href="/services/property-land"
+                  onClick={() => setActiveDropdown(null)}
                   onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  onClick={() => setActiveDropdown(activeDropdown === "property" ? null : "property")}
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname === "/services/property-land" || activeDropdown === "property"
+                    pathname.startsWith("/services/property-land") || activeDropdown === "property"
                       ? isDark
-                        ? "text-gold-400 bg-gold-400/20"
-                        : "text-gold-600 bg-gold-400/10"
+                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
+                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
                       : isDark
                       ? "text-white hover:text-gold-400 hover:bg-white/10"
                       : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
                   }`}
                   aria-expanded={activeDropdown === "property"}
+                  aria-haspopup="true"
+                  aria-controls="nav-dropdown-property"
                 >
                   <span>{t.nav.propertyLand}</span>
                   <ChevronDown
@@ -355,7 +341,7 @@ export default function Header() {
                         : "text-navy-400"
                     }`}
                   />
-                </button>
+                </Link>
 
                 <AnimatePresence>
                   {activeDropdown === "property" && (
@@ -379,22 +365,28 @@ export default function Header() {
                 onMouseEnter={() => handleMouseEnter("legal-group")}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
+                <Link
                   id="nav-button-legal-group"
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-legal-group"
+                  href="/services/registry-deeds"
+                  onClick={() => setActiveDropdown(null)}
                   onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  onClick={() => setActiveDropdown(activeDropdown === "legal-group" ? null : "legal-group")}
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
+                    pathname.startsWith("/services/registry-deeds") ||
+                    pathname.startsWith("/services/family-legal") ||
+                    pathname.startsWith("/services/banking-financial") ||
+                    pathname.startsWith("/services/legal-documentation") ||
+                    pathname.startsWith("/services/trademark-ipo") ||
                     activeDropdown === "legal-group"
                       ? isDark
-                        ? "text-gold-400 bg-gold-400/20"
-                        : "text-gold-600 bg-gold-400/10"
+                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
+                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
                       : isDark
                       ? "text-white hover:text-gold-400 hover:bg-white/10"
                       : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
                   }`}
                   aria-expanded={activeDropdown === "legal-group"}
+                  aria-haspopup="true"
+                  aria-controls="nav-dropdown-legal-group"
                 >
                   <span>{t.nav.legalFamily}</span>
                   <ChevronDown
@@ -406,7 +398,7 @@ export default function Header() {
                         : "text-navy-400"
                     }`}
                   />
-                </button>
+                </Link>
 
                 <AnimatePresence>
                   {activeDropdown === "legal-group" && (
@@ -701,7 +693,7 @@ export default function Header() {
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
             >
-              <MessageCircle className="h-3.5 w-3.5 text-emerald-500" />
+              <WhatsAppIcon className="h-3.5 w-3.5 text-[#25D366]" />
               {t.site.whatsappLabel}
             </a>
           </div>

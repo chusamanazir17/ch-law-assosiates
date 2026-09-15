@@ -1,19 +1,42 @@
 export const SITE = {
-  name: "LegalAssist",
-  country: "PAKISTAN",
-  phone: "+92 (51) 123-4567",
-  phoneHref: "tel:+92511234567",
-  whatsapp: "+92 (300) 888-9900",
-  whatsappHref: "https://wa.me/923008889900",
-  email: "support@legalassist.pk",
-  address: "Office 402, Business Tower, Blue Area, Islamabad, Pakistan",
-  addressShort: "Office 402, Business Tower, Blue Area",
+  name: "Ch Composing",
+  fullName: "Ch Composing Estamp and Tax Advisor",
+  tagline: "E-Stamp and Tax Advisor",
+  country: "E-STAMP & TAX ADVISOR",
+  phone: "0301-6922573",
+  phoneHref: "tel:+923016922573",
+  whatsapp: "0305-7902744",
+  whatsappHref: "https://wa.me/923057902744",
+  email: "contact@chcomposing.pk",
+  address: "Sharki Gate Chamber No 121 District Court Sahiwal",
+  addressShort: "Chamber No 121, District Court Sahiwal",
+  city: "Sahiwal",
+  contacts: [
+    {
+      name: "Hajji Nazir Ahmad",
+      nameUrdu: "حاجی نذیر احمد",
+      role: "Senior Consultant",
+      roleUrdu: "سینئر کنسلٹنٹ",
+      phone: "0301-6922573",
+      phoneHref: "tel:+923016922573",
+      whatsappHref: "https://wa.me/923016922573",
+    },
+    {
+      name: "Usama Nazir Ch",
+      nameUrdu: "اسامہ نذیر چوہدری",
+      role: "E-Stamp & Tax Advisor",
+      roleUrdu: "ای سٹامپ و ٹیکس ایڈوائزر",
+      phone: "0305-7902744",
+      phoneHref: "tel:+923057902744",
+      whatsappHref: "https://wa.me/923057902744",
+    },
+  ],
   hours: {
     weekdays: "Monday - Friday: 9:00 AM - 6:00 PM",
-    saturday: "Saturday: 10:00 AM - 2:00 PM",
+    saturday: "Saturday: 9:00 AM - 3:00 PM",
     sunday: "Sunday: Closed",
   },
-  mapsUrl: "https://maps.google.com/?q=Blue+Area+Islamabad",
+  mapsUrl: "https://maps.google.com/?q=District+Court+Sahiwal",
 };
 
 export type NavService = {
@@ -384,7 +407,7 @@ export const HOME_SERVICES = [
     title: "E-Stamping",
     href: "/services/e-stamping",
     image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=480&q=70",
     description:
       "Digital judicial and non-judicial stamp papers processed instantly with government verification.",
   },
@@ -392,7 +415,7 @@ export const HOME_SERVICES = [
     title: "Property Registry",
     href: "/services/property-land",
     image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=480&q=70",
     description:
       "Complete assistance for property transfers, sale deeds, and title verification across Pakistan.",
   },
@@ -400,7 +423,7 @@ export const HOME_SERVICES = [
     title: "Business Registry",
     href: "/services/business-registration",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=480&q=70",
     description:
       "Register your private limited or sole proprietorship with SECP and relevant chambers efficiently.",
   },
@@ -408,29 +431,29 @@ export const HOME_SERVICES = [
     title: "Tax Services",
     href: "/services/tax",
     image:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=480&q=70",
     description:
       "FBR tax filings, NTN registrations, and sales tax certifications for individuals and firms.",
   },
 ];
 
 export const HERO_IMAGES = {
-  home: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80",
+  home: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=70",
   banking:
-    "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1280&q=70",
   business:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
   estamp:
-    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=70",
   family:
-    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1280&q=70",
   legal:
-    "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1280&q=70",
   property:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
   registry:
-    "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1920&q=80",
-  tax: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1280&q=70",
+  tax: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
   trademark:
-    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1280&q=70",
 };

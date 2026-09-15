@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/lib/LanguageContext";
+import Logo from "./Logo";
 
 export default function Footer() {
   const { isUrdu, t } = useLanguage();
@@ -43,7 +44,15 @@ export default function Footer() {
   return (
     <>
       <footer className="border-t border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#071224] transition-colors duration-200">
-        <div className="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
+        <div className="container-x pt-12 pb-8 border-b border-navy-900/10 dark:border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <Logo isUrdu={isUrdu} size="lg" />
+          <p className="max-w-md text-xs sm:text-sm text-navy-800/70 dark:text-slate-400 leading-relaxed">
+            {isUrdu 
+              ? "ڈسٹرکٹ کورٹ ساہیوال میں ای سٹامپنگ، پراپرٹی رجسٹری، ٹیکس اور قانونی دستاویزات کا مستند و بااعتماد ادارہ۔" 
+              : "Authorized legal documentation & tax advisory firm providing verified E-Stamping, property registration, and corporate compliance services at District Court Sahiwal."}
+          </p>
+        </div>
+        <div className="container-x grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Contact */}
           <div>
             <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
@@ -52,13 +61,28 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-navy-800/70 dark:text-slate-300">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <span>{isUrdu ? "آفس 402، بزنس ٹاور، بلیو ایریا، اسلام آباد، پاکستان" : SITE.address}</span>
+                <span>{isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address}</span>
               </li>
               <li className="flex gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <a href={SITE.phoneHref} className="transition hover:text-gold-600 dark:hover:text-gold-400">
-                  {SITE.phone}
-                </a>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                      {isUrdu ? "حاجی نذیر احمد:" : "Hajji Nazir Ahmad:"}
+                    </span>
+                    <a href="tel:+923016922573" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                      0301-6922573
+                    </a>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                      {isUrdu ? "اسامہ نذیر چوہدری:" : "Usama Nazir Ch:"}
+                    </span>
+                    <a href="tel:+923057902744" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                      0305-7902744
+                    </a>
+                  </div>
+                </div>
               </li>
               <li className="flex gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
@@ -213,7 +237,7 @@ export default function Footer() {
                         Client Confidentiality & Privacy Standards:
                       </p>
                       <p>
-                        LegalAssist Pakistan strictly adheres to client-attorney confidentiality standards under Pakistani statutory law. Documents submitted for e-stamping, registry, FBR tax compliance, or SECP incorporation are used exclusively for authorized official processing.
+                        Ch Composing Estamp and Tax Advisor strictly adheres to client-attorney confidentiality standards under Pakistani statutory law. Documents submitted for e-stamping, registry, FBR tax compliance, or SECP incorporation are used exclusively for authorized official processing.
                       </p>
                       <p>
                         No personal identity records, land ownership deeds, or financial disclosures are shared with third parties without explicit client consent or lawful regulatory instruction.
@@ -238,10 +262,10 @@ export default function Footer() {
                       Terms of Service & Engagement:
                     </p>
                     <p>
-                      All legal and documentation services provided by LegalAssist Pakistan are predicated on authentic, verifiable source documentation provided by the client.
+                      All legal, documentation, and tax services provided by Ch Composing Estamp and Tax Advisor are predicated on authentic, verifiable source documentation provided by the client.
                     </p>
                     <p>
-                      Statutory turnaround times, government challan tariffs, and biometric attestation requirements are governed by respective authorities including FBR, SECP, and the Islamabad Revenue Administration.
+                      Statutory turnaround times, government challan tariffs, and biometric attestation requirements are governed by respective authorities including FBR, SECP, Punjab Revenue Authority, and District Administrations.
                     </p>
                   </>
                 )}

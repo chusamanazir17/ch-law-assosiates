@@ -4,16 +4,16 @@ export default function JsonLd() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "LegalService",
-    name: "LegalAssist Pakistan",
+    name: "Ch Composing Estamp and Tax Advisor",
     description:
-      "Pakistan's trusted legal documentation firm for E-Stamping, property registry, business registration, tax filings, and family legal services.",
-    url: "https://legalassist.pk",
+      "Pakistan's trusted legal documentation and tax consultancy firm for E-Stamping, property registry, business registration, and FBR tax filings.",
+    url: "https://chcomposing.pk",
     telephone: SITE.phone,
     email: SITE.email,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Office 402, Business Tower, Blue Area",
-      addressLocality: "Islamabad",
+      streetAddress: SITE.address,
+      addressLocality: SITE.city,
       addressCountry: "PK",
     },
     openingHoursSpecification: [

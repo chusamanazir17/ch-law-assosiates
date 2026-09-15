@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   ArrowRight,
   X,
-  MessageCircle,
   Phone,
   MapPin,
   FileText,
@@ -15,6 +14,7 @@ import {
   Clock,
   type LucideIcon,
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { staggerItem } from "@/components/motion/Stagger";
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -66,8 +66,8 @@ export default function ServiceCard({
 
   const whatsappInquiryUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(
     isUrdu
-      ? `السلام علیکم لیگل اسسٹ پاکستان، مجھے "${title}" کے لیے دستاویزات کی فہرست اور طریقہ کار معلوم کرنا ہے۔`
-      : `Hello LegalAssist Pakistan, I would like to inquire about requirements and processing for: "${title}".`
+      ? `السلام علیکم چوہدری کمپوزنگ ای سٹامپ اور ٹیکس ایڈوائزر، مجھے "${title}" کے لیے دستاویزات کی فہرست اور طریقہ کار معلوم کرنا ہے۔`
+      : `Hello Ch Composing Estamp and Tax Advisor, I would like to inquire about requirements and processing for: "${title}".`
   )}`;
 
   return (
@@ -226,7 +226,7 @@ export default function ServiceCard({
                         "Original CNIC / NADRA Smart Card of all parties",
                         "2 Passport-sized photographs & relevant authority forms",
                         "Title deed / ownership proof / registry records",
-                        "Biometric verification at our Blue Area, Islamabad office",
+                        "Biometric verification at our Sahiwal District Court chamber",
                       ]
                   ).map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2.5 text-xs leading-relaxed text-navy-800/80 dark:text-slate-300">
@@ -255,7 +255,7 @@ export default function ServiceCard({
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg bg-[#25d366] px-4 py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#20bd5a] focus-visible:ring-2 focus-visible:ring-[#25d366] focus:outline-none"
                 >
-                  <MessageCircle className="h-4 w-4" />
+                  <WhatsAppIcon className="h-4 w-4" />
                   <span>{isUrdu ? "واٹس ایپ معلومات حاصل کریں" : "WhatsApp Inquiry"}</span>
                 </a>
 
@@ -278,8 +278,8 @@ export default function ServiceCard({
                   <MapPin className="h-3.5 w-3.5 text-gold-500" />
                   <span>
                     {isUrdu
-                      ? "ہمارے اسلام آباد دفتر کا پتہ اور اوقات دیکھیں"
-                      : "View Islamabad Office Location & Timings"}
+                      ? "ہمارے ساہیوال چیمبر کا پتہ اور اوقات دیکھیں"
+                      : "View Sahiwal Chamber Location & Timings"}
                   </span>
                   <ArrowRight className="h-3 w-3 rtl:rotate-180" />
                 </Link>

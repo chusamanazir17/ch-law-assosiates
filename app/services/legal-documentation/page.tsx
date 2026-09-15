@@ -84,7 +84,7 @@ export default function LegalDocumentationPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?auto=format&fit=crop&w=640&q=70"
         imageAlt="Legal agreements and attested affidavits"
       />
 

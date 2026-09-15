@@ -2,11 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import {
   MapPin,
-  MessageCircle,
   Phone,
   Clock,
   ArrowRight,
@@ -24,42 +22,31 @@ import Stagger, { StaggerItem } from "@/components/motion/Stagger";
 import OfficeSection from "@/components/ui/OfficeSection";
 import { ConsultationForm } from "@/components/ui/ContactBlocks";
 import { useLanguage } from "@/lib/LanguageContext";
+import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 
 const BUILDING_IMG =
-  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80";
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
 
 function Hero() {
   const { isUrdu, t } = useLanguage();
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.25]);
 
   return (
-    <section ref={ref} className="relative flex min-h-[92vh] items-center overflow-hidden">
-      <motion.div
-        style={{ y }}
-        className="absolute inset-0 scale-110 bg-cover bg-center"
-        initial={{ scale: 1.2 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 9, ease: "easeOut" }}
-      >
-        {/* Hero background image */}
+    <section className="relative overflow-hidden bg-[#061226] text-white">
+      {/* Full width hero background image */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden will-change-transform transform-gpu">
         <Image
           src={HERO_IMAGES.home}
-          alt="Legal documentation office in Pakistan"
+          alt="Ch Composing Estamp and Tax Advisor office in Pakistan"
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
-      </motion.div>
-      <div className="absolute inset-0 hero-overlay texture-grid" />
+        <div className="absolute inset-0 hero-overlay texture-grid" />
+      </div>
 
-      <motion.div style={{ opacity }} className="container-x relative z-10 py-28">
+      <motion.div className="container-x relative z-10 pt-24 pb-14 sm:pt-28 sm:pb-18 lg:pt-32 lg:pb-24">
         <motion.span
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,7 +61,7 @@ function Hero() {
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.12 }}
-          className="mt-6 max-w-3xl font-serif text-4xl font-bold leading-[1.12] text-white sm:text-5xl lg:text-6xl"
+          className="mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl"
         >
           {t.hero.titlePart1}{" "}
           <span className="relative whitespace-nowrap text-gold-400">
@@ -101,19 +88,16 @@ function Hero() {
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.36 }}
-          className="mt-10 flex flex-wrap gap-4"
+          className="mt-8 sm:mt-10 flex flex-wrap gap-4"
         >
           <Link href="#office" className="btn-gold px-8 py-3.5 text-sm">
             <MapPin className="h-4 w-4" /> {t.hero.visitOfficeBtn}
           </Link>
-          <a
+          <OfficialWhatsAppButton
             href={SITE.whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-outline-light px-8 py-3.5 text-sm"
-          >
-            <MessageCircle className="h-4 w-4" /> {t.hero.whatsappBtn}
-          </a>
+            label={t.hero.whatsappBtn}
+            size="lg"
+          />
         </motion.div>
 
         {/* trust strip */}
@@ -121,7 +105,7 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.7 }}
-          className="mt-16 flex flex-wrap gap-x-10 gap-y-4 text-white/70"
+          className="mt-12 sm:mt-16 flex flex-wrap gap-x-10 gap-y-4 text-white/70"
         >
           {[
             { icon: FileCheck2, label: t.hero.govVerified },
@@ -136,21 +120,8 @@ function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* scroll cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.8 }}
-          className="flex h-10 w-6 items-start justify-center rounded-full border border-white/40 p-1.5"
-        >
-          <span className="h-2 w-1 rounded-full bg-gold-400" />
-        </motion.div>
-      </motion.div>
+      {/* Bottom fade for smooth transition to services section */}
+      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#f5f7fa] dark:from-[#071224] to-transparent pointer-events-none" />
     </section>
   );
 }
@@ -277,9 +248,10 @@ function PrepareVisit() {
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-navy dark:border-white/20 dark:text-white dark:hover:bg-white/10 w-full sm:w-auto text-center justify-center"
+              className="btn-outline-navy dark:border-white/20 dark:text-white dark:hover:bg-white/10 w-full sm:w-auto text-center justify-center inline-flex items-center gap-2"
             >
-              {t.prepareVisit.requestChecklistBtn}
+              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
+              <span>{t.prepareVisit.requestChecklistBtn}</span>
             </a>
           </div>
         </FadeIn>
@@ -290,7 +262,7 @@ function PrepareVisit() {
             <div className="relative h-56 sm:h-64 lg:h-72 w-full">
               <Image
                 src={BUILDING_IMG}
-                alt="LegalAssist main office location in Blue Area Islamabad"
+                alt="Ch Composing Chamber 121, District Court Sahiwal"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
@@ -300,22 +272,22 @@ function PrepareVisit() {
               {/* Location Badge */}
               <div className="absolute top-3.5 left-3.5 rtl:left-auto rtl:right-3.5 rounded-full bg-navy-900/85 dark:bg-black/85 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Islamabad HQ &bull; Blue Area</span>
+                <span>{isUrdu ? "ساہیوال کچہری • چیمبر 121" : "Sahiwal District Court • Chamber 121"}</span>
               </div>
 
               {/* Bottom Image Overlay Title */}
               <div className="absolute bottom-3.5 left-4 right-4 rtl:left-auto rtl:right-4 text-white">
                 <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.16em] text-gold-400">
-                  Head Office Location
+                  {isUrdu ? "مرکزی چیمبر کا پتہ" : "Chamber Location"}
                 </p>
                 <h3 className="font-serif text-lg sm:text-xl font-bold text-white drop-shadow-sm leading-tight">
-                  Business Tower, Blue Area
+                  {isUrdu ? "چیمبر نمبر 121، ڈسٹرکٹ کورٹ" : "Chamber No 121, District Court"}
                 </h3>
               </div>
             </div>
 
             {/* Card Content & Actions */}
-            <div className="p-5 sm:p-6 lg:p-7 space-y-4">
+            <div className="p-5 sm:p-6 lg:p-7 space-y-5">
               <div className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/15 text-gold-500 shadow-sm">
                   <MapPin className="h-5 w-5" />
@@ -324,8 +296,8 @@ function PrepareVisit() {
                   <h4 className="font-bold text-navy-900 dark:text-white text-base sm:text-lg leading-snug">
                     {t.prepareVisit.officeCardTitle}
                   </h4>
-                  <p className="text-xs font-medium text-navy-800/60 dark:text-slate-400 mt-0.5 leading-relaxed">
-                    Office 402, Business Tower, Jinnah Avenue, Blue Area, Islamabad
+                  <p className="text-xs sm:text-sm font-semibold text-gold-600 dark:text-gold-400 mt-0.5 leading-relaxed">
+                    {SITE.address}
                   </p>
                 </div>
               </div>
@@ -333,6 +305,83 @@ function PrepareVisit() {
               <p className="text-xs sm:text-sm leading-relaxed text-navy-800/70 dark:text-slate-300">
                 {t.prepareVisit.officeCardDesc}
               </p>
+
+              {/* Direct Advisor Contacts Box */}
+              <div className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-navy-50/70 dark:bg-white/[0.03] p-3.5 sm:p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-navy-900 dark:text-white flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 text-gold-500" />
+                    {isUrdu ? "براہ راست رابطہ برائے رہنمائی" : "Direct Advisor Contacts"}
+                  </span>
+                  <span className="text-[10px] font-semibold text-gold-600 dark:text-gold-400 bg-gold-400/10 px-2 py-0.5 rounded">
+                    {isUrdu ? "فوری رابطہ" : "Fast Response"}
+                  </span>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {/* Hajji Nazir Ahmad */}
+                  <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
+                      {isUrdu ? "سینئر مشیر" : "Senior Consultant"}
+                    </span>
+                    <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
+                      {isUrdu ? "حاجی نذیر احمد" : "Hajji Nazir Ahmad"}
+                    </p>
+                    <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
+                      0301-6922573
+                    </p>
+                    <div className="mt-2 flex gap-1.5">
+                      <a
+                        href="tel:+923016922573"
+                        className="flex-1 rounded bg-navy-900 dark:bg-white/10 py-1.5 text-center text-[10px] font-bold text-white hover:bg-navy-800 transition flex items-center justify-center gap-1"
+                      >
+                        <Phone className="h-2.5 w-2.5 text-gold-400" />
+                        <span>Call</span>
+                      </a>
+                      <a
+                        href="https://wa.me/923016922573"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
+                        title="WhatsApp Hajji Nazir Ahmad"
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Usama Nazir Ch */}
+                  <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
+                      {isUrdu ? "ای سٹامپ و ٹیکس ایڈوائزر" : "E-Stamp & Tax Advisor"}
+                    </span>
+                    <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
+                      {isUrdu ? "اسامہ نذیر چوہدری" : "Usama Nazir Ch"}
+                    </p>
+                    <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
+                      0305-7902744
+                    </p>
+                    <div className="mt-2 flex gap-1.5">
+                      <a
+                        href="tel:+923057902744"
+                        className="flex-1 rounded bg-gold-500 py-1.5 text-center text-[10px] font-bold text-navy-950 hover:bg-gold-400 transition flex items-center justify-center gap-1"
+                      >
+                        <Phone className="h-2.5 w-2.5" />
+                        <span>Call</span>
+                      </a>
+                      <a
+                        href="https://wa.me/923057902744"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
+                        title="WhatsApp Usama Nazir Ch"
+                      >
+                        <WhatsAppIcon className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className="pt-2 border-t border-navy-900/5 dark:border-white/10 flex flex-col sm:flex-row gap-3">
                 <a
@@ -373,7 +422,7 @@ function WhyTrust() {
             <div className="overflow-hidden rounded-2xl bg-gold-100/40 dark:bg-gold-900/20 p-6">
               <div className="relative h-64 sm:h-80 w-full">
                 <Image
-                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=900&q=80"
+                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=70"
                   alt="Legal agreement handshake"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -384,7 +433,7 @@ function WhyTrust() {
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              className="absolute -right-4 -top-4 rounded-xl bg-navy-900 border border-gold-400/30 px-6 py-5 text-center shadow-card-hover"
+              className="absolute -right-4 -top-4 rounded-xl bg-navy-900 border border-gold-400/30 px-6 py-5 text-center shadow-card-hover transform-gpu will-change-transform"
             >
               <p className="font-serif text-2xl font-bold text-gold-400">{t.whyTrust.yearsMetric}</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
@@ -428,15 +477,15 @@ function FinalCta() {
   const { isUrdu, t } = useLanguage();
 
   const cards = [
-    { icon: Phone, title: t.finalCta.callSupport, value: SITE.phone, href: SITE.phoneHref },
-    { icon: MessageCircle, title: t.finalCta.whatsappDirect, value: SITE.whatsapp, href: SITE.whatsappHref },
-    { icon: Clock, title: t.finalCta.visitHours, value: t.finalCta.hoursVal, href: "#office" },
+    { icon: Phone, title: t.finalCta.callSupport, value: SITE.phone, href: SITE.phoneHref, isWhatsApp: false },
+    { icon: WhatsAppIcon, title: t.finalCta.whatsappDirect, value: SITE.whatsapp, href: SITE.whatsappHref, isWhatsApp: true },
+    { icon: Clock, title: t.finalCta.visitHours, value: t.finalCta.hoursVal, href: "#office", isWhatsApp: false },
   ];
 
   return (
     <section id="contact" className="relative overflow-hidden bg-navy-900 py-24 texture-grid">
-      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gold-400/10 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-navy-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[radial-gradient(circle,_rgba(200,151,61,0.18)_0%,_transparent_70%)]" />
+      <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[radial-gradient(circle,_rgba(30,64,115,0.3)_0%,_transparent_70%)]" />
 
       <div className="container-x relative">
         <FadeIn className="mx-auto max-w-2xl text-center">
@@ -456,10 +505,20 @@ function FinalCta() {
                 target={c.href.startsWith("http") ? "_blank" : undefined}
                 rel={c.href.startsWith("http") ? "noopener noreferrer" : undefined}
                 whileHover={{ y: -6 }}
-                className="flex flex-col items-center rounded-lg border border-white/10 bg-white/[0.05] p-8 text-center backdrop-blur transition hover:border-gold-400/40 hover:bg-white/[0.08]"
+                className={`flex flex-col items-center rounded-lg border p-8 text-center backdrop-blur transition ${
+                  c.isWhatsApp
+                    ? "border-[#25D366]/30 bg-[#25D366]/[0.08] hover:border-[#25D366]/60 hover:bg-[#25D366]/[0.15]"
+                    : "border-white/10 bg-white/[0.05] hover:border-gold-400/40 hover:bg-white/[0.08]"
+                }`}
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gold-400/15 text-gold-400">
-                  <c.icon className="h-5 w-5" />
+                <span
+                  className={`flex h-12 w-12 items-center justify-center rounded-full ${
+                    c.isWhatsApp
+                      ? "bg-[#25D366]/20 text-[#25D366]"
+                      : "bg-gold-400/15 text-gold-400"
+                  }`}
+                >
+                  <c.icon className="h-6 w-6" />
                 </span>
                 <h4 className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-white/50">
                   {c.title}
@@ -491,8 +550,8 @@ export default function HomePageClient() {
       <ServicesGrid />
       <PrepareVisit />
       <WhyTrust />
-      <FinalCta />
       <OfficeSection />
+      <FinalCta />
     </>
   );
 }

@@ -84,7 +84,7 @@ export default function BankingFinancialPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=640&q=70"
         imageAlt="Banking and loan legal agreements"
       />
 

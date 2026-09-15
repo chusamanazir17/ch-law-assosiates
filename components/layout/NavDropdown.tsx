@@ -60,7 +60,7 @@ export function CategoryDropdownPanel({
         isDark
           ? "border-white/15 bg-[#0c1c33] text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           : "border-navy-900/10 bg-white text-navy-900 shadow-2xl"
-      } p-6 z-50 overflow-hidden`}
+      } p-6 z-50 overflow-hidden before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 before:content-['']`}
     >
       {/* Top Gold Accent Stripe */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold-400 via-gold-500 to-navy-900" />
@@ -223,7 +223,7 @@ export function LegalGroupDropdownPanel({
         isDark
           ? "border-white/15 bg-[#0c1c33] text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           : "border-navy-900/10 bg-white text-navy-900 shadow-2xl"
-      } p-6 z-50 overflow-hidden`}
+      } p-6 z-50 overflow-hidden before:absolute before:-top-3 before:left-0 before:right-0 before:h-3 before:content-['']`}
     >
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-gold-400 via-gold-500 to-navy-900" />
 

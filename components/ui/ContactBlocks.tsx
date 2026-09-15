@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Phone,
-  MessageCircle,
   Clock,
   MapPin,
   Navigation,
@@ -18,6 +17,7 @@ import {
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/lib/LanguageContext";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 const cardAnim = {
   hidden: { opacity: 0, y: 28 },
@@ -29,7 +29,7 @@ const cardAnim = {
 };
 
 export type ContactOption = {
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   lines: string[];
   actionLabel: string;
@@ -60,7 +60,7 @@ export function ContactCards({
       href: SITE.phoneHref,
     },
     {
-      icon: MessageCircle,
+      icon: WhatsAppIcon,
       title: t.common.whatsappUs,
       lines: [
         isUrdu ? "فوری معلومات اور مطلوبہ دستاویزات" : "Instant replies for quick queries and",
@@ -73,14 +73,14 @@ export function ContactCards({
     {
       icon: MapPin,
       title: t.common.getDirections,
-      lines: [isUrdu ? "بلیو ایریا، اسلام آباد" : "Blue Area, Islamabad", ""],
+      lines: [isUrdu ? "ڈسٹرکٹ کورٹ ساہیوال" : "District Court Sahiwal", ""],
       actionLabel: isUrdu ? "نقشہ دیکھیں" : "Open Maps",
       href: SITE.mapsUrl,
     },
     {
       icon: Home,
       title: t.common.visitOurOffice,
-      lines: [isUrdu ? "آفس 402، بزنس ٹاور" : "Office 402, Business Tower", ""],
+      lines: [isUrdu ? "چیمبر نمبر 121، شرقی گیٹ" : "Chamber 121, Sharki Gate", ""],
       actionLabel: isUrdu ? "اوقات دیکھیں" : "See Schedule",
       href: "/#office",
     },
@@ -226,9 +226,9 @@ export function ConsultationPanel({
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-light"
+              className="btn-outline-light inline-flex items-center gap-2"
             >
-              <MessageCircle className="h-4 w-4" /> {t.common.whatsappUs}
+              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" /> {t.common.whatsappUs}
             </a>
           </div>
         </FadeIn>
@@ -253,12 +253,12 @@ export function ConsultationPanel({
                   href={SITE.whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg bg-[#25d366] px-5 py-4 text-sm font-semibold text-white transition hover:brightness-95"
+                  className="flex items-center justify-between rounded-lg bg-[#25d366] px-5 py-4 text-sm font-semibold text-white transition hover:brightness-95 shadow-md shadow-[#25d366]/20"
                 >
                   <span className="flex items-center gap-3">
-                    <MessageCircle className="h-4 w-4" /> {t.common.whatsappUs}
+                    <WhatsAppIcon className="h-4 w-4" /> {t.common.whatsappUs}
                   </span>
-                  <span className="text-white/80 text-xs font-mono">{SITE.whatsapp}</span>
+                  <span className="text-white/90 text-xs font-mono">{SITE.whatsapp}</span>
                 </a>
                 <a
                   href={SITE.mapsUrl}
@@ -309,8 +309,8 @@ export function ConsultationForm() {
 
     const serviceName = serviceLabels[formData.service] || formData.service;
     const message = isUrdu
-      ? `السلام علیکم لیگل اسسٹ پاکستان،\n\nنام: ${formData.fullName}\nفون: ${formData.phone}\nسروس: ${serviceName}\n${formData.message ? `تفصیلات: ${formData.message}` : ""}`
-      : `Hello LegalAssist Pakistan,\n\nName: ${formData.fullName}\nPhone: ${formData.phone}\nService: ${serviceName}\n${formData.message ? `Details: ${formData.message}` : ""}`;
+      ? `السلام علیکم چوہدری کمپوزنگ ای سٹامپ اور ٹیکس ایڈوائزر،\n\nنام: ${formData.fullName}\nفون: ${formData.phone}\nسروس: ${serviceName}\n${formData.message ? `تفصیلات: ${formData.message}` : ""}`
+      : `Hello Ch Composing Estamp and Tax Advisor,\n\nName: ${formData.fullName}\nPhone: ${formData.phone}\nService: ${serviceName}\n${formData.message ? `Details: ${formData.message}` : ""}`;
 
     const whatsappUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(message.trim())}`;
 

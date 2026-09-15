@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, MessageCircle } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/lib/LanguageContext";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export type Crumb = { label: string; href?: string };
 
@@ -51,16 +52,17 @@ export default function PageHero({
     >
       {/* Background image with Ken Burns */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 will-change-transform transform-gpu"
         initial={{ scale: 1.15 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 8, ease: "easeOut" }}
+        transition={{ duration: 7, ease: "easeOut" }}
       >
         <Image
           src={image}
           alt=""
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover object-center"
         />
@@ -145,9 +147,9 @@ export default function PageHero({
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-light"
+              className="btn-outline-light inline-flex items-center gap-2"
             >
-              <MessageCircle className="h-4 w-4" />
+              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
               {t.common.whatsappUs}
             </a>
           )}

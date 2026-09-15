@@ -100,7 +100,7 @@ export default function EStampingPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=640&q=70"
         imageAlt="E-stamp paper being processed by a documentation expert"
         imageTip={sp.imageTip}
       >
@@ -108,7 +108,7 @@ export default function EStampingPage() {
           <div className="mt-8 flex gap-4 rounded-lg border border-navy-900/10 dark:border-white/10 bg-navy-900 p-5 text-white shadow-card">
             <FileSearch className="h-8 w-8 shrink-0 text-gold-400" />
             <p className="text-xs leading-relaxed text-white/75">
-              <span className="font-bold text-white">{isUrdu ? "لیگل اسسٹ پاکستان: " : "LegalAssist Pakistan: "}</span>
+              <span className="font-bold text-white">{isUrdu ? "چوہدری کمپوزنگ: " : "Ch Composing: "}</span>
               {sp.disclaimerBox}
             </p>
           </div>

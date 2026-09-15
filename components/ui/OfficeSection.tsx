@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Clock, Phone, MessageCircle } from "lucide-react";
+import { MapPin, Navigation, Clock, Phone, CheckCircle2, Shield } from "lucide-react";
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/lib/LanguageContext";
+import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 
 const BUILDING_IMG =
-  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80";
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
 
 export default function OfficeSection({
   title,
@@ -39,11 +40,13 @@ export default function OfficeSection({
                   <MapPin className="h-5 w-5" />
                 </span>
                 <h3 className="text-lg font-bold text-navy-900 dark:text-white">
-                  {isUrdu ? "ہمارا اسلام آباد دفتر" : "Our Islamabad Office"}
+                  {isUrdu ? "ہمارا ساہیوال چیمبر" : "Our Sahiwal Chamber"}
                 </h3>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">
-                {isUrdu ? "آفس 402، بزنس ٹاور، بلیو ایریا، اسلام آباد۔ شہر کے مرکزی مالیاتی اور تجارتی مرکز میں واقع، بینکنگ ڈسٹرکٹ سے انتہائی آسان رسائی۔" : `${SITE.address}. Situated conveniently near major financial hubs for easy accessibility from the city's banking district.`}
+                {isUrdu
+                  ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
+                  : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`}
               </p>
 
               <div className="mt-6 space-y-3 border-t border-navy-900/8 dark:border-white/10 pt-6">
@@ -60,7 +63,7 @@ export default function OfficeSection({
                     {isUrdu ? "ہفتہ" : "Saturdays"}
                   </span>
                   <span className="font-semibold text-navy-900 dark:text-slate-100">
-                    {isUrdu ? "10:00 بجے صبح تا 2:00 بجے دوپہر" : "10:00 AM - 2:00 PM"}
+                    {isUrdu ? "9:00 بجے صبح تا 3:00 بجے دوپہر" : "9:00 AM - 3:00 PM"}
                   </span>
                 </div>
               </div>
@@ -85,56 +88,80 @@ export default function OfficeSection({
             >
               <Image
                 src={BUILDING_IMG}
-                alt="LegalAssist Pakistan office in Blue Area, Islamabad"
+                alt="Ch Composing Chamber 121, District Court Sahiwal"
                 fill
                 sizes="(max-width: 1024px) 100vw, 33vw"
                 className="object-cover"
               />
               <div className="absolute bottom-4 left-4 rtl:right-4 rtl:left-auto rounded bg-navy-900/90 dark:bg-black/80 px-4 py-2 text-xs font-semibold text-white backdrop-blur">
                 <Clock className="mr-2 rtl:ml-2 rtl:mr-0 inline h-3.5 w-3.5 text-gold-400" />
-                {isUrdu ? "کھلا ہے: پیر تا جمعہ" : "Open Mon – Fri"}
+                {isUrdu ? "کھلا ہے: پیر تا ہفتہ" : "Open Mon – Sat"}
               </div>
             </motion.div>
           </FadeIn>
 
-          {/* Contact cards */}
-          <div className="grid gap-6 lg:col-span-4">
-            <FadeIn direction="left">
-              <div className="rounded-xl sm:rounded-2xl bg-navy-900 p-5 sm:p-7 text-white shadow-card">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/20 text-gold-400">
-                  <Phone className="h-5 w-5" />
-                </span>
-                <h4 className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">
-                  {isUrdu ? "ماہر سے گفتگو کریں" : "Speak to an Expert"}
-                </h4>
-                <p className="mt-1 text-lg font-bold text-gold-400">{SITE.phone}</p>
-                <a href={SITE.phoneHref} className="btn-gold mt-5 w-full text-center">
-                  {t.prepareVisit.callNowBtn}
-                </a>
+          {/* Visiting Guidance & Direct Official WhatsApp Action */}
+          <FadeIn direction="left" className="lg:col-span-4">
+            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-navy-900 p-5 sm:p-7 lg:p-8 text-white shadow-card">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/20 text-gold-400">
+                    <Shield className="h-5 w-5" />
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gold-400 bg-gold-400/10 px-3 py-1 rounded-full border border-gold-400/20">
+                    {isUrdu ? "چیمبر گائیڈ" : "Chamber Guide"}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 font-serif text-lg font-bold text-white">
+                  {isUrdu ? "کچہری تشریف آوری سے پہلے رہنمائی" : "Court Premises Visiting Guide"}
+                </h3>
+
+                <ul className="mt-4 space-y-3 text-xs leading-relaxed text-white/75">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
+                    <span>
+                      {isUrdu
+                        ? "ڈسٹرکٹ کورٹ کے شرقی گیٹ سے داخل ہوتے ہی سامنے گراؤنڈ فلور پر چیمبر 121 واقع ہے۔"
+                        : "Enter via Sharki Gate — Chamber 121 is directly accessible on the ground floor legal corridor."}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
+                    <span>
+                      {isUrdu
+                        ? "ای سٹامپ اور ٹیکس دستاویزات کے لیے پیشگی واٹس ایپ پر تفصیلات بھیج سکتے ہیں۔"
+                        : "Send required documents on WhatsApp before visiting for accelerated same-day processing."}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
+                    <span>
+                      {isUrdu
+                        ? "تمام قانونی ڈرافٹنگ، معاہدہ جات اور بیعانہ سروسز موقع پر دستیاب ہیں۔"
+                        : "All legal drafting, agreements, sale deeds, and tax filings processed on-site."}
+                    </span>
+                  </li>
+                </ul>
               </div>
-            </FadeIn>
-            <FadeIn direction="left" delay={0.1}>
-              <div className="rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 shadow-soft text-navy-900 dark:text-white">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy-900/[0.06] dark:bg-white/10 text-navy-900 dark:text-white">
-                  <MessageCircle className="h-5 w-5 text-emerald-500" />
-                </span>
-                <h4 className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-navy-800/60 dark:text-slate-400">
-                  {t.hero.whatsappBtn}
-                </h4>
-                <p className="mt-1 text-sm text-navy-800/70 dark:text-slate-300">
-                  {isUrdu ? "چیک لسٹ کی فوری فراہمی کے لیے رابطہ کریں۔" : "Immediate response for checklist requests."}
-                </p>
-                <a
+
+              <div className="mt-6 pt-5 border-t border-white/10 space-y-3">
+                <OfficialWhatsAppButton
                   href={SITE.whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 flex w-full items-center justify-center rounded border border-navy-900/20 dark:border-white/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-navy-900 dark:text-white transition hover:border-navy-900 hover:bg-navy-900 hover:text-white dark:hover:bg-white/10"
+                  label={isUrdu ? "واٹس ایپ پر پیشگی رہنمائی لیں" : "Chat with Chamber on WhatsApp"}
+                  size="md"
+                  className="w-full text-center"
+                />
+                <a
+                  href={SITE.phoneHref}
+                  className="w-full rounded-lg border border-white/20 py-2.5 text-center text-xs font-semibold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
                 >
-                  {isUrdu ? "میسج بھیجیں" : "Message Us"}
+                  <Phone className="h-3.5 w-3.5 text-gold-400" />
+                  <span>{isUrdu ? "چیمبر فون رابطہ" : "Call Chamber Desk"}</span>
                 </a>
               </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </div>
     </section>

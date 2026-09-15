@@ -22,8 +22,7 @@ const offset = (direction: string, distance: number) => {
       return { y: -distance };
     case "left":
     case "right":
-      // Avoid horizontal offsets on responsive layouts to prevent viewport overflow
-      return { y: Math.min(distance, 16) };
+      return { y: Math.min(distance, 12) };
     default:
       return {};
   }
@@ -33,14 +32,15 @@ export default function FadeIn({
   children,
   delay = 0,
   direction = "up",
-  distance = 36,
-  duration = 0.65,
+  distance = 16,
+  duration = 0.4,
   once = true,
-  className,
+  className = "",
   as = "div",
 }: FadeInProps) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once, margin: "0px" });
+  // Trigger 80px before entering viewport so scrolling is completely fluid and un-interrupted
+  const inView = useInView(ref, { once, margin: "80px 0px 0px 0px" });
   const MotionTag = motion[as] as typeof motion.div;
 
   const variants: Variants = {
@@ -52,7 +52,7 @@ export default function FadeIn({
       transition: {
         duration,
         delay,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.16, 1, 0.3, 1],
       },
     },
   };
@@ -60,7 +60,7 @@ export default function FadeIn({
   return (
     <MotionTag
       ref={ref}
-      className={className}
+      className={`${className} transform-gpu`}
       variants={variants}
       initial="hidden"
       animate={inView ? "visible" : "hidden"}

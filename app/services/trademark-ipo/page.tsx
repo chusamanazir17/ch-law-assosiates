@@ -84,7 +84,7 @@ export default function TrademarkIpoPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=640&q=70"
         imageAlt="Trademark registration and brand protection"
       />
 

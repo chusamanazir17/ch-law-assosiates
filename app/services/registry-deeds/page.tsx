@@ -84,7 +84,7 @@ export default function RegistryDeedsPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=640&q=70"
         imageAlt="Sub-Registrar deeds registration"
       />
 

@@ -43,7 +43,7 @@ export default function TaxPage() {
         title={sp.whyTitle}
         paragraphs={sp.whyParagraphs}
         features={features}
-        image="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1000&q=80"
+        image="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=640&q=70"
         imageAlt="Tax consultant advising a client"
       />
 

@@ -195,9 +195,9 @@ export interface Translations {
 export const TRANSLATIONS: Record<Language, Translations> = {
   en: {
     site: {
-      name: "LegalAssist",
-      country: "PAKISTAN",
-      badge: "Authorized Documentation Experts",
+      name: "Ch Composing",
+      country: "E-STAMP & TAX ADVISOR",
+      badge: "Authorized Documentation & Tax Experts",
       phoneLabel: "Call Support",
       whatsappLabel: "WhatsApp Us",
       officeDirections: "Get Directions",
@@ -242,7 +242,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       requestChecklistBtn: "Request Checklist",
       officeCardTitle: "Main Office Location",
       officeCardDesc:
-        "Office 402, Business Tower, Blue Area, Islamabad. Situated in the heart of the business district for easy accessibility.",
+        "Sharki Gate Chamber No 121 District Court Sahiwal. Conveniently situated within the judicial complex for prompt documentation.",
       getDirectionsBtn: "Get Directions",
       steps: [
         {
@@ -255,7 +255,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
         },
         {
           title: "Verification Visit",
-          text: "Bring your original CNIC and required documents to our Blue Area office.",
+          text: "Bring your original CNIC and required documents to our Sahiwal District Court chamber.",
         },
       ],
     },
@@ -359,8 +359,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       quickLinks: "Quick Links",
       followUs: "Follow Us",
       disclaimer:
-        "Authorized documentation facilitation. All documents are verified in person at our Islamabad office.",
-      rights: "© 2026 LegalAssist Pakistan. All rights reserved.",
+        "Authorized documentation facilitation. All documents are verified in person at our Sahiwal District Court chamber.",
+      rights: "© 2026 Ch Composing Estamp and Tax Advisor. All rights reserved.",
       privacy: "Privacy Policy",
       terms: "Terms of Service",
     },
@@ -567,7 +567,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           { title: "Same-Day Issuance", text: "Bring your required documents before 12:00 PM and we process your stamp paper on the same business day." },
         ],
         imageTip: "Ensure the stamp paper value matches the legal obligation it is intended to fulfill (per applicable laws).",
-        disclaimerBox: "LegalAssist Pakistan is an authorized facilitator. All documents must be collected in person after verification.",
+        disclaimerBox: "Ch Composing Estamp and Tax Advisor is an authorized facilitator. All documents must be collected in person after verification.",
         checklistBannerTitle: "Need a Document Checklist?",
         checklistBannerDesc: "Don't risk multiple trips. Call us now and we'll tell you exactly what you need to bring for your specific stamp paper request.",
       },
@@ -629,7 +629,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
         whyTitle: "Why Professional Tax Assistance Matters",
         whyParagraphs: [
           "Navigating the Federal Board of Revenue (FBR) regulations in Pakistan requires precision and up-to-date knowledge of the current Finance Act. Incorrect filings or missed deadlines can result in heavy penalties and legal complications.",
-          "LegalAssist Pakistan provides a bridge between complex tax laws and your financial peace of mind. Our team of certified consultants ensures that every document is verified, every exemption is explored, and every submission is timely.",
+          "Ch Composing Estamp and Tax Advisor provides a bridge between complex tax laws and your financial peace of mind. Our team of certified consultants ensures that every document is verified, every exemption is explored, and every submission is timely.",
         ],
         whyFeatures: [
           { title: "Fully Compliant", text: "Adhering strictly to latest FBR guidelines and legal frameworks." },
@@ -641,7 +641,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       "property-land": {
         heroBadge: "Real Estate & Documentation",
         heroTitle: "Property & Land Services",
-        heroDesc: "Expert assistance for property transfers, title verification, registry documentation, and legal searches across Islamabad and major districts of Pakistan.",
+        heroDesc: "Expert assistance for property transfers, title verification, registry documentation, and legal searches across Sahiwal Division, Punjab, and major districts of Pakistan.",
         noticeLabel: "Title Verification Advisory",
         noticeTitle: "Critical Title Verification Advisory",
         noticeText: "Property transactions demand rigorous verification before any token payment. Contact our legal search experts to verify original ownership records and non-encumbrance status.",
@@ -695,7 +695,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
         whyEyebrow: "Asset Protection",
         whyTitle: "Secure Your Property Assets with Legal Precision",
         whyParagraphs: [
-          "In Pakistan, property transactions demand meticulous attention to detail to prevent future disputes. LegalAssist provides a specialized team dedicated to the rigorous verification of land titles, e-stamping, and the preparation of comprehensive sale deeds.",
+          "In Pakistan, property transactions demand meticulous attention to detail to prevent future disputes. Ch Composing Estamp and Tax Advisor provides a specialized team dedicated to the rigorous verification of land titles, e-stamping, and the preparation of comprehensive sale deeds.",
           "We bridge the gap between clients and government authorities (Patwari, CDA, LDA, etc.), ensuring every document complies with current provincial laws and regulatory standards.",
         ],
         whyFeatures: [
@@ -764,7 +764,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
         whyEyebrow: "Corporate Standards",
         whyTitle: "Launch Your Business on Solid Legal Foundations",
         whyParagraphs: [
-          "Operating an unregistered or improperly structured business exposes founders to personal financial liability and regulatory penalties. LegalAssist ensures your company is incorporated in strict compliance with the Companies Act 2017.",
+          "Operating an unregistered or improperly structured business exposes founders to personal financial liability and regulatory penalties. Ch Composing Estamp and Tax Advisor ensures your company is incorporated in strict compliance with the Companies Act 2017.",
           "From reserving your corporate name to opening your corporate commercial bank account, we manage every administrative hurdle with absolute efficiency.",
         ],
         whyFeatures: [
@@ -1076,9 +1076,9 @@ export const TRANSLATIONS: Record<Language, Translations> = {
   },
   ur: {
     site: {
-      name: "لیگل اسسٹ",
-      country: "پاکستان",
-      badge: "مجاز قانونی دستاویزات کے ماہرین",
+      name: "چوہدری کمپوزنگ",
+      country: "ای سٹامپ اور ٹیکس ایڈوائزر",
+      badge: "مجاز دستاویزی و ٹیکس ایڈوائزر",
       phoneLabel: "فون رابطہ",
       whatsappLabel: "واٹس ایپ رابطہ",
       officeDirections: "راستہ معلوم کریں",
@@ -1123,7 +1123,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       requestChecklistBtn: "چیک لسٹ طلب کریں",
       officeCardTitle: "مرکزی دفتر کا پتہ",
       officeCardDesc:
-        "آفس نمبر 402، بزنس ٹاور، بلیو ایریا، اسلام آباد۔ شہر کے مرکزی کاروباری مرکز میں انتہائی آسان رسائی۔",
+        "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے میں مرکزی مقام پر واقع۔",
       getDirectionsBtn: "گوگل میپ پر راستہ دیکھیں",
       steps: [
         {
@@ -1136,7 +1136,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
         },
         {
           title: "تصدیقی تشریف آوری",
-          text: "اپنا اصل قومی شناختی کارڈ اور ضروری کاغذات ہمراہ لے کر ہمارے بلیو ایریا دفتر تشریف لائیں۔",
+          text: "اپنا اصل قومی شناختی کارڈ اور ضروری کاغذات ہمراہ لے کر ہمارے ڈسٹرکٹ کورٹ ساہیوال چیمبر تشریف لائیں۔",
         },
       ],
     },
@@ -1240,8 +1240,8 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       quickLinks: "فوری لنکس",
       followUs: "ہمیں فالو کریں",
       disclaimer:
-        "مجاز قانونی دستاویزی سہولت کار۔ تمام قانونی دستاویزات اسلام آباد دفتر میں فزیکل تصدیق کے بعد جاری کیے جاتے ہیں۔",
-      rights: "© 2026 لیگل اسسٹ پاکستان۔ جملہ حقوق محفوظ ہیں۔",
+        "مجاز قانونی دستاویزی سہولت کار۔ تمام قانونی دستاویزات ڈسٹرکٹ کورٹ ساہیوال چیمبر میں فزیکل تصدیق کے بعد جاری کیے جاتے ہیں۔",
+      rights: "© 2026 چوہدری کمپوزنگ ای سٹامپ اور ٹیکس ایڈوائزر۔ جملہ حقوق محفوظ ہیں۔",
       privacy: "پرائیویسی پالیسی",
       terms: "شرائط و ضوابط",
     },
@@ -1448,7 +1448,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           { title: "اسی دن سروس فراہمی", text: "دوپہر 12 بجے سے قبل مطلوبہ کاغذات لانے پر اسی دن سٹامپ پیپر کا اجراء ممکن بنایا جاتا ہے۔" },
         ],
         imageTip: "یقینی بنائیں کہ سٹامپ پیپر کی مالیت متعلقہ قانونی ذمہ داری اور ڈی سی ریٹ کے عین مطابق ہو۔",
-        disclaimerBox: "لیگل اسسٹ پاکستان ایک مجاز سہولت کار ہے۔ فزیکل تصدیق کے بعد تمام دستاویزات دستی وصول کیے جاتے ہیں۔",
+        disclaimerBox: "چوہدری کمپوزنگ ای سٹامپ اور ٹیکس ایڈوائزر ایک مجاز سہولت کار ہے۔ فزیکل تصدیق کے بعد تمام دستاویزات دستی وصول کیے جاتے ہیں۔",
         checklistBannerTitle: "کیا آپ کو مطلوبہ کاغذات کی چیک لسٹ چاہیے؟",
         checklistBannerDesc: "بار بار چکر لگانے کی زحمت سے بچیں۔ ابھی فون کریں اور اپنے اسٹامپ پیپر کے لیے درکار اصل کاغذات کی تفصیل معلوم کریں۔",
       },
