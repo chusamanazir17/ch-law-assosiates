@@ -13,7 +13,7 @@ export const SITE = {
   city: "Sahiwal",
   contacts: [
     {
-      name: "Hajji Nazir Ahmad",
+      name: "Haji Nazir Ahmad",
       nameUrdu: "حاجی نذیر احمد",
       role: "Senior Consultant",
       roleUrdu: "سینئر کنسلٹنٹ",

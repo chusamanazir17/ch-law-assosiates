@@ -319,13 +319,13 @@ function PrepareVisit() {
                 </div>
 
                 <div className="grid gap-2.5 sm:grid-cols-2">
-                  {/* Hajji Nazir Ahmad */}
+                  {/* Haji Nazir Ahmad */}
                   <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
                       {isUrdu ? "سینئر مشیر" : "Senior Consultant"}
                     </span>
                     <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
-                      {isUrdu ? "حاجی نذیر احمد" : "Hajji Nazir Ahmad"}
+                      {isUrdu ? "حاجی نذیر احمد" : "Haji Nazir Ahmad"}
                     </p>
                     <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
                       0301-6922573
@@ -343,7 +343,7 @@ function PrepareVisit() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
-                        title="WhatsApp Hajji Nazir Ahmad"
+                        title="WhatsApp Haji Nazir Ahmad"
                       >
                         <WhatsAppIcon className="h-3.5 w-3.5" />
                       </a>

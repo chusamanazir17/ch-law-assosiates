@@ -68,7 +68,7 @@ export default function Footer() {
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-xs font-semibold text-navy-900 dark:text-white">
-                      {isUrdu ? "حاجی نذیر احمد:" : "Hajji Nazir Ahmad:"}
+                      {isUrdu ? "حاجی نذیر احمد:" : "Haji Nazir Ahmad:"}
                     </span>
                     <a href="tel:+923016922573" className="transition hover:text-gold-600 dark:hover:text-gold-400">
                       0301-6922573
