@@ -1,15 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Clock, Phone, CheckCircle2, Shield } from "lucide-react";
+import { MapPin, Navigation, Clock, Phone, CheckCircle2, Shield, ExternalLink } from "lucide-react";
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/lib/LanguageContext";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
-
-const BUILDING_IMG =
-  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
 
 export default function OfficeSection({
   title,
@@ -69,7 +65,7 @@ export default function OfficeSection({
               </div>
 
               <a
-                href={SITE.mapsUrl}
+                href={SITE.directionsUrl || SITE.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-gold mt-7 w-full text-center flex items-center justify-center gap-2"
@@ -79,25 +75,76 @@ export default function OfficeSection({
             </div>
           </FadeIn>
 
-          {/* Building image */}
+          {/* Live Interactive Map Card */}
           <FadeIn delay={0.1} className="lg:col-span-4">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.5 }}
-              className="relative h-64 sm:h-72 overflow-hidden rounded-xl sm:rounded-2xl lg:h-full shadow-card border border-navy-900/5 dark:border-white/10"
-            >
-              <Image
-                src={BUILDING_IMG}
-                alt="Ch Composing Chamber 121, District Court Sahiwal"
-                fill
-                sizes="(max-width: 1024px) 100vw, 33vw"
-                className="object-cover"
-              />
-              <div className="absolute bottom-4 left-4 rtl:right-4 rtl:left-auto rounded bg-navy-900/90 dark:bg-black/80 px-4 py-2 text-xs font-semibold text-white backdrop-blur">
-                <Clock className="mr-2 rtl:ml-2 rtl:mr-0 inline h-3.5 w-3.5 text-gold-400" />
-                {isUrdu ? "کھلا ہے: پیر تا ہفتہ" : "Open Mon – Sat"}
+            <div className="flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] shadow-card text-navy-900 dark:text-white">
+              {/* Map Card Header with Live GPS indicator */}
+              <div className="flex items-center justify-between border-b border-navy-900/8 dark:border-white/10 px-4 py-3 sm:px-5 bg-navy-50/60 dark:bg-white/[0.03]">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-xs font-bold tracking-wide text-navy-900 dark:text-white">
+                    {isUrdu ? "براہ راست GPS لوکیشن" : "Live GPS Map"}
+                  </span>
+                </div>
+                <span className="font-mono text-[11px] font-semibold text-gold-600 dark:text-gold-400 bg-gold-400/10 px-2 py-0.5 rounded border border-gold-400/20">
+                  {SITE.coordinates.lat.toFixed(4)}, {SITE.coordinates.lng.toFixed(4)}
+                </span>
               </div>
-            </motion.div>
+
+              {/* Interactive Google Map iframe */}
+              <div className="relative flex-1 min-h-[260px] sm:min-h-[300px] w-full bg-slate-100 dark:bg-slate-900">
+                <iframe
+                  title="Ch Composing & Tax Consultancy Chamber 121 Sahiwal Live Map"
+                  src={`https://maps.google.com/maps?q=${SITE.coordinates.lat},${SITE.coordinates.lng}&hl=${isUrdu ? "ur" : "en"}&z=17&output=embed`}
+                  className="absolute inset-0 h-full w-full border-0"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+
+              {/* Map Footer Info and Direct Directions Action */}
+              <div className="border-t border-navy-900/8 dark:border-white/10 p-4 sm:p-5 bg-white dark:bg-[#0c1c33] space-y-3">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-gold-500 shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <p className="font-bold text-navy-900 dark:text-white">
+                      {isUrdu
+                        ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال"
+                        : "Chamber 121, Sharki Gate, District Court Sahiwal"}
+                    </p>
+                    <p className="text-[11px] text-navy-800/60 dark:text-slate-400 mt-0.5">
+                      {isUrdu ? "ساہیوال، پنجاب، پاکستان" : "Sahiwal, Punjab, Pakistan"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <a
+                    href={SITE.directionsUrl || SITE.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-gold flex-1 text-center py-2 px-3 text-xs flex items-center justify-center gap-1.5 font-medium shadow-sm hover:shadow"
+                  >
+                    <Navigation className="h-3.5 w-3.5" />
+                    <span>{isUrdu ? "گوگل میپس پر راستہ حاصل کریں" : "Get Directions"}</span>
+                  </a>
+                  <a
+                    href={SITE.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-navy-900/15 dark:border-white/15 p-2 text-xs font-semibold text-navy-800 dark:text-slate-200 hover:bg-navy-50 dark:hover:bg-white/5 transition flex items-center justify-center"
+                    title={isUrdu ? "بڑے گوگل میپ پر کھولیں" : "Open in Google Maps"}
+                    aria-label="Open in Google Maps"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
           </FadeIn>
 
           {/* Visiting Guidance & Direct Official WhatsApp Action */}

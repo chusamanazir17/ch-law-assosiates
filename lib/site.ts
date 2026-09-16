@@ -36,7 +36,13 @@ export const SITE = {
     saturday: "Saturday: 9:00 AM - 3:00 PM",
     sunday: "Sunday: Closed",
   },
-  mapsUrl: "https://maps.google.com/?q=District+Court+Sahiwal",
+  coordinates: {
+    lat: 30.665373,
+    lng: 73.097928,
+    label: "30.665373, 73.097928",
+  },
+  mapsUrl: "https://www.google.com/maps?q=30.665373,73.097928",
+  directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=30.665373,73.097928",
 };
 
 export type NavService = {
