@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import ThemeRegistry from "@/theme/ThemeRegistry";
+import AnnouncementBanner from "@/components/layout/AnnouncementBanner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
@@ -77,6 +78,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('legalassist_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
         <JsonLd />
         <ThemeRegistry>
+          <AnnouncementBanner />
           <ScrollProgress />
           <Header />
           <main id="main-content">{children}</main>

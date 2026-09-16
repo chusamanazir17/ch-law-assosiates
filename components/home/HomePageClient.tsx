@@ -23,6 +23,7 @@ import OfficeSection from "@/components/ui/OfficeSection";
 import { ConsultationForm } from "@/components/ui/ContactBlocks";
 import { useLanguage } from "@/lib/LanguageContext";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
+import TaxReminderSection from "@/features/reminders/TaxReminderSection";
 
 const BUILDING_IMG =
   "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
@@ -550,6 +551,7 @@ export default function HomePageClient() {
       <ServicesGrid />
       <PrepareVisit />
       <WhyTrust />
+      <TaxReminderSection />
       <OfficeSection />
       <FinalCta />
     </>

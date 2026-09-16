@@ -18,6 +18,7 @@ import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/lib/LanguageContext";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { createClient } from "@/lib/supabase/client";
 
 const cardAnim = {
   hidden: { opacity: 0, y: 28 },
@@ -303,7 +304,7 @@ export function ConsultationForm() {
     legal: isUrdu ? "قانونی دستاویزات" : "Legal Documentation",
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -314,12 +315,22 @@ export function ConsultationForm() {
 
     const whatsappUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(message.trim())}`;
 
-    // Brief loading state for visual feedback, then redirect
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-    }, 400);
+    try {
+      const supabase = createClient();
+      await supabase.from("consultation_inquiries").insert({
+        name: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        service_needed: serviceName,
+        message: formData.message.trim() || null,
+        status: "new",
+      });
+    } catch (err) {
+      console.warn("[Inquiry Save Error]", err);
+    }
+
+    setLoading(false);
+    setSubmitted(true);
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   if (submitted) {

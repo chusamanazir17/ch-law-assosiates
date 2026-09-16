@@ -41,7 +41,7 @@ export default function Header() {
   const [mobileServicesRootOpen, setMobileServicesRootOpen] = React.useState(true);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
   const { isUrdu, toggleLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useAppTheme();
@@ -102,6 +102,10 @@ export default function Header() {
   const legalGroupCategories = SERVICE_CATEGORIES.filter((c) =>
     ["registry-deeds", "family-legal", "banking-financial", "legal-documentation", "trademark-ipo"].includes(c.id)
   );
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <>
@@ -425,6 +429,22 @@ export default function Header() {
               >
                 {t.nav.about}
               </Link>
+
+              {/* Legal Updates & Guides Link */}
+              <Link
+                href="/updates"
+                className={`rounded-md px-3 py-2 text-[13px] font-semibold transition ${
+                  pathname.startsWith("/updates")
+                    ? isDark
+                      ? "text-gold-400 bg-gold-400/20"
+                      : "text-gold-600 bg-gold-400/10"
+                    : isDark
+                    ? "text-white hover:text-gold-400 hover:bg-white/10"
+                    : "text-navy-800 hover:text-gold-600 hover:bg-navy-900/5"
+                }`}
+              >
+                {isUrdu ? "قانونی رہنمائی" : "Legal Updates"}
+              </Link>
             </nav>
 
             {/* Header Right Actions: Theme Toggle & Urdu Toggle (Zero background, minimalistic) */}
@@ -667,6 +687,18 @@ export default function Header() {
             >
               <ListItemText
                 primary={t.nav.about}
+                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+              />
+            </ListItemButton>
+
+            <ListItemButton
+              component={Link}
+              href="/updates"
+              onClick={() => setDrawerOpen(false)}
+              sx={{ borderRadius: 2, py: 1.2 }}
+            >
+              <ListItemText
+                primary={isUrdu ? "قانونی رہنمائی اور اپ ڈیٹس" : "Legal Updates & Guides"}
                 primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
               />
             </ListItemButton>

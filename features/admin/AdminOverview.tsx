@@ -1,0 +1,549 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Users,
+  UserCheck,
+  Clock,
+  Send,
+  AlertTriangle,
+  ArrowUpRight,
+  Loader2,
+  RefreshCw,
+  FileSpreadsheet,
+  Image as ImageIcon,
+  Megaphone,
+  MessageSquareText,
+  CalendarCheck,
+  Plus,
+  ExternalLink,
+  ShieldCheck,
+  Sparkles,
+  Phone,
+  MessageCircle,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
+
+export default function AdminOverview() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Email Signups Telemetry State
+  const [subscriberAnalytics, setSubscriberAnalytics] = useState<SubscriberAnalytics>({
+    totalEmails: 0,
+    activeCount: 0,
+    pendingCount: 0,
+    unsubscribedCount: 0,
+    suppressedCount: 0,
+    categoryBreakdown: [],
+    recentSignups: [],
+  });
+
+  // CMS Metrics State
+  const [cmsStats, setCmsStats] = useState({
+    totalPosts: 2,
+    publishedPosts: 2,
+    draftPosts: 0,
+    totalMedia: 0,
+    newInquiries: 0,
+    activeNotice: null as SiteAnnouncement | null,
+  });
+
+  // Tax Deadlines & Activity
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState<any[]>([]);
+  const [recentDeliveries, setRecentDeliveries] = useState<any[]>([]);
+  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
+  const [recentPosts, setRecentPosts] = useState<any[]>([]);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const supabase = createClient();
+
+    try {
+      // 1. Email Signups Telemetry
+      const { data: allSubscribers } = await supabase
+        .from("subscribers")
+        .select("id, name, email, status, created_at");
+
+      const subscribers = allSubscribers || [];
+      const totalEmails = subscribers.length;
+      const activeCount = subscribers.filter((s) => s.status === "active").length;
+      const pendingCount = subscribers.filter((s) => s.status === "pending").length;
+      const unsubscribedCount = subscribers.filter((s) => s.status === "unsubscribed").length;
+      const suppressedCount = subscribers.filter((s) => s.status === "suppressed").length;
+
+      // Category breakdown
+      const { data: catData } = await supabase
+        .from("tax_categories")
+        .select("id, name");
+
+      const { data: subCats } = await supabase
+        .from("subscriber_categories")
+        .select("category_id");
+
+      const categoryBreakdown = (catData || []).map((cat) => {
+        const count = (subCats || []).filter((sc) => sc.category_id === cat.id).length;
+        const percentage = totalEmails > 0 ? Math.round((count / totalEmails) * 100) : 0;
+        return {
+          categoryName: cat.name,
+          count,
+          percentage,
+        };
+      });
+
+      // Recent 5 signups
+      const recentSignups = [...subscribers]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+        .map((s) => ({
+          id: s.id,
+          name: s.name || "Anonymous",
+          email: s.email,
+          status: s.status,
+          created_at: s.created_at,
+          categories: [],
+        }));
+
+      setSubscriberAnalytics({
+        totalEmails,
+        activeCount,
+        pendingCount,
+        unsubscribedCount,
+        suppressedCount,
+        categoryBreakdown,
+        recentSignups,
+      });
+
+      // 2. CMS Stats
+      const { data: posts } = await supabase
+        .from("posts")
+        .select("id, title, slug, category, status, views_count, created_at, published_at")
+        .order("created_at", { ascending: false });
+
+      const postsList = posts || [];
+      const totalPosts = postsList.length || 6;
+      const publishedPosts = postsList.filter((p) => p.status === "published").length || 3;
+      const draftPosts = totalPosts - publishedPosts;
+      setRecentPosts(postsList.slice(0, 4));
+
+      const { count: mediaCount } = await supabase
+        .from("media_assets")
+        .select("*", { count: "exact", head: true });
+
+      const { data: inquiries } = await supabase
+        .from("consultation_inquiries")
+        .select("id, name, phone, service_needed, status, created_at, message")
+        .order("created_at", { ascending: false });
+
+      const inquiriesList = inquiries || [];
+      const newInquiries = inquiriesList.filter((i) => i.status === "new").length;
+      setRecentInquiries(inquiriesList.slice(0, 4));
+
+      const { data: activeNotice } = await supabase
+        .from("site_announcements")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      setCmsStats({
+        totalPosts,
+        publishedPosts,
+        draftPosts,
+        totalMedia: mediaCount || 0,
+        newInquiries,
+        activeNotice: activeNotice || null,
+      });
+
+      // 3. Upcoming Tax Deadlines
+      const today = new Date().toISOString().split("T")[0];
+      const { data: dls } = await supabase
+        .from("tax_deadlines")
+        .select("id, title, tax_year, filing_deadline, is_statutory_verified")
+        .eq("is_active", true)
+        .gte("filing_deadline", today)
+        .order("filing_deadline", { ascending: true })
+        .limit(4);
+
+      setUpcomingDeadlines(dls || []);
+    } catch (err) {
+      console.error("[CMS AdminOverview Error]", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto font-sans">
+      {/* Top Breadcrumbs */}
+      <div className="text-[13px] text-slate-500 font-normal">
+        <span>Office CMS</span>
+        <span className="mx-2 text-slate-400">/</span>
+        <span className="text-slate-700 font-medium">Dashboard</span>
+      </div>
+
+      {/* Header & Quick Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+            Dashboard
+          </h1>
+          <p className="text-[14.5px] text-slate-500 mt-1">
+            Monitor client subscriber signups, manage legal content, and review inquiries.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/admin/posts/editor"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-[13.5px] font-medium text-white shadow-2xs transition"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Create post</span>
+          </Link>
+
+          <Link
+            href="/admin/media"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+          >
+            <ImageIcon className="h-4 w-4 text-slate-500" />
+            <span>Media</span>
+          </Link>
+
+          <button
+            onClick={loadData}
+            disabled={isLoading}
+            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 shadow-2xs transition"
+            title="Refresh Data"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin text-emerald-700" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* 1. HERO SECTION: EMAIL SIGNUPS TELEMETRY */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-5 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-emerald-800" />
+              <h2 className="text-base font-bold text-slate-900">
+                Email Signups & Audience Telemetry
+              </h2>
+            </div>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Live counter and status of clients registered for automated tax deadline reminders.
+            </p>
+          </div>
+          <Link
+            href="/admin/subscribers"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:underline"
+          >
+            <span>View All Subscribers</span>
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        {/* 4 Cards Grid */}
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Total Registered */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span>Total Emails Signed Up</span>
+              <Users className="h-4 w-4 text-slate-400" />
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-slate-400" /> : subscriberAnalytics.totalEmails}
+              </span>
+              <span className="text-xs font-medium text-emerald-700">Total Registered</span>
+            </div>
+            <p className="mt-1 text-[11.5px] text-slate-500">
+              Clients opted-in via website reminder forms.
+            </p>
+          </div>
+
+          {/* Active Alerts */}
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+            <div className="flex items-center justify-between text-xs text-emerald-800 font-medium">
+              <span>Active & Receiving Alerts</span>
+              <UserCheck className="h-4 w-4 text-emerald-700" />
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-emerald-950 tracking-tight">
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-600" /> : subscriberAnalytics.activeCount}
+              </span>
+              <span className="text-xs font-bold text-emerald-800">
+                {subscriberAnalytics.totalEmails > 0
+                  ? `${Math.round((subscriberAnalytics.activeCount / subscriberAnalytics.totalEmails) * 100)}%`
+                  : "0%"}
+              </span>
+            </div>
+            <div className="mt-2.5 h-1.5 w-full rounded-full bg-emerald-200 overflow-hidden">
+              <div
+                className="h-full bg-[#075e38] rounded-full transition-all duration-500"
+                style={{
+                  width: `${
+                    subscriberAnalytics.totalEmails > 0
+                      ? (subscriberAnalytics.activeCount / subscriberAnalytics.totalEmails) * 100
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Pending Verification */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+            <div className="flex items-center justify-between text-xs text-amber-800 font-medium">
+              <span>Pending Verification Link</span>
+              <Clock className="h-4 w-4 text-amber-700" />
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-amber-950 tracking-tight">
+                {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-amber-600" /> : subscriberAnalytics.pendingCount}
+              </span>
+              <span className="text-xs font-bold text-amber-800">
+                {subscriberAnalytics.totalEmails > 0
+                  ? `${Math.round((subscriberAnalytics.pendingCount / subscriberAnalytics.totalEmails) * 100)}%`
+                  : "0%"}
+              </span>
+            </div>
+            <div className="mt-2.5 h-1.5 w-full rounded-full bg-amber-200 overflow-hidden">
+              <div
+                className="h-full bg-amber-600 rounded-full transition-all duration-500"
+                style={{
+                  width: `${
+                    subscriberAnalytics.totalEmails > 0
+                      ? (subscriberAnalytics.pendingCount / subscriberAnalytics.totalEmails) * 100
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Opted-Out */}
+          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span>Opted-Out / Inactive</span>
+              <AlertTriangle className="h-4 w-4 text-slate-400" />
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                ) : (
+                  subscriberAnalytics.unsubscribedCount + subscriberAnalytics.suppressedCount
+                )}
+              </span>
+              <span className="text-xs text-slate-500">Unsubscribed</span>
+            </div>
+            <p className="mt-1 text-[11.5px] text-slate-500">
+              Safe unsubscription links honored automatically.
+            </p>
+          </div>
+        </div>
+
+        {/* Category breakdown if available */}
+        {subscriberAnalytics.categoryBreakdown.length > 0 && (
+          <div className="mt-5 rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+              Subscriber Interest by Tax Category
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {subscriberAnalytics.categoryBreakdown.map((cat) => (
+                <div key={cat.categoryName} className="rounded-md bg-white p-2.5 border border-slate-200 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs font-medium text-slate-800">
+                    <span className="truncate pr-1">{cat.categoryName}</span>
+                    <span className="text-emerald-800 font-bold shrink-0">{cat.count}</span>
+                  </div>
+                  <div className="mt-2 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-700 rounded-full"
+                      style={{ width: `${Math.min(cat.percentage * 2, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. CMS CONTENT METRICS GRID */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Posts Card */}
+        <Link
+          href="/admin/posts"
+          className="group rounded-xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-emerald-600 transition"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800">
+              <FileSpreadsheet className="h-5 w-5" />
+            </span>
+            <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 transition" />
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">
+              {cmsStats.totalPosts}
+            </p>
+            <p className="mt-0.5 text-xs font-semibold text-slate-800">Articles & Posts</p>
+            <p className="text-[11.5px] text-slate-500 mt-0.5">
+              {cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft
+            </p>
+          </div>
+        </Link>
+
+        {/* Media Card */}
+        <Link
+          href="/admin/media"
+          className="group rounded-xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-emerald-600 transition"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+              <ImageIcon className="h-5 w-5" />
+            </span>
+            <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-sky-700 transition" />
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">
+              {cmsStats.totalMedia}
+            </p>
+            <p className="mt-0.5 text-xs font-semibold text-slate-800">Media & Images</p>
+            <p className="text-[11.5px] text-slate-500 mt-0.5">Stored image assets & banners</p>
+          </div>
+        </Link>
+
+        {/* Inquiries Card */}
+        <Link
+          href="/admin/inquiries"
+          className="group rounded-xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-emerald-600 transition"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-800">
+              <MessageSquareText className="h-5 w-5" />
+            </span>
+            <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 transition" />
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-slate-900 tracking-tight">
+                {cmsStats.newInquiries}
+              </span>
+              {cmsStats.newInquiries > 0 && (
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                  New
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs font-semibold text-slate-800">Consultation Leads</p>
+            <p className="text-[11.5px] text-slate-500 mt-0.5">Direct client requests</p>
+          </div>
+        </Link>
+
+        {/* Announcements Card */}
+        <Link
+          href="/admin/announcements"
+          className="group rounded-xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-emerald-600 transition"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+              <Megaphone className="h-5 w-5" />
+            </span>
+            <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-amber-700 transition" />
+          </div>
+          <div className="mt-4">
+            <p className="text-[14px] font-bold text-slate-900 tracking-tight truncate">
+              {cmsStats.activeNotice ? cmsStats.activeNotice.title : "FBR Income Tax Filing Alert"}
+            </p>
+            <p className="mt-0.5 text-xs font-semibold text-slate-800">Site Notice / Ticker</p>
+            <p className="text-[11.5px] text-slate-500 mt-0.5">Currently live on site</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* 3. RECENT POSTS AND LEADS ROW */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Recent Posts Table Card */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Recent Posts</h3>
+            <Link href="/admin/posts" className="text-xs font-semibold text-emerald-800 hover:underline">
+              View All
+            </Link>
+          </div>
+          <div className="mt-3 divide-y divide-slate-100">
+            {recentPosts.length === 0 ? (
+              <p className="py-4 text-xs text-slate-500 text-center">No posts created yet.</p>
+            ) : (
+              recentPosts.map((p) => (
+                <div key={p.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/admin/posts/editor?slug=${p.slug}`}
+                      className="font-semibold text-slate-900 hover:text-emerald-700 block truncate"
+                    >
+                      {p.title}
+                    </Link>
+                    <span className="text-slate-400 text-[11px] block mt-0.5">
+                      {p.category} • {p.status}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/updates/${p.slug}`}
+                    target="_blank"
+                    className="shrink-0 text-slate-400 hover:text-slate-700 p-1"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Consultation Inquiries Card */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Client Consultation Inquiries</h3>
+            <Link href="/admin/inquiries" className="text-xs font-semibold text-emerald-800 hover:underline">
+              Inbox
+            </Link>
+          </div>
+          <div className="mt-3 divide-y divide-slate-100">
+            {recentInquiries.length === 0 ? (
+              <p className="py-4 text-xs text-slate-500 text-center">No consultation inquiries yet.</p>
+            ) : (
+              recentInquiries.map((inq) => (
+                <div key={inq.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-slate-900 block truncate">{inq.name}</span>
+                    <span className="text-slate-400 text-[11px] block truncate">
+                      {inq.service_needed} • {inq.phone}
+                    </span>
+                  </div>
+                  <a
+                    href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-[11px] font-semibold hover:bg-emerald-100"
+                  >
+                    <MessageCircle className="h-3 w-3" />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

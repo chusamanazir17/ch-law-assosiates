@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
@@ -21,6 +22,11 @@ import { useLanguage } from "@/lib/LanguageContext";
 import Logo from "./Logo";
 
 export default function Footer() {
+  const pathname = usePathname() || "";
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   const { isUrdu, t } = useLanguage();
   const [policyType, setPolicyType] = useState<"privacy" | "terms" | null>(null);
 

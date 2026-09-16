@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -65,7 +66,12 @@ export function OfficialWhatsAppButton({
 }
 
 export function FloatingWhatsApp() {
+  const pathname = usePathname() || "";
   const { isUrdu } = useLanguage();
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <aside

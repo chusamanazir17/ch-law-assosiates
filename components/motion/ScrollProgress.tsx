@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ScrollProgress() {
+  const pathname = usePathname() || "";
   const barRef = useRef<HTMLDivElement>(null);
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   useEffect(() => {
     const el = barRef.current;
