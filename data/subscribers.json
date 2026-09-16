@@ -1,5 +1,48 @@
 [
   {
+    "id": "sub-1789551871386",
+    "name": "shah zaib",
+    "email": "shahzaibbusiness2026@gmail.com",
+    "status": "active",
+    "consent_at": "2026-09-16T09:44:31.386Z",
+    "consent_text_version": "v1.0",
+    "confirmed_at": "2026-09-16T09:44:31.386Z",
+    "created_at": "2026-09-16T09:44:31.386Z",
+    "updated_at": "2026-09-16T09:44:31.386Z",
+    "categories": [
+      {
+        "id": "1",
+        "name": "Income Tax - Individuals & Salaried",
+        "slug": "income-tax-individuals",
+        "description": "Annual FBR returns",
+        "is_active": true,
+        "sort_order": 1,
+        "created_at": "2026-09-01T00:00:00Z",
+        "updated_at": "2026-09-01T00:00:00Z"
+      },
+      {
+        "id": "2",
+        "name": "Business & Corporate Tax",
+        "slug": "business-corporate-tax",
+        "description": "AOP, Sole Proprietor, Private Ltd",
+        "is_active": true,
+        "sort_order": 2,
+        "created_at": "2026-09-01T00:00:00Z",
+        "updated_at": "2026-09-01T00:00:00Z"
+      },
+      {
+        "id": "0e4ae88c-0069-498d-b82c-fe1a6b55d6fb",
+        "name": "Tax Category 0e4ae88c-0069-498d-b82c-fe1a6b55d6fb",
+        "slug": "category-0e4ae88c-0069-498d-b82c-fe1a6b55d6fb",
+        "description": "Statutory Tax Filing",
+        "is_active": true,
+        "sort_order": 99,
+        "created_at": "2026-09-16T09:44:31.386Z",
+        "updated_at": "2026-09-16T09:44:31.386Z"
+      }
+    ]
+  },
+  {
     "id": "sub-1789551572912",
     "name": "Haji Usama",
     "email": "client.alert.test@example.com",

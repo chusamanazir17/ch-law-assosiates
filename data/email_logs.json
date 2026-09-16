@@ -1,5 +1,19 @@
 [
   {
+    "id": "mail-1789551871670",
+    "to": "shahzaibbusiness2026@gmail.com",
+    "name": "shah zaib",
+    "categories": [
+      "Income Tax - Individuals & Salaried",
+      "Business & Corporate Tax",
+      "Category 0e4ae88c-0069-498d-b82c-fe1a6b55d6fb"
+    ],
+    "subject": "Tax Deadline Alerts Activated - Ch Composing Estamp and Tax Advisor",
+    "dispatched_at": "2026-09-16T09:44:31.670Z",
+    "status": "delivered",
+    "note": "Dispatched via verified local email service handler"
+  },
+  {
     "id": "mail-1789551573165",
     "to": "client.alert.test@example.com",
     "name": "Haji Usama",
