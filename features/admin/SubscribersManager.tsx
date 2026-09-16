@@ -16,6 +16,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Download,
   ExternalLink,
   Mail,
@@ -182,8 +183,8 @@ export default function SubscribersManager() {
     switch (status) {
       case "active":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef7f2] border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#075e38]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#075e38] animate-pulse" />
             Active
           </span>
         );
@@ -279,170 +280,166 @@ export default function SubscribersManager() {
         </div>
       )}
 
-      {/* 4 Metric KPI Stat Cards */}
+      {/* 4 Uniform Metric KPI Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Registered */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4.5 shadow-xs transition hover:border-slate-300">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Total Registered Clients</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-              <Users className="h-4 w-4" />
+        {/* Card 1: Total Registered */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-slate-600">Total Subscribers</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+              <Users className="h-4.5 w-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight text-slate-900">
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-slate-400" /> : totalCount}
             </span>
-            <span className="text-xs font-medium text-slate-500">Email Alerts</span>
+            <span className="text-[11.5px] font-medium text-slate-500">Registered</span>
           </div>
-          <p className="mt-1 text-[11.5px] text-slate-400">
-            Clients registered on the official website.
+          <p className="text-[12px] text-slate-500 truncate">
+            Opted-in via public website forms
           </p>
         </div>
 
-        {/* Active Alerts */}
-        <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-4.5 shadow-xs transition hover:border-emerald-300">
-          <div className="flex items-center justify-between text-xs font-semibold text-emerald-900">
-            <span>Active & Receiving Alerts</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-              <UserCheck className="h-4 w-4" />
+        {/* Card 2: Active Alerts */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-slate-600">Active Recipients</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eef7f2] text-[#075e38]">
+              <UserCheck className="h-4.5 w-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-emerald-950">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold tracking-tight text-slate-900">
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-600" /> : activeCount}
             </span>
-            <span className="text-xs font-bold text-emerald-700">
+            <span className="inline-flex items-center rounded-full bg-[#eef7f2] border border-emerald-200/60 px-2 py-0.5 text-[11px] font-semibold text-[#075e38]">
               {totalCount > 0 ? `${Math.round((activeCount / totalCount) * 100)}% active` : "100%"}
             </span>
           </div>
-          <div className="mt-2.5 h-1.5 w-full rounded-full bg-emerald-200/70 overflow-hidden">
-            <div
-              className="h-full bg-[#075e38] rounded-full transition-all duration-500"
-              style={{ width: `${totalCount > 0 ? (activeCount / totalCount) * 100 : 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Pending Confirmation */}
-        <div className="rounded-xl border border-amber-200/80 bg-amber-50/40 p-4.5 shadow-xs transition hover:border-amber-300">
-          <div className="flex items-center justify-between text-xs font-semibold text-amber-900">
-            <span>Pending Confirmation</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-amber-950">
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-amber-600" /> : pendingCount}
-            </span>
-            <span className="text-xs font-medium text-amber-800">Awaiting Click</span>
-          </div>
-          <p className="mt-1 text-[11.5px] text-amber-700/80">
-            Double opt-in verification links sent.
+          <p className="text-[12px] text-slate-500 truncate">
+            Receiving statutory reminder dispatches
           </p>
         </div>
 
-        {/* Monitored Categories */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4.5 shadow-xs transition hover:border-slate-300">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-            <span>Tax Categories</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-              <ShieldCheck className="h-4 w-4" />
+        {/* Card 3: Pending Confirmation */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-slate-600">Pending Verification</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+              <Clock className="h-4.5 w-4.5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold tracking-tight text-slate-900">
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-amber-600" /> : pendingCount}
+            </span>
+            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+              Double opt-in
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-500 truncate">
+            Awaiting verification link confirmation
+          </p>
+        </div>
+
+        {/* Card 4: Tax Categories */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-slate-600">Tax Categories</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+              <ShieldCheck className="h-4.5 w-4.5" />
+            </div>
+          </div>
+          <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight text-slate-900">
               {categories.length || 5}
             </span>
-            <span className="text-xs font-medium text-slate-500">Active Schedules</span>
+            <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+              Active schedules
+            </span>
           </div>
-          <p className="mt-1 text-[11.5px] text-slate-400">
-            FBR, PRA, E-Stamping, and Withholding.
+          <p className="text-[12px] text-slate-500 truncate">
+            FBR, PRA, E-Stamping & Withholding
           </p>
         </div>
       </div>
 
-      {/* Tabs & Search Toolbar */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-4">
-        {/* Status Tabs matching Office CMS Posts pattern */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
-          <div className="flex items-center gap-1">
-            {[
-              { key: "all", label: "All Subscribers", count: totalCount },
-              { key: "active", label: "Active", count: activeCount },
-              { key: "pending", label: "Pending", count: pendingCount },
-              { key: "unsubscribed", label: "Unsubscribed", count: unsubscribedCount },
-            ].map((tab) => (
+      {/* Status Filter Tabs matching Dashboard & PostsManager */}
+      <div className="border-b border-slate-200">
+        <nav className="flex space-x-6 text-[14px]">
+          {[
+            { key: "all", label: "All subscribers", count: totalCount },
+            { key: "active", label: "Active", count: activeCount },
+            { key: "pending", label: "Pending", count: pendingCount },
+            { key: "unsubscribed", label: "Unsubscribed", count: unsubscribedCount },
+          ].map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
               <button
                 key={tab.key}
                 onClick={() => {
                   setActiveTab(tab.key as any);
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                  activeTab === tab.key
-                    ? "bg-[#075e38] text-white shadow-2xs"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
+                  isActive
+                    ? "border-[#075e38] text-[#075e38] font-semibold"
+                    : "border-transparent text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-full px-1.5 py-0.2 text-[10.5px] ${
-                    activeTab === tab.key
-                      ? "bg-white/20 text-white"
+                  className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
+                    isActive
+                      ? "bg-emerald-50 text-[#075e38]"
                       : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {tab.count}
                 </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </nav>
+      </div>
 
-          <span className="text-xs text-slate-400 font-normal">
-            Showing {filteredSubscribers.length} filtered results
-          </span>
+      {/* Search and Category Filter Toolbar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search by client name or email address..."
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-[13.5px] text-slate-800 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+          />
         </div>
 
-        {/* Search and Category Filter Toolbar */}
-        <div className="grid gap-3 sm:grid-cols-12">
-          {/* Search */}
-          <div className="sm:col-span-8 relative">
-            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <Search className="h-4 w-4" />
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search by client name or email address..."
-              className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pl-9.5 pr-4 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:border-slate-400 focus:outline-none transition"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="sm:col-span-4">
-            <select
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              aria-label="Filter by Category"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 px-3 text-xs text-slate-700 focus:border-slate-400 focus:outline-none"
-            >
-              <option value="all">All Tax Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Category Filter */}
+        <div className="relative w-full sm:w-auto">
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            aria-label="Filter by Category"
+            className="w-full sm:w-auto appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-9 text-[13.5px] font-normal text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs cursor-pointer"
+          >
+            <option value="all">All tax categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         </div>
       </div>
 

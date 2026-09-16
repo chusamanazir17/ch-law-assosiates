@@ -255,15 +255,15 @@ export default function PostsManager() {
             onClick={() => setActiveTab("all")}
             className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "all"
-                ? "border-[#075e38] text-slate-900 font-semibold"
+                ? "border-[#075e38] text-[#075e38] font-semibold"
                 : "border-transparent text-slate-600 hover:text-slate-900"
             }`}
           >
             <span>All posts</span>
             <span
-              className={`rounded-md px-2 py-0.5 text-xs ${
+              className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                 activeTab === "all"
-                  ? "bg-emerald-100 text-emerald-800"
+                  ? "bg-emerald-50 text-[#075e38]"
                   : "bg-slate-100 text-slate-600"
               }`}
             >
@@ -275,15 +275,15 @@ export default function PostsManager() {
             onClick={() => setActiveTab("published")}
             className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "published"
-                ? "border-[#075e38] text-slate-900 font-semibold"
+                ? "border-[#075e38] text-[#075e38] font-semibold"
                 : "border-transparent text-slate-600 hover:text-slate-900"
             }`}
           >
             <span>Published</span>
             <span
-              className={`rounded-md px-2 py-0.5 text-xs ${
+              className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                 activeTab === "published"
-                  ? "bg-emerald-100 text-emerald-800"
+                  ? "bg-emerald-50 text-[#075e38]"
                   : "bg-slate-100 text-slate-600"
               }`}
             >
@@ -295,15 +295,15 @@ export default function PostsManager() {
             onClick={() => setActiveTab("draft")}
             className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "draft"
-                ? "border-[#075e38] text-slate-900 font-semibold"
+                ? "border-[#075e38] text-[#075e38] font-semibold"
                 : "border-transparent text-slate-600 hover:text-slate-900"
             }`}
           >
             <span>Drafts</span>
             <span
-              className={`rounded-md px-2 py-0.5 text-xs ${
+              className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                 activeTab === "draft"
-                  ? "bg-emerald-100 text-emerald-800"
+                  ? "bg-emerald-50 text-[#075e38]"
                   : "bg-slate-100 text-slate-600"
               }`}
             >
@@ -315,15 +315,15 @@ export default function PostsManager() {
             onClick={() => setActiveTab("scheduled")}
             className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "scheduled"
-                ? "border-[#075e38] text-slate-900 font-semibold"
+                ? "border-[#075e38] text-[#075e38] font-semibold"
                 : "border-transparent text-slate-600 hover:text-slate-900"
             }`}
           >
             <span>Scheduled</span>
             <span
-              className={`rounded-md px-2 py-0.5 text-xs ${
+              className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                 activeTab === "scheduled"
-                  ? "bg-emerald-100 text-emerald-800"
+                  ? "bg-emerald-50 text-[#075e38]"
                   : "bg-slate-100 text-slate-600"
               }`}
             >
@@ -335,7 +335,7 @@ export default function PostsManager() {
             onClick={() => setActiveTab("trash")}
             className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === "trash"
-                ? "border-[#075e38] text-slate-900 font-semibold"
+                ? "border-[#075e38] text-[#075e38] font-semibold"
                 : "border-transparent text-slate-600 hover:text-slate-900"
             }`}
           >

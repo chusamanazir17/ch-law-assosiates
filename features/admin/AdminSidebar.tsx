@@ -100,7 +100,7 @@ export default function AdminSidebar({
             <div className="flex flex-col items-center gap-2">
               <Link
                 href="/admin"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-700 text-white shadow-xs transition hover:bg-emerald-800"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#075e38] text-white shadow-xs transition hover:bg-[#064e2e]"
                 title="Office CMS - Dashboard"
               >
                 <svg
@@ -124,7 +124,7 @@ export default function AdminSidebar({
                 onClick={toggleCollapsed}
                 title="Expand sidebar"
                 aria-label="Expand sidebar"
-                className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-[#eef7f2] hover:text-[#075e38] transition"
               >
                 <PanelLeftOpen className="h-4 w-4" />
               </button>
@@ -132,7 +132,7 @@ export default function AdminSidebar({
           ) : (
             <>
               <Link href="/admin" className="flex items-center gap-3 min-w-0">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-white shadow-xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#075e38] text-white shadow-xs">
                   <svg
                     className="h-5 w-5"
                     viewBox="0 0 24 24"
@@ -165,7 +165,7 @@ export default function AdminSidebar({
                   onClick={toggleCollapsed}
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
-                  className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                  className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-[#eef7f2] hover:text-[#075e38] transition"
                 >
                   <PanelLeftClose className="h-4 w-4" />
                 </button>
@@ -209,20 +209,20 @@ export default function AdminSidebar({
                       key={item.label}
                       href={item.href}
                       onClick={() => handleCloseMobile()}
-                      className={`group relative flex items-center rounded-lg transition-colors ${
+                      className={`group relative flex items-center rounded-lg transition-all duration-150 ${
                         isCollapsed
                           ? "justify-center h-10 w-full"
                           : "gap-3 px-2.5 py-2 text-[13.5px]"
                       } ${
                         isActive
-                          ? "bg-emerald-50 text-emerald-800 font-semibold"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-normal"
+                          ? "bg-[#eef7f2] text-[#075e38] font-semibold"
+                          : "text-slate-700 hover:bg-[#eef7f2]/60 hover:text-[#075e38] font-medium"
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
                       <Icon
-                        className={`h-[18px] w-[18px] shrink-0 ${
-                          isActive ? "text-emerald-700" : "text-slate-400 group-hover:text-slate-600"
+                        className={`h-[18px] w-[18px] shrink-0 transition-colors ${
+                          isActive ? "text-[#075e38]" : "text-slate-500 group-hover:text-[#075e38]"
                         }`}
                       />
                       {!isCollapsed && <span className="truncate">{item.label}</span>}

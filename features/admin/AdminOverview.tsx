@@ -253,100 +253,90 @@ export default function AdminOverview() {
         {/* 4 Cards Grid */}
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Registered */}
-          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-              <span>Total Emails Signed Up</span>
-              <Users className="h-4 w-4 text-slate-400" />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-slate-600">Total Subscribers</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                <Users className="h-4.5 w-4.5" />
+              </div>
             </div>
-            <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tracking-tight text-slate-900">
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-slate-400" /> : subscriberAnalytics.totalEmails}
               </span>
-              <span className="text-xs font-medium text-emerald-700">Total Registered</span>
+              <span className="text-[11.5px] font-medium text-slate-500">Registered</span>
             </div>
-            <p className="mt-1 text-[11.5px] text-slate-500">
-              Clients opted-in via website reminder forms.
+            <p className="text-[12px] text-slate-500 truncate">
+              Clients opted-in via website reminder forms
             </p>
           </div>
 
           {/* Active Alerts */}
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
-            <div className="flex items-center justify-between text-xs text-emerald-800 font-medium">
-              <span>Active & Receiving Alerts</span>
-              <UserCheck className="h-4 w-4 text-emerald-700" />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-slate-600">Active Recipients</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eef7f2] text-[#075e38]">
+                <UserCheck className="h-4.5 w-4.5" />
+              </div>
             </div>
-            <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-emerald-950 tracking-tight">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tracking-tight text-slate-900">
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-600" /> : subscriberAnalytics.activeCount}
               </span>
-              <span className="text-xs font-bold text-emerald-800">
+              <span className="inline-flex items-center rounded-full bg-[#eef7f2] border border-emerald-200/60 px-2 py-0.5 text-[11px] font-semibold text-[#075e38]">
                 {subscriberAnalytics.totalEmails > 0
-                  ? `${Math.round((subscriberAnalytics.activeCount / subscriberAnalytics.totalEmails) * 100)}%`
-                  : "0%"}
+                  ? `${Math.round((subscriberAnalytics.activeCount / subscriberAnalytics.totalEmails) * 100)}% active`
+                  : "100%"}
               </span>
             </div>
-            <div className="mt-2.5 h-1.5 w-full rounded-full bg-emerald-200 overflow-hidden">
-              <div
-                className="h-full bg-[#075e38] rounded-full transition-all duration-500"
-                style={{
-                  width: `${
-                    subscriberAnalytics.totalEmails > 0
-                      ? (subscriberAnalytics.activeCount / subscriberAnalytics.totalEmails) * 100
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
+            <p className="text-[12px] text-slate-500 truncate">
+              Receiving statutory reminder dispatches
+            </p>
           </div>
 
           {/* Pending Verification */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
-            <div className="flex items-center justify-between text-xs text-amber-800 font-medium">
-              <span>Pending Verification Link</span>
-              <Clock className="h-4 w-4 text-amber-700" />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-slate-600">Pending Verification</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                <Clock className="h-4.5 w-4.5" />
+              </div>
             </div>
-            <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-amber-950 tracking-tight">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tracking-tight text-slate-900">
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-amber-600" /> : subscriberAnalytics.pendingCount}
               </span>
-              <span className="text-xs font-bold text-amber-800">
-                {subscriberAnalytics.totalEmails > 0
-                  ? `${Math.round((subscriberAnalytics.pendingCount / subscriberAnalytics.totalEmails) * 100)}%`
-                  : "0%"}
+              <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                Double opt-in
               </span>
             </div>
-            <div className="mt-2.5 h-1.5 w-full rounded-full bg-amber-200 overflow-hidden">
-              <div
-                className="h-full bg-amber-600 rounded-full transition-all duration-500"
-                style={{
-                  width: `${
-                    subscriberAnalytics.totalEmails > 0
-                      ? (subscriberAnalytics.pendingCount / subscriberAnalytics.totalEmails) * 100
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
+            <p className="text-[12px] text-slate-500 truncate">
+              Awaiting verification link confirmation
+            </p>
           </div>
 
           {/* Opted-Out */}
-          <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-            <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-              <span>Opted-Out / Inactive</span>
-              <AlertTriangle className="h-4 w-4 text-slate-400" />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-slate-600">Opted-Out</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                <AlertTriangle className="h-4.5 w-4.5" />
+              </div>
             </div>
-            <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold tracking-tight text-slate-900">
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
                 ) : (
                   subscriberAnalytics.unsubscribedCount + subscriberAnalytics.suppressedCount
                 )}
               </span>
-              <span className="text-xs text-slate-500">Unsubscribed</span>
+              <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                Inactive
+              </span>
             </div>
-            <p className="mt-1 text-[11.5px] text-slate-500">
-              Safe unsubscription links honored automatically.
+            <p className="text-[12px] text-slate-500 truncate">
+              Safe unsubscription links honored automatically
             </p>
           </div>
         </div>

@@ -46,12 +46,12 @@
     "id": "sub-1789551572912",
     "name": "Haji Usama",
     "email": "client.alert.test@example.com",
-    "status": "active",
+    "status": "unsubscribed",
     "consent_at": "2026-09-16T09:39:32.912Z",
     "consent_text_version": "v1.0",
     "confirmed_at": "2026-09-16T09:39:32.912Z",
     "created_at": "2026-09-16T09:39:32.912Z",
-    "updated_at": "2026-09-16T09:39:32.912Z",
+    "updated_at": "2026-09-16T10:00:30.129Z",
     "categories": [
       {
         "id": "1",
