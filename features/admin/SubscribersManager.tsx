@@ -51,63 +51,40 @@ export default function SubscribersManager() {
   const fetchSubscribers = useCallback(async () => {
     setIsLoading(true);
     setActionFeedback(null);
-    const supabase = createClient();
 
     try {
-      let query = supabase
-        .from("subscribers")
-        .select(
-          `
-          id,
-          name,
-          email,
-          status,
-          consent_at,
-          consent_text_version,
-          confirmed_at,
-          created_at,
-          updated_at,
-          subscriber_categories (
-            category_id,
-            tax_categories ( id, name, slug )
-          )
-        `,
-          { count: "exact" }
-        );
+      const res = await fetch("/api/admin/subscribers");
+      const data = await res.json();
 
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to load subscribers");
+      }
+
+      let all: SubscriberWithCategories[] = data.subscribers || [];
+
+      // Apply Status Filter
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter as any);
+        all = all.filter((s) => s.status === statusFilter);
       }
 
+      // Apply Search Query
       if (searchQuery.trim()) {
-        const q = searchQuery.trim();
-        query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%`);
+        const q = searchQuery.trim().toLowerCase();
+        all = all.filter(
+          (s) => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+        );
       }
+
+      // Apply Category Filter
+      if (categoryFilter !== "all") {
+        all = all.filter((s) => s.categories.some((c) => c.id === categoryFilter));
+      }
+
+      setTotalCount(all.length);
 
       const from = (currentPage - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      const { data, count, error } = await query
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-      if (error) throw error;
-
-      // Transform rows to include clean categories array
-      const mapped: SubscriberWithCategories[] = (data || []).map((sub: any) => ({
-        ...sub,
-        categories: (sub.subscriber_categories || [])
-          .map((sc: any) => sc.tax_categories)
-          .filter(Boolean),
-      }));
-
-      // Filter by category in-memory if requested
-      const filtered = categoryFilter === "all"
-        ? mapped
-        : mapped.filter((s) => s.categories.some((c) => c.id === categoryFilter));
-
-      setSubscribers(filtered);
-      setTotalCount(count || 0);
+      const to = from + PAGE_SIZE;
+      setSubscribers(all.slice(from, to));
     } catch (err) {
       console.error("[Subscribers Fetch Error]", err);
     } finally {
@@ -126,26 +103,22 @@ export default function SubscribersManager() {
     );
     if (!confirmAction) return;
 
-    const supabase = createClient();
     try {
-      const { error } = await supabase
-        .from("subscribers")
-        .update({ status: "unsubscribed", updated_at: new Date().toISOString() })
-        .eq("id", subscriberId);
+      const res = await fetch("/api/admin/subscribers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unsubscribe", id: subscriberId, email }),
+      });
+      const data = await res.json();
 
-      if (error) throw error;
-
-      // Cancel queued deliveries
-      await supabase
-        .from("reminder_deliveries")
-        .update({ status: "cancelled", updated_at: new Date().toISOString() })
-        .eq("subscriber_id", subscriberId)
-        .eq("status", "queued");
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to unsubscribe");
+      }
 
       setActionFeedback(`Subscriber ${email} marked as unsubscribed.`);
       fetchSubscribers();
-    } catch (err) {
-      alert("Failed to unsubscribe client. Please check your permissions.");
+    } catch (err: any) {
+      alert(err.message || "Failed to unsubscribe client.");
     }
   };
 

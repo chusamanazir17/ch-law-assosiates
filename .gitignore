@@ -30,6 +30,7 @@ yarn-error.log*
 .env.production.local
 capture_previews.cjs
 supabase/.temp/
+scratch/
 
 # typescript
 *.tsbuildinfo

@@ -25,23 +25,29 @@ export async function getActiveTaxCategories(): Promise<TaxCategory[]> {
 }
 
 /**
- * Submit tax reminder subscription request (calls Supabase Edge Function 'subscribe')
+ * Submit tax reminder subscription request (calls Next.js API /api/reminders/subscribe)
  */
 export async function submitSubscription(formData: SubscriptionFormData): Promise<SubscriptionApiResponse> {
-  const supabase = createClient();
   try {
-    const { data, error } = await supabase.functions.invoke("subscribe", {
-      body: formData,
+    const res = await fetch("/api/reminders/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
     });
 
-    if (error) {
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
       return {
         success: false,
-        error: error.message || "Failed to submit subscription. Please try again.",
+        error: data.error || "Failed to submit subscription. Please check your email and try again.",
       };
     }
 
-    return data as SubscriptionApiResponse;
+    return {
+      success: true,
+      message: data.message,
+    };
   } catch (err: unknown) {
     return {
       success: false,

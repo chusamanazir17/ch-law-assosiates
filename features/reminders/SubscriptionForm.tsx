@@ -22,8 +22,8 @@ export default function SubscriptionForm() {
   // Form fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [consent, setConsent] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["1", "2"]);
+  const [consent, setConsent] = useState(true);
   const [honeypot, setHoneypot] = useState(""); // Hidden spam honeypot
 
   // Form states
@@ -36,11 +36,9 @@ export default function SubscriptionForm() {
     async function load() {
       setIsLoadingCategories(true);
       const data = await getActiveTaxCategories();
-      if (data && data.length > 0) {
-        setCategories(data);
-      } else {
-        setCategories(FALLBACK_CATEGORIES);
-      }
+      const loadedCats = data && data.length > 0 ? data : FALLBACK_CATEGORIES;
+      setCategories(loadedCats);
+      setSelectedCategories((prev) => (prev.length === 0 ? loadedCats.slice(0, 2).map((c) => c.id) : prev));
       setIsLoadingCategories(false);
     }
     load();
@@ -163,7 +161,7 @@ export default function SubscriptionForm() {
         {/* Name Field */}
         <div>
           <label htmlFor="reminder_name" className="block text-xs font-semibold uppercase tracking-wider text-white/80">
-            Full Name <span className="text-gold-400">*</span>
+            Full Name <span className="text-white/40 text-[11px] font-normal lowercase">(optional)</span>
           </label>
           <div className="relative mt-1.5">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
@@ -184,7 +182,6 @@ export default function SubscriptionForm() {
                   : "border-white/15 focus:border-gold-400/60 focus:ring-gold-400/20"
               }`}
               disabled={isSubmitting}
-              required
             />
           </div>
           {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}

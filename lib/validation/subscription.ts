@@ -18,11 +18,7 @@ export function validateSubscription(data: {
   const errors: Record<string, string> = {};
 
   const name = data.name ? data.name.trim() : "";
-  if (!name) {
-    errors.name = "Please enter your full name.";
-  } else if (name.length < 2) {
-    errors.name = "Name must be at least 2 characters.";
-  } else if (name.length > 100) {
+  if (name && name.length > 100) {
     errors.name = "Name must not exceed 100 characters.";
   }
 
