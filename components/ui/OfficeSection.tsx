@@ -30,20 +30,22 @@ export default function OfficeSection({
         <div className="mt-10 sm:mt-12 grid gap-6 lg:grid-cols-12">
           {/* Office info card */}
           <FadeIn direction="right" className="lg:col-span-4">
-            <div className="flex h-full flex-col rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 lg:p-8 shadow-card text-navy-900 dark:text-white">
-              <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/12 text-gold-500">
-                  <MapPin className="h-5 w-5" />
-                </span>
-                <h3 className="text-lg font-bold text-navy-900 dark:text-white">
-                  {isUrdu ? "ہمارا ساہیوال چیمبر" : "Our Sahiwal Chamber"}
-                </h3>
+            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 lg:p-8 shadow-card text-navy-900 dark:text-white">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/12 text-gold-500">
+                    <MapPin className="h-5 w-5" />
+                  </span>
+                  <h3 className="text-lg font-bold text-navy-900 dark:text-white">
+                    {isUrdu ? "ہمارا ساہیوال چیمبر" : "Our Sahiwal Chamber"}
+                  </h3>
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">
+                  {isUrdu
+                    ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
+                    : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`}
+                </p>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">
-                {isUrdu
-                  ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
-                  : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`}
-              </p>
 
               <div className="mt-6 space-y-3 border-t border-navy-900/8 dark:border-white/10 pt-6">
                 <div className="flex items-center justify-between text-xs">
@@ -63,15 +65,6 @@ export default function OfficeSection({
                   </span>
                 </div>
               </div>
-
-              <a
-                href={SITE.directionsUrl || SITE.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-gold mt-7 w-full text-center flex items-center justify-center gap-2"
-              >
-                <Navigation className="h-4 w-4" /> {t.officeSection.getDirectionsBtn}
-              </a>
             </div>
           </FadeIn>
 
