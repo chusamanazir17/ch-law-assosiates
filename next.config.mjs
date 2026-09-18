@@ -3,6 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
+  transpilePackages: [
+    "@mui/material",
+    "@mui/material-nextjs",
+    "@emotion/react",
+    "@emotion/styled",
+  ],
   images: {
     formats: ["image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -34,20 +40,11 @@ const nextConfig = {
       },
       {
         source: "/admin/:path*",
-        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
+        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" }],
       },
       {
         source: "/api/:path*",
-        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
-      },
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
+        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" }],
       },
     ];
   },
