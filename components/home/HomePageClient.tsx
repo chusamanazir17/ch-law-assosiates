@@ -24,19 +24,28 @@ import { ConsultationForm } from "@/components/ui/ContactBlocks";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 import TaxReminderSection from "@/features/reminders/TaxReminderSection";
+import { useCms } from "@/lib/hooks/useCms";
 
 const BUILDING_IMG =
   "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
 
 function Hero() {
   const { isUrdu, t } = useLanguage();
+  const { getPageContent, settings } = useCms();
+  const homeCms = getPageContent("/");
+
+  const heroImage = homeCms?.heroImage || HERO_IMAGES.home;
+  const eyebrowText = homeCms?.heroBadge || t.hero.eyebrow;
+  const heroDescription = homeCms?.heroSubtitle || t.hero.description;
+  const visitOfficeText = homeCms?.primaryCtaText || t.hero.visitOfficeBtn;
+  const visitOfficeUrl = homeCms?.primaryCtaHref || "#office";
 
   return (
     <section className="relative overflow-hidden bg-[#061226] text-white">
       {/* Full width hero background image */}
       <div className="absolute inset-0 w-full h-full overflow-hidden will-change-transform transform-gpu">
         <Image
-          src={HERO_IMAGES.home}
+          src={heroImage}
           alt="Ch Composing Estamp and Tax Advisor office in Pakistan"
           fill
           priority
@@ -55,7 +64,7 @@ function Hero() {
           className="eyebrow"
         >
           <BadgeCheck className="h-3.5 w-3.5" />
-          {t.hero.eyebrow}
+          {eyebrowText}
         </motion.span>
 
         <motion.h1
@@ -64,16 +73,22 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.12 }}
           className="mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl"
         >
-          {t.hero.titlePart1}{" "}
-          <span className="relative whitespace-nowrap text-gold-400">
-            {t.hero.countryHighlight}
-            <motion.span
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-              className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
-            />
-          </span>
+          {homeCms?.heroHeadline ? (
+            homeCms.heroHeadline
+          ) : (
+            <>
+              {t.hero.titlePart1}{" "}
+              <span className="relative whitespace-nowrap text-gold-400">
+                {t.hero.countryHighlight}
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: 0.9 }}
+                  className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
+                />
+              </span>
+            </>
+          )}
         </motion.h1>
 
         <motion.p
@@ -82,7 +97,7 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.24 }}
           className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg"
         >
-          {t.hero.description}
+          {heroDescription}
         </motion.p>
 
         <motion.div
@@ -91,11 +106,11 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.36 }}
           className="mt-8 sm:mt-10 flex flex-wrap gap-4"
         >
-          <Link href="#office" className="btn-gold px-8 py-3.5 text-sm">
-            <MapPin className="h-4 w-4" /> {t.hero.visitOfficeBtn}
+          <Link href={visitOfficeUrl} className="btn-gold px-8 py-3.5 text-sm">
+            <MapPin className="h-4 w-4" /> {visitOfficeText}
           </Link>
           <OfficialWhatsAppButton
-            href={SITE.whatsappHref}
+            href={settings?.whatsapp ? `https://wa.me/92${settings.whatsapp.replace(/^0|[^\d]/g, "")}` : SITE.whatsappHref}
             label={t.hero.whatsappBtn}
             size="lg"
           />
@@ -129,8 +144,9 @@ function Hero() {
 
 function ServicesGrid() {
   const { isUrdu, t } = useLanguage();
+  const { services } = useCms();
 
-  const servicesData = [
+  const defaultServicesData = [
     {
       title: t.categories["e-stamping"].title,
       href: "/services/e-stamping",
@@ -156,6 +172,17 @@ function ServicesGrid() {
       description: t.categories["tax"].description,
     },
   ];
+
+  const activeServices = services && services.length > 0 ? services.filter((s) => s.active) : [];
+  const servicesData =
+    activeServices.length > 0
+      ? activeServices.slice(0, 8).map((s, idx) => ({
+          title: isUrdu && s.nameUrdu ? s.nameUrdu : s.name,
+          href: `/services/${s.slug}`,
+          image: s.heroImage || HOME_SERVICES[idx % HOME_SERVICES.length]?.image || HOME_SERVICES[0].image,
+          description: s.description,
+        }))
+      : defaultServicesData;
 
   return (
     <section id="services" className="bg-[#f5f7fa] dark:bg-[#071224] py-24 transition-colors duration-200">

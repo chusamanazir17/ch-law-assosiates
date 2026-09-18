@@ -33,6 +33,7 @@ import { useAppTheme } from "@/providers/ThemeProvider";
 import { getCategoryHeaderIcon, getSubServiceIcon } from "@/lib/icon-map";
 import Logo from "./Logo";
 import { CategoryDropdownPanel, LegalGroupDropdownPanel } from "./NavDropdown";
+import { useCms } from "@/lib/hooks/useCms";
 
 type DropdownAlign = "left" | "right" | "center";
 
@@ -140,6 +141,7 @@ export default function Header() {
 
   const { isUrdu, toggleLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useAppTheme();
+  const { settings } = useCms();
 
   React.useEffect(() => {
     let lastScrolled = window.scrollY > 20;
@@ -365,6 +367,22 @@ export default function Header() {
               >
                 {isUrdu ? "قانونی رہنمائی" : "Legal Updates"}
               </Link>
+              {settings?.navigationMenu
+                ?.filter((item) => item.enabled && !["home", "services", "updates", "reminders", "contact"].includes(item.id))
+                .map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    target={item.isExternal ? "_blank" : undefined}
+                    rel={item.isExternal ? "noreferrer noopener" : undefined}
+                    className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                      pathname === item.href,
+                      isDark
+                    )}`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
             </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">

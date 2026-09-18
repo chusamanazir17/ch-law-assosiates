@@ -22,6 +22,9 @@ import {
   Sparkles,
   Phone,
   MessageCircle,
+  FileText,
+  Boxes,
+  Settings,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ConsultationInquiry, Post, SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
@@ -404,6 +407,92 @@ export default function AdminOverview() {
             </p>
           </div>
         </Link>
+      </div>
+
+      {/* 2.5 WEBSITE CMS CONTROL CENTER */}
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Website Content Management Hub</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Customize text, headlines, hero photography, legal practices, and navigation in real time.
+            </p>
+          </div>
+          <Link
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-800 hover:underline"
+          >
+            <span>Open Public Website</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <Link
+            href="/admin/pages"
+            className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-emerald-600 hover:bg-white hover:shadow-xs"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100/80 text-emerald-800">
+                  <FileText className="h-4.5 w-4.5" />
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 transition" />
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-slate-900">Pages Content Editor</h3>
+              <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                Update headlines, subtitles, badges, hero images, and CTA buttons across all 11 public pages.
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-slate-200/60 text-[11px] font-semibold text-emerald-700">
+              11 Editable Pages →
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/services"
+            className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-emerald-600 hover:bg-white hover:shadow-xs"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100/80 text-blue-800">
+                  <Boxes className="h-4.5 w-4.5" />
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-blue-700 transition" />
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-slate-900">Services Catalog Editor</h3>
+              <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                Manage 9 legal practices, Pakistani legal terms, required documents, turnaround times, and DC fee rates.
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-slate-200/60 text-[11px] font-semibold text-blue-700">
+              9 Chamber Practices →
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/settings"
+            className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-emerald-600 hover:bg-white hover:shadow-xs"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100/80 text-amber-800">
+                  <Settings className="h-4.5 w-4.5" />
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-amber-700 transition" />
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-slate-900">Firm Identity & Navigation</h3>
+              <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                Configure Chamber 121 address, emergency hotlines, working hours, and header menu links.
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-slate-200/60 text-[11px] font-semibold text-amber-700">
+              Navigation & Identity →
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* 3. RECENT POSTS AND LEADS ROW */}

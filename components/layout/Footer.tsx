@@ -16,10 +16,12 @@ import {
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/providers/LanguageProvider";
 import Logo from "./Logo";
+import { useCms } from "@/lib/hooks/useCms";
 
 export default function Footer() {
   const pathname = usePathname() || "";
   const { isUrdu, t } = useLanguage();
+  const { settings } = useCms();
   const [policyType, setPolicyType] = useState<"privacy" | "terms" | null>(null);
 
   useEffect(() => {
@@ -66,33 +68,48 @@ export default function Footer() {
             <ul className="space-y-4 text-sm text-navy-800/70 dark:text-slate-300">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <span>{isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address}</span>
+                <span>{settings?.address || (isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address)}</span>
               </li>
               <li className="flex gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
                 <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs font-semibold text-navy-900 dark:text-white">
-                      {isUrdu ? "حاجی نذیر احمد:" : "Haji Nazir Ahmad:"}
-                    </span>
-                    <a href="tel:+923016922573" className="transition hover:text-gold-600 dark:hover:text-gold-400">
-                      0301-6922573
-                    </a>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs font-semibold text-navy-900 dark:text-white">
-                      {isUrdu ? "اسامہ نذیر چوہدری:" : "Usama Nazir Ch:"}
-                    </span>
-                    <a href="tel:+923057902744" className="transition hover:text-gold-600 dark:hover:text-gold-400">
-                      0305-7902744
-                    </a>
-                  </div>
+                  {settings?.contacts && settings.contacts.length > 0 ? (
+                    settings.contacts.map((c, i) => (
+                      <div key={i} className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                          {isUrdu && c.nameUrdu ? `${c.nameUrdu}:` : `${c.name}:`}
+                        </span>
+                        <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`} className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                          {c.phone}
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                          {isUrdu ? "حاجی نذیر احمد:" : "Haji Nazir Ahmad:"}
+                        </span>
+                        <a href="tel:+923016922573" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                          0301-6922573
+                        </a>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                          {isUrdu ? "اسامہ نذیر چوہدری:" : "Usama Nazir Ch:"}
+                        </span>
+                        <a href="tel:+923057902744" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                          0305-7902744
+                        </a>
+                      </div>
+                    </>
+                  )}
                 </div>
               </li>
               <li className="flex gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <a href={`mailto:${SITE.email}`} className="transition hover:text-gold-600 dark:hover:text-gold-400">
-                  {SITE.email}
+                <a href={`mailto:${settings?.email || SITE.email}`} className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                  {settings?.email || SITE.email}
                 </a>
               </li>
             </ul>
@@ -106,13 +123,13 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-navy-800/70 dark:text-slate-300">
               <li className="flex gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <span>{isUrdu ? "پیر تا جمعہ: 9:00 بجے صبح تا 6:00 بجے شام" : SITE.hours.weekdays}</span>
+                <span>{settings?.hours?.weekdays ? `${isUrdu ? "پیر تا جمعہ: " : ""}${settings.hours.weekdays}` : (isUrdu ? "پیر تا جمعہ: 9:00 بجے صبح تا 6:00 بجے شام" : SITE.hours.weekdays)}</span>
               </li>
               <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
-                {isUrdu ? "ہفتہ: 9:00 بجے صبح تا 3:00 بجے دوپہر" : SITE.hours.saturday}
+                {settings?.hours?.saturday ? `${isUrdu ? "ہفتہ: " : ""}${settings.hours.saturday}` : (isUrdu ? "ہفتہ: 9:00 بجے صبح تا 3:00 بجے دوپہر" : SITE.hours.saturday)}
               </li>
               <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
-                {isUrdu ? "اتوار: بند ہے" : SITE.hours.sunday}
+                {settings?.hours?.sunday ? `${isUrdu ? "اتوار: " : ""}${settings.hours.sunday}` : (isUrdu ? "اتوار: بند ہے" : SITE.hours.sunday)}
               </li>
             </ul>
           </div>

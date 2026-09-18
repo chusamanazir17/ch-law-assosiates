@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   Megaphone,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminSidebar } from "./AdminSidebarContext";
@@ -192,8 +193,29 @@ export default function AdminSidebar({
           )}
         </div>
 
+        {/* Quick View Public Site button */}
+        <div className={isCollapsed ? "mt-2 mb-3" : "mt-2 mb-4"}>
+          <Link
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className={`group relative flex items-center rounded-lg border border-emerald-200/80 bg-emerald-50/70 font-semibold text-emerald-800 transition-all hover:bg-emerald-100 hover:border-emerald-300 ${
+              isCollapsed ? "justify-center h-10 w-full" : "gap-2.5 px-3 py-2 text-xs"
+            }`}
+            title="Open Live Website in New Tab"
+          >
+            <ExternalLink className="h-4 w-4 shrink-0 text-emerald-600 group-hover:scale-110 transition-transform" />
+            {!isCollapsed && <span>View Public Site</span>}
+            {isCollapsed && (
+              <div className="pointer-events-none absolute left-full ml-3 hidden items-center rounded-md bg-slate-900 px-2.5 py-1 text-[12px] font-medium text-white shadow-lg z-50 group-hover:flex">
+                View Public Site
+              </div>
+            )}
+          </Link>
+        </div>
+
         {/* Navigation Sections */}
-        <div className={`mt-3 ${isCollapsed ? "space-y-4" : "space-y-5"}`}>
+        <div className={`mt-1 ${isCollapsed ? "space-y-4" : "space-y-5"}`}>
           {navSections.map((section, idx) => (
             <div key={idx}>
               {section.group && (

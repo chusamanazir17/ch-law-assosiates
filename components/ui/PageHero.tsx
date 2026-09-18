@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { SITE } from "@/lib/site";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { useCms } from "@/lib/hooks/useCms";
 
 export type Crumb = { label: string; href?: string };
 
@@ -37,13 +39,29 @@ export default function PageHero({
   whatsapp = true,
   tall = false,
 }: PageHeroProps) {
+  const pathname = usePathname() || "";
   const { t } = useLanguage();
+  const { getPageContent, getService } = useCms();
+
+  // Dynamic CMS overrides from Admin Dashboard
+  const cmsPage = getPageContent(pathname);
+  const slug = pathname.startsWith("/services/") ? pathname.replace(/^\/services\//, "") : "";
+  const cmsService = slug ? getService(slug) : undefined;
+
+  const effectiveBadge = cmsPage?.heroBadge || cmsService?.tagline || badge;
+  const effectiveTitle = cmsPage?.heroHeadline || cmsService?.name || title;
+  const effectiveDescription = cmsPage?.heroSubtitle || cmsService?.description || description;
+  const effectiveImage = cmsPage?.heroImage || cmsService?.heroImage || image;
+
   const effectiveBackLabel = backLabel || t.common.backToHome;
   const rawPrimaryCta = primaryCta || { label: t.common.visitOurOffice, href: "/#office" };
-  const effectivePrimaryCta = {
-    ...rawPrimaryCta,
-    href: rawPrimaryCta.href === "#contact" || rawPrimaryCta.href === "#office" ? "/#office" : rawPrimaryCta.href,
-  };
+  const effectivePrimaryCta = cmsPage?.primaryCtaText
+    ? { label: cmsPage.primaryCtaText, href: cmsPage.primaryCtaHref || "/#office" }
+    : {
+        ...rawPrimaryCta,
+        href: rawPrimaryCta.href === "#contact" || rawPrimaryCta.href === "#office" ? "/#office" : rawPrimaryCta.href,
+      };
+
   return (
     <section
       className={`relative flex items-center overflow-hidden ${
@@ -58,8 +76,8 @@ export default function PageHero({
         transition={{ duration: 7, ease: "easeOut" }}
       >
         <Image
-          src={image}
-          alt=""
+          src={effectiveImage}
+          alt={effectiveTitle}
           fill
           priority
           fetchPriority="high"
@@ -102,7 +120,7 @@ export default function PageHero({
           )}
         </motion.div>
 
-        {badge && (
+        {effectiveBadge && (
           <motion.span
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -110,7 +128,7 @@ export default function PageHero({
             className="eyebrow"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-            {badge}
+            {effectiveBadge}
           </motion.span>
         )}
 
@@ -118,46 +136,42 @@ export default function PageHero({
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.18 }}
-          className="mt-5 max-w-3xl font-serif text-4xl font-bold leading-[1.1] text-white sm:text-5xl"
+          className="mt-4 max-w-2xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl"
         >
-          {title} {highlight && <span className="text-gold-400">{highlight}</span>}
+          {effectiveTitle}
+          {highlight && <span className="text-gold-400"> {highlight}</span>}
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.28 }}
-          className="mt-5 max-w-2xl text-base leading-relaxed text-white/75"
+          className="mt-4 max-w-xl text-base leading-relaxed text-white/80"
         >
-          {description}
+          {effectiveDescription}
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.38 }}
-          className="mt-9 flex flex-wrap gap-4"
+          className="mt-8 flex flex-wrap gap-4"
         >
-          <Link href={effectivePrimaryCta.href} className="btn-gold">
-            <MapPin className="h-4 w-4" />
-            {effectivePrimaryCta.label}
+          <Link href={effectivePrimaryCta.href} className="btn-gold px-7 py-3 text-sm">
+            <MapPin className="h-4 w-4" /> {effectivePrimaryCta.label}
           </Link>
           {whatsapp && (
             <a
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-light inline-flex items-center gap-2"
+              className="btn-outline-gold px-7 py-3 text-sm"
             >
-              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
-              {t.common.whatsappUs}
+              <WhatsAppIcon className="h-4 w-4 text-emerald-400" /> {t.common.whatsappUs}
             </a>
           )}
         </motion.div>
       </div>
-
-      {/* bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f5f7fa] dark:from-[#071224] to-transparent" />
     </section>
   );
 }

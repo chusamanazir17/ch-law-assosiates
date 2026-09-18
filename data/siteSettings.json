@@ -1,0 +1,81 @@
+{
+  "name": "Ch Composing",
+  "fullName": "Ch Composing Estamp and Tax Advisor",
+  "tagline": "E-Stamping, Property Registry & Legal Consultants",
+  "country": "E-STAMP & TAX ADVISOR",
+  "phone": "0301-6922573",
+  "whatsapp": "0305-7902744",
+  "email": "contact@chcomposing.pk",
+  "address": "Sharki Gate Chamber No 121 District Court Sahiwal",
+  "addressShort": "Chamber 121, District Courts Sahiwal",
+  "city": "Sahiwal",
+  "hours": {
+    "weekdays": "Monday - Friday: 9:00 AM - 6:00 PM",
+    "saturday": "Saturday: 9:00 AM - 3:00 PM",
+    "sunday": "Sunday: Closed"
+  },
+  "mapsUrl": "https://www.google.com/maps?q=30.665373,73.097928",
+  "contacts": [
+    {
+      "name": "Haji Nazir Ahmad",
+      "nameUrdu": "حاجی نذیر احمد",
+      "role": "Senior Consultant",
+      "roleUrdu": "سینئر کنسلٹنٹ",
+      "phone": "0301-6922573",
+      "whatsapp": "0301-6922573"
+    },
+    {
+      "name": "Usama Nazir Ch",
+      "nameUrdu": "اسامہ نذیر چوہدری",
+      "role": "E-Stamp & Tax Advisor",
+      "roleUrdu": "ای سٹامپ و ٹیکس ایڈوائزر",
+      "phone": "0305-7902744",
+      "whatsapp": "0305-7902744"
+    }
+  ],
+  "navigationMenu": [
+    {
+      "id": "home",
+      "label": "Home",
+      "href": "/",
+      "enabled": true
+    },
+    {
+      "id": "services",
+      "label": "Services",
+      "href": "/#services",
+      "enabled": true
+    },
+    {
+      "id": "updates",
+      "label": "Legal Updates",
+      "href": "/updates",
+      "enabled": true
+    },
+    {
+      "id": "reminders",
+      "label": "Tax Reminders",
+      "href": "/#reminders",
+      "enabled": true
+    },
+    {
+      "id": "contact",
+      "label": "Contact Office",
+      "href": "/#contact",
+      "enabled": true
+    }
+  ],
+  "heroImages": {
+    "home": "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=70",
+    "banking": "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1280&q=70",
+    "business": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
+    "estamp": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=70",
+    "family": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1280&q=70",
+    "legal": "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1280&q=70",
+    "property": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
+    "registry": "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1280&q=70",
+    "tax": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
+    "trademark": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1280&q=70"
+  },
+  "updatedAt": "2026-09-18T04:48:22.424Z"
+}
