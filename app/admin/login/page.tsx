@@ -17,7 +17,7 @@ function LoginForm() {
       : "/admin";
   const urlError = searchParams.get("error");
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
@@ -25,6 +25,15 @@ function LoginForm() {
       ? "Access denied. Your account does not have administrator privileges."
       : null
   );
+
+  // Clear legacy error query params from browser URL if present
+  React.useEffect(() => {
+    if (urlError === "configuration") {
+      try {
+        window.history.replaceState({}, "", "/admin/login");
+      } catch {}
+    }
+  }, [urlError]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +54,7 @@ function LoginForm() {
       const result = await res.json();
 
       if (res.ok && result.success) {
-        router.push(redirectedFrom);
-        router.refresh();
+        window.location.href = redirectedFrom;
         return;
       }
 
