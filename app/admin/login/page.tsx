@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Shield, Lock, Mail, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
+import { Shield, Lock, User, AlertCircle, Loader2, ArrowLeft, KeyRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SITE } from "@/lib/site";
 
@@ -17,15 +17,13 @@ function LoginForm() {
       : "/admin";
   const urlError = searchParams.get("error");
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(
     urlError === "unauthorized"
       ? "Access denied. Your account does not have administrator privileges."
-      : urlError === "configuration"
-        ? "Admin access is unavailable until Supabase environment variables are configured."
-        : null
+      : null
   );
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -34,34 +32,50 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      // 1. Direct credentials verification via API
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+        }),
       });
 
-      if (error) {
-        setErrorMessage(error.message || "Invalid email or password.");
-        setIsLoading(false);
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        router.push(redirectedFrom);
+        router.refresh();
         return;
       }
 
-      if (data?.user) {
-        // Verify admin membership
-        const { data: isAdmin, error: adminErr } = await supabase.rpc("is_admin", {
-          p_user_id: data.user.id,
-        });
+      // 2. Fallback attempt with Supabase Auth if username is an email
+      if (username.includes("@")) {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: username.trim(),
+            password,
+          });
 
-        if (adminErr || !isAdmin) {
-          await supabase.auth.signOut();
-          setErrorMessage("Access denied. Your account is not authorized as an administrator.");
-          setIsLoading(false);
-          return;
+          if (!error && data?.user) {
+            const { data: isAdmin } = await supabase.rpc("is_admin", {
+              p_user_id: data.user.id,
+            });
+
+            if (isAdmin) {
+              router.push(redirectedFrom);
+              router.refresh();
+              return;
+            }
+          }
+        } catch {
+          // Non-fatal
         }
-
-        router.push(redirectedFrom);
-        router.refresh();
       }
+
+      setErrorMessage(result.error || "Invalid username or password.");
     } catch {
       setErrorMessage("An unexpected network error occurred. Please try again.");
     } finally {
@@ -94,22 +108,25 @@ function LoginForm() {
         </div>
       )}
 
-      {/* Form */}
+      {/* Login Form */}
       <form onSubmit={handleLogin} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="admin-email" className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
-            Admin Email
+          <label
+            htmlFor="admin-username"
+            className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5"
+          >
+            Admin Username or Email
           </label>
           <div className="relative">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-white/40">
-              <Mail className="h-4 w-4" />
+              <User className="h-4 w-4" />
             </span>
             <input
-              id="admin-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@chcomposing.pk"
+              id="admin-username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="e.g. admin"
               required
               className="w-full rounded-lg border border-white/15 bg-white/[0.06] py-2.5 pl-9 pr-3.5 text-sm text-white placeholder-white/30 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20"
               disabled={isLoading}
@@ -119,7 +136,10 @@ function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="admin-password" className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
+          <label
+            htmlFor="admin-password"
+            className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5"
+          >
             Password
           </label>
           <div className="relative">
@@ -143,7 +163,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-gold-400 py-3 text-sm font-bold text-navy-950 shadow-md hover:bg-gold-300 focus:outline-none focus:ring-2 focus:ring-gold-400/50 transition disabled:opacity-50"
+          className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-gold-400 py-3 text-sm font-bold text-navy-950 shadow-md hover:bg-gold-300 focus:outline-none focus:ring-2 focus:ring-gold-400/50 transition disabled:opacity-50 cursor-pointer"
         >
           {isLoading ? (
             <>
@@ -152,7 +172,7 @@ function LoginForm() {
             </>
           ) : (
             <>
-              <Lock className="h-4 w-4" />
+              <KeyRound className="h-4 w-4" />
               Sign In to Admin
             </>
           )}

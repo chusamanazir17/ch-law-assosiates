@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAdminSession } from "@/lib/auth/admin";
 import {
-  listSubscribers,
-  setSubscriberStatus,
-} from "@/lib/repositories/subscribersRepository";
+  getAllSubscribers,
+  updateSubscriberStatus,
+} from "@/lib/db/subscribersStore";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export async function GET() {
   if (!session) return unauthorized();
 
   try {
-    const subscribers = await listSubscribers(session.supabase);
+    const subscribers = await getAllSubscribers();
     return NextResponse.json({
       success: true,
       subscribers,
@@ -36,15 +36,22 @@ export async function POST(request: NextRequest) {
   if (!session) return unauthorized();
 
   try {
-    const body = (await request.json()) as { action?: unknown; id?: unknown };
-    if (body.action !== "unsubscribe" || typeof body.id !== "string" || !body.id.trim()) {
-      return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
+    const body = (await request.json()) as {
+      action?: string;
+      id?: string;
+      status?: "active" | "pending" | "unsubscribed" | "suppressed";
+    };
+
+    if (typeof body.id !== "string" || !body.id.trim()) {
+      return NextResponse.json({ success: false, error: "Subscriber ID is required." }, { status: 400 });
     }
 
-    await setSubscriberStatus(session.supabase, body.id.trim(), "unsubscribed");
+    const targetStatus = body.status || (body.action === "unsubscribe" ? "unsubscribed" : "active");
+    await updateSubscriberStatus(body.id.trim(), targetStatus);
+
     return NextResponse.json({
       success: true,
-      message: "Subscriber marked as unsubscribed.",
+      message: `Subscriber status updated to ${targetStatus}.`,
     });
   } catch (error) {
     console.error("[Admin Subscribers] Update failed:", error);

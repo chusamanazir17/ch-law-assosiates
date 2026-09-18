@@ -30,8 +30,17 @@ export default function InquiriesManager() {
 
   const loadInquiries = async () => {
     setIsLoading(true);
-    const supabase = createClient();
     try {
+      const res = await fetch("/api/admin/inquiries");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.inquiries) {
+          setInquiries(json.inquiries);
+          setIsLoading(false);
+          return;
+        }
+      }
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("consultation_inquiries")
         .select("*")
@@ -40,7 +49,7 @@ export default function InquiriesManager() {
       if (error) throw error;
       setInquiries(data || []);
     } catch (error) {
-      console.error("[Inquiries Load Error]", error);
+      console.warn("[Inquiries Load]", error);
       setMessage({ type: "error", text: "Failed to load client inquiries." });
     } finally {
       setIsLoading(false);
@@ -56,9 +65,24 @@ export default function InquiriesManager() {
     newStatus: InquiryStatus
   ) => {
     setActionLoading(id);
-    const supabase = createClient();
 
     try {
+      const res = await fetch("/api/admin/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+
+      if (res.ok) {
+        setInquiries((prev) =>
+          prev.map((inq) => (inq.id === id ? { ...inq, status: newStatus } : inq))
+        );
+        setMessage({ type: "success", text: `Status updated to ${newStatus}.` });
+        setActionLoading(null);
+        return;
+      }
+
+      const supabase = createClient();
       const { error } = await supabase
         .from("consultation_inquiries")
         .update({ status: newStatus })
@@ -81,8 +105,21 @@ export default function InquiriesManager() {
     if (!confirm(`Delete inquiry from ${name}?`)) return;
 
     setActionLoading(id);
-    const supabase = createClient();
     try {
+      const res = await fetch("/api/admin/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, action: "delete" }),
+      });
+
+      if (res.ok) {
+        setInquiries((prev) => prev.filter((i) => i.id !== id));
+        setMessage({ type: "success", text: "Inquiry removed from inbox." });
+        setActionLoading(null);
+        return;
+      }
+
+      const supabase = createClient();
       const { error } = await supabase
         .from("consultation_inquiries")
         .delete()

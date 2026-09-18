@@ -42,8 +42,17 @@ export default function AdminSidebar({
   const handleCloseMobile = propOnCloseMobile || (() => setMobileOpen(false));
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    }
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore Supabase errors if unconfigured
+    }
     router.push("/admin/login");
     router.refresh();
   };

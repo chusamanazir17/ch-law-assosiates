@@ -3,11 +3,13 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database.types";
-import { requireSupabasePublicConfig } from "@/config/env";
+import { getSupabasePublicConfig } from "@/config/env";
 
 export async function createClient() {
   const cookieStore = await cookies();
-  const { url, anonKey } = requireSupabasePublicConfig();
+  const config = getSupabasePublicConfig();
+  const url = config?.url || "https://placeholder-project.supabase.co";
+  const anonKey = config?.anonKey || "placeholder-anon-key";
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {

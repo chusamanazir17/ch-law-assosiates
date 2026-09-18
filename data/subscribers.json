@@ -1,0 +1,134 @@
+[
+  {
+    "id": "sub-1789703875375",
+    "name": "Chaudhry Usama Nazir",
+    "email": "usama.nazir@ch-law.pk",
+    "status": "active",
+    "consent_at": "2026-09-18T03:57:55.375Z",
+    "consent_text_version": "v1.0",
+    "confirmed_at": "2026-09-18T03:57:55.375Z",
+    "created_at": "2026-09-18T03:57:55.375Z",
+    "updated_at": "2026-09-18T03:57:55.375Z",
+    "categories": [
+      {
+        "id": "income-tax-individuals",
+        "name": "Income Tax - Individuals & Salaried",
+        "slug": "income-tax-individuals",
+        "description": "Annual FBR returns",
+        "is_active": true,
+        "sort_order": 1,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "id": "property-tax-stamp-duty",
+        "name": "Property & Capital Value Tax",
+        "slug": "property-tax-stamp-duty",
+        "description": "E-Stamp duty and transfer deadlines",
+        "is_active": true,
+        "sort_order": 5,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "sub-1789703651893",
+    "name": "Chaudhry Usama",
+    "email": "usama.test@chcomposing.pk",
+    "status": "active",
+    "consent_at": "2026-09-18T03:54:11.893Z",
+    "consent_text_version": "v1.0",
+    "confirmed_at": "2026-09-18T03:54:11.893Z",
+    "created_at": "2026-09-18T03:54:11.893Z",
+    "updated_at": "2026-09-18T03:54:11.893Z",
+    "categories": [
+      {
+        "id": "income-tax-individuals",
+        "name": "Income Tax - Individuals & Salaried",
+        "slug": "income-tax-individuals",
+        "description": "Annual FBR returns",
+        "is_active": true,
+        "sort_order": 1,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "id": "business-corporate-tax",
+        "name": "Business & Corporate Tax",
+        "slug": "business-corporate-tax",
+        "description": "AOP, Sole Proprietor, Private Ltd",
+        "is_active": true,
+        "sort_order": 2,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "sub-seed-1",
+    "name": "Muhammad Tariq",
+    "email": "tariq.sahiwal@gmail.com",
+    "status": "active",
+    "consent_at": "2026-09-10T10:15:00Z",
+    "consent_text_version": "v1.0",
+    "confirmed_at": "2026-09-10T10:20:00Z",
+    "created_at": "2026-09-10T10:15:00Z",
+    "updated_at": "2026-09-10T10:20:00Z",
+    "categories": [
+      {
+        "id": "income-tax-individuals",
+        "name": "Income Tax - Individuals & Salaried",
+        "slug": "income-tax-individuals",
+        "description": "Annual FBR returns",
+        "is_active": true,
+        "sort_order": 1,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "id": "business-corporate-tax",
+        "name": "Business & Corporate Tax",
+        "slug": "business-corporate-tax",
+        "description": "AOP, Sole Proprietor, Private Ltd",
+        "is_active": true,
+        "sort_order": 2,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "sub-seed-2",
+    "name": "Chaudhry Farooq",
+    "email": "farooq.enterprises@yahoo.com",
+    "status": "active",
+    "consent_at": "2026-09-12T14:30:00Z",
+    "consent_text_version": "v1.0",
+    "confirmed_at": "2026-09-12T14:32:00Z",
+    "created_at": "2026-09-12T14:30:00Z",
+    "updated_at": "2026-09-12T14:32:00Z",
+    "categories": [
+      {
+        "id": "sales-tax-pra",
+        "name": "Sales Tax (Federal & PRA)",
+        "slug": "sales-tax-pra",
+        "description": "Monthly sales tax returns",
+        "is_active": true,
+        "sort_order": 3,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "id": "property-tax-stamp-duty",
+        "name": "Property & Capital Value Tax",
+        "slug": "property-tax-stamp-duty",
+        "description": "E-Stamp duty and transfer deadlines",
+        "is_active": true,
+        "sort_order": 5,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  }
+]

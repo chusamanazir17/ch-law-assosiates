@@ -1,0 +1,22 @@
+[
+  {
+    "id": "inq-seed-1",
+    "name": "Rana Zafar Iqbal",
+    "phone": "0300 9876543",
+    "email": null,
+    "service_needed": "Property Registry & E-Stamp",
+    "message": "Need urgent documentation assistance for registry transfer in Sahiwal district.",
+    "status": "new",
+    "created_at": "2026-09-15T11:00:00Z"
+  },
+  {
+    "id": "inq-seed-2",
+    "name": "Haji Abdul Rehman",
+    "phone": "0321 4567890",
+    "email": "abdulrehman@example.com",
+    "service_needed": "FBR Income Tax Filing",
+    "message": "Salaried employee tax return filing for current tax year.",
+    "status": "in_progress",
+    "created_at": "2026-09-14T09:30:00Z"
+  }
+]

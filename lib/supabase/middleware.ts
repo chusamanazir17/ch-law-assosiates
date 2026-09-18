@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database.types";
 import { getSupabasePublicConfig } from "@/config/env";
+import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/auth/adminAuth";
 
 function loginRedirect(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
@@ -12,17 +13,39 @@ function loginRedirect(request: NextRequest, reason?: string) {
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const config = getSupabasePublicConfig();
   const pathname = request.nextUrl.pathname;
 
-  // Public pages remain renderable before the CMS is configured. Admin pages fail closed.
+  // 1. Check verified local admin cookie session
+  const adminCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+  const isLocalAdmin = await verifyAdminToken(adminCookie);
+
+  if (isLocalAdmin) {
+    // If authenticated admin visits login page, redirect to dashboard
+    if (pathname === "/admin/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    // Authenticated admin accessing /admin routes
+    if (pathname.startsWith("/admin")) {
+      return response;
+    }
+  }
+
+  // 2. Check Supabase credentials if configured
+  const config = getSupabasePublicConfig();
+
   if (!config) {
+    // If Supabase is not configured and not logged in as admin:
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-      return loginRedirect(request, "configuration");
+      return loginRedirect(request);
     }
     return response;
   }
 
+  // Supabase session handling
   const supabase = createServerClient<Database>(config.url, config.anonKey, {
     cookies: {
       getAll() {
@@ -44,13 +67,17 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (!user) return loginRedirect(request);
+    if (!user && !isLocalAdmin) return loginRedirect(request);
 
-    const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin", {
-      p_user_id: user.id,
-    });
+    if (user) {
+      const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin", {
+        p_user_id: user.id,
+      });
 
-    if (adminError || !isAdmin) return loginRedirect(request, "unauthorized");
+      if ((adminError || !isAdmin) && !isLocalAdmin) {
+        return loginRedirect(request, "unauthorized");
+      }
+    }
   }
 
   if (pathname === "/admin/login" && user) {
