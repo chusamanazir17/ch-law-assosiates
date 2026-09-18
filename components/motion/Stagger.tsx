@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, type Variants } from "framer-motion";
+import { motion, useInView, useReducedMotion, type Variants } from "framer-motion";
 import { useRef, type ReactNode } from "react";
 
 export const staggerContainer: Variants = {
@@ -30,14 +30,15 @@ export default function Stagger({
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once, margin: "80px 0px 0px 0px" });
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
       ref={ref}
       className={`${className} transform-gpu`}
       variants={staggerContainer}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
+      initial={prefersReducedMotion ? "visible" : "hidden"}
+      animate={prefersReducedMotion || inView ? "visible" : "hidden"}
     >
       {children}
     </motion.div>

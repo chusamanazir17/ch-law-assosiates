@@ -255,8 +255,9 @@ export default function AdminSidebar({
             {/* Tooltip with Sign Out */}
             <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-44 rounded-lg bg-white p-2 text-slate-800 shadow-xl border border-slate-200 z-50 group-hover:pointer-events-auto group-hover:block">
               <div className="text-[13px] font-semibold text-slate-900">Admin</div>
-              <div className="text-[11px] text-slate-500 mb-2">admin@chlaw.com</div>
+              <div className="text-[11px] text-slate-500 mb-2">Authenticated administrator</div>
               <button
+                type="button"
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2 rounded px-2 py-1.5 text-xs text-red-600 hover:bg-red-50 transition"
               >
@@ -282,6 +283,7 @@ export default function AdminSidebar({
             </div>
 
             <button
+              type="button"
               onClick={handleSignOut}
               title="Sign out of Admin"
               className="rounded p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"

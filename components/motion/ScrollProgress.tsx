@@ -7,11 +7,9 @@ export default function ScrollProgress() {
   const pathname = usePathname() || "";
   const barRef = useRef<HTMLDivElement>(null);
 
-  if (pathname.startsWith("/admin")) {
-    return null;
-  }
-
   useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+
     const el = barRef.current;
     if (!el) return;
 
@@ -36,7 +34,11 @@ export default function ScrollProgress() {
     updateProgress();
 
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [pathname]);
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <div

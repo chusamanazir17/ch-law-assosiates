@@ -12,7 +12,7 @@ import Stagger from "@/components/motion/Stagger";
 import FadeIn from "@/components/motion/FadeIn";
 import { ContactCards } from "@/components/ui/ContactBlocks";
 import { HERO_IMAGES, SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 const cardIcons = [Building2, User, Handshake, ReceiptText, Globe2, FileBadge];
 const featureIcons = [Zap, FileCheck2, ShieldCheck, Landmark];

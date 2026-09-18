@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export type Crumb = { label: string; href?: string };

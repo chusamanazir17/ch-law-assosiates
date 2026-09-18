@@ -7,14 +7,11 @@ import {
   Calendar,
   Clock,
   User,
-  Shield,
   MapPin,
   Phone,
   MessageCircle,
-  Share2,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getPostBySlug } from "@/lib/cms/postsStorage";
+import { getPublishedPostBySlug } from "@/lib/cms/publicPosts";
 import type { Post } from "@/types/cms";
 import { SITE } from "@/lib/site";
 
@@ -24,9 +21,10 @@ export const revalidate = 0;
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await getPublishedPostBySlug(slug);
 
   if (!post || post.status !== "published") {
     return {
@@ -50,26 +48,16 @@ export async function generateMetadata({
 export default async function PostReaderPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const postData = await getPostBySlug(params.slug);
+  const { slug } = await params;
+  const postData = await getPublishedPostBySlug(slug);
 
   if (!postData || postData.status !== "published") {
     notFound();
   }
 
   const post = postData as Post;
-
-  // Gracefully increment views
-  try {
-    const supabase = createClient();
-    await supabase
-      .from("posts")
-      .update({ views_count: (post.views_count || 0) + 1 })
-      .eq("id", post.id);
-  } catch (err) {
-    // Non-fatal
-  }
 
   return (
     <article className="min-h-screen bg-slate-50 dark:bg-[#071328] text-navy-950 dark:text-slate-100 transition-colors">
@@ -216,7 +204,7 @@ export default async function PostReaderPage({
                 </p>
                 <p className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4 text-gold-400 shrink-0" />
-                  <span>Monday – Saturday: 8:30 AM – 5:00 PM (Court Working Hours)</span>
+                  <span>{SITE.hours.weekdays}; {SITE.hours.saturday}</span>
                 </p>
               </div>
             </div>
@@ -232,11 +220,11 @@ export default async function PostReaderPage({
                 <span>WhatsApp Consultant</span>
               </a>
               <a
-                href="tel:03016922573"
+                href={SITE.phoneHref}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-xs font-bold text-white hover:bg-white/20 transition"
               >
                 <Phone className="h-4 w-4" />
-                <span>Call 0301-6922573</span>
+                <span>Call {SITE.phone}</span>
               </a>
             </div>
           </div>

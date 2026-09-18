@@ -21,7 +21,7 @@ import FadeIn from "@/components/motion/FadeIn";
 import Stagger, { StaggerItem } from "@/components/motion/Stagger";
 import OfficeSection from "@/components/ui/OfficeSection";
 import { ConsultationForm } from "@/components/ui/ContactBlocks";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 import TaxReminderSection from "@/features/reminders/TaxReminderSection";
 

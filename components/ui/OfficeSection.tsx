@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { MapPin, Navigation, Clock, Phone, CheckCircle2, Shield, ExternalLink } from "lucide-react";
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 
 export default function OfficeSection({

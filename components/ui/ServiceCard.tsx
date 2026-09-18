@@ -17,7 +17,7 @@ import {
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { staggerItem } from "@/components/motion/Stagger";
 import { SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 type ServiceCardProps = {
   icon: LucideIcon;

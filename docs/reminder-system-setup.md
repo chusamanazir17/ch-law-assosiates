@@ -25,8 +25,7 @@ Run the database migration to create the tables, triggers, indexes, RLS policies
 ```bash
 npx supabase db push
 ```
-Alternatively, open the Supabase Dashboard **SQL Editor** and run the contents of:
-`supabase/migrations/20240916000001_tax_reminder_system.sql`.
+Alternatively, open the Supabase Dashboard **SQL Editor** and apply every SQL file in `supabase/migrations/` in filename order. The later migrations contain required security and media-storage hardening and must not be skipped.
 
 This provisions:
 - `tax_categories` (seeded with standard FBR, PRA, Corporate, and E-Stamp categories)
@@ -189,7 +188,7 @@ Create or update `.env.local` in the project root:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-or-anon-key
 NEXT_PUBLIC_SITE_URL=https://chcomposing.pk
 ```
 
@@ -207,8 +206,8 @@ npm run dev
 2. Navigate to **Deadlines** (`/admin/deadlines`).
 3. Click **Add Tax Deadline**.
 4. Select the appropriate Tax Category (e.g. *Income Tax - Individuals & Salaried*).
-5. Specify the Tax Period (e.g. `Tax Year 2024`) and Official Title.
-6. Select the statutory deadline date (e.g. `2024-09-30`).
+5. Specify the Tax Period (e.g. `Tax Year 2026`) and Official Title.
+6. Select the statutory deadline date (for example, the currently verified statutory deadline).
 7. Paste the official FBR/PRA gazette or circular URL under **Official Source URL**.
 8. Click **Save Deadline**.
 9. **Verify the Deadline**: Click the **Verify** button next to the deadline.

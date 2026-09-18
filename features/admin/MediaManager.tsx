@@ -38,8 +38,8 @@ export default function MediaManager() {
 
   const loadAssets = async () => {
     setIsLoading(true);
-    const supabase = createClient();
     try {
+      const supabase = createClient();
       const { data, error } = await supabase
         .from("media_assets")
         .select("*")
@@ -47,7 +47,7 @@ export default function MediaManager() {
 
       if (error) throw error;
       setAssets(data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[Media Load Error]", err);
       setMessage({ type: "error", text: "Failed to load media assets from Supabase." });
     } finally {
@@ -59,23 +59,41 @@ export default function MediaManager() {
     loadAssets();
   }, []);
 
-  const handleCopyUrl = (id: string, url: string) => {
-    navigator.clipboard.writeText(url);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleCopyUrl = async (id: string, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      setMessage({ type: "error", text: "The image URL could not be copied to the clipboard." });
+    }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Delete image asset "${title}"?`)) return;
+  const handleDelete = async (asset: MediaAsset) => {
+    if (!confirm(`Delete image asset "${asset.name}"?`)) return;
 
-    const supabase = createClient();
     try {
-      const { error } = await supabase.from("media_assets").delete().eq("id", id);
+      const supabase = createClient();
+      const { error } = await supabase.from("media_assets").delete().eq("id", asset.id);
       if (error) throw error;
-      setAssets((prev) => prev.filter((a) => a.id !== id));
-      setMessage({ type: "success", text: "Image asset removed successfully." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to delete image asset." });
+
+      let storageCleanupWarning: string | null = null;
+      if (asset.storage_path) {
+        const { error: storageError } = await supabase.storage.from("media").remove([asset.storage_path]);
+        if (storageError) {
+          storageCleanupWarning = storageError.message;
+          console.warn("[Media Delete] Database record removed but storage cleanup failed:", storageError.message);
+        }
+      }
+
+      setAssets((prev) => prev.filter((item) => item.id !== asset.id));
+      setMessage(
+        storageCleanupWarning
+          ? { type: "error", text: "The media record was removed, but the stored file could not be deleted. Check Supabase Storage permissions." }
+          : { type: "success", text: "Image asset removed successfully." }
+      );
+    } catch (err: unknown) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to delete image asset." });
     }
   };
 
@@ -88,25 +106,38 @@ export default function MediaManager() {
 
     setActionLoading(true);
     setMessage(null);
-    const supabase = createClient();
-
     try {
+      const supabase = createClient();
       let finalUrl = assetUrl.trim();
-      let mimeType = "image/jpeg";
+      let mimeType: string | null = null;
       let fileSize: number | null = null;
+      let storagePath: string | null = null;
 
       if (inputMode === "upload") {
         if (!selectedFile) {
           throw new Error("Please select an image file to upload.");
         }
 
-        mimeType = selectedFile.type || "image/jpeg";
+        const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+        if (!allowedTypes.has(selectedFile.type)) {
+          throw new Error("Only JPG, PNG, WebP, or GIF images can be uploaded.");
+        }
+        if (selectedFile.size > 5 * 1024 * 1024) {
+          throw new Error("Image files must be 5 MB or smaller.");
+        }
+
+        mimeType = selectedFile.type;
         fileSize = selectedFile.size;
 
-        // Try uploading to Supabase storage bucket 'media'
-        const fileExt = selectedFile.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const extensionByType: Record<string, string> = {
+          "image/jpeg": "jpg",
+          "image/png": "png",
+          "image/webp": "webp",
+          "image/gif": "gif",
+        };
+        const fileName = `${crypto.randomUUID()}.${extensionByType[selectedFile.type]}`;
         const filePath = `uploads/${fileName}`;
+        storagePath = filePath;
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("media")
@@ -116,27 +147,32 @@ export default function MediaManager() {
           });
 
         if (uploadError) {
-          // If storage bucket 'media' does not exist or fails, fallback gracefully to a data URL reader
-          const base64Data = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(selectedFile);
-          });
-          finalUrl = base64Data;
-        } else {
-          const { data: publicUrlData } = supabase.storage
-            .from("media")
-            .getPublicUrl(filePath);
-          finalUrl = publicUrlData.publicUrl;
+          throw new Error(`Image upload failed: ${uploadError.message}`);
         }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("media")
+          .getPublicUrl(filePath);
+        finalUrl = publicUrlData.publicUrl;
       } else {
         if (!finalUrl) {
           throw new Error("Please enter a valid image URL.");
         }
+
+        let parsedUrl: URL;
+        try {
+          parsedUrl = new URL(finalUrl);
+        } catch {
+          throw new Error("Please enter a valid image URL.");
+        }
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          throw new Error("Image URLs must use HTTP or HTTPS.");
+        }
+        finalUrl = parsedUrl.toString();
       }
 
-      // Insert record into media_assets
+      // Insert record into media_assets. If persistence fails after an upload,
+      // remove the new object so Storage does not accumulate orphaned files.
       const { data, error } = await supabase
         .from("media_assets")
         .insert({
@@ -145,11 +181,20 @@ export default function MediaManager() {
           url: finalUrl,
           mime_type: mimeType,
           size_bytes: fileSize,
+          storage_path: storagePath,
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (storagePath) {
+          const { error: cleanupError } = await supabase.storage.from("media").remove([storagePath]);
+          if (cleanupError) {
+            console.warn("[Media Save] Failed to roll back uploaded object:", cleanupError.message);
+          }
+        }
+        throw error;
+      }
 
       if (data) {
         setAssets((prev) => [data, ...prev]);
@@ -162,9 +207,9 @@ export default function MediaManager() {
       setAssetAlt("");
       setAssetUrl("");
       setSelectedFile(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[Save Media Error]", err);
-      setMessage({ type: "error", text: err.message || "Failed to save image asset." });
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to save image asset." });
     } finally {
       setActionLoading(false);
     }
@@ -328,7 +373,7 @@ export default function MediaManager() {
 
                   {/* Delete Button */}
                   <button
-                    onClick={() => handleDelete(asset.id, asset.name)}
+                    onClick={() => handleDelete(asset)}
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
                     title="Delete Image Asset"
                   >

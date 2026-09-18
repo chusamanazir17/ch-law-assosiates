@@ -16,20 +16,26 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import type { DeliveryWithDetails, DeadlineWithCategory } from "@/types/reminders";
+import type { DeliveryWithDetails, ReminderDelivery } from "@/types/reminders";
 
 const PAGE_SIZE = 15;
+type DeliveryStatus = ReminderDelivery["status"];
+type VerifiedDeadlineOption = { id: string; title: string; tax_year_or_period: string; filing_deadline: string };
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function ReminderHistory() {
   const [deliveries, setDeliveries] = useState<DeliveryWithDetails[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | DeliveryStatus>("all");
   const [isLoading, setIsLoading] = useState(true);
 
   // Test Email state
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [verifiedDeadlines, setVerifiedDeadlines] = useState<DeadlineWithCategory[]>([]);
+  const [verifiedDeadlines, setVerifiedDeadlines] = useState<VerifiedDeadlineOption[]>([]);
   const [selectedDeadlineId, setSelectedDeadlineId] = useState("");
   const [selectedInterval, setSelectedInterval] = useState<"30_days" | "7_days">("7_days");
   const [isSendingTest, setIsSendingTest] = useState(false);
@@ -37,7 +43,7 @@ export default function ReminderHistory() {
 
   // Retry state
   const [retryingId, setRetryingId] = useState<string | null>(null);
-  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const fetchDeliveries = useCallback(async () => {
     setIsLoading(true);
@@ -74,7 +80,7 @@ export default function ReminderHistory() {
         );
 
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter as any);
+        query = query.eq("status", statusFilter);
       }
 
       const from = (currentPage - 1) * PAGE_SIZE;
@@ -86,13 +92,15 @@ export default function ReminderHistory() {
 
       if (error) throw error;
 
-      const mapped: DeliveryWithDetails[] = (data || []).map((d: any) => ({
-        ...d,
-        subscriber: d.subscribers,
-        deadline: {
-          ...d.tax_deadlines,
-          category: d.tax_deadlines?.tax_categories,
-        },
+      const mapped: DeliveryWithDetails[] = (data || []).map((delivery) => ({
+        ...delivery,
+        subscriber: delivery.subscribers ?? undefined,
+        deadline: delivery.tax_deadlines
+          ? {
+              ...delivery.tax_deadlines,
+              category: delivery.tax_deadlines.tax_categories ?? undefined,
+            }
+          : undefined,
       }));
 
       setDeliveries(mapped);
@@ -112,15 +120,18 @@ export default function ReminderHistory() {
   useEffect(() => {
     async function loadVerifiedDeadlines() {
       const supabase = createClient();
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("tax_deadlines")
         .select("id, title, tax_year_or_period, filing_deadline, is_active, tax_categories(name)")
         .eq("is_active", true)
         .not("verified_at", "is", null);
-      if (data && data.length > 0) {
-        setVerifiedDeadlines(data as any);
-        setSelectedDeadlineId(data[0].id);
+      if (error) {
+        console.error("[Verified Deadlines Load Error]", error);
+        setActionNotice({ type: "error", message: "Verified deadlines could not be loaded for test email selection." });
+        return;
       }
+      setVerifiedDeadlines(data || []);
+      setSelectedDeadlineId(data?.[0]?.id || "");
     }
     loadVerifiedDeadlines();
   }, []);
@@ -144,10 +155,10 @@ export default function ReminderHistory() {
 
       if (error) throw error;
 
-      setActionNotice("Delivery successfully reset to queued status for the next scheduled batch.");
+      setActionNotice({ type: "success", message: "Delivery successfully reset to queued status for the next scheduled batch." });
       fetchDeliveries();
-    } catch (err: any) {
-      alert("Failed to retry delivery: " + err.message);
+    } catch (error) {
+      setActionNotice({ type: "error", message: getErrorMessage(error, "Failed to retry delivery.") });
     } finally {
       setRetryingId(null);
     }
@@ -186,10 +197,10 @@ export default function ReminderHistory() {
           message: data?.error || "Unable to dispatch test email.",
         });
       }
-    } catch (err: any) {
+    } catch (error) {
       setTestResult({
         success: false,
-        message: err.message || "Network error while sending test email.",
+        message: getErrorMessage(error, "Network error while sending test email."),
       });
     } finally {
       setIsSendingTest(false);
@@ -282,9 +293,20 @@ export default function ReminderHistory() {
 
       {/* Action Notification */}
       {actionNotice && (
-        <div className="rounded-lg border border-emerald-200 bg-[#eef7f2] p-3 text-xs text-emerald-800 flex items-center gap-2 shadow-2xs">
-          <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
-          {actionNotice}
+        <div
+          role="status"
+          className={`rounded-lg border p-3 text-xs flex items-center gap-2 shadow-2xs ${
+            actionNotice.type === "success"
+              ? "border-emerald-200 bg-[#eef7f2] text-emerald-800"
+              : "border-rose-200 bg-rose-50 text-rose-800"
+          }`}
+        >
+          {actionNotice.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+          )}
+          {actionNotice.message}
         </div>
       )}
 
@@ -297,7 +319,7 @@ export default function ReminderHistory() {
         <select
           value={statusFilter}
           onChange={(e) => {
-            setStatusFilter(e.target.value);
+            setStatusFilter(e.target.value as "all" | DeliveryStatus);
             setCurrentPage(1);
           }}
           aria-label="Filter deliveries by Status"

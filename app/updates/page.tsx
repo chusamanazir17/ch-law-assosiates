@@ -4,17 +4,12 @@ import { Metadata } from "next";
 import {
   FileText,
   Clock,
-  User,
-  ArrowRight,
   Shield,
   MapPin,
-  Search,
-  Sparkles,
   Phone,
   MessageCircle,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getAllPosts } from "@/lib/cms/postsStorage";
+import { getPublishedPosts } from "@/lib/cms/publicPosts";
 import type { Post } from "@/types/cms";
 import { SITE } from "@/lib/site";
 
@@ -30,20 +25,20 @@ export const metadata: Metadata = {
 export default async function UpdatesPage({
   searchParams,
 }: {
-  searchParams?: { category?: string; q?: string };
+  searchParams?: Promise<{ category?: string; q?: string }>;
 }) {
-  const selectedCategory = searchParams?.category || "all";
-  const query = searchParams?.q?.toLowerCase() || "";
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const selectedCategory = resolvedSearchParams.category || "all";
+  const query = resolvedSearchParams.q?.toLowerCase() || "";
 
-  const allDbPosts = await getAllPosts();
-  const publishedOnly = allDbPosts.filter((p) => p.status === "published");
+  const publishedPosts = await getPublishedPosts();
 
   const allPosts =
     selectedCategory !== "all"
-      ? publishedOnly.filter(
+      ? publishedPosts.filter(
           (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
         )
-      : publishedOnly;
+      : publishedPosts;
 
   const filteredPosts = query
     ? allPosts.filter(
@@ -94,8 +89,8 @@ export default async function UpdatesPage({
             <span className="hidden sm:inline text-white/30">•</span>
             <div className="flex items-center gap-1.5">
               <span>Direct Consultation:</span>
-              <a href="tel:03016922573" className="text-gold-400 font-bold hover:underline">
-                0301-6922573
+              <a href={SITE.phoneHref} className="text-gold-400 font-bold hover:underline">
+                {SITE.phone}
               </a>
             </div>
           </div>
@@ -272,11 +267,11 @@ export default async function UpdatesPage({
                 <span>WhatsApp Consultant</span>
               </a>
               <a
-                href="tel:03016922573"
+                href={SITE.phoneHref}
                 className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition"
               >
                 <Phone className="h-4 w-4" />
-                <span>Call 0301-6922573</span>
+                <span>Call {SITE.phone}</span>
               </a>
             </div>
           </div>

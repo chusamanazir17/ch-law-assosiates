@@ -5,34 +5,129 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   AppBar,
+  Collapse,
   Container,
-  IconButton,
+  Divider,
   Drawer,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
-  Collapse,
-  Divider,
 } from "@mui/material";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
-  ChevronDown,
   ArrowRight,
-  Phone,
-  Menu as MenuIcon,
-  X,
-  Sun,
-  Moon,
+  ChevronDown,
   Globe,
+  Menu as MenuIcon,
+  Moon,
+  Phone,
+  Sun,
+  X,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { SERVICE_CATEGORIES, ServiceCategory, SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
-import { useAppTheme } from "@/lib/ThemeContext";
-
+import { SERVICE_CATEGORIES, SITE, type ServiceCategory } from "@/lib/site";
+import type { CategoryTrans, Translations } from "@/lib/translations";
+import { useLanguage } from "@/providers/LanguageProvider";
+import { useAppTheme } from "@/providers/ThemeProvider";
+import { getCategoryHeaderIcon, getSubServiceIcon } from "@/lib/icon-map";
 import Logo from "./Logo";
 import { CategoryDropdownPanel, LegalGroupDropdownPanel } from "./NavDropdown";
-import { getSubServiceIcon, getCategoryHeaderIcon } from "@/lib/icon-map";
+
+type DropdownAlign = "left" | "right" | "center";
+
+interface DesktopCategoryNavItemProps {
+  category: ServiceCategory;
+  categoryTrans: CategoryTrans;
+  label: string;
+  activeDropdown: string | null;
+  pathname: string;
+  isUrdu: boolean;
+  isDark: boolean;
+  align: DropdownAlign;
+  t: Translations;
+  onOpen: (id: string) => void;
+  onCloseSoon: () => void;
+  onClose: () => void;
+}
+
+function desktopLinkClass(active: boolean, isDark: boolean) {
+  if (active) {
+    return isDark
+      ? "bg-gold-400/15 text-gold-400 ring-1 ring-gold-400/25"
+      : "bg-gold-400/10 text-gold-700 ring-1 ring-gold-400/20";
+  }
+
+  return isDark
+    ? "text-white hover:bg-white/10 hover:text-gold-400"
+    : "text-navy-900 hover:bg-navy-900/5 hover:text-gold-700";
+}
+
+function DesktopCategoryNavItem({
+  category,
+  categoryTrans,
+  label,
+  activeDropdown,
+  pathname,
+  isUrdu,
+  isDark,
+  align,
+  t,
+  onOpen,
+  onCloseSoon,
+  onClose,
+}: DesktopCategoryNavItemProps) {
+  const isOpen = activeDropdown === category.id;
+  const isActive = pathname.startsWith(category.href) || isOpen;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => onOpen(category.id)}
+      onMouseLeave={onCloseSoon}
+      onFocus={() => onOpen(category.id)}
+    >
+      <Link
+        id={`nav-button-${category.id}`}
+        href={category.href}
+        onClick={onClose}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onClose();
+        }}
+        className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+          isActive,
+          isDark
+        )}`}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls={`nav-dropdown-${category.id}`}
+        aria-current={pathname.startsWith(category.href) ? "page" : undefined}
+      >
+        <span>{label}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${
+            isOpen ? "rotate-180 text-gold-500" : isDark ? "text-slate-300" : "text-navy-400"
+          }`}
+        />
+      </Link>
+
+      <AnimatePresence>
+        {isOpen && (
+          <CategoryDropdownPanel
+            id={`nav-dropdown-${category.id}`}
+            category={category}
+            categoryTrans={categoryTrans}
+            onClose={onClose}
+            align={align}
+            isUrdu={isUrdu}
+            isDark={isDark}
+            t={t}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function Header() {
   const [scrolled, setScrolled] = React.useState(false);
@@ -40,7 +135,7 @@ export default function Header() {
   const [expandedMobileServices, setExpandedMobileServices] = React.useState<Record<string, boolean>>({});
   const [mobileServicesRootOpen, setMobileServicesRootOpen] = React.useState(true);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname() || "";
 
   const { isUrdu, toggleLanguage, t } = useLanguage();
@@ -52,17 +147,16 @@ export default function Header() {
 
     let ticking = false;
     const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const isNowScrolled = window.scrollY > 20;
-          if (isNowScrolled !== lastScrolled) {
-            lastScrolled = isNowScrolled;
-            setScrolled(isNowScrolled);
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const nextScrolled = window.scrollY > 20;
+        if (nextScrolled !== lastScrolled) {
+          lastScrolled = nextScrolled;
+          setScrolled(nextScrolled);
+        }
+        ticking = false;
+      });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -74,38 +168,68 @@ export default function Header() {
     setActiveDropdown(null);
   }, [pathname]);
 
-  const handleMouseEnter = (id: string) => {
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const openDropdown = (id: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setActiveDropdown(id);
   };
 
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 180);
+  const closeDropdownSoon = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setActiveDropdown(null), 160);
+  };
+
+  const closeDropdown = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setActiveDropdown(null);
   };
 
   const toggleMobileCategory = (id: string) => {
-    setExpandedMobileServices((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setExpandedMobileServices((current) => ({ ...current, [id]: !current[id] }));
   };
 
-  // Primary categories featured directly in desktop nav
-  const taxCategory = SERVICE_CATEGORIES.find((c) => c.id === "tax")!;
-  const estampCategory = SERVICE_CATEGORIES.find((c) => c.id === "e-stamping")!;
-  const businessCategory = SERVICE_CATEGORIES.find((c) => c.id === "business-registration")!;
-  const propertyCategory = SERVICE_CATEGORIES.find((c) => c.id === "property-land")!;
-
-  // Grouped remaining legal categories
-  const legalGroupCategories = SERVICE_CATEGORIES.filter((c) =>
-    ["registry-deeds", "family-legal", "banking-financial", "legal-documentation", "trademark-ipo"].includes(c.id)
+  const categoryMap = React.useMemo(
+    () => new Map(SERVICE_CATEGORIES.map((category) => [category.id, category])),
+    []
   );
 
-  if (pathname.startsWith("/admin")) {
-    return null;
-  }
+  const primaryNav = [
+    {
+      id: "tax",
+      label: t.nav.taxServices,
+      align: isUrdu ? "right" : "left",
+    },
+    {
+      id: "e-stamping",
+      label: t.nav.eStamping,
+      align: isUrdu ? "right" : "left",
+    },
+    {
+      id: "business-registration",
+      label: t.nav.business,
+      align: "center",
+    },
+    {
+      id: "property-land",
+      label: t.nav.propertyLand,
+      align: isUrdu ? "left" : "right",
+    },
+  ] satisfies Array<{ id: string; label: string; align: DropdownAlign }>;
+
+  const legalGroupCategories = SERVICE_CATEGORIES.filter((category) =>
+    ["registry-deeds", "family-legal", "banking-financial", "legal-documentation", "trademark-ipo"].includes(
+      category.id
+    )
+  );
+  const legalGroupActive =
+    legalGroupCategories.some((category) => pathname.startsWith(category.href)) || activeDropdown === "legal-group";
+
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <>
@@ -115,279 +239,83 @@ export default function Header() {
         sx={{
           background: scrolled
             ? isDark
-              ? "rgba(7, 18, 36, 0.98)"
-              : "rgba(255,255,255,0.98)"
+              ? "rgba(7, 18, 36, 0.96)"
+              : "rgba(255,255,255,0.96)"
             : isDark
-            ? "rgba(7, 18, 36, 1)"
-            : "rgba(255,255,255,1)",
-          backdropFilter: "blur(8px)",
+            ? "#071224"
+            : "#ffffff",
+          backdropFilter: "blur(14px)",
+          borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(11,29,56,0.07)",
           boxShadow: scrolled
             ? isDark
-              ? "0 4px 20px rgba(0,0,0,0.35)"
-              : "0 4px 20px rgba(6,18,38,0.08)"
-            : isDark
-            ? "0 1px 0 rgba(255,255,255,0.08)"
-            : "0 1px 0 rgba(11,29,56,0.06)",
+              ? "0 8px 30px rgba(0,0,0,0.28)"
+              : "0 8px 30px rgba(6,18,38,0.08)"
+            : "none",
           transition: "background-color 0.2s ease, box-shadow 0.2s ease",
           zIndex: 1100,
-          willChange: "transform",
         }}
       >
         <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
-          <div className="flex h-[72px] items-center justify-between">
+          <div className="flex h-[72px] items-center justify-between gap-4">
             <Logo isUrdu={isUrdu} isDark={isDark} />
 
-            {/* Desktop Navigation */}
-            <nav className="hidden items-center gap-1 xl:gap-2.5 lg:flex" onMouseLeave={handleMouseLeave}>
-              {/* Home Link */}
+            <nav
+              aria-label="Primary navigation"
+              className="hidden min-w-0 items-center gap-0.5 xl:flex 2xl:gap-1.5"
+              onMouseLeave={closeDropdownSoon}
+            >
               <Link
                 href="/"
-                className={`rounded-md px-3 py-2 text-[13px] font-semibold transition ${
-                  pathname === "/"
-                    ? isDark
-                      ? "text-gold-400 bg-gold-400/20"
-                      : "text-gold-600 bg-gold-400/10"
-                    : isDark
-                    ? "text-white hover:text-gold-400 hover:bg-white/10"
-                    : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                }`}
+                aria-current={pathname === "/" ? "page" : undefined}
+                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                  pathname === "/",
+                  isDark
+                )}`}
               >
                 {t.nav.home}
               </Link>
 
-              {/* 1. Tax Services Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => handleMouseEnter("tax")}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link
-                  id="nav-button-tax"
-                  href="/services/tax"
-                  onClick={() => setActiveDropdown(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname.startsWith("/services/tax") || activeDropdown === "tax"
-                      ? isDark
-                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
-                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
-                      : isDark
-                      ? "text-white hover:text-gold-400 hover:bg-white/10"
-                      : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                  }`}
-                  aria-expanded={activeDropdown === "tax"}
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-tax"
-                >
-                  <span>{t.nav.taxServices}</span>
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                      activeDropdown === "tax"
-                        ? "rotate-180 text-gold-400"
-                        : isDark
-                        ? "text-slate-300"
-                        : "text-navy-400"
-                    }`}
+              {primaryNav.map((item) => {
+                const category = categoryMap.get(item.id);
+                const categoryTrans = t.categories[item.id];
+                if (!category || !categoryTrans) return null;
+
+                return (
+                  <DesktopCategoryNavItem
+                    key={item.id}
+                    category={category}
+                    categoryTrans={categoryTrans}
+                    label={item.label}
+                    activeDropdown={activeDropdown}
+                    pathname={pathname}
+                    isUrdu={isUrdu}
+                    isDark={isDark}
+                    align={item.align}
+                    t={t}
+                    onOpen={openDropdown}
+                    onCloseSoon={closeDropdownSoon}
+                    onClose={closeDropdown}
                   />
-                </Link>
+                );
+              })}
 
-                <AnimatePresence>
-                  {activeDropdown === "tax" && (
-                    <CategoryDropdownPanel
-                      id="nav-dropdown-tax"
-                      category={taxCategory}
-                      categoryTrans={t.categories["tax"]}
-                      onClose={() => setActiveDropdown(null)}
-                      align={isUrdu ? "right" : "left"}
-                      isUrdu={isUrdu}
-                      isDark={isDark}
-                      t={t}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* 2. E-Stamping Dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => handleMouseEnter("e-stamping")}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link
-                  id="nav-button-e-stamping"
-                  href="/services/e-stamping"
-                  onClick={() => setActiveDropdown(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname.startsWith("/services/e-stamping") || activeDropdown === "e-stamping"
-                      ? isDark
-                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
-                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
-                      : isDark
-                      ? "text-white hover:text-gold-400 hover:bg-white/10"
-                      : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                  }`}
-                  aria-expanded={activeDropdown === "e-stamping"}
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-e-stamping"
-                >
-                  <span>{t.nav.eStamping}</span>
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                      activeDropdown === "e-stamping"
-                        ? "rotate-180 text-gold-400"
-                        : isDark
-                        ? "text-slate-300"
-                        : "text-navy-400"
-                    }`}
-                  />
-                </Link>
-
-                <AnimatePresence>
-                  {activeDropdown === "e-stamping" && (
-                    <CategoryDropdownPanel
-                      id="nav-dropdown-e-stamping"
-                      category={estampCategory}
-                      categoryTrans={t.categories["e-stamping"]}
-                      onClose={() => setActiveDropdown(null)}
-                      align={isUrdu ? "right" : "left"}
-                      isUrdu={isUrdu}
-                      isDark={isDark}
-                      t={t}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* 3. Business Registration Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => handleMouseEnter("business")}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link
-                  id="nav-button-business"
-                  href="/services/business-registration"
-                  onClick={() => setActiveDropdown(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname.startsWith("/services/business-registration") || activeDropdown === "business"
-                      ? isDark
-                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
-                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
-                      : isDark
-                      ? "text-white hover:text-gold-400 hover:bg-white/10"
-                      : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                  }`}
-                  aria-expanded={activeDropdown === "business"}
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-business"
-                >
-                  <span>{t.nav.business}</span>
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                      activeDropdown === "business"
-                        ? "rotate-180 text-gold-400"
-                        : isDark
-                        ? "text-slate-300"
-                        : "text-navy-400"
-                    }`}
-                  />
-                </Link>
-
-                <AnimatePresence>
-                  {activeDropdown === "business" && (
-                    <CategoryDropdownPanel
-                      id="nav-dropdown-business"
-                      category={businessCategory}
-                      categoryTrans={t.categories["business-registration"]}
-                      onClose={() => setActiveDropdown(null)}
-                      align="center"
-                      isUrdu={isUrdu}
-                      isDark={isDark}
-                      t={t}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* 4. Property & Land Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => handleMouseEnter("property")}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link
-                  id="nav-button-property"
-                  href="/services/property-land"
-                  onClick={() => setActiveDropdown(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname.startsWith("/services/property-land") || activeDropdown === "property"
-                      ? isDark
-                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
-                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
-                      : isDark
-                      ? "text-white hover:text-gold-400 hover:bg-white/10"
-                      : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                  }`}
-                  aria-expanded={activeDropdown === "property"}
-                  aria-haspopup="true"
-                  aria-controls="nav-dropdown-property"
-                >
-                  <span>{t.nav.propertyLand}</span>
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                      activeDropdown === "property"
-                        ? "rotate-180 text-gold-400"
-                        : isDark
-                        ? "text-slate-300"
-                        : "text-navy-400"
-                    }`}
-                  />
-                </Link>
-
-                <AnimatePresence>
-                  {activeDropdown === "property" && (
-                    <CategoryDropdownPanel
-                      id="nav-dropdown-property"
-                      category={propertyCategory}
-                      categoryTrans={t.categories["property-land"]}
-                      onClose={() => setActiveDropdown(null)}
-                      align={isUrdu ? "left" : "right"}
-                      isUrdu={isUrdu}
-                      isDark={isDark}
-                      t={t}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* 5. Legal & Family Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => handleMouseEnter("legal-group")}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={() => openDropdown("legal-group")}
+                onMouseLeave={closeDropdownSoon}
+                onFocus={() => openDropdown("legal-group")}
               >
                 <Link
                   id="nav-button-legal-group"
                   href="/services/registry-deeds"
-                  onClick={() => setActiveDropdown(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveDropdown(null); }}
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-[13px] font-semibold transition-colors ${
-                    pathname.startsWith("/services/registry-deeds") ||
-                    pathname.startsWith("/services/family-legal") ||
-                    pathname.startsWith("/services/banking-financial") ||
-                    pathname.startsWith("/services/legal-documentation") ||
-                    pathname.startsWith("/services/trademark-ipo") ||
-                    activeDropdown === "legal-group"
-                      ? isDark
-                        ? "text-gold-400 bg-gold-400/20 shadow-xs ring-1 ring-gold-400/30"
-                        : "text-gold-600 bg-gold-400/10 shadow-xs ring-1 ring-gold-400/25"
-                      : isDark
-                      ? "text-white hover:text-gold-400 hover:bg-white/10"
-                      : "text-navy-900 hover:text-gold-600 hover:bg-navy-900/5"
-                  }`}
+                  onClick={closeDropdown}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") closeDropdown();
+                  }}
+                  className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                    legalGroupActive,
+                    isDark
+                  )}`}
                   aria-expanded={activeDropdown === "legal-group"}
                   aria-haspopup="true"
                   aria-controls="nav-dropdown-legal-group"
@@ -396,7 +324,7 @@ export default function Header() {
                   <ChevronDown
                     className={`h-3.5 w-3.5 transition-transform duration-200 ${
                       activeDropdown === "legal-group"
-                        ? "rotate-180 text-gold-400"
+                        ? "rotate-180 text-gold-500"
                         : isDark
                         ? "text-slate-300"
                         : "text-navy-400"
@@ -410,7 +338,7 @@ export default function Header() {
                       id="nav-dropdown-legal-group"
                       categories={legalGroupCategories}
                       categoriesTrans={t.categories}
-                      onClose={() => setActiveDropdown(null)}
+                      onClose={closeDropdown}
                       isUrdu={isUrdu}
                       isDark={isDark}
                     />
@@ -418,91 +346,70 @@ export default function Header() {
                 </AnimatePresence>
               </div>
 
-              {/* About Link */}
               <Link
                 href="/#about"
-                className={`rounded-md px-3 py-2 text-[13px] font-semibold transition ${
+                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                  false,
                   isDark
-                    ? "text-white hover:text-gold-400 hover:bg-white/10"
-                    : "text-navy-800 hover:text-gold-600 hover:bg-navy-900/5"
-                }`}
+                )}`}
               >
                 {t.nav.about}
               </Link>
-
-              {/* Legal Updates & Guides Link */}
               <Link
                 href="/updates"
-                className={`rounded-md px-3 py-2 text-[13px] font-semibold transition ${
-                  pathname.startsWith("/updates")
-                    ? isDark
-                      ? "text-gold-400 bg-gold-400/20"
-                      : "text-gold-600 bg-gold-400/10"
-                    : isDark
-                    ? "text-white hover:text-gold-400 hover:bg-white/10"
-                    : "text-navy-800 hover:text-gold-600 hover:bg-navy-900/5"
-                }`}
+                aria-current={pathname.startsWith("/updates") ? "page" : undefined}
+                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                  pathname.startsWith("/updates"),
+                  isDark
+                )}`}
               >
                 {isUrdu ? "قانونی رہنمائی" : "Legal Updates"}
               </Link>
             </nav>
 
-            {/* Header Right Actions: Theme Toggle & Urdu Toggle (Zero background, minimalistic) */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Minimalistic Theme Toggle: Only button, no background */}
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
               <button
+                type="button"
                 onClick={toggleTheme}
-                aria-label={isDark ? "Switch to bright mode" : "Switch to dark mode"}
-                title={isDark ? "Switch to bright mode" : "Switch to dark mode"}
-                className={`flex h-9 w-9 items-center justify-center transition-colors focus:outline-none ${
-                  isDark
-                    ? "text-gold-400 hover:text-gold-300"
-                    : "text-navy-800 hover:text-gold-600"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                  isDark ? "text-gold-400 hover:bg-white/10" : "text-navy-800 hover:bg-navy-900/5 hover:text-gold-700"
                 }`}
               >
-                {isDark ? (
-                  <Sun className="h-5 w-5 transition-transform duration-300 hover:rotate-45" />
-                ) : (
-                  <Moon className="h-5 w-5 transition-transform duration-300 hover:-rotate-12" />
-                )}
+                {isDark ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
               </button>
 
-              {/* Minimalistic Urdu / English Toggle: Only button, no background */}
               <button
+                type="button"
                 onClick={toggleLanguage}
                 aria-label="Toggle language between Urdu and English"
                 title="Toggle Urdu / English"
-                className={`flex items-center gap-1.5 px-2 py-1 text-[13px] font-bold transition-colors focus:outline-none ${
-                  isDark
-                    ? "text-white hover:text-gold-400"
-                    : "text-navy-900 hover:text-gold-600"
+                className={`hidden items-center gap-1.5 rounded-lg px-2 py-2 text-[12px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:flex ${
+                  isDark ? "text-white hover:bg-white/10 hover:text-gold-400" : "text-navy-900 hover:bg-navy-900/5 hover:text-gold-700"
                 }`}
               >
                 <Globe className="h-4 w-4 text-gold-500" />
-                <span className={isUrdu ? "font-sans text-xs tracking-wider" : "font-serif text-sm font-bold"}>
-                  {isUrdu ? "English" : "اردو"}
-                </span>
+                <span>{isUrdu ? "English" : "اردو"}</span>
               </button>
 
-              {/* Mobile Hamburger */}
               <IconButton
                 edge="end"
                 onClick={() => setDrawerOpen(true)}
                 sx={{
-                  display: { lg: "none" },
+                  display: { xl: "none" },
                   color: isDark ? "#ffffff" : "#0b1d38",
-                  ml: 0.5,
+                  ml: 0.25,
                 }}
-                aria-label="Open menu"
+                aria-label="Open navigation menu"
               >
-                <MenuIcon />
+                <MenuIcon className="h-5 w-5" />
               </IconButton>
             </div>
           </div>
         </Container>
       </AppBar>
 
-      {/* Mobile Drawer */}
       <Drawer
         anchor={isUrdu ? "left" : "right"}
         open={drawerOpen}
@@ -516,30 +423,39 @@ export default function Header() {
           },
         }}
       >
-        <div className={`flex items-center justify-between border-b ${isDark ? "border-white/10 bg-[#0a1830]" : "border-navy-900/10 bg-white"} p-4`}>
+        <div
+          className={`flex items-center justify-between border-b p-4 ${
+            isDark ? "border-white/10 bg-[#0a1830]" : "border-navy-900/10 bg-white"
+          }`}
+        >
           <Logo isUrdu={isUrdu} isDark={isDark} />
-          <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu" sx={{ color: isDark ? "#ffffff" : "#0b1d38" }}>
+          <IconButton
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close navigation menu"
+            sx={{ color: isDark ? "#ffffff" : "#0b1d38" }}
+          >
             <X className="h-5 w-5" />
           </IconButton>
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-3">
-          {/* Mobile Theme & Language bar inside drawer */}
-          <div className="mb-3 flex items-center justify-between rounded-xl bg-navy-900/5 dark:bg-white/5 p-2.5">
+          <div className="mb-3 flex items-center justify-between rounded-xl bg-navy-900/5 p-2.5 dark:bg-white/5">
             <span className="text-xs font-semibold text-navy-600 dark:text-slate-400">
               {isUrdu ? "ترتیبات" : "Preferences"}
             </span>
             <div className="flex items-center gap-3">
               <button
+                type="button"
                 onClick={toggleTheme}
-                className="flex items-center gap-1 text-xs font-semibold text-navy-800 dark:text-gold-400 hover:text-gold-600 focus:outline-none"
+                className="flex items-center gap-1 text-xs font-semibold text-navy-800 hover:text-gold-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 dark:text-gold-400"
               >
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                <span>{isDark ? (isUrdu ? "روشن موڈ" : "Bright") : isUrdu ? "ڈارک موڈ" : "Dark"}</span>
+                <span>{isDark ? (isUrdu ? "روشن موڈ" : "Light") : isUrdu ? "ڈارک موڈ" : "Dark"}</span>
               </button>
               <button
+                type="button"
                 onClick={toggleLanguage}
-                className="flex items-center gap-1 text-xs font-bold text-navy-900 dark:text-slate-100 hover:text-gold-600 focus:outline-none"
+                className="flex items-center gap-1 text-xs font-bold text-navy-900 hover:text-gold-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 dark:text-slate-100"
               >
                 <Globe className="h-4 w-4 text-gold-500" />
                 <span>{isUrdu ? "English" : "اردو"}</span>
@@ -551,8 +467,7 @@ export default function Header() {
             {isUrdu ? "قانونی و دستاویزی خدمات" : "Legal & Documentation Services"}
           </div>
 
-          <List component="nav" disablePadding>
-            {/* Mobile Home Link */}
+          <List component="nav" aria-label="Mobile navigation" disablePadding>
             <ListItemButton
               component={Link}
               href="/"
@@ -562,27 +477,22 @@ export default function Header() {
                 py: 1.2,
                 mb: 1,
                 bgcolor: pathname === "/" ? (isDark ? "rgba(212,164,76,0.18)" : "rgba(200,151,61,0.12)") : "transparent",
-                fontWeight: 700,
-                color: pathname === "/" ? "#dfbb6e" : isDark ? "#ffffff" : "#0b1d38",
+                color: pathname === "/" ? "#c8973d" : isDark ? "#ffffff" : "#0b1d38",
               }}
             >
-              <ListItemText
-                primary={t.nav.home}
-                primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }}
-              />
+              <ListItemText primary={t.nav.home} primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }} />
             </ListItemButton>
 
-            {/* Root Services Accordion */}
             <ListItemButton
-              onClick={() => setMobileServicesRootOpen(!mobileServicesRootOpen)}
+              onClick={() => setMobileServicesRootOpen((current) => !current)}
               sx={{
                 borderRadius: 2,
                 py: 1.2,
                 mb: 1,
                 bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(11,29,56,0.05)",
-                fontWeight: 700,
                 color: isDark ? "#ffffff" : "#0b1d38",
               }}
+              aria-expanded={mobileServicesRootOpen}
             >
               <ListItemText
                 primary={isUrdu ? "تمام خدمات اور فہرست" : "All Services & Categories"}
@@ -597,75 +507,85 @@ export default function Header() {
 
             <Collapse in={mobileServicesRootOpen} timeout="auto" unmountOnExit>
               <div className="space-y-1.5 pl-1">
-                {SERVICE_CATEGORIES.map((cat) => {
-                  const isExpanded = !!expandedMobileServices[cat.id];
-                  const Icon = getCategoryHeaderIcon(cat.id);
-                  const catTrans = t.categories[cat.id] || {
-                    title: cat.title,
-                    tagline: cat.tagline,
-                    items: cat.items,
+                {SERVICE_CATEGORIES.map((category) => {
+                  const isExpanded = Boolean(expandedMobileServices[category.id]);
+                  const Icon = getCategoryHeaderIcon(category.id);
+                  const categoryTrans = t.categories[category.id] || {
+                    title: category.title,
+                    shortTitle: category.shortTitle,
+                    tagline: category.tagline,
+                    description: category.description,
+                    items: category.items,
                   };
 
                   return (
                     <div
-                      key={cat.id}
-                      className={`rounded-xl border ${
-                        isDark ? "border-white/10 bg-[#0c1c33]" : "border-navy-900/8 bg-white"
-                      } overflow-hidden shadow-xs`}
+                      key={category.id}
+                      className={`overflow-hidden rounded-xl border shadow-sm ${
+                        isDark ? "border-white/10 bg-[#0c1c33]" : "border-navy-900/10 bg-white"
+                      }`}
                     >
                       <button
-                        onClick={() => toggleMobileCategory(cat.id)}
-                        className="flex w-full items-center justify-between p-3 text-left transition hover:bg-gold-50/40 dark:hover:bg-white/5"
+                        type="button"
+                        onClick={() => toggleMobileCategory(category.id)}
+                        className="flex w-full items-center justify-between p-3 text-left transition hover:bg-gold-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 dark:hover:bg-white/5"
+                        aria-expanded={isExpanded}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-navy-900/5 dark:bg-white/10 text-gold-500">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-navy-900/5 text-gold-500 dark:bg-white/10">
                             <Icon className="h-4 w-4" />
                           </span>
-                          <div>
-                            <p className="text-xs font-bold text-navy-900 dark:text-white">{catTrans.title}</p>
-                            <p className="text-[10px] text-navy-500 dark:text-slate-400 line-clamp-1">{catTrans.tagline}</p>
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-bold text-navy-900 dark:text-white">{categoryTrans.title}</p>
+                            <p className="line-clamp-1 text-[10px] text-navy-500 dark:text-slate-400">{categoryTrans.tagline}</p>
                           </div>
                         </div>
                         <ChevronDown
-                          className={`h-4 w-4 text-navy-400 transition-transform ${
+                          className={`h-4 w-4 shrink-0 text-navy-400 transition-transform ${
                             isExpanded ? "rotate-180 text-gold-500" : ""
                           }`}
                         />
                       </button>
 
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <div className={`border-t ${isDark ? "border-white/10 bg-black/20" : "border-navy-900/5 bg-slate-50/70"} p-2 space-y-1`}>
-                          {catTrans.items.map((item, idx) => {
-                            const ItemIcon = getSubServiceIcon(idx, cat.items[idx]?.title || item.title);
+                        <div
+                          className={`space-y-1 border-t p-2 ${
+                            isDark ? "border-white/10 bg-black/20" : "border-navy-900/5 bg-slate-50/70"
+                          }`}
+                        >
+                          {categoryTrans.items.map((item, index) => {
+                            const ItemIcon = getSubServiceIcon(index, category.items[index]?.title || item.title);
                             return (
                               <Link
                                 key={item.title}
-                                href={cat.href}
+                                href={category.href}
                                 onClick={() => setDrawerOpen(false)}
-                                className={`flex items-start gap-2 rounded-lg p-2 transition ${
-                                  isDark ? "hover:bg-white/10" : "hover:bg-white hover:shadow-xs"
-                                } group`}
+                                className={`group flex items-start gap-2 rounded-lg p-2 transition ${
+                                  isDark ? "hover:bg-white/10" : "hover:bg-white hover:shadow-sm"
+                                }`}
                               >
-                                <ItemIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-500 group-hover:text-gold-400" />
+                                <ItemIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-500" />
                                 <div>
-                                  <p className="text-xs font-semibold text-navy-900 dark:text-slate-100 group-hover:text-gold-500">
+                                  <p className="text-xs font-semibold text-navy-900 group-hover:text-gold-600 dark:text-slate-100 dark:group-hover:text-gold-400">
                                     {item.title}
                                   </p>
-                                  <p className="text-[10px] text-navy-500 dark:text-slate-400 leading-tight">
-                                    {item.description}
-                                  </p>
+                                  <p className="text-[10px] leading-tight text-navy-500 dark:text-slate-400">{item.description}</p>
                                 </div>
                               </Link>
                             );
                           })}
 
-                          <div className={`pt-1.5 mt-1 border-t ${isDark ? "border-white/10" : "border-navy-900/5"}`}>
+                          <div className={`mt-1 border-t pt-1.5 ${isDark ? "border-white/10" : "border-navy-900/5"}`}>
                             <Link
-                              href={cat.href}
+                              href={category.href}
                               onClick={() => setDrawerOpen(false)}
-                              className="flex items-center justify-between rounded-md bg-gold-400/10 px-3 py-1.5 text-xs font-bold text-gold-600 dark:text-gold-400 hover:bg-gold-400/20 transition"
+                              className="flex items-center justify-between rounded-md bg-gold-400/10 px-3 py-1.5 text-xs font-bold text-gold-700 transition hover:bg-gold-400/20 dark:text-gold-400"
                             >
-                              <span>{isUrdu ? `${catTrans.shortTitle} کی تمام خدمات` : `Explore All ${cat.shortTitle} Services`}</span>
+                              <span>
+                                {isUrdu
+                                  ? `${categoryTrans.shortTitle} کی تمام خدمات`
+                                  : `Explore All ${category.shortTitle} Services`}
+                              </span>
                               <ArrowRight className="h-3.5 w-3.5" />
                             </Link>
                           </div>
@@ -679,24 +599,10 @@ export default function Header() {
 
             <Divider sx={{ my: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
 
-            <ListItemButton
-              component={Link}
-              href="/#about"
-              onClick={() => setDrawerOpen(false)}
-              sx={{ borderRadius: 2, py: 1.2 }}
-            >
-              <ListItemText
-                primary={t.nav.about}
-                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-              />
+            <ListItemButton component={Link} href="/#about" onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
+              <ListItemText primary={t.nav.about} primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }} />
             </ListItemButton>
-
-            <ListItemButton
-              component={Link}
-              href="/updates"
-              onClick={() => setDrawerOpen(false)}
-              sx={{ borderRadius: 2, py: 1.2 }}
-            >
+            <ListItemButton component={Link} href="/updates" onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
               <ListItemText
                 primary={isUrdu ? "قانونی رہنمائی اور اپ ڈیٹس" : "Legal Updates & Guides"}
                 primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
@@ -723,7 +629,7 @@ export default function Header() {
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-400"
             >
               <WhatsAppIcon className="h-3.5 w-3.5 text-[#25D366]" />
               {t.site.whatsappLabel}
@@ -732,9 +638,7 @@ export default function Header() {
         </div>
       </Drawer>
 
-      {/* fixed header spacer */}
-      <div style={{ height: 72 }} aria-hidden />
+      <div className="h-[72px]" aria-hidden="true" />
     </>
   );
 }
-

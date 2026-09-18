@@ -20,6 +20,10 @@ import { createClient } from "@/lib/supabase/client";
 import { validateDeadlineForm, type DeadlineFormData } from "@/lib/validation/deadline";
 import type { DeadlineWithCategory, TaxCategory } from "@/types/reminders";
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function DeadlinesManager() {
   const [deadlines, setDeadlines] = useState<DeadlineWithCategory[]>([]);
   const [categories, setCategories] = useState<TaxCategory[]>([]);
@@ -44,11 +48,16 @@ export default function DeadlinesManager() {
   useEffect(() => {
     async function loadCategories() {
       const supabase = createClient();
-      const { data } = await supabase
-        .from("tax_categories")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (data) setCategories(data);
+      try {
+        const { data, error } = await supabase
+          .from("tax_categories")
+          .select("*")
+          .order("sort_order", { ascending: true });
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error) {
+        setFeedback({ type: "error", message: getErrorMessage(error, "Failed to load tax categories.") });
+      }
     }
     loadCategories();
   }, []);
@@ -81,14 +90,15 @@ export default function DeadlinesManager() {
 
       if (error) throw error;
 
-      const mapped: DeadlineWithCategory[] = (data || []).map((d: any) => ({
-        ...d,
-        category: d.tax_categories,
+      const mapped: DeadlineWithCategory[] = (data || []).map((deadline) => ({
+        ...deadline,
+        category: deadline.tax_categories ?? undefined,
       }));
 
       setDeadlines(mapped);
     } catch (err) {
       console.error("[Deadlines Fetch Error]", err);
+      setFeedback({ type: "error", message: getErrorMessage(err, "Failed to load tax deadlines.") });
     } finally {
       setIsLoading(false);
     }
@@ -180,10 +190,10 @@ export default function DeadlinesManager() {
 
       setIsModalOpen(false);
       fetchDeadlines();
-    } catch (err: any) {
+    } catch (error) {
       setFeedback({
         type: "error",
-        message: err.message || "Failed to save deadline.",
+        message: getErrorMessage(error, "Failed to save deadline."),
       });
     } finally {
       setIsSaving(false);
@@ -193,15 +203,15 @@ export default function DeadlinesManager() {
   // Explicit Verification Toggle Action
   const handleVerifyDeadline = async (dl: DeadlineWithCategory) => {
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     const isCurrentlyVerified = dl.verified_at !== null;
-    const nextVerifiedAt = isCurrentlyVerified ? null : new Date().toISOString();
-    const nextVerifiedBy = isCurrentlyVerified ? null : user?.id || null;
 
     try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!isCurrentlyVerified && !user) throw new Error("Your administrator session has expired. Please sign in again.");
+
+      const nextVerifiedAt = isCurrentlyVerified ? null : new Date().toISOString();
+      const nextVerifiedBy = isCurrentlyVerified ? null : user?.id || null;
       const { error } = await supabase
         .from("tax_deadlines")
         .update({
@@ -219,8 +229,8 @@ export default function DeadlinesManager() {
           : `Deadline verified: ${dl.title}. Eligible for automated reminders.`,
       });
       fetchDeadlines();
-    } catch (err: any) {
-      alert("Failed to update verification status: " + err.message);
+    } catch (error) {
+      setFeedback({ type: "error", message: getErrorMessage(error, "Failed to update verification status.") });
     }
   };
 
@@ -238,8 +248,8 @@ export default function DeadlinesManager() {
 
       if (error) throw error;
       fetchDeadlines();
-    } catch (err: any) {
-      alert("Failed to toggle status: " + err.message);
+    } catch (error) {
+      setFeedback({ type: "error", message: getErrorMessage(error, "Failed to toggle status.") });
     }
   };
 
@@ -486,7 +496,7 @@ export default function DeadlinesManager() {
                   type="text"
                   value={formData.tax_year_or_period}
                   onChange={(e) => setFormData({ ...formData, tax_year_or_period: e.target.value })}
-                  placeholder="e.g. Tax Year 2024 or Q3 2024"
+                  placeholder="e.g. Tax Year 2026 or Q3 2026"
                   className="w-full rounded-lg border border-slate-200 bg-white py-2 px-3 text-xs text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
                   required
                 />

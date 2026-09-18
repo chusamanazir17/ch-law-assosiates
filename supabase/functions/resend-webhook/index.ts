@@ -56,16 +56,17 @@ Deno.serve(async (req: Request) => {
 
   try {
     const rawBody = await req.text();
-    const webhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+    const webhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET")?.trim();
 
-    if (webhookSecret) {
-      const isValid = await verifyWebhookSignature(rawBody, req.headers, webhookSecret);
-      if (!isValid) {
-        console.warn("[Resend Webhook] Signature verification failed.");
-        return new Response("Invalid signature", { status: 401, headers: corsHeaders });
-      }
-    } else {
-      console.warn("[Resend Webhook] RESEND_WEBHOOK_SECRET not set; processing without signature validation.");
+    if (!webhookSecret) {
+      console.error("[Resend Webhook] RESEND_WEBHOOK_SECRET is not configured.");
+      return new Response("Webhook is not configured", { status: 503, headers: corsHeaders });
+    }
+
+    const isValid = await verifyWebhookSignature(rawBody, req.headers, webhookSecret);
+    if (!isValid) {
+      console.warn("[Resend Webhook] Signature verification failed.");
+      return new Response("Invalid signature", { status: 401, headers: corsHeaders });
     }
 
     const event = JSON.parse(rawBody);
@@ -84,17 +85,18 @@ Deno.serve(async (req: Request) => {
     switch (type) {
       case "email.delivered":
         if (emailId) {
-          await supabase
+          const { error } = await supabase
             .from("reminder_deliveries")
             .update({ status: "sent", updated_at: new Date().toISOString() })
             .eq("provider_message_id", emailId);
+          if (error) throw error;
         }
         break;
 
       case "email.bounced":
         // Mark delivery as failed
         if (emailId) {
-          await supabase
+          const { error } = await supabase
             .from("reminder_deliveries")
             .update({
               status: "failed",
@@ -102,23 +104,26 @@ Deno.serve(async (req: Request) => {
               updated_at: new Date().toISOString(),
             })
             .eq("provider_message_id", emailId);
+          if (error) throw error;
         }
         // Suppress subscriber to prevent future bounces
         if (recipientEmail) {
-          await supabase
+          const { error } = await supabase
             .from("subscribers")
             .update({ status: "suppressed", updated_at: new Date().toISOString() })
             .eq("email", recipientEmail.trim().toLowerCase());
+          if (error) throw error;
         }
         break;
 
       case "email.complained":
         // Spam complaint: immediately suppress subscriber
         if (recipientEmail) {
-          await supabase
+          const { error } = await supabase
             .from("subscribers")
             .update({ status: "suppressed", updated_at: new Date().toISOString() })
             .eq("email", recipientEmail.trim().toLowerCase());
+          if (error) throw error;
         }
         break;
 

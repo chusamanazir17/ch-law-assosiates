@@ -13,9 +13,20 @@ import {
   Loader2,
   Eye,
   ExternalLink,
+  type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { SiteAnnouncement } from "@/types/cms";
+
+type AnnouncementTone = "info" | "warning" | "danger" | "dark";
+
+function normalizeTone(value: string): AnnouncementTone {
+  return value === "info" || value === "danger" || value === "dark" ? value : "warning";
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function AnnouncementsManager() {
   const [announcements, setAnnouncements] = useState<SiteAnnouncement[]>([]);
@@ -27,7 +38,7 @@ export default function AnnouncementsManager() {
   // Form fields
   const [title, setTitle] = useState("");
   const [msgText, setMsgText] = useState("");
-  const [tone, setTone] = useState<"info" | "warning" | "danger" | "dark">("warning");
+  const [tone, setTone] = useState<AnnouncementTone>("warning");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
   const [isActive, setIsActive] = useState(true);
@@ -43,8 +54,8 @@ export default function AnnouncementsManager() {
 
       if (error) throw error;
       setAnnouncements(data || []);
-    } catch (err: any) {
-      console.error("[Announcements Load Error]", err);
+    } catch (error) {
+      console.error("[Announcements Load Error]", error);
       setMessage({ type: "error", text: "Failed to load announcements." });
     } finally {
       setIsLoading(false);
@@ -69,7 +80,7 @@ export default function AnnouncementsManager() {
     setEditingId(ann.id);
     setTitle(ann.title);
     setMsgText(ann.message);
-    setTone(ann.tone as any);
+    setTone(normalizeTone(ann.tone));
     setLinkUrl(ann.link_url || "");
     setLinkText(ann.link_text || "");
     setIsActive(ann.is_active);
@@ -95,8 +106,8 @@ export default function AnnouncementsManager() {
         type: "success",
         text: `Announcement "${ann.title}" is now ${newStatus ? "ACTIVE" : "INACTIVE"}.`,
       });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to update status." });
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Failed to update status.") });
     }
   };
 
@@ -113,8 +124,8 @@ export default function AnnouncementsManager() {
       if (error) throw error;
       setAnnouncements((prev) => prev.filter((a) => a.id !== id));
       setMessage({ type: "success", text: "Announcement deleted successfully." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to delete announcement." });
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Failed to delete announcement.") });
     }
   };
 
@@ -161,16 +172,16 @@ export default function AnnouncementsManager() {
 
       resetForm();
       loadAnnouncements();
-    } catch (err: any) {
-      console.error("[Save Announcement Error]", err);
-      setMessage({ type: "error", text: err.message || "Failed to save announcement." });
+    } catch (error) {
+      console.error("[Save Announcement Error]", error);
+      setMessage({ type: "error", text: getErrorMessage(error, "Failed to save announcement.") });
     } finally {
       setIsSaving(false);
     }
   };
 
   // Tone banner styles mapping
-  const toneClasses: Record<string, { bg: string; border: string; text: string; icon: any }> = {
+  const toneClasses: Record<AnnouncementTone, { bg: string; border: string; text: string; icon: LucideIcon }> = {
     warning: {
       bg: "bg-amber-50",
       border: "border-amber-200",
@@ -272,7 +283,7 @@ export default function AnnouncementsManager() {
                 rows={3}
                 value={msgText}
                 onChange={(e) => setMsgText(e.target.value)}
-                placeholder="FBR has extended the statutory filing deadline to October 31, 2024. Visit Chamber 121 for fast-track processing."
+                placeholder="Add a concise public notice, filing update, or office announcement here."
                 className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
               />
             </div>
@@ -284,7 +295,7 @@ export default function AnnouncementsManager() {
               </label>
               <select
                 value={tone}
-                onChange={(e) => setTone(e.target.value as any)}
+                onChange={(e) => setTone(e.target.value as AnnouncementTone)}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:border-[#075e38] focus:outline-none"
               >
                 <option value="warning">Warning (Amber)</option>

@@ -10,7 +10,11 @@ import { SITE } from "@/lib/site";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectedFrom = searchParams.get("redirectedFrom") || "/admin";
+  const requestedPath = searchParams.get("redirectedFrom");
+  const redirectedFrom =
+    requestedPath?.startsWith("/admin") && !requestedPath.startsWith("//")
+      ? requestedPath
+      : "/admin";
   const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -19,7 +23,9 @@ function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(
     urlError === "unauthorized"
       ? "Access denied. Your account does not have administrator privileges."
-      : null
+      : urlError === "configuration"
+        ? "Admin access is unavailable until Supabase environment variables are configured."
+        : null
   );
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -91,7 +97,7 @@ function LoginForm() {
       {/* Form */}
       <form onSubmit={handleLogin} className="mt-6 space-y-4">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
+          <label htmlFor="admin-email" className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
             Admin Email
           </label>
           <div className="relative">
@@ -99,6 +105,7 @@ function LoginForm() {
               <Mail className="h-4 w-4" />
             </span>
             <input
+              id="admin-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -106,12 +113,13 @@ function LoginForm() {
               required
               className="w-full rounded-lg border border-white/15 bg-white/[0.06] py-2.5 pl-9 pr-3.5 text-sm text-white placeholder-white/30 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20"
               disabled={isLoading}
+              autoComplete="username"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
+          <label htmlFor="admin-password" className="block text-xs font-semibold uppercase tracking-wider text-white/75 mb-1.5">
             Password
           </label>
           <div className="relative">
@@ -119,6 +127,7 @@ function LoginForm() {
               <Lock className="h-4 w-4" />
             </span>
             <input
+              id="admin-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -126,6 +135,7 @@ function LoginForm() {
               required
               className="w-full rounded-lg border border-white/15 bg-white/[0.06] py-2.5 pl-9 pr-3.5 text-sm text-white placeholder-white/30 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/20"
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
         </div>

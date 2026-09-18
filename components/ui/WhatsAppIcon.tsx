@@ -3,7 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 export function WhatsAppIcon({
   className = "h-4 w-4",
@@ -89,7 +89,7 @@ export function FloatingWhatsApp() {
         <span className="absolute inset-0 -z-10 rounded-full bg-[#25D366] opacity-75 animate-ping" />
         
         {/* Official WhatsApp Icon */}
-        <WhatsAppIcon className={iconSizes_7} />
+        <WhatsAppIcon className={floatingIconSize} />
 
         {/* Floating Tooltip Pill on Hover */}
         <span className="absolute right-16 rtl:right-auto rtl:left-16 hidden sm:inline-flex whitespace-nowrap rounded-lg bg-navy-900/90 dark:bg-black/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none border border-white/10">
@@ -100,6 +100,6 @@ export function FloatingWhatsApp() {
   );
 }
 
-const iconSizes_7 = "h-7 w-7";
+const floatingIconSize = "h-7 w-7";
 
 export default WhatsAppIcon;

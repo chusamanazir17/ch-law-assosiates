@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Playfair_Display } from "next/font/google";
-import ThemeRegistry from "@/theme/ThemeRegistry";
+import AppProviders from "@/providers/AppProviders";
 import AnnouncementBanner from "@/components/layout/AnnouncementBanner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
 import JsonLd from "@/components/seo/JsonLd";
 import { FloatingWhatsApp } from "@/components/ui/WhatsAppIcon";
+import { getSiteUrl } from "@/config/env";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,7 +24,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chcomposing.pk'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Ch Composing Estamp and Tax Advisor | Professional Legal Documentation & Tax Services",
     template: "%s | Ch Composing Estamp and Tax Advisor",
@@ -73,18 +75,18 @@ export default function RootLayout({
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
-      <body className={`${inter.variable} ${playfair.variable}`}>
+      <body className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded-md focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">Skip to content</a>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('legalassist_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+        <Script id="theme-init" strategy="beforeInteractive">{`(function(){try{var t=localStorage.getItem('ch_composing_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})();`}</Script>
         <JsonLd />
-        <ThemeRegistry>
+        <AppProviders>
           <AnnouncementBanner />
           <ScrollProgress />
           <Header />
           <main id="main-content">{children}</main>
           <Footer />
           <FloatingWhatsApp />
-        </ThemeRegistry>
+        </AppProviders>
       </body>
     </html>
   );

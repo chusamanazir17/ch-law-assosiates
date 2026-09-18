@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, type Variants } from "framer-motion";
+import { motion, useInView, useReducedMotion, type Variants } from "framer-motion";
 import { useRef, type ReactNode } from "react";
 
 type FadeInProps = {
@@ -42,6 +42,7 @@ export default function FadeIn({
   // Trigger 80px before entering viewport so scrolling is completely fluid and un-interrupted
   const inView = useInView(ref, { once, margin: "80px 0px 0px 0px" });
   const MotionTag = motion[as] as typeof motion.div;
+  const prefersReducedMotion = useReducedMotion();
 
   const variants: Variants = {
     hidden: { opacity: 0, ...offset(direction, distance) },
@@ -62,8 +63,8 @@ export default function FadeIn({
       ref={ref}
       className={`${className} transform-gpu`}
       variants={variants}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
+      initial={prefersReducedMotion ? "visible" : "hidden"}
+      animate={prefersReducedMotion || inView ? "visible" : "hidden"}
     >
       {children}
     </MotionTag>

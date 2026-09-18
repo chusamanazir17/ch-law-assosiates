@@ -24,10 +24,14 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
+import type { ConsultationInquiry, Post, SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
+
+type DashboardPost = Pick<Post, "id" | "title" | "slug" | "category" | "status" | "views_count" | "created_at" | "published_at">;
+type DashboardInquiry = Pick<ConsultationInquiry, "id" | "name" | "phone" | "service_needed" | "status" | "created_at" | "message">;
 
 export default function AdminOverview() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Email Signups Telemetry State
   const [subscriberAnalytics, setSubscriberAnalytics] = useState<SubscriberAnalytics>({
@@ -42,8 +46,8 @@ export default function AdminOverview() {
 
   // CMS Metrics State
   const [cmsStats, setCmsStats] = useState({
-    totalPosts: 2,
-    publishedPosts: 2,
+    totalPosts: 0,
+    publishedPosts: 0,
     draftPosts: 0,
     totalMedia: 0,
     newInquiries: 0,
@@ -51,20 +55,20 @@ export default function AdminOverview() {
   });
 
   // Tax Deadlines & Activity
-  const [upcomingDeadlines, setUpcomingDeadlines] = useState<any[]>([]);
-  const [recentDeliveries, setRecentDeliveries] = useState<any[]>([]);
-  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
-  const [recentPosts, setRecentPosts] = useState<any[]>([]);
+  const [recentInquiries, setRecentInquiries] = useState<DashboardInquiry[]>([]);
+  const [recentPosts, setRecentPosts] = useState<DashboardPost[]>([]);
 
   const loadData = async () => {
     setIsLoading(true);
+    setLoadError(null);
     const supabase = createClient();
 
     try {
       // 1. Email Signups Telemetry
-      const { data: allSubscribers } = await supabase
+      const { data: allSubscribers, error: subscribersError } = await supabase
         .from("subscribers")
         .select("id, name, email, status, created_at");
+      if (subscribersError) throw subscribersError;
 
       const subscribers = allSubscribers || [];
       const totalEmails = subscribers.length;
@@ -74,13 +78,15 @@ export default function AdminOverview() {
       const suppressedCount = subscribers.filter((s) => s.status === "suppressed").length;
 
       // Category breakdown
-      const { data: catData } = await supabase
+      const { data: catData, error: categoriesError } = await supabase
         .from("tax_categories")
         .select("id, name");
+      if (categoriesError) throw categoriesError;
 
-      const { data: subCats } = await supabase
+      const { data: subCats, error: subscriberCategoriesError } = await supabase
         .from("subscriber_categories")
         .select("category_id");
+      if (subscriberCategoriesError) throw subscriberCategoriesError;
 
       const categoryBreakdown = (catData || []).map((cat) => {
         const count = (subCats || []).filter((sc) => sc.category_id === cat.id).length;
@@ -116,37 +122,41 @@ export default function AdminOverview() {
       });
 
       // 2. CMS Stats
-      const { data: posts } = await supabase
+      const { data: posts, error: postsError } = await supabase
         .from("posts")
         .select("id, title, slug, category, status, views_count, created_at, published_at")
         .order("created_at", { ascending: false });
+      if (postsError) throw postsError;
 
       const postsList = posts || [];
-      const totalPosts = postsList.length || 6;
-      const publishedPosts = postsList.filter((p) => p.status === "published").length || 3;
+      const totalPosts = postsList.length;
+      const publishedPosts = postsList.filter((p) => p.status === "published").length;
       const draftPosts = totalPosts - publishedPosts;
       setRecentPosts(postsList.slice(0, 4));
 
-      const { count: mediaCount } = await supabase
+      const { count: mediaCount, error: mediaError } = await supabase
         .from("media_assets")
         .select("*", { count: "exact", head: true });
+      if (mediaError) throw mediaError;
 
-      const { data: inquiries } = await supabase
+      const { data: inquiries, error: inquiriesError } = await supabase
         .from("consultation_inquiries")
         .select("id, name, phone, service_needed, status, created_at, message")
         .order("created_at", { ascending: false });
+      if (inquiriesError) throw inquiriesError;
 
       const inquiriesList = inquiries || [];
       const newInquiries = inquiriesList.filter((i) => i.status === "new").length;
       setRecentInquiries(inquiriesList.slice(0, 4));
 
-      const { data: activeNotice } = await supabase
+      const { data: activeNotice, error: noticeError } = await supabase
         .from("site_announcements")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+      if (noticeError) throw noticeError;
 
       setCmsStats({
         totalPosts,
@@ -157,19 +167,9 @@ export default function AdminOverview() {
         activeNotice: activeNotice || null,
       });
 
-      // 3. Upcoming Tax Deadlines
-      const today = new Date().toISOString().split("T")[0];
-      const { data: dls } = await supabase
-        .from("tax_deadlines")
-        .select("id, title, tax_year, filing_deadline, is_statutory_verified")
-        .eq("is_active", true)
-        .gte("filing_deadline", today)
-        .order("filing_deadline", { ascending: true })
-        .limit(4);
-
-      setUpcomingDeadlines(dls || []);
     } catch (err) {
       console.error("[CMS AdminOverview Error]", err);
+      setLoadError("Dashboard data could not be loaded. Check the Supabase connection and administrator permissions, then retry.");
     } finally {
       setIsLoading(false);
     }
@@ -226,6 +226,13 @@ export default function AdminOverview() {
           </button>
         </div>
       </div>
+
+      {loadError && (
+        <div role="alert" className="flex items-start justify-between gap-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          <span>{loadError}</span>
+          <button type="button" onClick={loadData} className="shrink-0 font-semibold underline underline-offset-2">Retry</button>
+        </div>
+      )}
 
       {/* 1. HERO SECTION: EMAIL SIGNUPS TELEMETRY */}
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-2xs">
@@ -451,10 +458,12 @@ export default function AdminOverview() {
           </div>
           <div className="mt-4">
             <p className="text-[14px] font-bold text-slate-900 tracking-tight truncate">
-              {cmsStats.activeNotice ? cmsStats.activeNotice.title : "FBR Income Tax Filing Alert"}
+              {cmsStats.activeNotice ? cmsStats.activeNotice.title : "No active site announcement"}
             </p>
             <p className="mt-0.5 text-xs font-semibold text-slate-800">Site Notice / Ticker</p>
-            <p className="text-[11.5px] text-slate-500 mt-0.5">Currently live on site</p>
+            <p className="text-[11.5px] text-slate-500 mt-0.5">
+              {cmsStats.activeNotice ? "Currently live on site" : "Nothing is currently published"}
+            </p>
           </div>
         </Link>
       </div>

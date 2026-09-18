@@ -482,6 +482,16 @@ export type Database = {
         };
         Returns: boolean;
       };
+      submit_consultation_inquiry: {
+        Args: {
+          p_name: string;
+          p_phone: string;
+          p_service_needed: string;
+          p_message: string;
+          p_rate_key: string;
+        };
+        Returns: string;
+      };
       claim_reminder_deliveries: {
         Args: {
           p_batch_size?: number;

@@ -24,7 +24,7 @@ export interface SubscriberWithCategories extends Subscriber {
 }
 
 export interface DeadlineWithCategory extends TaxDeadline {
-  category?: TaxCategory;
+  category?: Pick<TaxCategory, "id" | "name" | "slug">;
 }
 
 export interface DeliveryWithDetails extends ReminderDelivery {

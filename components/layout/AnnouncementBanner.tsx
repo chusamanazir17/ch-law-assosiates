@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Megaphone, AlertTriangle, ShieldAlert, Info, X, ExternalLink } from "lucide-react";
+import { Megaphone, AlertTriangle, ShieldAlert, Info, X, ExternalLink, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { SiteAnnouncement } from "@/types/cms";
 
@@ -30,8 +30,8 @@ export default function AnnouncementBanner() {
             setAnnouncement(data[0]);
           }
         }
-      } catch (err) {
-        // Non-fatal
+      } catch {
+        // Announcement loading is optional and must not block page rendering.
       }
     };
 
@@ -50,7 +50,7 @@ export default function AnnouncementBanner() {
   }
 
   // Tone styles
-  const toneClasses: Record<string, { bg: string; border: string; text: string; icon: any }> = {
+  const toneClasses: Record<string, { bg: string; border: string; text: string; icon: LucideIcon }> = {
     warning: {
       bg: "bg-amber-600/90 text-white",
       border: "border-b border-amber-500",

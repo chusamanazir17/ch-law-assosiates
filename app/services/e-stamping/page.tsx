@@ -13,8 +13,8 @@ import Stagger from "@/components/motion/Stagger";
 import FadeIn from "@/components/motion/FadeIn";
 import { ContactCards } from "@/components/ui/ContactBlocks";
 import { HERO_IMAGES, SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
-import { useAppTheme } from "@/lib/ThemeContext";
+import { useLanguage } from "@/providers/LanguageProvider";
+import { useAppTheme } from "@/providers/ThemeProvider";
 
 const cardIcons = [Stamp, Scale, Home, Handshake, Landmark, ShieldCheck];
 const featureIcons = [FileCheck2, BadgeCheck, Clock3];

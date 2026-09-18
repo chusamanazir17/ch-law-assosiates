@@ -12,7 +12,7 @@ import FadeIn from "@/components/motion/FadeIn";
 import SplitShowcase from "@/components/ui/SplitShowcase";
 import { ContactCards } from "@/components/ui/ContactBlocks";
 import { HERO_IMAGES, SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 const cardIcons = [FileSignature, Send, SearchCheck, Landmark, ScrollText, FileKey];
 const featureIcons = [ShieldCheck, PenLine, Landmark, AlertTriangle];

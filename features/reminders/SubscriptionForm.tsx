@@ -8,11 +8,11 @@ import type { TaxCategory } from "@/types/reminders";
 
 // Fallback initial categories if DB is loading or empty in dev
 const FALLBACK_CATEGORIES: TaxCategory[] = [
-  { id: "1", name: "Income Tax - Individuals & Salaried", slug: "income-tax-individuals", description: "Annual FBR returns", is_active: true, sort_order: 1, created_at: "", updated_at: "" },
-  { id: "2", name: "Business & Corporate Tax", slug: "business-corporate-tax", description: "AOP, Sole Proprietor, Private Ltd", is_active: true, sort_order: 2, created_at: "", updated_at: "" },
-  { id: "3", name: "Sales Tax (Federal & PRA)", slug: "sales-tax-pra", description: "Monthly sales tax returns", is_active: true, sort_order: 3, created_at: "", updated_at: "" },
-  { id: "4", name: "Withholding Tax Statements", slug: "withholding-tax", description: "Periodic withholding statements", is_active: true, sort_order: 4, created_at: "", updated_at: "" },
-  { id: "5", name: "Property & Capital Value Tax", slug: "property-tax-stamp-duty", description: "E-Stamp duty and transfer deadlines", is_active: true, sort_order: 5, created_at: "", updated_at: "" },
+  { id: "income-tax-individuals", name: "Income Tax - Individuals & Salaried", slug: "income-tax-individuals", description: "Annual FBR returns", is_active: true, sort_order: 1, created_at: "", updated_at: "" },
+  { id: "business-corporate-tax", name: "Business & Corporate Tax", slug: "business-corporate-tax", description: "AOP, Sole Proprietor, Private Ltd", is_active: true, sort_order: 2, created_at: "", updated_at: "" },
+  { id: "sales-tax-pra", name: "Sales Tax (Federal & PRA)", slug: "sales-tax-pra", description: "Monthly sales tax returns", is_active: true, sort_order: 3, created_at: "", updated_at: "" },
+  { id: "withholding-tax", name: "Withholding Tax Statements", slug: "withholding-tax", description: "Periodic withholding statements", is_active: true, sort_order: 4, created_at: "", updated_at: "" },
+  { id: "property-tax-stamp-duty", name: "Property & Capital Value Tax", slug: "property-tax-stamp-duty", description: "E-Stamp duty and transfer deadlines", is_active: true, sort_order: 5, created_at: "", updated_at: "" },
 ];
 
 export default function SubscriptionForm() {
@@ -22,7 +22,7 @@ export default function SubscriptionForm() {
   // Form fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(["1", "2"]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [consent, setConsent] = useState(true);
   const [honeypot, setHoneypot] = useState(""); // Hidden spam honeypot
 
@@ -38,7 +38,7 @@ export default function SubscriptionForm() {
       const data = await getActiveTaxCategories();
       const loadedCats = data && data.length > 0 ? data : FALLBACK_CATEGORIES;
       setCategories(loadedCats);
-      setSelectedCategories((prev) => (prev.length === 0 ? loadedCats.slice(0, 2).map((c) => c.id) : prev));
+      setSelectedCategories(loadedCats.slice(0, 2).map((c) => c.id));
       setIsLoadingCategories(false);
     }
     load();
@@ -161,7 +161,7 @@ export default function SubscriptionForm() {
         {/* Name Field */}
         <div>
           <label htmlFor="reminder_name" className="block text-xs font-semibold uppercase tracking-wider text-white/80">
-            Full Name <span className="text-white/40 text-[11px] font-normal lowercase">(optional)</span>
+            Full Name <span className="text-gold-400">*</span>
           </label>
           <div className="relative mt-1.5">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
@@ -182,6 +182,8 @@ export default function SubscriptionForm() {
                   : "border-white/15 focus:border-gold-400/60 focus:ring-gold-400/20"
               }`}
               disabled={isSubmitting}
+              required
+              autoComplete="name"
             />
           </div>
           {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
@@ -212,6 +214,7 @@ export default function SubscriptionForm() {
               }`}
               disabled={isSubmitting}
               required
+              autoComplete="email"
             />
           </div>
           {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}

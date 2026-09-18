@@ -26,7 +26,7 @@ export function validateDeadlineForm(data: DeadlineFormData): {
   }
 
   if (!data.tax_year_or_period?.trim()) {
-    errors.tax_year_or_period = "Please specify the tax year or period (e.g. 'Tax Year 2024').";
+    errors.tax_year_or_period = "Please specify the tax year or period (e.g. 'Tax Year 2026').";
   }
 
   if (!data.filing_deadline) {

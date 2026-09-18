@@ -11,214 +11,175 @@ const GENERIC_RESPONSE = {
   message: "If this email address is valid, a confirmation link has been sent to your inbox.",
 };
 
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req: Request) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   try {
     const body = await req.json();
     const { name, email, category_ids, consent, hp_company } = body;
 
-    // 1. Spam Honeypot Protection
+    // Honeypot requests receive a generic success response and no database write.
     if (hp_company) {
       console.warn("[Spam Protection] Honeypot triggered.");
-      return new Response(JSON.stringify(GENERIC_RESPONSE), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(GENERIC_RESPONSE);
     }
 
-    // 2. Input Validation
     const clientName = sanitizeName(name);
     if (!clientName) {
-      return new Response(JSON.stringify({ success: false, error: "Please provide your full name." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ success: false, error: "Please provide your full name." }, 400);
     }
 
     if (!isValidEmail(email)) {
-      return new Response(JSON.stringify({ success: false, error: "Please enter a valid email address." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ success: false, error: "Please enter a valid email address." }, 400);
     }
 
     if (!consent) {
-      return new Response(JSON.stringify({ success: false, error: "Consent is required to receive tax deadline reminders." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse(
+        { success: false, error: "Consent is required to receive tax deadline reminders." },
+        400,
+      );
     }
 
-    if (!Array.isArray(category_ids) || category_ids.length === 0) {
-      return new Response(JSON.stringify({ success: false, error: "Please select at least one tax category." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!Array.isArray(category_ids) || category_ids.length === 0 || category_ids.length > 20) {
+      return jsonResponse(
+        { success: false, error: "Please select between 1 and 20 tax categories." },
+        400,
+      );
+    }
+
+    const requestedCategoryIds = [
+      ...new Set(
+        category_ids.filter(
+          (id: unknown): id is string => typeof id === "string" && id.trim().length > 0,
+        ),
+      ),
+    ];
+
+    if (requestedCategoryIds.length !== category_ids.length) {
+      return jsonResponse({ success: false, error: "Invalid tax categories selected." }, 400);
     }
 
     const supabase = getSupabaseAdmin();
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown-ip";
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 3. Persistent Server-side Rate Limiting
-    const { data: ipAllowed } = await supabase.rpc("check_rate_limit", {
-      p_key: `sub_ip_${clientIp}`,
-      p_max_requests: 6,
-      p_window_seconds: 300, // max 6 per 5 minutes per IP
-    });
+    // Persistent server-side rate limiting.
+    const ipRateKey = await hashToken(clientIp);
+    const emailRateKey = await hashToken(normalizedEmail);
 
-    const { data: emailAllowed } = await supabase.rpc("check_rate_limit", {
-      p_key: `sub_email_${normalizedEmail}`,
-      p_max_requests: 3,
-      p_window_seconds: 3600, // max 3 per hour per email
+    const { data: ipAllowed, error: ipRateError } = await supabase.rpc("check_rate_limit", {
+      p_key: `sub_ip_${ipRateKey}`,
+      p_max_requests: 6,
+      p_window_seconds: 300,
     });
+    if (ipRateError) throw ipRateError;
+
+    const { data: emailAllowed, error: emailRateError } = await supabase.rpc("check_rate_limit", {
+      p_key: `sub_email_${emailRateKey}`,
+      p_max_requests: 3,
+      p_window_seconds: 3600,
+    });
+    if (emailRateError) throw emailRateError;
 
     if (ipAllowed === false || emailAllowed === false) {
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        {
           success: false,
           error: "Too many subscription requests. Please wait a few minutes before trying again.",
-        }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
+        429,
       );
     }
 
-    // 4. Verify Active Categories
-    const { data: validCategories, error: catError } = await supabase
+    // Verify that every requested category exists and is currently active.
+    const { data: validCategories, error: categoryError } = await supabase
       .from("tax_categories")
       .select("id, name")
-      .in("id", category_ids)
+      .in("id", requestedCategoryIds)
       .eq("is_active", true);
 
-    if (catError || !validCategories || validCategories.length === 0) {
-      return new Response(JSON.stringify({ success: false, error: "Invalid tax categories selected." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (categoryError) throw categoryError;
+    if (!validCategories || validCategories.length !== requestedCategoryIds.length) {
+      return jsonResponse({ success: false, error: "Invalid tax categories selected." }, 400);
     }
 
-    const validCategoryIds = validCategories.map((c) => c.id);
-    const categoryNames = validCategories.map((c) => c.name);
+    const validCategoryIds = validCategories.map((category) => category.id);
+    const categoryNames = validCategories.map((category) => category.name);
 
-    // 5. Check Existing Subscriber
-    const { data: existingSubscriber } = await supabase
-      .from("subscribers")
-      .select("id, name, email, status")
-      .eq("email", normalizedEmail)
-      .maybeSingle();
-
-    const siteUrl = Deno.env.get("SITE_URL") || "http://localhost:3000";
+    const siteUrl = (Deno.env.get("SITE_URL") || "https://chcomposing.pk").replace(/\/$/, "");
     const rawToken = generateToken(32);
     const tokenHash = await hashToken(rawToken);
-    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
-    let subscriberId: string;
+    // This RPC creates/updates the pending subscription and token atomically.
+    const { data: preparedRows, error: prepareError } = await supabase.rpc(
+      "prepare_subscription_request",
+      {
+        p_name: clientName,
+        p_email: normalizedEmail,
+        p_category_ids: validCategoryIds,
+        p_token_hash: tokenHash,
+        p_expires_at: expiresAt,
+      },
+    );
+    if (prepareError) throw prepareError;
 
-    if (!existingSubscriber) {
-      // Create new pending subscriber
-      const { data: newSub, error: subError } = await supabase
-        .from("subscribers")
-        .insert({
-          name: clientName,
-          email: normalizedEmail,
-          status: "pending",
-          consent_at: new Date().toISOString(),
-          consent_text_version: "v1.0",
-        })
-        .select("id")
-        .single();
-
-      if (subError || !newSub) {
-        throw new Error(`Failed to create subscriber: ${subError?.message}`);
-      }
-
-      subscriberId = newSub.id;
-
-      // Link categories
-      const categoryRows = validCategoryIds.map((catId) => ({
-        subscriber_id: subscriberId,
-        category_id: catId,
-      }));
-      await supabase.from("subscriber_categories").insert(categoryRows);
-
-      // Store confirmation token
-      await supabase.from("subscription_tokens").insert({
-        subscriber_id: subscriberId,
-        token_hash: tokenHash,
-        purpose: "confirmation",
-        metadata: { category_ids: validCategoryIds },
-        expires_at: expiresAt,
-      });
-    } else if (existingSubscriber.status === "suppressed") {
-      // Suppressed addresses (hard bounce/spam complaint) should not be sent emails
-      return new Response(JSON.stringify(GENERIC_RESPONSE), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } else {
-      // Existing subscriber (active, pending, or unsubscribed)
-      subscriberId = existingSubscriber.id;
-
-      // Revoke any older pending tokens
-      await supabase
-        .from("subscription_tokens")
-        .update({ revoked_at: new Date().toISOString() })
-        .eq("subscriber_id", subscriberId)
-        .eq("purpose", "confirmation")
-        .is("used_at", null);
-
-      // Store new confirmation token with requested categories
-      await supabase.from("subscription_tokens").insert({
-        subscriber_id: subscriberId,
-        token_hash: tokenHash,
-        purpose: "confirmation",
-        metadata: { category_ids: validCategoryIds, proposed_name: clientName },
-        expires_at: expiresAt,
-      });
+    const prepared = Array.isArray(preparedRows) ? preparedRows[0] : preparedRows;
+    if (!prepared) {
+      throw new Error("Subscription preparation returned no result.");
     }
 
-    // 6. Send Double Opt-in Confirmation Email
-    const confirmUrl = `${siteUrl}/reminders/confirm?token=${rawToken}`;
+    // Suppressed addresses intentionally receive no indication that they exist.
+    if (prepared.is_suppressed || prepared.should_send === false) {
+      return jsonResponse(GENERIC_RESPONSE);
+    }
+
+    const confirmUrl = `${siteUrl}/reminders/confirm?token=${encodeURIComponent(rawToken)}`;
     const emailContent = renderConfirmationEmail({
       name: clientName,
       confirmUrl,
       categories: categoryNames,
     });
 
-    await sendEmail({
+    const sendResult = await sendEmail({
       to: normalizedEmail,
       subject: emailContent.subject,
       html: emailContent.html,
       text: emailContent.text,
     });
 
-    return new Response(JSON.stringify(GENERIC_RESPONSE), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    if (!sendResult.success) {
+      console.error("[Subscribe] Confirmation email dispatch failed:", sendResult.error);
+      return jsonResponse(
+        {
+          success: false,
+          error: "Confirmation email is temporarily unavailable. Please try again later.",
+        },
+        503,
+      );
+    }
+
+    return jsonResponse(GENERIC_RESPONSE);
   } catch (err: unknown) {
     console.error("[Subscribe Error]", err);
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      {
         success: false,
         error: "Unable to process subscription at this time. Please try again later.",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
+      500,
     );
   }
 });

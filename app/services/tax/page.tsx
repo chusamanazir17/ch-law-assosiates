@@ -11,7 +11,7 @@ import Stagger from "@/components/motion/Stagger";
 import FadeIn from "@/components/motion/FadeIn";
 import { ConsultationPanel } from "@/components/ui/ContactBlocks";
 import { HERO_IMAGES, SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 const cardIcons = [ContactRound, FileSpreadsheet, TrendingUp, BadgePercent, FileSearch2, Building2];
 const featureIcons = [ShieldCheck, Receipt];

@@ -27,6 +27,11 @@ import { createClient } from "@/lib/supabase/client";
 import type { SubscriberWithCategories, TaxCategory } from "@/types/reminders";
 
 const PAGE_SIZE = 12;
+type SubscriberTab = "all" | "active" | "pending" | "unsubscribed";
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function SubscribersManager() {
   const [allSubscribers, setAllSubscribers] = useState<SubscriberWithCategories[]>([]);
@@ -34,24 +39,27 @@ export default function SubscribersManager() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filters
-  const [activeTab, setActiveTab] = useState<"all" | "active" | "pending" | "unsubscribed">("all");
+  const [activeTab, setActiveTab] = useState<SubscriberTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const [isLoading, setIsLoading] = useState(true);
-  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Load available categories
   useEffect(() => {
     async function fetchCats() {
       const supabase = createClient();
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("tax_categories")
         .select("*")
         .order("sort_order", { ascending: true });
-      if (data && data.length > 0) {
-        setCategories(data);
+      if (error) {
+        console.error("[Subscriber Categories Fetch Error]", error);
+        setActionFeedback({ type: "error", message: "Tax categories could not be loaded." });
+        return;
       }
+      setCategories(data || []);
     }
     fetchCats();
   }, []);
@@ -71,6 +79,7 @@ export default function SubscribersManager() {
       setAllSubscribers(data.subscribers || []);
     } catch (err) {
       console.error("[Subscribers Fetch Error]", err);
+      setActionFeedback({ type: "error", message: getErrorMessage(err, "Failed to load subscribers.") });
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +103,13 @@ export default function SubscribersManager() {
     () => allSubscribers.filter((s) => s.status === "unsubscribed").length,
     [allSubscribers]
   );
+
+  const statusTabs: Array<{ key: SubscriberTab; label: string; count: number }> = [
+    { key: "all", label: "All subscribers", count: totalCount },
+    { key: "active", label: "Active", count: activeCount },
+    { key: "pending", label: "Pending", count: pendingCount },
+    { key: "unsubscribed", label: "Unsubscribed", count: unsubscribedCount },
+  ];
 
   // Filtered subscribers
   const filteredSubscribers = useMemo(() => {
@@ -143,17 +159,17 @@ export default function SubscribersManager() {
         throw new Error(data.error || "Failed to unsubscribe");
       }
 
-      setActionFeedback(`Subscriber ${email} marked as unsubscribed.`);
+      setActionFeedback({ type: "success", message: `Subscriber ${email} marked as unsubscribed.` });
       fetchSubscribers();
-    } catch (err: any) {
-      alert(err.message || "Failed to unsubscribe client.");
+    } catch (error) {
+      setActionFeedback({ type: "error", message: getErrorMessage(error, "Failed to unsubscribe client.") });
     }
   };
 
   // CSV Export for office bookkeeping
   const handleExportCSV = () => {
     if (filteredSubscribers.length === 0) {
-      alert("No records to export.");
+      setActionFeedback({ type: "error", message: "No subscriber records match the current filters." });
       return;
     }
 
@@ -177,6 +193,7 @@ export default function SubscribersManager() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const getStatusBadge = (status: string) => {
@@ -274,9 +291,20 @@ export default function SubscribersManager() {
 
       {/* Action feedback toast */}
       {actionFeedback && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5 text-xs text-emerald-900 flex items-center gap-2.5 shadow-2xs">
-          <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
-          <span>{actionFeedback}</span>
+        <div
+          role="status"
+          className={`rounded-xl border p-3.5 text-xs flex items-center gap-2.5 shadow-2xs ${
+            actionFeedback.type === "success"
+              ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
+              : "border-rose-200 bg-rose-50 text-rose-800"
+          }`}
+        >
+          {actionFeedback.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+          ) : (
+            <Ban className="h-4 w-4 text-rose-600 shrink-0" />
+          )}
+          <span>{actionFeedback.message}</span>
         </div>
       )}
 
@@ -314,7 +342,7 @@ export default function SubscribersManager() {
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-600" /> : activeCount}
             </span>
             <span className="inline-flex items-center rounded-full bg-[#eef7f2] border border-emerald-200/60 px-2 py-0.5 text-[11px] font-semibold text-[#075e38]">
-              {totalCount > 0 ? `${Math.round((activeCount / totalCount) * 100)}% active` : "100%"}
+              {totalCount > 0 ? `${Math.round((activeCount / totalCount) * 100)}% active` : "0%"}
             </span>
           </div>
           <p className="text-[12px] text-slate-500 truncate">
@@ -353,7 +381,7 @@ export default function SubscribersManager() {
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold tracking-tight text-slate-900">
-              {categories.length || 5}
+              {categories.length}
             </span>
             <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
               Active schedules
@@ -368,18 +396,13 @@ export default function SubscribersManager() {
       {/* Status Filter Tabs matching Dashboard & PostsManager */}
       <div className="border-b border-slate-200">
         <nav className="flex space-x-6 text-[14px]">
-          {[
-            { key: "all", label: "All subscribers", count: totalCount },
-            { key: "active", label: "Active", count: activeCount },
-            { key: "pending", label: "Pending", count: pendingCount },
-            { key: "unsubscribed", label: "Unsubscribed", count: unsubscribedCount },
-          ].map((tab) => {
+          {statusTabs.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => {
-                  setActiveTab(tab.key as any);
+                  setActiveTab(tab.key);
                   setCurrentPage(1);
                 }}
                 className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${

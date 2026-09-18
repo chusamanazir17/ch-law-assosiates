@@ -40,7 +40,8 @@ Deno.serve(async (req: Request) => {
     const adminId = userData.user.id;
 
     // 2. Verify Admin Membership
-    const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: adminId });
+    const { data: isAdmin, error: adminCheckError } = await supabase.rpc("is_admin", { p_user_id: adminId });
+    if (adminCheckError) throw adminCheckError;
     if (!isAdmin) {
       return new Response(JSON.stringify({ error: "Unauthorized. Admin privileges required." }), {
         status: 403,
@@ -79,7 +80,10 @@ Deno.serve(async (req: Request) => {
     }
 
     const daysRemaining = reminder_interval === "30_days" ? 30 : 7;
-    const categoryName = (deadline.tax_categories as any)?.name || "General Tax";
+    const relation = deadline.tax_categories as { name?: string } | Array<{ name?: string }> | null;
+    const categoryName = Array.isArray(relation)
+      ? relation[0]?.name || "General Tax"
+      : relation?.name || "General Tax";
 
     const emailContent = renderTestReminderEmail({
       adminEmail,

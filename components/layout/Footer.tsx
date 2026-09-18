@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,26 +9,33 @@ import {
   Phone,
   Mail,
   Clock,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Twitter,
   X,
   ShieldCheck,
   FileText,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 import Logo from "./Logo";
 
 export default function Footer() {
   const pathname = usePathname() || "";
+  const { isUrdu, t } = useLanguage();
+  const [policyType, setPolicyType] = useState<"privacy" | "terms" | null>(null);
+
+  useEffect(() => {
+    if (!policyType) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPolicyType(null);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [policyType]);
+
   if (pathname.startsWith("/admin")) {
     return null;
   }
-
-  const { isUrdu, t } = useLanguage();
-  const [policyType, setPolicyType] = useState<"privacy" | "terms" | null>(null);
 
   const quickLinks = [
     { label: t.common.home, href: "/" },
@@ -37,14 +44,6 @@ export default function Footer() {
     { label: isUrdu ? "بزنس و کمپنی رجسٹریشن" : "Business Registration", href: "/services/business-registration" },
     { label: isUrdu ? "ٹیکس سروسز (FBR)" : "Tax Services", href: "/services/tax" },
     { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/#about" },
-  ];
-
-  // TODO: Replace with actual social media profile URLs before production launch
-  const socials = [
-    { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
-    { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
-    { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com" },
-    { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
   ];
 
   return (
@@ -110,7 +109,7 @@ export default function Footer() {
                 <span>{isUrdu ? "پیر تا جمعہ: 9:00 بجے صبح تا 6:00 بجے شام" : SITE.hours.weekdays}</span>
               </li>
               <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
-                {isUrdu ? "ہفتہ: 10:00 بجے صبح تا 2:00 بجے دوپہر" : SITE.hours.saturday}
+                {isUrdu ? "ہفتہ: 9:00 بجے صبح تا 3:00 بجے دوپہر" : SITE.hours.saturday}
               </li>
               <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
                 {isUrdu ? "اتوار: بند ہے" : SITE.hours.sunday}
@@ -137,26 +136,30 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Social */}
+          {/* Direct assistance */}
           <div>
             <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
-              {t.footer.followUs}
+              {isUrdu ? "براہ راست رابطہ" : "Direct assistance"}
             </h4>
-            <div className="flex gap-3">
-              {socials.map(({ icon: Icon, label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-400 text-white transition-all duration-300 hover:-translate-y-1 hover:bg-gold-500 hover:shadow-lg hover:shadow-gold-400/40 focus-visible:ring-2 focus-visible:ring-gold-400 focus:outline-none"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
+            <div className="grid gap-2.5">
+              <a
+                href={SITE.phoneHref}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-navy-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 dark:bg-white/10 dark:hover:bg-white/15"
+              >
+                <Phone className="h-4 w-4 text-gold-400" />
+                {isUrdu ? "ابھی کال کریں" : `Call ${SITE.phone}`}
+              </a>
+              <a
+                href={SITE.whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300"
+              >
+                <Phone className="h-4 w-4" />
+                {isUrdu ? "واٹس ایپ پر رابطہ" : "Message on WhatsApp"}
+              </a>
             </div>
-            <div className="mt-6 rounded-lg bg-navy-900/[0.04] dark:bg-white/[0.06] p-4 text-xs leading-relaxed text-navy-800/70 dark:text-slate-300 border border-navy-900/5 dark:border-white/5">
+            <div className="mt-4 rounded-lg border border-navy-900/5 bg-navy-900/[0.04] p-4 text-xs leading-relaxed text-navy-800/70 dark:border-white/5 dark:bg-white/[0.06] dark:text-slate-300">
               {t.footer.disclaimer}
             </div>
           </div>

@@ -8,22 +8,23 @@ import {
   Phone,
   MessageCircle,
   Clock,
-  CheckCircle2,
   Trash2,
-  User,
-  Calendar,
   Loader2,
-  MapPin,
-  ExternalLink,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ConsultationInquiry } from "@/types/cms";
+
+type InquiryStatus = ConsultationInquiry["status"];
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function InquiriesManager() {
   const [inquiries, setInquiries] = useState<ConsultationInquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | InquiryStatus>("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -38,8 +39,8 @@ export default function InquiriesManager() {
 
       if (error) throw error;
       setInquiries(data || []);
-    } catch (err: any) {
-      console.error("[Inquiries Load Error]", err);
+    } catch (error) {
+      console.error("[Inquiries Load Error]", error);
       setMessage({ type: "error", text: "Failed to load client inquiries." });
     } finally {
       setIsLoading(false);
@@ -52,7 +53,7 @@ export default function InquiriesManager() {
 
   const handleStatusChange = async (
     id: string,
-    newStatus: "new" | "in_progress" | "completed" | "archived"
+    newStatus: InquiryStatus
   ) => {
     setActionLoading(id);
     const supabase = createClient();
@@ -69,8 +70,8 @@ export default function InquiriesManager() {
         prev.map((inq) => (inq.id === id ? { ...inq, status: newStatus } : inq))
       );
       setMessage({ type: "success", text: `Status updated to ${newStatus}.` });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to update status." });
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Failed to update status.") });
     } finally {
       setActionLoading(null);
     }
@@ -90,8 +91,8 @@ export default function InquiriesManager() {
       if (error) throw error;
       setInquiries((prev) => prev.filter((i) => i.id !== id));
       setMessage({ type: "success", text: "Inquiry removed from inbox." });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message || "Failed to delete inquiry." });
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Failed to delete inquiry.") });
     } finally {
       setActionLoading(null);
     }
@@ -177,14 +178,14 @@ export default function InquiriesManager() {
           <Filter className="h-4 w-4 text-slate-400 shrink-0" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => setStatusFilter(e.target.value as "all" | InquiryStatus)}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs"
           >
             <option value="all">All Statuses</option>
             <option value="new">New</option>
-            <option value="contacted">Contacted</option>
+            <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="archived">Archived</option>
           </select>
         </div>
       </div>
@@ -295,7 +296,7 @@ export default function InquiriesManager() {
                       onChange={(e) =>
                         handleStatusChange(
                           inq.id,
-                          e.target.value as "new" | "in_progress" | "completed" | "archived"
+                          e.target.value as InquiryStatus
                         )
                       }
                       className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs"

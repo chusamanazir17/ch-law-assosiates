@@ -1,77 +1,113 @@
-import { NextRequest, NextResponse } from "next/server";
-import { addOrUpdateSubscriber, TAX_CATEGORY_MAP } from "@/lib/cms/subscribersStorage";
-import { sendAlertEmail } from "@/lib/email/emailService";
+import { NextResponse, type NextRequest } from "next/server";
+import { getSupabasePublicConfig } from "@/config/env";
+import { validateSubscription } from "@/lib/validation/subscription";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { name, email, category_ids, consent, hp_company } = body;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const GENERIC_SUCCESS = {
+  success: true,
+  message: "If this email address is valid, a confirmation link has been sent to your inbox.",
+};
 
-    // 1. Honeypot spam check
-    if (hp_company) {
-      return NextResponse.json({
-        success: true,
-        message: "Subscription confirmed! You will receive statutory tax deadline reminders.",
-      });
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+
+    // Honeypots must look successful to automated submitters.
+    if (typeof body.hp_company === "string" && body.hp_company.trim()) {
+      return NextResponse.json(GENERIC_SUCCESS);
     }
 
-    // 2. Validate email
-    const trimmedEmail = (email || "").trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const categoryIds = Array.isArray(body.category_ids)
+      ? body.category_ids.filter((id): id is string => typeof id === "string")
+      : [];
+    const consent = body.consent === true;
+
+    const validation = validateSubscription({ name, email, category_ids: categoryIds, consent });
+    if (!validation.isValid) {
       return NextResponse.json(
-        { success: false, error: "Please enter a valid email address (e.g. client@example.com)." },
+        { success: false, error: Object.values(validation.errors)[0] || "Invalid subscription request." },
         { status: 400 }
       );
     }
 
-    // 3. Resolve categories
-    let selectedIds: string[] = Array.isArray(category_ids) && category_ids.length > 0
-      ? category_ids
-      : ["1", "2", "3"]; // Default to primary tax categories if none ticked
+    const config = getSupabasePublicConfig();
+    if (!config) {
+      return NextResponse.json(
+        { success: false, error: "Reminder service is not configured yet." },
+        { status: 503 }
+      );
+    }
 
-    const categoryNames = selectedIds.map((id) => TAX_CATEGORY_MAP[id]?.name || `Category ${id}`);
+    // Fallback UI categories use stable slugs. Resolve them to database UUIDs
+    // before calling the secured Edge Function.
+    let resolvedCategoryIds = categoryIds;
+    if (categoryIds.some((id) => !UUID_RE.test(id))) {
+      const slugs = categoryIds.filter((id) => !UUID_RE.test(id));
+      const lookupResponse = await fetch(
+        `${config.url}/rest/v1/tax_categories?select=id,slug&is_active=eq.true&slug=in.(${slugs.map(encodeURIComponent).join(",")})`,
+        {
+          headers: {
+            apikey: config.anonKey,
+            Authorization: `Bearer ${config.anonKey}`,
+          },
+          cache: "no-store",
+        }
+      );
 
-    const clientName = (name || "").trim() || trimmedEmail.split("@")[0];
+      if (!lookupResponse.ok) {
+        return NextResponse.json(
+          { success: false, error: "Unable to verify reminder categories. Please try again." },
+          { status: 503 }
+        );
+      }
 
-    // 4. Store in Database
-    const subscriber = await addOrUpdateSubscriber({
-      name: clientName,
-      email: trimmedEmail,
-      categoryIds: selectedIds,
-      consent: consent !== false,
-    });
+      const rows = (await lookupResponse.json()) as Array<{ id: string; slug: string }>;
+      const bySlug = new Map(rows.map((row) => [row.slug, row.id]));
+      resolvedCategoryIds = categoryIds
+        .map((id) => (UUID_RE.test(id) ? id : bySlug.get(id)))
+        .filter((id): id is string => Boolean(id));
 
-    // 5. Send Alert Email
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const emailResult = await sendAlertEmail({
-      to: trimmedEmail,
-      name: clientName,
-      categoryNames,
-      unsubscribeUrl: `${siteUrl}/reminders/unsubscribe?email=${encodeURIComponent(trimmedEmail)}`,
-    });
+      if (resolvedCategoryIds.length !== categoryIds.length) {
+        return NextResponse.json(
+          { success: false, error: "One or more reminder categories are unavailable." },
+          { status: 400 }
+        );
+      }
+    }
 
-    console.log(`[Subscribe API] Stored subscriber ${trimmedEmail} in database. Email result:`, emailResult);
-
-    return NextResponse.json({
-      success: true,
-      message: `Alert activated! A confirmation email for your selected tax reminders has been sent to ${trimmedEmail}.`,
-      subscriber: {
-        id: subscriber.id,
-        name: subscriber.name,
-        email: subscriber.email,
-        categories: subscriber.categories,
+    const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const edgeResponse = await fetch(`${config.url}/functions/v1/subscribe`, {
+      method: "POST",
+      headers: {
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
+        "Content-Type": "application/json",
+        ...(forwardedFor ? { "x-forwarded-for": forwardedFor } : {}),
       },
+      body: JSON.stringify({
+        name: name.slice(0, 100),
+        email,
+        category_ids: resolvedCategoryIds,
+        consent,
+        hp_company: "",
+      }),
+      cache: "no-store",
     });
-  } catch (err: any) {
-    console.error("[Subscribe API Error]:", err);
+
+    const result = await edgeResponse.json().catch(() => ({
+      success: false,
+      error: "Reminder service returned an invalid response.",
+    }));
+
+    return NextResponse.json(result, { status: edgeResponse.status });
+  } catch (error) {
+    console.error("[Reminder Subscribe] Request failed:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: err?.message || "An unexpected error occurred while processing your subscription. Please try again.",
-      },
+      { success: false, error: "Unable to process subscription at this time." },
       { status: 500 }
     );
   }

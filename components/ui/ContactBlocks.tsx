@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 import { SITE } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
-import { useLanguage } from "@/lib/LanguageContext";
+import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { createClient } from "@/lib/supabase/client";
+import { validateInquiry } from "@/lib/validation/inquiry";
 
 const cardAnim = {
   hidden: { opacity: 0, y: 28 },
@@ -289,11 +289,15 @@ export function ConsultationForm() {
   const { isUrdu, t } = useLanguage();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
+  const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState(SITE.whatsappHref);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
     service: "tax",
     message: "",
+    company: "",
   });
 
   const serviceLabels: Record<string, string> = {
@@ -306,6 +310,21 @@ export function ConsultationForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    setSaveWarning(null);
+
+    try {
+      validateInquiry({
+        name: formData.fullName,
+        phone: formData.phone,
+        service: formData.service,
+        message: formData.message,
+      });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Please check the form details and try again.");
+      return;
+    }
+
     setLoading(true);
 
     const serviceName = serviceLabels[formData.service] || formData.service;
@@ -314,23 +333,42 @@ export function ConsultationForm() {
       : `Hello Ch Composing Estamp and Tax Advisor,\n\nName: ${formData.fullName}\nPhone: ${formData.phone}\nService: ${serviceName}\n${formData.message ? `Details: ${formData.message}` : ""}`;
 
     const whatsappUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(message.trim())}`;
+    setLastWhatsAppUrl(whatsappUrl);
+
+    // Open from the original submit gesture so browser popup protection does not
+    // block the WhatsApp handoff. The success screen also includes a fallback link.
+    const whatsappWindow = window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    if (whatsappWindow) whatsappWindow.opener = null;
 
     try {
-      const supabase = createClient();
-      await supabase.from("consultation_inquiries").insert({
-        name: formData.fullName.trim(),
-        phone: formData.phone.trim(),
-        service_needed: serviceName,
-        message: formData.message.trim() || null,
-        status: "new",
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          service: formData.service,
+          message: formData.message.trim(),
+          company: formData.company,
+        }),
       });
-    } catch (err) {
-      console.warn("[Inquiry Save Error]", err);
-    }
 
-    setLoading(false);
-    setSubmitted(true);
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success !== true) {
+        setSaveWarning(
+          payload?.error ||
+            "WhatsApp was opened, but the website could not save a separate inquiry record. Please send the prepared WhatsApp message.",
+        );
+      }
+    } catch (error) {
+      console.warn("[Inquiry Save] Database capture unavailable; WhatsApp handoff remains available.", error);
+      setSaveWarning(
+        "WhatsApp was opened, but the website could not save a separate inquiry record. Please send the prepared WhatsApp message.",
+      );
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+    }
   };
 
   if (submitted) {
@@ -340,15 +378,26 @@ export function ConsultationForm() {
           <CheckCircle2 className="h-8 w-8" />
         </div>
         <h3 className="font-serif text-xl font-bold text-navy-900 dark:text-white">
-          {t.form.successTitle}
+          {saveWarning ? (isUrdu ? "واٹس ایپ پیغام تیار ہے" : "WhatsApp Message Ready") : t.form.successTitle}
         </h3>
         <p className="mt-2 text-sm text-navy-800/70 dark:text-slate-300">
-          {t.form.successDesc}
+          {saveWarning ? saveWarning : t.form.successDesc}
         </p>
+        <a
+          href={lastWhatsAppUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-navy mt-5 inline-flex items-center justify-center gap-2 py-2.5 text-xs"
+        >
+          <WhatsAppIcon className="h-4 w-4" />
+          {isUrdu ? "واٹس ایپ پیغام کھولیں" : "Open WhatsApp Message"}
+        </a>
         <button
           onClick={() => {
             setSubmitted(false);
-            setFormData({ fullName: "", phone: "", service: "tax", message: "" });
+            setSaveWarning(null);
+            setFormError(null);
+            setFormData({ fullName: "", phone: "", service: "tax", message: "", company: "" });
           }}
           className="btn-gold mt-6 py-2.5 text-xs"
         >
@@ -363,6 +412,17 @@ export function ConsultationForm() {
       onSubmit={handleSubmit}
       className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-8 shadow-card-hover text-navy-900 dark:text-white transition-colors duration-200"
     >
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="consultation-company">Company</label>
+        <input
+          id="consultation-company"
+          tabIndex={-1}
+          autoComplete="off"
+          value={formData.company}
+          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+        />
+      </div>
+
       <div className="mb-6 text-center">
         <h3 className="font-serif text-xl font-bold text-navy-900 dark:text-white">
           {t.form.cardTitle}
@@ -372,34 +432,50 @@ export function ConsultationForm() {
         </p>
       </div>
 
+      {formError && (
+        <div role="alert" className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+          {formError}
+        </div>
+      )}
+
       <div className="space-y-4">
         <div>
-          <label className="form-label mb-1.5">{t.form.fullName}</label>
+          <label htmlFor="consultation-name" className="form-label mb-1.5">{t.form.fullName}</label>
           <input
+            id="consultation-name"
             type="text"
             required
             placeholder={t.form.fullNamePlaceholder}
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             className="form-input"
+            autoComplete="name"
+            maxLength={100}
           />
         </div>
 
         <div>
-          <label className="form-label mb-1.5">{t.form.phone}</label>
+          <label htmlFor="consultation-phone" className="form-label mb-1.5">{t.form.phone}</label>
           <input
+            id="consultation-phone"
             type="tel"
             required
             placeholder={t.form.phonePlaceholder}
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             className="form-input"
+            autoComplete="tel"
+            inputMode="tel"
+            minLength={7}
+            maxLength={24}
+            pattern={"[+()0-9\\s-]{7,24}"}
           />
         </div>
 
         <div>
-          <label className="form-label mb-1.5">{t.form.service}</label>
+          <label htmlFor="consultation-service" className="form-label mb-1.5">{t.form.service}</label>
           <select
+            id="consultation-service"
             value={formData.service}
             onChange={(e) => setFormData({ ...formData, service: e.target.value })}
             className="form-input cursor-pointer"
@@ -413,13 +489,15 @@ export function ConsultationForm() {
         </div>
 
         <div>
-          <label className="form-label mb-1.5">{t.form.message}</label>
+          <label htmlFor="consultation-message" className="form-label mb-1.5">{t.form.message}</label>
           <textarea
+            id="consultation-message"
             rows={3}
             placeholder={t.form.messagePlaceholder}
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             className="form-input resize-none"
+            maxLength={1500}
           />
         </div>
 

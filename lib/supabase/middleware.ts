@@ -1,54 +1,39 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database.types";
+import { getSupabasePublicConfig } from "@/config/env";
+
+function loginRedirect(request: NextRequest, reason?: string) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/admin/login";
+  if (reason) url.searchParams.set("error", reason);
+  return NextResponse.redirect(url);
+}
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  let response = NextResponse.next({ request });
+  const config = getSupabasePublicConfig();
+  const pathname = request.nextUrl.pathname;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
+  // Public pages remain renderable before the CMS is configured. Admin pages fail closed.
+  if (!config) {
+    if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+      return loginRedirect(request, "configuration");
+    }
+    return response;
+  }
 
-  const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient<Database>(config.url, config.anonKey, {
     cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
+      getAll() {
+        return request.cookies.getAll();
       },
-      set(name: string, value: string, options: CookieOptions) {
-        request.cookies.set({
-          name,
-          value,
-          ...options,
-        });
-        response = NextResponse.next({
-          request: {
-            headers: request.headers,
-          },
-        });
-        response.cookies.set({
-          name,
-          value,
-          ...options,
-        });
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({
-          name,
-          value: "",
-          ...options,
-        });
-        response = NextResponse.next({
-          request: {
-            headers: request.headers,
-          },
-        });
-        response.cookies.set({
-          name,
-          value: "",
-          ...options,
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
         });
       },
     },
@@ -58,42 +43,25 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    if (!user) return loginRedirect(request);
 
-  const isDevPreview =
-    request.nextUrl.searchParams.get("preview") === "1" ||
-    request.cookies.get("admin_preview")?.value === "1";
+    const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin", {
+      p_user_id: user.id,
+    });
 
-  if (isDevPreview && request.nextUrl.searchParams.get("preview") === "1") {
-    response.cookies.set("admin_preview", "1", { path: "/" });
+    if (adminError || !isAdmin) return loginRedirect(request, "unauthorized");
   }
 
-  // Protect /admin routes (except /admin/login)
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login" && !isDevPreview) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      url.searchParams.set("redirectedFrom", pathname);
-      return NextResponse.redirect(url);
-    }
-
-    // Check admin authorization
-    const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: user.id });
-    if (!isAdmin) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      url.searchParams.set("error", "unauthorized");
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // If user is logged in as admin and visits /admin/login, redirect to /admin
   if (pathname === "/admin/login" && user) {
     const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: user.id });
     if (isAdmin) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin";
-      return NextResponse.redirect(url);
+      url.search = "";
+      const redirectResponse = NextResponse.redirect(url);
+      response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+      return redirectResponse;
     }
   }
 

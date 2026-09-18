@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import { getSiteUrl } from "@/config/env";
 
 export default function JsonLd() {
   const schema = {
@@ -7,7 +8,7 @@ export default function JsonLd() {
     name: "Ch Composing Estamp and Tax Advisor",
     description:
       "Pakistan's trusted legal documentation and tax consultancy firm for E-Stamping, property registry, business registration, and FBR tax filings.",
-    url: "https://chcomposing.pk",
+    url: getSiteUrl(),
     telephone: SITE.phone,
     email: SITE.email,
     address: {
@@ -26,8 +27,8 @@ export default function JsonLd() {
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: "Saturday",
-        opens: "10:00",
-        closes: "14:00",
+        opens: "09:00",
+        closes: "15:00",
       },
     ],
     areaServed: {
@@ -40,7 +41,7 @@ export default function JsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
     />
   );
 }
