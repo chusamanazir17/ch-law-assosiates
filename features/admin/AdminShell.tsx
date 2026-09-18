@@ -13,7 +13,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   const { isCollapsed, setMobileOpen } = useAdminSidebar();
 
-  if (pathname === "/admin/login") return <>{children}</>;
+  if (pathname.startsWith("/admin/login")) return <>{children}</>;
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
