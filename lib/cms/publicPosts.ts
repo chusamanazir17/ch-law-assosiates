@@ -1,41 +1,50 @@
 import type { Post } from "@/types/cms";
 import { getSupabasePublicConfig } from "@/config/env";
 import { createPublicClient } from "@/lib/supabase/public";
+import * as postsStore from "@/lib/db/postsStore";
 
-/** Public CMS reads. RLS limits the anonymous client to published posts. */
+/** Public CMS reads. Gracefully uses Supabase if online, otherwise serves from local postsStore. */
 export async function getPublishedPosts(): Promise<Post[]> {
-  if (!getSupabasePublicConfig()) return [];
+  if (getSupabasePublicConfig()) {
+    try {
+      const client = createPublicClient();
+      const { data, error } = await client
+        .from("posts")
+        .select("*")
+        .eq("status", "published")
+        .order("published_at", { ascending: false });
 
-  const client = createPublicClient();
-  const { data, error } = await client
-    .from("posts")
-    .select("*")
-    .eq("status", "published")
-    .order("published_at", { ascending: false });
-
-  if (error) {
-    console.error("[PublicPosts] Failed to load published posts:", error.message);
-    return [];
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    } catch (err) {
+      console.warn("[PublicPosts] Supabase fetch failed, serving from local postsStore:", err);
+    }
   }
 
-  return data ?? [];
+  return postsStore.getPublishedPosts();
 }
 
 export async function getPublishedPostBySlug(slug: string): Promise<Post | null> {
-  if (!slug || !getSupabasePublicConfig()) return null;
+  if (!slug) return null;
 
-  const client = createPublicClient();
-  const { data, error } = await client
-    .from("posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  if (getSupabasePublicConfig()) {
+    try {
+      const client = createPublicClient();
+      const { data, error } = await client
+        .from("posts")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .maybeSingle();
 
-  if (error) {
-    console.error("[PublicPosts] Failed to load post:", error.message);
-    return null;
+      if (!error && data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn("[PublicPosts] Supabase slug fetch failed, serving from local postsStore:", err);
+    }
   }
 
-  return data;
+  return postsStore.getPublishedPostBySlug(slug);
 }

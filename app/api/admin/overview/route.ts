@@ -3,6 +3,8 @@ import { getAdminSession } from "@/lib/auth/admin";
 import { getAllSubscribers } from "@/lib/db/subscribersStore";
 import { getAllInquiries } from "@/lib/db/inquiriesStore";
 
+import { getAllPosts } from "@/lib/db/postsStore";
+
 export const dynamic = "force-dynamic";
 
 function unauthorized() {
@@ -16,6 +18,7 @@ export async function GET() {
   try {
     const subscribers = await getAllSubscribers();
     const inquiries = await getAllInquiries();
+    const posts = await getAllPosts();
 
     const totalEmails = subscribers.length;
     const activeCount = subscribers.filter((s) => s.status === "active").length;
@@ -48,6 +51,9 @@ export async function GET() {
     }));
 
     const newInquiries = inquiries.filter((inq) => inq.status === "new").length;
+    const totalPosts = posts.length;
+    const publishedPosts = posts.filter((p) => p.status === "published").length;
+    const draftPosts = posts.filter((p) => p.status === "draft").length;
 
     return NextResponse.json({
       success: true,
@@ -61,9 +67,9 @@ export async function GET() {
         recentSignups,
       },
       cmsStats: {
-        totalPosts: 4,
-        publishedPosts: 4,
-        draftPosts: 0,
+        totalPosts,
+        publishedPosts,
+        draftPosts,
         totalMedia: 12,
         newInquiries,
         activeNotice: null,

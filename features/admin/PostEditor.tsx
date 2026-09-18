@@ -348,22 +348,104 @@ export default function PostEditor() {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-slate-500" />
-              <h2 className="text-sm font-bold text-slate-900">Cover image</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4 text-slate-500" />
+                <h2 className="text-sm font-bold text-slate-900">Cover image</h2>
+              </div>
+              {coverImageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setCoverImageUrl("")}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700"
+                >
+                  Clear image
+                </button>
+              )}
             </div>
-            <label htmlFor="cover-image-url" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Image URL</label>
+
+            <label htmlFor="cover-image-url" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Image URL (Custom or Preset)
+            </label>
             <input
               id="cover-image-url"
               type="url"
               value={coverImageUrl}
               onChange={(event) => setCoverImageUrl(event.target.value)}
-              placeholder="https://..."
+              placeholder="https://images.unsplash.com/..."
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
             />
-            {coverImageUrl && (
-              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                <img src={coverImageUrl} alt="Cover preview" className="aspect-video w-full object-cover" />
+
+            {/* Quick Presets Gallery */}
+            <div className="mt-4">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                1-Click Curated Presets:
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  {
+                    name: "E-Stamp & Papers",
+                    url: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  {
+                    name: "FBR Income Tax",
+                    url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  {
+                    name: "Property Registry",
+                    url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  {
+                    name: "SECP Corporate",
+                    url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  {
+                    name: "Sales Tax / PRA",
+                    url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  {
+                    name: "Chamber 121 Office",
+                    url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=70",
+                  },
+                ].map((preset) => {
+                  const isSelected = coverImageUrl === preset.url;
+                  return (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => setCoverImageUrl(preset.url)}
+                      className={`flex items-center gap-1.5 rounded-lg border p-1.5 text-left text-xs transition ${
+                        isSelected
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      <img
+                        src={preset.url}
+                        alt={preset.name}
+                        className="h-8 w-8 rounded object-cover shrink-0"
+                      />
+                      <span className="truncate text-[11px] leading-tight">{preset.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {coverImageUrl ? (
+              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                <img
+                  src={coverImageUrl}
+                  alt="Cover preview"
+                  className="aspect-video w-full object-cover"
+                />
+                <div className="bg-slate-50 p-2 text-center text-xs text-slate-500 font-medium">
+                  Cover Image Live Preview
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 flex aspect-video w-full items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-400">
+                No cover image selected
               </div>
             )}
           </section>
