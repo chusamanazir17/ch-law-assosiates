@@ -17,7 +17,18 @@ export function getSupabasePublicConfig(): SupabasePublicConfig | null {
   )?.trim();
 
   if (!url || !anonKey) return null;
+  if (
+    url.includes("placeholder-project") ||
+    url.includes("example.com") ||
+    anonKey.includes("placeholder-anon-key")
+  ) {
+    return null;
+  }
   return { url, anonKey };
+}
+
+export function isSupabaseConfigured(): boolean {
+  return getSupabasePublicConfig() !== null;
 }
 
 export function requireSupabasePublicConfig(): SupabasePublicConfig {

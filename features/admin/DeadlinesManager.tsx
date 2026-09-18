@@ -90,7 +90,7 @@ export default function DeadlinesManager() {
 
       if (error) throw error;
 
-      const mapped: DeadlineWithCategory[] = (data || []).map((deadline) => ({
+      const mapped: DeadlineWithCategory[] = (data || []).map((deadline: any) => ({
         ...deadline,
         category: deadline.tax_categories ?? undefined,
       }));

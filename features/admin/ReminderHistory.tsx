@@ -92,7 +92,7 @@ export default function ReminderHistory() {
 
       if (error) throw error;
 
-      const mapped: DeliveryWithDetails[] = (data || []).map((delivery) => ({
+      const mapped: DeliveryWithDetails[] = (data || []).map((delivery: any) => ({
         ...delivery,
         subscriber: delivery.subscribers ?? undefined,
         deadline: delivery.tax_deadlines

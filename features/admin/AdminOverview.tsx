@@ -85,12 +85,12 @@ export default function AdminOverview() {
         .from("subscribers")
         .select("id, name, email, status, created_at");
 
-      const subscribers = allSubscribers || [];
+      const subscribers: any[] = (allSubscribers as any[]) || [];
       const totalEmails = subscribers.length;
-      const activeCount = subscribers.filter((s) => s.status === "active").length;
-      const pendingCount = subscribers.filter((s) => s.status === "pending").length;
-      const unsubscribedCount = subscribers.filter((s) => s.status === "unsubscribed").length;
-      const suppressedCount = subscribers.filter((s) => s.status === "suppressed").length;
+      const activeCount = subscribers.filter((s: any) => s.status === "active").length;
+      const pendingCount = subscribers.filter((s: any) => s.status === "pending").length;
+      const unsubscribedCount = subscribers.filter((s: any) => s.status === "unsubscribed").length;
+      const suppressedCount = subscribers.filter((s: any) => s.status === "suppressed").length;
 
       setSubscriberAnalytics({
         totalEmails,
@@ -99,7 +99,7 @@ export default function AdminOverview() {
         unsubscribedCount,
         suppressedCount,
         categoryBreakdown: [],
-        recentSignups: subscribers.slice(0, 5).map((s) => ({
+        recentSignups: subscribers.slice(0, 5).map((s: any) => ({
           id: s.id,
           name: s.name || "Anonymous",
           email: s.email,
