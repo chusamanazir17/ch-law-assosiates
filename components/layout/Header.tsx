@@ -19,7 +19,6 @@ import {
   ArrowRight,
   ChevronDown,
   Globe,
-  MapPin,
   Menu as MenuIcon,
   Moon,
   Phone,
@@ -264,7 +263,7 @@ export default function Header() {
 
             <nav
               aria-label="Primary navigation"
-              className="hidden min-w-0 items-center gap-0.5 xl:flex 2xl:gap-1.5"
+              className="hidden min-w-0 items-center gap-0.5 lg:flex 2xl:gap-1.5"
               onMouseLeave={closeDropdownSoon}
             >
               <Link
@@ -387,16 +386,6 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-              {settings?.headerSettings?.primaryCtaEnabled && (
-                <Link
-                  href={settings.headerSettings.primaryCtaHref || "/#office"}
-                  className="hidden md:inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] text-white px-3 py-1.5 text-xs font-bold shadow-2xs transition"
-                >
-                  <MapPin className="h-3.5 w-3.5 text-gold-400" />
-                  <span>{settings.headerSettings.primaryCtaText || "Visit Chamber"}</span>
-                </Link>
-              )}
-
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -426,10 +415,11 @@ export default function Header() {
                 edge="end"
                 onClick={() => setDrawerOpen(true)}
                 sx={{
-                  display: { xl: "none" },
+                  display: { xs: "inline-flex", lg: "none" },
                   color: isDark ? "#ffffff" : "#0b1d38",
                   ml: 0.25,
                 }}
+                className="lg:!hidden"
                 aria-label="Open navigation menu"
               >
                 <MenuIcon className="h-5 w-5" />
