@@ -22,6 +22,7 @@ import {
   Megaphone,
   MessageSquare,
   ExternalLink,
+  Headphones,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminSidebar } from "./AdminSidebarContext";
@@ -68,21 +69,21 @@ export default function AdminSidebar({
     {
       group: "WEBSITE",
       items: [
-        { label: "Page content", href: "/admin/pages", icon: FileText },
+        { label: "Page Content", href: "/admin/pages", icon: FileText },
         { label: "Services", href: "/admin/services", icon: Boxes },
         { label: "Posts", href: "/admin/posts", icon: FileSpreadsheet },
         { label: "Categories", href: "/admin/categories", icon: Tag },
         { label: "Media", href: "/admin/media", icon: ImageIcon },
         { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
-        { label: "Client inquiries", href: "/admin/inquiries", icon: MessageSquare },
+        { label: "Client Inquiries", href: "/admin/inquiries", icon: MessageSquare },
       ],
     },
     {
       group: "REMINDERS",
       items: [
         { label: "Subscribers", href: "/admin/subscribers", icon: Users },
-        { label: "Tax deadlines", href: "/admin/deadlines", icon: Calendar },
-        { label: "Email reminders", href: "/admin/history", icon: Mail },
+        { label: "Tax Deadlines", href: "/admin/deadlines", icon: Calendar },
+        { label: "Email Reminders", href: "/admin/history", icon: Mail },
       ],
     },
     {
@@ -273,20 +274,41 @@ export default function AdminSidebar({
         </div>
       </div>
 
+      {/* Need Help? Card */}
+      {!isCollapsed && (
+        <div className="mt-4 mb-2 rounded-xl border border-slate-200/80 bg-slate-50/70 p-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eef7f2] text-[#075e38]">
+              <Headphones className="h-4 w-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800">Need Help?</h4>
+              <p className="text-[11px] text-slate-400">Get support or view guides.</p>
+            </div>
+          </div>
+          <Link
+            href="/admin/settings"
+            className="mt-2.5 flex w-full items-center justify-center rounded-lg border border-slate-200 bg-white py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+          >
+            Visit Help Center
+          </Link>
+        </div>
+      )}
+
       {/* Bottom Profile Footer */}
-      <div className="pt-3 mt-6 border-t border-slate-100">
+      <div className="pt-3 border-t border-slate-100">
         {isCollapsed ? (
           <div className="group relative flex flex-col items-center">
             <div
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-[11.5px] font-bold text-white uppercase tracking-wider shadow-2xs cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-[12px] font-bold text-white shadow-2xs cursor-pointer"
               title="Admin (Administrator)"
             >
-              AD
+              N
             </div>
             {/* Tooltip with Sign Out */}
             <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-44 rounded-lg bg-white p-2 text-slate-800 shadow-xl border border-slate-200 z-50 group-hover:pointer-events-auto group-hover:block">
               <div className="text-[13px] font-semibold text-slate-900">Admin</div>
-              <div className="text-[11px] text-slate-500 mb-2">Authenticated administrator</div>
+              <div className="text-[11px] text-slate-500 mb-2">Administrator</div>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -300,8 +322,8 @@ export default function AdminSidebar({
         ) : (
           <div className="flex items-center justify-between rounded-lg p-1.5 hover:bg-slate-50 transition-colors">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[11px] font-bold text-white uppercase tracking-wider">
-                AD
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-[12px] font-bold text-white">
+                N
               </div>
               <div className="min-w-0">
                 <span className="text-[13px] font-semibold text-slate-900 block leading-tight truncate">
