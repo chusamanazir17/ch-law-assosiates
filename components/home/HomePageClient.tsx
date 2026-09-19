@@ -80,6 +80,7 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="eyebrow"
+          suppressHydrationWarning
         >
           <BadgeCheck className="h-3.5 w-3.5" />
           {eyebrowText}
@@ -768,8 +769,8 @@ function FinalCta() {
   );
 }
 
-export default function HomePageClient() {
-  const { homeSections } = useCms();
+export default function HomePageClient({ initialCms }: { initialCms?: any }) {
+  const { homeSections } = useCms(initialCms);
 
   const order = homeSections?.sectionOrder || [
     "hero",

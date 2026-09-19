@@ -509,7 +509,7 @@ export default function AdminOverview() {
   };
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto font-sans pb-10">
+    <div className="space-y-4 max-w-7xl mx-auto font-sans pb-10">
       {/* 1. Breadcrumbs */}
       <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
         <span>Office CMS</span>

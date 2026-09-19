@@ -336,7 +336,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-4 pt-3 pb-8 sm:px-6 sm:pt-3.5 sm:pb-8 lg:px-8 lg:pt-4 lg:pb-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>

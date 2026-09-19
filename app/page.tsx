@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import HomePageClient from "@/components/home/HomePageClient";
+import { getHomeSections } from "@/lib/db/homeSectionsStore";
+import { getAllPagesContent } from "@/lib/db/pagesContentStore";
+import { getSiteSettings } from "@/lib/db/siteSettingsStore";
+import { getAllServices } from "@/lib/db/servicesStore";
 
 export const metadata: Metadata = {
   title: "Ch Composing Estamp and Tax Advisor | Legal Documentation & Tax Services",
@@ -22,5 +26,13 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <HomePageClient />;
+  const initialCms = {
+    settings: getSiteSettings(),
+    services: getAllServices(),
+    pages: getAllPagesContent(),
+    homeSections: getHomeSections(),
+    isLoading: false,
+  };
+
+  return <HomePageClient initialCms={initialCms} />;
 }

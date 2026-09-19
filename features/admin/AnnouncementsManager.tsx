@@ -45,15 +45,19 @@ export default function AnnouncementsManager() {
 
   const loadAnnouncements = async () => {
     setIsLoading(true);
-    const supabase = createClient();
     try {
-      const { data, error } = await supabase
-        .from("site_announcements")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setAnnouncements(data || []);
+      const res = await fetch("/api/admin/announcements");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.announcements)) {
+        setAnnouncements(data.announcements);
+      } else {
+        const supabase = createClient();
+        const { data: sData } = await supabase
+          .from("site_announcements")
+          .select("*")
+          .order("created_at", { ascending: false });
+        setAnnouncements(sData || []);
+      }
     } catch (error) {
       console.error("[Announcements Load Error]", error);
       setMessage({ type: "error", text: "Failed to load announcements." });
@@ -88,23 +92,21 @@ export default function AnnouncementsManager() {
   };
 
   const handleToggleActive = async (ann: SiteAnnouncement) => {
-    const supabase = createClient();
-    const newStatus = !ann.is_active;
-
     try {
-      const { error } = await supabase
-        .from("site_announcements")
-        .update({ is_active: newStatus, updated_at: new Date().toISOString() })
-        .eq("id", ann.id);
-
-      if (error) throw error;
+      const res = await fetch("/api/admin/announcements", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: ann.id }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Failed to update status");
 
       setAnnouncements((prev) =>
-        prev.map((a) => (a.id === ann.id ? { ...a, is_active: newStatus } : a))
+        prev.map((a) => (a.id === ann.id ? { ...a, is_active: !a.is_active } : { ...a, is_active: false }))
       );
       setMessage({
         type: "success",
-        text: `Announcement "${ann.title}" is now ${newStatus ? "ACTIVE" : "INACTIVE"}.`,
+        text: `Announcement "${ann.title}" is now ${!ann.is_active ? "ACTIVE" : "INACTIVE"}.`,
       });
     } catch (error) {
       setMessage({ type: "error", text: getErrorMessage(error, "Failed to update status.") });
@@ -114,14 +116,13 @@ export default function AnnouncementsManager() {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
 
-    const supabase = createClient();
     try {
-      const { error } = await supabase
-        .from("site_announcements")
-        .delete()
-        .eq("id", id);
+      const res = await fetch(`/api/admin/announcements?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Failed to delete announcement");
 
-      if (error) throw error;
       setAnnouncements((prev) => prev.filter((a) => a.id !== id));
       setMessage({ type: "success", text: "Announcement deleted successfully." });
     } catch (error) {
@@ -138,37 +139,30 @@ export default function AnnouncementsManager() {
 
     setIsSaving(true);
     setMessage(null);
-    const supabase = createClient();
 
     const payload = {
+      id: editingId || undefined,
       title: title.trim(),
       message: msgText.trim(),
       tone,
       link_url: linkUrl.trim() || null,
       link_text: linkText.trim() || null,
       is_active: isActive,
-      updated_at: new Date().toISOString(),
     };
 
     try {
-      if (editingId) {
-        // Update
-        const { error } = await supabase
-          .from("site_announcements")
-          .update(payload)
-          .eq("id", editingId);
+      const res = await fetch("/api/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Failed to save announcement");
 
-        if (error) throw error;
-        setMessage({ type: "success", text: "Announcement updated successfully!" });
-      } else {
-        // Insert
-        const { error } = await supabase
-          .from("site_announcements")
-          .insert(payload);
-
-        if (error) throw error;
-        setMessage({ type: "success", text: "New announcement published!" });
-      }
+      setMessage({
+        type: "success",
+        text: editingId ? "Announcement updated successfully!" : "New announcement published!",
+      });
 
       resetForm();
       loadAnnouncements();
@@ -181,29 +175,67 @@ export default function AnnouncementsManager() {
   };
 
   // Tone banner styles mapping
-  const toneClasses: Record<AnnouncementTone, { bg: string; border: string; text: string; icon: LucideIcon }> = {
+  const toneClasses: Record<
+    AnnouncementTone,
+    {
+      gradient: string;
+      border: string;
+      badgeBg: string;
+      badgeText: string;
+      badgeLabel: string;
+      titleColor: string;
+      textColor: string;
+      dotColor: string;
+      btnBg: string;
+      icon: LucideIcon;
+    }
+  > = {
     warning: {
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      text: "text-amber-900",
+      gradient: "bg-gradient-to-r from-[#180f02] via-[#2a1a05] to-[#180f02]",
+      border: "border-amber-500/30",
+      badgeBg: "bg-amber-500/15 border-amber-500/30",
+      badgeText: "text-amber-300",
+      badgeLabel: "STATUTORY NOTICE",
+      titleColor: "text-amber-200",
+      textColor: "text-amber-100/90",
+      dotColor: "bg-amber-400",
+      btnBg: "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold",
       icon: AlertTriangle,
     },
     danger: {
-      bg: "bg-rose-50",
-      border: "border-rose-200",
-      text: "text-rose-900",
+      gradient: "bg-gradient-to-r from-[#1c0505] via-[#2e0909] to-[#1c0505]",
+      border: "border-rose-500/30",
+      badgeBg: "bg-rose-500/15 border-rose-500/30",
+      badgeText: "text-rose-300",
+      badgeLabel: "URGENT ALERT",
+      titleColor: "text-rose-200",
+      textColor: "text-rose-100/90",
+      dotColor: "bg-rose-400",
+      btnBg: "bg-gradient-to-r from-rose-600 to-rose-700 text-white font-bold",
       icon: ShieldAlert,
     },
     info: {
-      bg: "bg-sky-50",
-      border: "border-sky-200",
-      text: "text-sky-900",
+      gradient: "bg-gradient-to-r from-[#031424] via-[#062038] to-[#031424]",
+      border: "border-sky-500/30",
+      badgeBg: "bg-sky-500/15 border-sky-500/30",
+      badgeText: "text-sky-300",
+      badgeLabel: "PUBLIC ADVISORY",
+      titleColor: "text-sky-200",
+      textColor: "text-sky-100/90",
+      dotColor: "bg-sky-400",
+      btnBg: "bg-gradient-to-r from-sky-500 to-sky-600 text-slate-950 font-bold",
       icon: Info,
     },
     dark: {
-      bg: "bg-slate-900",
-      border: "border-slate-800",
-      text: "text-white",
+      gradient: "bg-gradient-to-r from-[#050e1c] via-[#0a1b33] to-[#050e1c]",
+      border: "border-gold-400/30",
+      badgeBg: "bg-gold-400/15 border-gold-400/30",
+      badgeText: "text-gold-300",
+      badgeLabel: "CHAMBER DISPATCH",
+      titleColor: "text-gold-200",
+      textColor: "text-slate-100/90",
+      dotColor: "bg-gold-400",
+      btnBg: "bg-gradient-to-r from-gold-400 to-gold-500 text-navy-950 font-bold",
       icon: Megaphone,
     },
   };
@@ -383,24 +415,36 @@ export default function AnnouncementsManager() {
 
             {/* Banner Simulation */}
             <div
-              className={`rounded-xl border p-4 shadow-2xs transition-all ${currentTone.bg} ${currentTone.border}`}
+              className={`rounded-xl border p-4 shadow-md transition-all ${currentTone.gradient} ${currentTone.border} text-white`}
             >
-              <div className="flex items-start gap-3">
-                <CurrentIcon className={`h-5 w-5 shrink-0 ${currentTone.text} mt-0.5`} />
-                <div className="min-w-0 flex-1">
-                  <span className={`font-bold text-xs block ${currentTone.text}`}>
-                    {title || "Official Compliance Notice Title"}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${currentTone.dotColor} opacity-75`} />
+                    <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${currentTone.dotColor}`} />
+                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-bold tracking-wider uppercase border ${currentTone.badgeBg} ${currentTone.badgeText}`}
+                  >
+                    <CurrentIcon className="h-2.5 w-2.5" />
+                    <span>{currentTone.badgeLabel}</span>
                   </span>
-                  <p className="text-[11.5px] text-slate-700 mt-1 leading-relaxed">
-                    {msgText || "Detailed message content explaining the tax deadline extension or office schedule will appear here."}
-                  </p>
-                  {(linkUrl || linkText) && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#075e38] hover:underline mt-2">
-                      <span>{linkText || "Learn More"}</span>
-                      <ExternalLink className="h-3 w-3" />
+                  <div className="min-w-0 flex-1">
+                    <span className={`font-bold text-xs block truncate ${currentTone.titleColor}`}>
+                      {title || "Official Compliance Notice Title"}
                     </span>
-                  )}
+                    <p className={`text-[11px] truncate ${currentTone.textColor}`}>
+                      {msgText || "Detailed message content explaining the tax deadline extension or office schedule."}
+                    </p>
+                  </div>
                 </div>
+
+                {(linkUrl || linkText) && (
+                  <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded shadow-sm shrink-0 font-bold ${currentTone.btnBg}`}>
+                    <span>{linkText || "View Details"}</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -440,10 +484,8 @@ export default function AnnouncementsManager() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase border ${
-                        toneClasses[ann.tone]?.bg || "bg-slate-100"
-                      } ${toneClasses[ann.tone]?.text || "text-slate-700"} ${
-                        toneClasses[ann.tone]?.border || "border-slate-200"
-                      }`}
+                        toneClasses[ann.tone]?.badgeBg || "bg-slate-100"
+                      } ${toneClasses[ann.tone]?.badgeText || "text-slate-700"}`}
                     >
                       {ann.tone}
                     </span>

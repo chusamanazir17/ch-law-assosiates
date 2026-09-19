@@ -216,7 +216,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewFullDetails: "View Full Details",
     },
     hero: {
-      eyebrow: "Authorized Documentation Experts",
+      eyebrow: "AUTHORIZED DOCUMENTATION EXPERTS",
       titlePart1: "Premium Legal Documentation Services in",
       countryHighlight: "Pakistan",
       description:

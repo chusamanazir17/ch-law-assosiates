@@ -17,14 +17,24 @@ interface CmsState {
 let cachedCmsState: CmsState | null = null;
 const listeners = new Set<(state: CmsState) => void>();
 
-export function useCms() {
+export function useCms(initialData?: Partial<CmsState>) {
+  if (initialData && !cachedCmsState) {
+    cachedCmsState = {
+      settings: initialData.settings ?? null,
+      services: initialData.services ?? [],
+      pages: initialData.pages ?? [],
+      homeSections: initialData.homeSections ?? null,
+      isLoading: false,
+    };
+  }
+
   const [state, setState] = useState<CmsState>(
     cachedCmsState || {
-      settings: null,
-      services: [],
-      pages: [],
-      homeSections: null,
-      isLoading: true,
+      settings: initialData?.settings ?? null,
+      services: initialData?.services ?? [],
+      pages: initialData?.pages ?? [],
+      homeSections: initialData?.homeSections ?? null,
+      isLoading: !initialData,
     }
   );
 

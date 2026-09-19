@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, Playfair_Display } from "next/font/google";
 import AppProviders from "@/providers/AppProviders";
-import AnnouncementBanner from "@/components/layout/AnnouncementBanner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
@@ -80,7 +79,6 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">{`(function(){try{var t=localStorage.getItem('ch_composing_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})();`}</Script>
         <JsonLd />
         <AppProviders>
-          <AnnouncementBanner />
           <ScrollProgress />
           <Header />
           <main id="main-content">{children}</main>

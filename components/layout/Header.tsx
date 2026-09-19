@@ -34,6 +34,7 @@ import { getCategoryHeaderIcon, getSubServiceIcon } from "@/lib/icon-map";
 import Logo from "./Logo";
 import { CategoryDropdownPanel, LegalGroupDropdownPanel } from "./NavDropdown";
 import { useCms } from "@/lib/hooks/useCms";
+import AnnouncementBanner from "./AnnouncementBanner";
 
 type DropdownAlign = "left" | "right" | "center";
 
@@ -136,6 +137,7 @@ export default function Header() {
   const [expandedMobileServices, setExpandedMobileServices] = React.useState<Record<string, boolean>>({});
   const [mobileServicesRootOpen, setMobileServicesRootOpen] = React.useState(true);
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
+  const [bannerHeight, setBannerHeight] = React.useState(0);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname() || "";
 
@@ -257,6 +259,7 @@ export default function Header() {
           zIndex: 1100,
         }}
       >
+        <AnnouncementBanner onHeightChange={setBannerHeight} />
         <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
           <div className="flex h-[72px] items-center justify-between gap-4">
             <Logo isUrdu={isUrdu} isDark={isDark} />
@@ -661,7 +664,7 @@ export default function Header() {
         </div>
       </Drawer>
 
-      <div className="h-[72px]" aria-hidden="true" />
+      <div style={{ height: 72 + bannerHeight }} aria-hidden="true" />
     </>
   );
 }

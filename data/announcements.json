@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ann-fbr-filing-2026",
+    "title": "FBR Tax Filing & ATL Compliance Notice",
+    "message": "Active Taxpayer List (ATL) verification and statutory compliance services are actively processed at Chamber 121, District Court Sahiwal.",
+    "tone": "warning",
+    "link_url": "/services/fbr-tax-filing",
+    "link_text": "View Details",
+    "is_active": true,
+    "created_at": "2026-09-19T10:37:40.445Z",
+    "updated_at": "2026-09-19T10:37:40.445Z"
+  }
+]
