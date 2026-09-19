@@ -204,12 +204,12 @@ export default function Header() {
     {
       id: "tax",
       label: t.nav.taxServices,
-      align: isUrdu ? "right" : "left",
+      align: "left",
     },
     {
       id: "e-stamping",
       label: t.nav.eStamping,
-      align: isUrdu ? "right" : "left",
+      align: "left",
     },
     {
       id: "business-registration",
@@ -219,7 +219,7 @@ export default function Header() {
     {
       id: "property-land",
       label: t.nav.propertyLand,
-      align: isUrdu ? "left" : "right",
+      align: "right",
     },
   ] satisfies Array<{ id: string; label: string; align: DropdownAlign }>;
 
@@ -429,7 +429,7 @@ export default function Header() {
       </AppBar>
 
       <Drawer
-        anchor={isUrdu ? "left" : "right"}
+        anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         PaperProps={{
@@ -647,9 +647,9 @@ export default function Header() {
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-emerald-600/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-400"
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] py-2 text-xs font-bold text-white shadow-sm shadow-[#25D366]/20 transition"
             >
-              <WhatsAppIcon className="h-3.5 w-3.5 text-[#25D366]" />
+              <WhatsAppIcon className="h-3.5 w-3.5" />
               {t.site.whatsappLabel}
             </a>
           </div>

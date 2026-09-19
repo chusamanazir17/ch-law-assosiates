@@ -40,3 +40,5 @@ pnpm-debug.log*
 scratch/
 coverage/
 .npm-cache/
+.chrome-preview-profile/
+capture-live-previews.mjs

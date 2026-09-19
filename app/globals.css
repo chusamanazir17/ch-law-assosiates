@@ -35,8 +35,9 @@ body {
   color: #f1f5f9;
 }
 
+/* Direction stays LTR across all languages */
 html[dir="rtl"] {
-  text-align: right;
+  text-align: left;
 }
 
 html[lang="ur"] {
@@ -206,4 +207,65 @@ html[lang="ur"] .font-serif {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ==========================================================================
+   Admin Dashboard Theme Enforcement (Bright / Light Theme)
+   Guarantees that all inputs, textareas, selects, and form controls inside
+   the admin portal strictly adhere to the bright theme with clean white
+   backgrounds, dark slate legible text, clear placeholders, and crisp focus rings.
+   ========================================================================== */
+
+.admin-shell {
+  color-scheme: light !important;
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.admin-shell textarea,
+.admin-shell select {
+  background-color: #ffffff !important;
+  color: #0f172a !important; /* slate-900 */
+  border-color: #cbd5e1 !important; /* slate-300 */
+  color-scheme: light !important;
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.admin-shell textarea::placeholder {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+.admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #059669 !important; /* emerald-600 */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+  outline: none !important;
+}
+
+.admin-shell select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.admin-shell input[type="checkbox"],
+.admin-shell input[type="radio"] {
+  accent-color: #059669 !important;
+}
+
+.admin-shell input:disabled,
+.admin-shell textarea:disabled,
+.admin-shell select:disabled {
+  background-color: #f8fafc !important; /* slate-50 */
+  color: #64748b !important; /* slate-500 */
+  border-color: #e2e8f0 !important;
+  cursor: not-allowed !important;
+}
+
+/* Prefix containers (e.g. /services/ or /updates/ slug inputs) */
+.admin-shell .bg-slate-50 input.bg-transparent,
+.admin-shell .bg-slate-50 input[class*="bg-transparent"] {
+  background-color: transparent !important;
+  color: #0f172a !important;
 }

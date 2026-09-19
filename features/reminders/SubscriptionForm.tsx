@@ -5,6 +5,7 @@ import { CheckCircle2, AlertCircle, Loader2, BellRing, ShieldCheck, Mail, User }
 import { getActiveTaxCategories, submitSubscription } from "./api";
 import { validateSubscription } from "@/lib/validation/subscription";
 import type { TaxCategory } from "@/types/reminders";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 // Fallback initial categories if DB is loading or empty in dev
 const FALLBACK_CATEGORIES: TaxCategory[] = [
@@ -16,6 +17,7 @@ const FALLBACK_CATEGORIES: TaxCategory[] = [
 ];
 
 export default function SubscriptionForm() {
+  const { isUrdu } = useLanguage();
   const [categories, setCategories] = useState<TaxCategory[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
@@ -85,17 +87,19 @@ export default function SubscriptionForm() {
       if (res.success) {
         setSubmitSuccess(
           res.message ||
-            "If this email address is valid, a confirmation link has been sent to your inbox."
+            (isUrdu
+              ? "اگر یہ ای میل درست ہے تو ایک تصدیقی لنک آپ کے ان باکس میں بھیج دیا گیا ہے۔"
+              : "If this email address is valid, a confirmation link has been sent to your inbox.")
         );
         setName("");
         setEmail("");
         setSelectedCategories([]);
         setConsent(false);
       } else {
-        setSubmitError(res.error || "Failed to process your subscription. Please try again.");
+        setSubmitError(res.error || (isUrdu ? "سبسکرپشن پروسیس کرنے میں ناکامی ہوئی۔ دوبارہ کوشش کریں۔" : "Failed to process your subscription. Please try again."));
       }
     } catch {
-      setSubmitError("An unexpected error occurred. Please try again later.");
+      setSubmitError(isUrdu ? "غیر متوقع خرابی پیش آئی۔ براہ کرم بعد میں کوشش کریں۔" : "An unexpected error occurred. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,10 +114,12 @@ export default function SubscriptionForm() {
         </span>
         <div>
           <h3 className="text-lg font-bold text-white sm:text-xl">
-            Subscribe to Tax Deadline Reminders
+            {isUrdu ? "ٹیکس ڈیڈلائن ریمائنڈرز سبسکرائب کریں" : "Subscribe to Tax Deadline Reminders"}
           </h3>
           <p className="text-xs text-white/70">
-            FBR & provincial filing alerts for our District Court Sahiwal office clients.
+            {isUrdu
+              ? "ڈسٹرکٹ کورٹ ساہیوال چیمبر کلائنٹس کے لیے ایف بی آر اور صوبائی ٹیکس الرٹس۔"
+              : "FBR & provincial filing alerts for our District Court Sahiwal office clients."}
           </p>
         </div>
       </div>
@@ -124,10 +130,14 @@ export default function SubscriptionForm() {
           <div className="flex items-start gap-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" />
             <div>
-              <p className="font-semibold text-sm text-emerald-200">Confirmation Sent!</p>
+              <p className="font-semibold text-sm text-emerald-200">
+                {isUrdu ? "تصدیقی ای میل بھیج دی گئی!" : "Confirmation Sent!"}
+              </p>
               <p className="mt-1 text-xs leading-relaxed">{submitSuccess}</p>
               <p className="mt-2 text-[11px] text-emerald-400/80">
-                Please check your inbox (and spam folder) to activate your reminders.
+                {isUrdu
+                  ? "براہ کرم اپنا ان باکس (اور سپیم فولڈر) چیک کریں تاکہ ریمائنڈرز فعال ہو سکیں۔"
+                  : "Please check your inbox (and spam folder) to activate your reminders."}
               </p>
             </div>
           </div>
@@ -161,7 +171,7 @@ export default function SubscriptionForm() {
         {/* Name Field */}
         <div>
           <label htmlFor="reminder_name" className="block text-xs font-semibold uppercase tracking-wider text-white/80">
-            Full Name <span className="text-gold-400">*</span>
+            {isUrdu ? "مکمل نام" : "Full Name"} <span className="text-gold-400">*</span>
           </label>
           <div className="relative mt-1.5">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
@@ -175,7 +185,7 @@ export default function SubscriptionForm() {
                 setName(e.target.value);
                 if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
               }}
-              placeholder="e.g. Muhammad Ali"
+              placeholder={isUrdu ? "مثلاً: محمد علی" : "e.g. Muhammad Ali"}
               className={`w-full rounded-lg border bg-white/[0.06] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 ${
                 errors.name
                   ? "border-red-500/80 focus:ring-red-500/30"
@@ -192,7 +202,7 @@ export default function SubscriptionForm() {
         {/* Email Field */}
         <div>
           <label htmlFor="reminder_email" className="block text-xs font-semibold uppercase tracking-wider text-white/80">
-            Email Address <span className="text-gold-400">*</span>
+            {isUrdu ? "ای میل ایڈریس" : "Email Address"} <span className="text-gold-400">*</span>
           </label>
           <div className="relative mt-1.5">
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
@@ -224,16 +234,18 @@ export default function SubscriptionForm() {
         <div>
           <fieldset>
             <legend className="block text-xs font-semibold uppercase tracking-wider text-white/80">
-              Select Tax Categories <span className="text-gold-400">*</span>
+              {isUrdu ? "ٹیکس کی اقسام منتخب کریں" : "Select Tax Categories"} <span className="text-gold-400">*</span>
             </legend>
             <p className="mt-0.5 text-[11px] text-white/50">
-              Select the filing deadlines you wish to be reminded about:
+              {isUrdu
+                ? "وہ فائلنگ ڈیڈلائنز منتخب کریں جن کی یاددہانی آپ چاہتے ہیں:"
+                : "Select the filing deadlines you wish to be reminded about:"}
             </p>
 
             {isLoadingCategories ? (
               <div className="mt-3 flex items-center gap-2 text-xs text-white/50">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-gold-400" />
-                Loading active categories...
+                {isUrdu ? "اقسام لوڈ ہو رہی ہیں..." : "Loading active categories..."}
               </div>
             ) : (
               <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
@@ -290,7 +302,9 @@ export default function SubscriptionForm() {
               required
             />
             <span className="leading-relaxed">
-              I consent to receive automated tax filing deadline reminders via email from Ch Composing Estamp and Tax Advisor relating to services provided at Sharki Gate Chamber No 121, District Court Sahiwal. I can unsubscribe at any time.
+              {isUrdu
+                ? "میں شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال سے متعلق ٹیکس گوشواروں کی آخری تاریخ کے ای میل الرٹس حاصل کرنے کی رضامندی دیتا/دیتی ہوں۔ میں کسی بھی وقت ان سبسکرائب کر سکتا/سکتی ہوں۔"
+                : "I consent to receive automated tax filing deadline reminders via email from Ch Composing Estamp and Tax Advisor relating to services provided at Sharki Gate Chamber No 121, District Court Sahiwal. I can unsubscribe at any time."}
             </span>
           </label>
           {errors.consent && <p className="mt-1 text-xs text-red-400">{errors.consent}</p>}
@@ -306,12 +320,12 @@ export default function SubscriptionForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Sending Confirmation...
+                {isUrdu ? "تصدیقی پیغام بھیجا جا رہا ہے..." : "Sending Confirmation..."}
               </>
             ) : (
               <>
                 <ShieldCheck className="h-4 w-4" />
-                Get Tax Deadline Reminders
+                {isUrdu ? "ٹیکس ریمائنڈرز حاصل کریں" : "Get Tax Deadline Reminders"}
               </>
             )}
           </button>
@@ -319,7 +333,9 @@ export default function SubscriptionForm() {
 
         {/* Plain-Language Notice */}
         <p className="text-[11px] leading-relaxed text-center text-white/50">
-          🔒 Double opt-in: We send a verification link to confirm ownership. We never sell or share your email address.
+          {isUrdu
+            ? "🔒 مکمل محفوظ: ہم ملکیت کی تصدیق کے لیے لنک بھیجتے ہیں۔ ہم آپ کا ای میل کبھی فروخت یا شیئر نہیں کرتے۔"
+            : "🔒 Double opt-in: We send a verification link to confirm ownership. We never sell or share your email address."}
         </p>
       </form>
     </div>

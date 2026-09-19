@@ -332,13 +332,13 @@ export default function SiteSettingsManager() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700">Official Primary Phone</label>
-                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 px-3 py-2">
+                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2">
                   <Phone className="mr-2 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
                     value={formData.phone || ""}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="0301-6922573"
+                    placeholder="0305-7902744"
                     className="w-full text-sm text-slate-800 focus:outline-none"
                   />
                 </div>
@@ -346,13 +346,13 @@ export default function SiteSettingsManager() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700">Official Chamber WhatsApp</label>
-                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 px-3 py-2">
+                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2">
                   <Smartphone className="mr-2 h-4 w-4 text-emerald-600" />
                   <input
                     type="text"
                     value={formData.whatsapp || ""}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                    placeholder="0301-6922573"
+                    placeholder="0305-7902744"
                     className="w-full text-sm text-slate-800 focus:outline-none"
                   />
                 </div>
@@ -360,7 +360,7 @@ export default function SiteSettingsManager() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700">Chamber Email Address</label>
-                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 px-3 py-2">
+                <div className="mt-1.5 flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2">
                   <Mail className="mr-2 h-4 w-4 text-slate-400" />
                   <input
                     type="email"

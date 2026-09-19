@@ -213,7 +213,7 @@ export function LegalGroupDropdownPanel({
   isDark,
   id,
 }: LegalGroupDropdownPanelProps) {
-  const alignClass = isUrdu ? "left-0" : "right-0";
+  const alignClass = "right-0";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

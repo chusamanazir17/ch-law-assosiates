@@ -3,16 +3,16 @@
   "fullName": "Ch Composing Estamp and Tax Advisor",
   "tagline": "E-Stamping, Property Registry & Legal Consultants",
   "country": "E-STAMP & TAX ADVISOR",
-  "phone": "0301-6922573",
+  "phone": "0305-7902744",
   "whatsapp": "0305-7902744",
   "email": "contact@chcomposing.pk",
   "address": "Sharki Gate Chamber No 121 District Court Sahiwal",
   "addressShort": "Chamber 121, District Courts Sahiwal",
   "city": "Sahiwal",
   "hours": {
-    "weekdays": "Monday - Friday: 9:00 AM - 6:00 PM",
-    "saturday": "Saturday: 9:00 AM - 3:00 PM",
-    "sunday": "Sunday: Closed"
+    "weekdays": "Monday - Thursday: 9:00 AM - 6:00 PM",
+    "saturday": "Saturday: 9:00 AM - 6:00 PM",
+    "sunday": "Friday: Closed"
   },
   "mapsUrl": "https://www.google.com/maps?q=30.665373,73.097928",
   "contacts": [
@@ -77,5 +77,5 @@
     "tax": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
     "trademark": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1280&q=70"
   },
-  "updatedAt": "2026-09-18T05:05:49.212Z"
+  "updatedAt": "2026-09-19T09:26:31.859Z"
 }

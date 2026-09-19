@@ -34,27 +34,17 @@ function Hero() {
   const { getPageContent, settings } = useCms();
   const homeCms = getPageContent("/");
 
-  const heroImage = homeCms?.heroImage || HERO_IMAGES.home;
-  const eyebrowText = homeCms?.heroBadge || t.hero.eyebrow;
-  const heroDescription = homeCms?.heroSubtitle || t.hero.description;
-  const visitOfficeText = homeCms?.primaryCtaText || t.hero.visitOfficeBtn;
+  const eyebrowText = isUrdu ? t.hero.eyebrow : (homeCms?.heroBadge || t.hero.eyebrow);
+  const heroDescription = isUrdu ? t.hero.description : (homeCms?.heroSubtitle || t.hero.description);
+  const visitOfficeText = isUrdu ? t.hero.visitOfficeBtn : (homeCms?.primaryCtaText || t.hero.visitOfficeBtn);
   const visitOfficeUrl = homeCms?.primaryCtaHref || "#office";
 
   return (
-    <section className="relative overflow-hidden bg-[#061226] text-white">
-      {/* Full width hero background image */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden will-change-transform transform-gpu">
-        <Image
-          src={heroImage}
-          alt="Ch Composing Estamp and Tax Advisor office in Pakistan"
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 hero-overlay texture-grid" />
-      </div>
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#050f1f] via-[#081730] to-[#061226] text-white">
+      {/* Ambient background styling */}
+      <div className="pointer-events-none absolute inset-0 texture-grid opacity-35" />
+      <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-gold-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-navy-600/20 blur-[140px]" />
 
       <motion.div className="container-x relative z-10 pt-24 pb-14 sm:pt-28 sm:pb-18 lg:pt-32 lg:pb-24">
         <motion.span
@@ -73,7 +63,20 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.12 }}
           className="mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl"
         >
-          {homeCms?.heroHeadline ? (
+          {isUrdu ? (
+            <>
+              {t.hero.titlePart1}{" "}
+              <span className="relative whitespace-nowrap text-gold-400">
+                {t.hero.countryHighlight}
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.8, delay: 0.9 }}
+                  className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
+                />
+              </span>
+            </>
+          ) : homeCms?.heroHeadline ? (
             homeCms.heroHeadline
           ) : (
             <>
@@ -177,10 +180,10 @@ function ServicesGrid() {
   const servicesData =
     activeServices.length > 0
       ? activeServices.slice(0, 8).map((s, idx) => ({
-          title: isUrdu && s.nameUrdu ? s.nameUrdu : s.name,
+          title: isUrdu ? (s.nameUrdu || t.categories[s.slug]?.title || s.name) : s.name,
           href: `/services/${s.slug}`,
           image: s.heroImage || HOME_SERVICES[idx % HOME_SERVICES.length]?.image || HOME_SERVICES[0].image,
-          description: s.description,
+          description: isUrdu ? (t.categories[s.slug]?.description || s.description) : s.description,
         }))
       : defaultServicesData;
 
@@ -222,7 +225,7 @@ function ServicesGrid() {
                     className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gold-600 dark:text-gold-400 transition hover:text-gold-700"
                   >
                     <span>{t.servicesSection.learnMore}</span>
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
               </motion.article>
@@ -276,9 +279,9 @@ function PrepareVisit() {
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-navy dark:border-white/20 dark:text-white dark:hover:bg-white/10 w-full sm:w-auto text-center justify-center inline-flex items-center gap-2"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-6 py-3 text-xs shadow-md shadow-[#25D366]/25 transition hover:shadow-lg hover:shadow-[#25D366]/35 w-full sm:w-auto"
             >
-              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" />
+              <WhatsAppIcon className="h-4 w-4" />
               <span>{t.prepareVisit.requestChecklistBtn}</span>
             </a>
           </div>
@@ -298,13 +301,13 @@ function PrepareVisit() {
               <div className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/25 to-transparent" />
               
               {/* Location Badge */}
-              <div className="absolute top-3.5 left-3.5 rtl:left-auto rtl:right-3.5 rounded-full bg-navy-900/85 dark:bg-black/85 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5 shadow-sm">
+              <div className="absolute top-3.5 left-3.5 rounded-full bg-navy-900/85 dark:bg-black/85 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>{isUrdu ? "ساہیوال کچہری • چیمبر 121" : "Sahiwal District Court • Chamber 121"}</span>
               </div>
 
               {/* Bottom Image Overlay Title */}
-              <div className="absolute bottom-3.5 left-4 right-4 rtl:left-auto rtl:right-4 text-white">
+              <div className="absolute bottom-3.5 left-4 right-4 text-white">
                 <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.16em] text-gold-400">
                   {isUrdu ? "مرکزی چیمبر کا پتہ" : "Chamber Location"}
                 </p>
@@ -364,7 +367,7 @@ function PrepareVisit() {
                         className="flex-1 rounded bg-navy-900 dark:bg-white/10 py-1.5 text-center text-[10px] font-bold text-white hover:bg-navy-800 transition flex items-center justify-center gap-1"
                       >
                         <Phone className="h-2.5 w-2.5 text-gold-400" />
-                        <span>Call</span>
+                        <span>{isUrdu ? "کال کریں" : "Call"}</span>
                       </a>
                       <a
                         href="https://wa.me/923016922573"
@@ -395,7 +398,7 @@ function PrepareVisit() {
                         className="flex-1 rounded bg-gold-500 py-1.5 text-center text-[10px] font-bold text-navy-950 hover:bg-gold-400 transition flex items-center justify-center gap-1"
                       >
                         <Phone className="h-2.5 w-2.5" />
-                        <span>Call</span>
+                        <span>{isUrdu ? "کال کریں" : "Call"}</span>
                       </a>
                       <a
                         href="https://wa.me/923057902744"
@@ -542,7 +545,7 @@ function FinalCta() {
                 <span
                   className={`flex h-12 w-12 items-center justify-center rounded-full ${
                     c.isWhatsApp
-                      ? "bg-[#25D366]/20 text-[#25D366]"
+                      ? "bg-[#25D366] text-white shadow-md shadow-[#25D366]/30"
                       : "bg-gold-400/15 text-gold-400"
                   }`}
                 >

@@ -17,6 +17,7 @@ import { SITE } from "@/lib/site";
 import { useLanguage } from "@/providers/LanguageProvider";
 import Logo from "./Logo";
 import { useCms } from "@/lib/hooks/useCms";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export default function Footer() {
   const pathname = usePathname() || "";
@@ -125,10 +126,10 @@ export default function Footer() {
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
                 <span>{settings?.hours?.weekdays ? `${isUrdu ? "پیر تا جمعہ: " : ""}${settings.hours.weekdays}` : (isUrdu ? "پیر تا جمعہ: 9:00 بجے صبح تا 6:00 بجے شام" : SITE.hours.weekdays)}</span>
               </li>
-              <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
+              <li className="flex gap-3 pl-7">
                 {settings?.hours?.saturday ? `${isUrdu ? "ہفتہ: " : ""}${settings.hours.saturday}` : (isUrdu ? "ہفتہ: 9:00 بجے صبح تا 3:00 بجے دوپہر" : SITE.hours.saturday)}
               </li>
-              <li className="flex gap-3 pl-7 rtl:pr-7 rtl:pl-0">
+              <li className="flex gap-3 pl-7">
                 {settings?.hours?.sunday ? `${isUrdu ? "اتوار: " : ""}${settings.hours.sunday}` : (isUrdu ? "اتوار: بند ہے" : SITE.hours.sunday)}
               </li>
             </ul>
@@ -144,7 +145,7 @@ export default function Footer() {
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-navy-800/70 dark:text-slate-300 transition hover:pl-1 rtl:hover:pr-1 rtl:hover:pl-0 hover:text-gold-600 dark:hover:text-gold-400"
+                    className="text-navy-800/70 dark:text-slate-300 transition hover:pl-1 hover:text-gold-600 dark:hover:text-gold-400"
                   >
                     {l.label}
                   </Link>
@@ -170,9 +171,9 @@ export default function Footer() {
                 href={SITE.whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-emerald-300"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-[#25D366]/20 transition hover:shadow-md hover:shadow-[#25D366]/30"
               >
-                <Phone className="h-4 w-4" />
+                <WhatsAppIcon className="h-4 w-4" />
                 {isUrdu ? "واٹس ایپ پر رابطہ" : "Message on WhatsApp"}
               </a>
             </div>
@@ -229,12 +230,12 @@ export default function Footer() {
                 type="button"
                 onClick={() => setPolicyType(null)}
                 aria-label={isUrdu ? "بند کریں" : "Close"}
-                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto flex h-9 w-9 items-center justify-center rounded-full bg-navy-900/5 dark:bg-white/10 text-navy-800 dark:text-slate-300 hover:bg-navy-900/10 dark:hover:bg-white/20 transition"
+                className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-navy-900/5 dark:bg-white/10 text-navy-800 dark:text-slate-300 hover:bg-navy-900/10 dark:hover:bg-white/20 transition"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="flex items-center gap-3 pr-8 rtl:pr-0 rtl:pl-8">
+              <div className="flex items-center gap-3 pr-8">
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-400/15 text-gold-500 dark:text-gold-400">
                   {policyType === "privacy" ? <ShieldCheck className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                 </span>
@@ -297,7 +298,7 @@ export default function Footer() {
                 )}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-navy-900/8 dark:border-white/10 text-right rtl:text-left">
+              <div className="mt-6 pt-4 border-t border-navy-900/8 dark:border-white/10 text-right">
                 <button
                   type="button"
                   onClick={() => setPolicyType(null)}

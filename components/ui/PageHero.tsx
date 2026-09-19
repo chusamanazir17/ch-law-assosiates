@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -17,7 +16,7 @@ type PageHeroProps = {
   title: string;
   highlight?: string;
   description: string;
-  image: string;
+  image?: string;
   crumbs?: Crumb[];
   backLabel?: string;
   backHref?: string;
@@ -40,22 +39,21 @@ export default function PageHero({
   tall = false,
 }: PageHeroProps) {
   const pathname = usePathname() || "";
-  const { t } = useLanguage();
+  const { t, isUrdu } = useLanguage();
   const { getPageContent, getService } = useCms();
 
-  // Dynamic CMS overrides from Admin Dashboard
+  // Dynamic CMS overrides from Admin Dashboard (only override in English mode)
   const cmsPage = getPageContent(pathname);
   const slug = pathname.startsWith("/services/") ? pathname.replace(/^\/services\//, "") : "";
   const cmsService = slug ? getService(slug) : undefined;
 
-  const effectiveBadge = cmsPage?.heroBadge || cmsService?.tagline || badge;
-  const effectiveTitle = cmsPage?.heroHeadline || cmsService?.name || title;
-  const effectiveDescription = cmsPage?.heroSubtitle || cmsService?.description || description;
-  const effectiveImage = cmsPage?.heroImage || cmsService?.heroImage || image;
+  const effectiveBadge = isUrdu ? badge : (cmsPage?.heroBadge || cmsService?.tagline || badge);
+  const effectiveTitle = isUrdu ? title : (cmsPage?.heroHeadline || cmsService?.name || title);
+  const effectiveDescription = isUrdu ? description : (cmsPage?.heroSubtitle || cmsService?.description || description);
 
   const effectiveBackLabel = backLabel || t.common.backToHome;
   const rawPrimaryCta = primaryCta || { label: t.common.visitOurOffice, href: "/#office" };
-  const effectivePrimaryCta = cmsPage?.primaryCtaText
+  const effectivePrimaryCta = (!isUrdu && cmsPage?.primaryCtaText)
     ? { label: cmsPage.primaryCtaText, href: cmsPage.primaryCtaHref || "/#office" }
     : {
         ...rawPrimaryCta,
@@ -64,30 +62,16 @@ export default function PageHero({
 
   return (
     <section
-      className={`relative flex items-center overflow-hidden ${
-        tall ? "min-h-[560px]" : "min-h-[440px]"
+      className={`relative flex items-center overflow-hidden bg-gradient-to-b from-[#050f1f] via-[#081730] to-[#071328] text-white ${
+        tall ? "min-h-[480px]" : "min-h-[360px]"
       }`}
     >
-      {/* Background image with Ken Burns */}
-      <motion.div
-        className="absolute inset-0 will-change-transform transform-gpu"
-        initial={{ scale: 1.15 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 7, ease: "easeOut" }}
-      >
-        <Image
-          src={effectiveImage}
-          alt={effectiveTitle}
-          fill
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-      </motion.div>
-      <div className="absolute inset-0 hero-overlay texture-grid" />
+      {/* Ambient background styling */}
+      <div className="pointer-events-none absolute inset-0 texture-grid opacity-35" />
+      <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-gold-500/10 blur-[100px]" />
+      <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-navy-600/20 blur-[120px]" />
 
-      <div className="container-x relative z-10 py-20">
+      <div className="container-x relative z-10 py-16 sm:py-20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,7 +98,7 @@ export default function PageHero({
               href={backHref}
               className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white/70 transition hover:text-gold-300"
             >
-              <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               {effectiveBackLabel}
             </Link>
           )}
@@ -165,9 +149,10 @@ export default function PageHero({
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-gold px-7 py-3 text-sm"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-7 py-3 text-sm shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#25D366]/40 hover:-translate-y-0.5 active:translate-y-0 border border-emerald-400/30"
             >
-              <WhatsAppIcon className="h-4 w-4 text-emerald-400" /> {t.common.whatsappUs}
+              <WhatsAppIcon className="h-4 w-4" />
+              <span>{t.common.whatsappUs}</span>
             </a>
           )}
         </motion.div>

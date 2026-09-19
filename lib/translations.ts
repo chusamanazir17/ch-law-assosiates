@@ -498,7 +498,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       "e-stamping": {
         heroBadge: "Authorized Government Vendor",
         heroTitle: "E-Stamp & Stamp Paper Services",
-        heroDesc: "Legally recognized judicial and non-judicial stamp papers for all your legal, property, and business requirements. Fast, verified, and professional processing at our Blue Area office.",
+        heroDesc: "Legally recognized judicial and non-judicial stamp papers for all your legal, property, and business requirements. Fast, verified, and professional processing at our Chamber No 121 Sahiwal office.",
         noticeLabel: "Pre-Visit Consultation Required",
         noticeTitle: "Pre-Visit Consultation Required",
         noticeText: "Stamp paper requirements vary significantly based on the purpose (e.g. Sale Deed, Affidavit, Rental Agreement). Please contact us before visiting to ensure you bring the correct documentation and CNIC.",
@@ -636,7 +636,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           { title: "Transparent Fee", text: "Fixed service charges with no hidden consultancy costs." },
         ],
         checklistBannerTitle: "Schedule Your Consultation",
-        checklistBannerDesc: "Our Blue Area office is open Monday through Saturday for walk-in consultations and pre-scheduled appointments.",
+        checklistBannerDesc: "Our Chamber 121 District Court Sahiwal office is open Monday through Saturday for walk-in consultations and pre-scheduled appointments.",
       },
       "property-land": {
         heroBadge: "Real Estate & Documentation",
@@ -1008,7 +1008,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           { title: "Rapid Turnaround", text: "Same-day drafting and attestation for standard affidavits and agreements." },
         ],
         checklistBannerTitle: "Require Urgent Legal Attestation?",
-        checklistBannerDesc: "Call our documentation helpline or visit our Blue Area office for immediate processing.",
+        checklistBannerDesc: "Call our documentation helpline or visit our Chamber 121 District Court Sahiwal office for immediate processing.",
       },
       "trademark-ipo": {
         heroBadge: "Intellectual Property Organization",

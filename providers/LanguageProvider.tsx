@@ -50,7 +50,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
 
     document.documentElement.lang = language;
-    document.documentElement.dir = language === "ur" ? "rtl" : "ltr";
+    document.documentElement.dir = "ltr";
     document.documentElement.classList.toggle("lang-urdu", language === "ur");
   }, [hydrated, language]);
 

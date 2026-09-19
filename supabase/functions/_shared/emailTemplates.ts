@@ -13,7 +13,7 @@ export interface BusinessDetails {
 export const DEFAULT_BUSINESS: BusinessDetails = {
   name: "Ch Composing",
   fullName: "Ch Composing Estamp and Tax Advisor",
-  phone: "0301-6922573",
+  phone: "0305-7902744",
   whatsapp: "0305-7902744",
   whatsappHref: "https://wa.me/923057902744",
   address: "Sharki Gate Chamber No 121 District Court Sahiwal",
@@ -105,7 +105,7 @@ export function renderConfirmationEmail(params: {
                 <br><strong>${escapeHtml(b.address)}</strong>.
               </p>
               <p style="margin: 8px 0 0 0; font-size: 13px; color: #475569;">
-                Direct Call: <a href="tel:+923016922573" style="color: #0b1d38; font-weight: 600; text-decoration: none;">${escapeHtml(b.phone)}</a> &bull; WhatsApp: <a href="${escapeHtml(b.whatsappHref)}" style="color: #059669; font-weight: 600; text-decoration: none;">${escapeHtml(b.whatsapp)}</a>
+                Direct Call: <a href="tel:+923057902744" style="color: #0b1d38; font-weight: 600; text-decoration: none;">${escapeHtml(b.phone)}</a> &bull; WhatsApp: <a href="${escapeHtml(b.whatsappHref)}" style="color: #059669; font-weight: 600; text-decoration: none;">${escapeHtml(b.whatsapp)}</a>
               </p>
             </td>
           </tr>
@@ -246,7 +246,7 @@ export function renderTaxReminderEmail(params: {
                     </a>
                   </td>
                   <td>
-                    <a href="tel:+923016922573" style="display: inline-block; padding: 12px 20px; font-size: 13px; font-weight: 600; color: #0b1d38; text-decoration: none; border-radius: 6px; background-color: #e2e8f0;">
+                    <a href="tel:+923057902744" style="display: inline-block; padding: 12px 20px; font-size: 13px; font-weight: 600; color: #0b1d38; text-decoration: none; border-radius: 6px; background-color: #e2e8f0;">
                       Call: ${escapeHtml(b.phone)}
                     </a>
                   </td>

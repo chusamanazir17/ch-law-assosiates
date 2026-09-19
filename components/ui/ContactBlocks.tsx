@@ -227,9 +227,9 @@ export function ConsultationPanel({
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline-light inline-flex items-center gap-2"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-6 py-3 text-sm shadow-md shadow-[#25D366]/25 transition hover:shadow-lg hover:shadow-[#25D366]/35"
             >
-              <WhatsAppIcon className="h-4 w-4 text-[#25D366]" /> {t.common.whatsappUs}
+              <WhatsAppIcon className="h-4 w-4" /> {t.common.whatsappUs}
             </a>
           </div>
         </FadeIn>
@@ -270,7 +270,7 @@ export function ConsultationPanel({
                   <span className="flex items-center gap-3">
                     <Navigation className="h-4 w-4" /> {t.common.getDirections}
                   </span>
-                  <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+                  <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
               <p className="mt-5 text-center text-[11px] leading-relaxed text-navy-800/60 dark:text-slate-400">
@@ -387,7 +387,7 @@ export function ConsultationForm() {
           href={lastWhatsAppUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-navy mt-5 inline-flex items-center justify-center gap-2 py-2.5 text-xs"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-5 py-2.5 text-xs shadow-md shadow-[#25D366]/30 transition hover:shadow-lg hover:shadow-[#25D366]/40 mt-5"
         >
           <WhatsAppIcon className="h-4 w-4" />
           {isUrdu ? "واٹس ایپ پیغام کھولیں" : "Open WhatsApp Message"}
@@ -545,7 +545,7 @@ export function HelpBanner() {
             href="/"
             className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-gold-400 transition hover:gap-3 hover:text-gold-300"
           >
-            {t.common.backToHome} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+            {t.common.backToHome} <ArrowRight className="h-4 w-4" />
           </Link>
         </FadeIn>
       </div>

@@ -139,7 +139,7 @@ export default function ServiceCard({
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gold-600 dark:text-gold-400 transition hover:text-gold-700 dark:hover:text-gold-300 focus-visible:ring-2 focus-visible:ring-gold-400 focus:outline-none active:scale-[0.98]"
             >
               <span>{linkLabel}</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </button>
           ) : (
             <button
@@ -148,7 +148,7 @@ export default function ServiceCard({
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-navy-800/70 dark:text-slate-300 transition group-hover:gap-2.5 group-hover:text-gold-600 dark:group-hover:text-gold-400 focus-visible:ring-2 focus-visible:ring-gold-400 focus:outline-none active:scale-[0.98]"
             >
               <span>{linkLabel}</span>
-              <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -183,12 +183,12 @@ export default function ServiceCard({
                 type="button"
                 onClick={() => setModalOpen(false)}
                 aria-label={isUrdu ? "بند کریں" : "Close"}
-                className="absolute top-4 right-4 rtl:left-4 rtl:right-auto flex h-9 w-9 items-center justify-center rounded-full bg-navy-900/5 dark:bg-white/10 text-navy-800 dark:text-slate-300 transition hover:bg-navy-900/10 dark:hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-gold-400 focus:outline-none"
+                className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-navy-900/5 dark:bg-white/10 text-navy-800 dark:text-slate-300 transition hover:bg-navy-900/10 dark:hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-gold-400 focus:outline-none"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="flex items-start gap-3.5 pr-8 rtl:pr-0 rtl:pl-8">
+              <div className="flex items-start gap-3.5 pr-8">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold-400/15 text-gold-500 dark:text-gold-400">
                   <Icon className="h-6 w-6" />
                 </span>
@@ -281,7 +281,7 @@ export default function ServiceCard({
                       ? "ہمارے ساہیوال چیمبر کا پتہ اور اوقات دیکھیں"
                       : "View Sahiwal Chamber Location & Timings"}
                   </span>
-                  <ArrowRight className="h-3 w-3 rtl:rotate-180" />
+                  <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             </motion.div>

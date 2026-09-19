@@ -11,7 +11,7 @@ export function WhatsAppIcon({
 }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="0 0 448 512"
       width="24"
       height="24"
       fill="currentColor"
@@ -19,7 +19,7 @@ export function WhatsAppIcon({
       aria-hidden="true"
       {...props}
     >
-      <path d="M17.472 14.382c-.301-.15-1.782-.88-2.058-.98-.276-.1-.477-.15-.678.15-.201.3-.778.98-.954 1.18-.176.2-.351.23-.652.08-.301-.15-1.272-.47-2.423-1.498-.896-.8-1.501-1.788-1.677-2.089-.176-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.15-.176.201-.301.301-.502.1-.201.05-.376-.025-.527-.075-.15-.678-1.631-.929-2.233-.244-.586-.492-.507-.678-.516l-.577-.01c-.201 0-.527.075-.803.376-.276.301-1.054 1.029-1.054 2.509 0 1.48 1.079 2.909 1.23 3.11.15.2 2.122 3.24 5.141 4.544.718.31 1.279.495 1.716.634.721.23 1.377.197 1.896.12.578-.086 1.782-.728 2.033-1.431.251-.703.251-1.305.176-1.431-.075-.126-.276-.201-.577-.351zM12.052 21.808c-1.77 0-3.504-.476-5.029-1.378l-.361-.214-3.738.98.997-3.644-.235-.374a9.78 9.78 0 0 1-1.506-5.212c0-5.412 4.403-9.815 9.819-9.815 2.624 0 5.09 1.023 6.946 2.879a9.774 9.774 0 0 1 2.872 6.936c0 5.413-4.403 9.818-9.819 9.818zm8.334-16.757A11.758 11.758 0 0 0 12.052 1.6C5.558 1.6.273 6.885.273 13.379c0 2.075.541 4.099 1.569 5.882L0 23.636l4.49-1.178a11.735 11.735 0 0 0 5.845 1.55h.005c6.494 0 11.779-5.285 11.779-11.78 0-3.147-1.226-6.105-3.453-8.331z" />
+      <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z" />
     </svg>
   );
 }
@@ -40,14 +40,14 @@ export function OfficialWhatsAppButton({
   const displayLabel = label || defaultLabel;
 
   const sizeClasses = {
-    sm: "px-3 py-1.5 text-xs gap-1.5",
-    md: "px-5 py-3 text-sm gap-2",
-    lg: "px-8 py-3.5 text-sm gap-2.5 font-bold",
+    sm: "px-4 py-2 text-xs gap-2",
+    md: "px-6 py-3 text-sm gap-2.5",
+    lg: "px-8 py-3.5 text-base gap-3 font-bold",
   };
 
   const iconSizes = {
-    sm: "h-3.5 w-3.5",
-    md: "h-4 w-4",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
     lg: "h-5 w-5",
   };
 
@@ -56,7 +56,7 @@ export function OfficialWhatsAppButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center rounded-lg bg-[#25D366] text-white font-semibold shadow-md shadow-[#25D366]/20 transition-all duration-200 hover:bg-[#20bd5a] hover:shadow-lg hover:shadow-[#25D366]/30 hover:-translate-y-0.5 active:translate-y-0 ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#25D366]/40 hover:-translate-y-0.5 active:translate-y-0 border border-emerald-400/30 ${sizeClasses[size]} ${className}`}
       title={displayLabel}
     >
       <WhatsAppIcon className={iconSizes[size]} />
@@ -76,7 +76,7 @@ export function FloatingWhatsApp() {
   return (
     <aside
       aria-label="WhatsApp Quick Contact"
-      className="fixed bottom-6 right-6 rtl:right-auto rtl:left-6 z-50 flex items-center group pointer-events-auto select-none"
+      className="fixed bottom-6 right-6 z-50 flex items-center group pointer-events-auto select-none"
     >
       <a
         href={SITE.whatsappHref}
@@ -92,7 +92,7 @@ export function FloatingWhatsApp() {
         <WhatsAppIcon className={floatingIconSize} />
 
         {/* Floating Tooltip Pill on Hover */}
-        <span className="absolute right-16 rtl:right-auto rtl:left-16 hidden sm:inline-flex whitespace-nowrap rounded-lg bg-navy-900/90 dark:bg-black/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none border border-white/10">
+        <span className="absolute right-16 hidden sm:inline-flex whitespace-nowrap rounded-lg bg-navy-900/90 dark:bg-black/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none border border-white/10">
           {isUrdu ? "واٹس ایپ پر فوری رابطہ کریں" : "Chat on WhatsApp"}
         </span>
       </a>

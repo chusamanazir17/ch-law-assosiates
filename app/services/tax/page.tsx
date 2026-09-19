@@ -97,7 +97,7 @@ export default function TaxPage() {
         title={sp.checklistBannerTitle}
         text={sp.checklistBannerDesc}
         bullets={[
-          { icon: MapPin, label: isUrdu ? "دفتر کا پتہ" : "Office Location", value: isUrdu ? "بلیو ایریا، اسلام آباد" : "4th Floor, Business Tower, Blue Area" },
+          { icon: MapPin, label: isUrdu ? "دفتر کا پتہ" : "Office Location", value: isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address },
           { icon: Phone, label: isUrdu ? "ہیلپ لائن" : "Helpline", value: `${SITE.phone} | Mon–Fri 9am–6pm` },
         ]}
       />

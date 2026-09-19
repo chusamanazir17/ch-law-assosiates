@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Info, AlertTriangle, PhoneCall, ArrowRight, type LucideIcon } from "lucide-react";
 
+import { SITE } from "@/lib/site";
+
 type Tone = "info" | "warning" | "danger" | "dark";
 
 const tones: Record<
@@ -42,7 +44,7 @@ export default function NoticeBar({
   title,
   text,
   ctaLabel,
-  ctaHref = "tel:+92511234567",
+  ctaHref = SITE.phoneHref,
   className = "",
 }: {
   tone?: Tone;

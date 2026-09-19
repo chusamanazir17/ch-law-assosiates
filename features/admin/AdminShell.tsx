@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import AdminSidebar from "@/features/admin/AdminSidebar";
@@ -13,10 +13,29 @@ function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   const { isCollapsed, setMobileOpen } = useAdminSidebar();
 
+  useEffect(() => {
+    // Admin dashboard strictly enforces bright light theme.
+    // Temporarily remove dark mode while inside admin area.
+    const wasDark = document.documentElement.classList.contains("dark");
+    document.documentElement.classList.remove("dark");
+    const previousColorScheme = document.documentElement.style.colorScheme;
+    document.documentElement.style.colorScheme = "light";
+
+    return () => {
+      if (wasDark) {
+        document.documentElement.classList.add("dark");
+      }
+      document.documentElement.style.colorScheme = previousColorScheme;
+    };
+  }, []);
+
   if (pathname.startsWith("/admin/login")) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
+    <div
+      className="admin-shell flex min-h-screen bg-slate-50 font-sans text-slate-900 antialiased"
+      style={{ colorScheme: "light" }}
+    >
       <AdminSidebar />
 
       <div

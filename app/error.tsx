@@ -24,7 +24,7 @@ export default function Error({
         <h1 className="font-serif text-3xl font-bold text-navy-900 dark:text-white">
           Something Went Wrong
         </h1>
-        <p className="mt-2 font-serif text-lg text-navy-800/60 dark:text-slate-400" dir="rtl">
+        <p className="mt-2 font-serif text-lg text-navy-800/60 dark:text-slate-400">
           کچھ غلط ہو گیا
         </p>
         <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">

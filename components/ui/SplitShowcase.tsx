@@ -61,7 +61,7 @@ export default function SplitShowcase({
             </motion.div>
 
             {imageTip && (
-              <div className="absolute bottom-5 right-5 rtl:left-5 rtl:right-auto max-w-[240px] rounded-lg bg-navy-900/95 dark:bg-black/90 p-5 text-xs italic leading-relaxed text-white/85 shadow-card-hover backdrop-blur border border-white/10">
+              <div className="absolute bottom-5 right-5 max-w-[240px] rounded-lg bg-navy-900/95 dark:bg-black/90 p-5 text-xs italic leading-relaxed text-white/85 shadow-card-hover backdrop-blur border border-white/10">
                 <Quote className="mb-2 h-4 w-4 text-gold-400" />
                 {imageTip}
               </div>
@@ -123,7 +123,7 @@ export default function SplitShowcase({
           )}
 
           {quote && (
-            <div className="mt-8 border-l-[3px] rtl:border-l-0 rtl:border-r-[3px] border-gold-400 bg-white/60 dark:bg-white/5 py-4 pl-5 pr-4 rtl:pr-5 rtl:pl-4">
+            <div className="mt-8 border-l-[3px] border-gold-400 bg-white/60 dark:bg-white/5 py-4 pl-5 pr-4">
               <p className="text-xs italic leading-relaxed text-navy-800/75 dark:text-slate-300">
                 &ldquo;{quote.text}&rdquo;
               </p>

@@ -5,8 +5,11 @@ import { Calendar, MapPin, ShieldAlert, CheckCircle, Clock } from "lucide-react"
 import SubscriptionForm from "./SubscriptionForm";
 import FadeIn from "@/components/motion/FadeIn";
 import { SITE } from "@/lib/site";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 export default function TaxReminderSection() {
+  const { isUrdu } = useLanguage();
+
   return (
     <section
       id="tax-reminders"
@@ -22,15 +25,21 @@ export default function TaxReminderSection() {
           <FadeIn className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-gold-400">
               <Calendar className="h-3.5 w-3.5" />
-              Automated Compliance Alerts
+              {isUrdu ? "ٹیکس ڈیڈلائن الرٹس" : "Automated Compliance Alerts"}
             </div>
 
             <h2 className="font-serif text-3xl font-bold leading-tight sm:text-4xl text-white">
-              Never Miss a Statutory <span className="text-gold-400">Tax Deadline</span>
+              {isUrdu ? (
+                <>ایف بی آر اور پنجاب ریونیو کی <span className="text-gold-400">آخری تاریخ</span> کبھی مت بھولیں</>
+              ) : (
+                <>Never Miss a Statutory <span className="text-gold-400">Tax Deadline</span></>
+              )}
             </h2>
 
             <p className="text-sm sm:text-base leading-relaxed text-white/80">
-              FBR and PRA tax deadlines in Pakistan carry statutory non-filing penalties and surcharges. Subscribe to receive automated reminders <strong>30 days</strong> and <strong>7 days</strong> before critical filing cutoff dates.
+              {isUrdu
+                ? "پاکستان میں ایف بی آر اور پی آر اے ٹیکس گوشوارے جمع کروانے کی آخری تاریخ گزرنے پر بھاری جرمانہ اور سرچارج عائد ہوتا ہے۔ اہم تاریخوں سے 30 دن اور 7 دن پہلے خودکار یاددہانی حاصل کریں۔"
+                : "FBR and PRA tax deadlines in Pakistan carry statutory non-filing penalties and surcharges. Subscribe to receive automated reminders 30 days and 7 days before critical filing cutoff dates."}
             </p>
 
             {/* Service & Office Reality Details */}
@@ -41,14 +50,26 @@ export default function TaxReminderSection() {
                 </span>
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-                    In-Person Documentation & Filing Services
+                    {isUrdu ? "چیمبر میں ذاتی آمد اور ٹیکس فائلنگ سروسز" : "In-Person Documentation & Filing Services"}
                   </h4>
                   <p className="mt-1 text-xs leading-relaxed text-white/70">
-                    Reminders are published for clients of our physical practice located at:
-                    <br />
-                    <strong className="text-white">{SITE.address}</strong>.
-                    <br />
-                    Our advisors are available on-site to assist with NTN, iris income tax filing, sales tax, and e-stamp paperwork.
+                    {isUrdu ? (
+                      <>
+                        ہمارے ساہیوال چیمبر واقع:
+                        <br />
+                        <strong className="text-white">شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال</strong>
+                        <br />
+                        میں تشریف لائیں۔ ہمارے مشیر این ٹی این، انکم ٹیکس ریٹرن، سیلز ٹیکس اور ای سٹامپ پیپرز کی تیاری کے لیے ہمہ وقت دستیاب ہیں۔
+                      </>
+                    ) : (
+                      <>
+                        Reminders are published for clients of our physical practice located at:
+                        <br />
+                        <strong className="text-white">{SITE.address}</strong>.
+                        <br />
+                        Our advisors are available on-site to assist with NTN, iris income tax filing, sales tax, and e-stamp paperwork.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -56,19 +77,19 @@ export default function TaxReminderSection() {
               <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-white/10">
                 <div className="flex items-center gap-2 text-xs text-white/70">
                   <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Double opt-in verification</span>
+                  <span>{isUrdu ? "تصدیقی ای میل سسٹم" : "Double opt-in verification"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-white/70">
                   <Clock className="h-4 w-4 text-gold-400 shrink-0" />
-                  <span>30-day & 7-day notifications</span>
+                  <span>{isUrdu ? "30 دن اور 7 دن پہلے الرٹس" : "30-day & 7-day notifications"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-white/70">
                   <ShieldAlert className="h-4 w-4 text-sky-400 shrink-0" />
-                  <span>100% spam-free & private</span>
+                  <span>{isUrdu ? "100% محفوظ و رازداری" : "100% spam-free & private"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-white/70">
                   <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Instant 1-click unsubscribe</span>
+                  <span>{isUrdu ? "فوری ان سبسکرائب کی سہولت" : "Instant 1-click unsubscribe"}</span>
                 </div>
               </div>
             </div>
