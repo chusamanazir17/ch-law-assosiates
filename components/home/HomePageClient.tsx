@@ -39,31 +39,56 @@ function Hero() {
   const homeCms = getPageContent("/");
   const heroSec = homeSections?.hero;
 
-  const eyebrowText = heroSec?.badge || (isUrdu ? t.hero.eyebrow : homeCms?.heroBadge || t.hero.eyebrow);
-  const heroTitle = heroSec?.headline || (homeCms?.heroHeadline || (isUrdu ? t.hero.titlePart1 : "Premier Legal Documentation & Chamber Services"));
-  const heroHighlight = heroSec?.highlight || t.hero.countryHighlight;
-  const heroDescription = heroSec?.subtitle || (homeCms?.heroSubtitle || (isUrdu ? t.hero.description : "Providing reliable E-Stamping, property registry, and business registration solutions with absolute transparency and professional excellence."));
+  const eyebrowText = isUrdu
+    ? t.hero.eyebrow
+    : (heroSec?.badge || homeCms?.heroBadge || t.hero.eyebrow);
 
-  const primaryBtn = heroSec?.primaryBtn || {
-    text: isUrdu ? t.hero.visitOfficeBtn : (homeCms?.primaryCtaText || t.hero.visitOfficeBtn),
-    href: homeCms?.primaryCtaHref || "#office",
-    enabled: true,
+  const heroTitle = isUrdu
+    ? t.hero.titlePart1
+    : (heroSec?.headline || homeCms?.heroHeadline || "Premier Legal Documentation & Chamber Services");
+
+  const heroHighlight = isUrdu
+    ? t.hero.countryHighlight
+    : (heroSec?.highlight || "Chamber 121 Sahiwal");
+
+  const heroDescription = isUrdu
+    ? t.hero.description
+    : (heroSec?.subtitle || homeCms?.heroSubtitle || "Providing reliable E-Stamping, property registry, and business registration solutions with absolute transparency and professional excellence.");
+
+  const primaryBtn = {
+    text: isUrdu
+      ? t.hero.visitOfficeBtn
+      : (heroSec?.primaryBtn?.text || homeCms?.primaryCtaText || t.hero.visitOfficeBtn),
+    href: heroSec?.primaryBtn?.href || homeCms?.primaryCtaHref || "#office",
+    enabled: heroSec?.primaryBtn?.enabled !== false,
   };
 
-  const secondaryBtn = heroSec?.secondaryBtn || {
-    text: isUrdu ? t.hero.whatsappBtn : "Chat on WhatsApp",
-    message: settings?.whatsappSettings?.sectionMessages?.hero || "",
-    enabled: true,
+  const secondaryBtn = {
+    text: isUrdu
+      ? t.hero.whatsappBtn
+      : (heroSec?.secondaryBtn?.text || "Chat on WhatsApp"),
+    message: isUrdu
+      ? "السلام علیکم، میں چیمبر 121 سے قانونی دستاویزات اور ٹیکس ایڈوائزری کے بارے میں معلومات حاصل کرنا چاہتا ہوں۔"
+      : (settings?.whatsappSettings?.sectionMessages?.hero || "Hello, I would like to inquire about legal documentation and tax advisory services."),
+    enabled: heroSec?.secondaryBtn?.enabled !== false,
   };
 
   const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
   const whatsappUrl = buildWhatsAppUrl(whatsappPhone, secondaryBtn.message);
 
-  const trustBadges = (heroSec?.trustBadges || [
-    { id: "1", label: t.hero.govVerified, enabled: true },
-    { id: "2", label: t.hero.sameDay, enabled: true },
-    { id: "3", label: t.hero.confidential, enabled: true },
-  ]).filter((b) => b.enabled !== false);
+  const trustBadges = (
+    isUrdu
+      ? [
+          { id: "1", label: t.hero.govVerified, enabled: true },
+          { id: "2", label: t.hero.sameDay, enabled: true },
+          { id: "3", label: t.hero.confidential, enabled: true },
+        ]
+      : (heroSec?.trustBadges || [
+          { id: "1", label: t.hero.govVerified, enabled: true },
+          { id: "2", label: t.hero.sameDay, enabled: true },
+          { id: "3", label: t.hero.confidential, enabled: true },
+        ])
+  ).filter((b) => b.enabled !== false);
 
   const trustIcons = [FileCheck2, CalendarCheck, ShieldCheck];
 
@@ -74,23 +99,25 @@ function Hero() {
       <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-gold-500/10 blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-navy-600/20 blur-[140px]" />
 
-      <motion.div className="container-x relative z-10 pt-24 pb-14 sm:pt-28 sm:pb-18 lg:pt-32 lg:pb-24">
+      <motion.div className="container-x relative z-10 pt-24 pb-14 sm:pt-28 sm:pb-18 lg:pt-32 lg:pb-24 text-left">
         <motion.span
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="eyebrow"
+          className="eyebrow inline-flex items-center gap-2 text-left"
           suppressHydrationWarning
         >
-          <BadgeCheck className="h-3.5 w-3.5" />
-          {eyebrowText}
+          <BadgeCheck className="h-3.5 w-3.5 shrink-0" />
+          <span>{eyebrowText}</span>
         </motion.span>
 
         <motion.h1
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.12 }}
-          className="mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl"
+          className={`mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl text-left ${
+            isUrdu ? "leading-[1.35]" : ""
+          }`}
         >
           {heroTitle}{" "}
           {heroHighlight && (
@@ -110,7 +137,7 @@ function Hero() {
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.24 }}
-          className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg"
+          className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg text-left"
         >
           {heroDescription}
         </motion.p>
@@ -119,7 +146,7 @@ function Hero() {
           initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.36 }}
-          className="mt-8 sm:mt-10 flex flex-wrap gap-4"
+          className="mt-8 sm:mt-10 flex flex-wrap items-center justify-start gap-4 text-left"
         >
           {primaryBtn.enabled !== false && (
             <Link href={primaryBtn.href || "#office"} className="btn-gold px-8 py-3.5 text-sm">
@@ -142,7 +169,7 @@ function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.7 }}
-            className="mt-12 sm:mt-16 flex flex-wrap gap-x-10 gap-y-4 text-white/70"
+            className="mt-12 sm:mt-16 flex flex-wrap items-center justify-start gap-x-10 gap-y-4 text-white/70 text-left"
           >
             {trustBadges.map((s, idx) => {
               const Icon = trustIcons[idx % trustIcons.length];
