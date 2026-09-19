@@ -1,17 +1,66 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
-import { Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Menu,
+  Search,
+  Bell,
+  Settings,
+  ExternalLink,
+  LogOut,
+  MessageSquare,
+  Users,
+  CheckCircle2,
+  ChevronDown,
+  LayoutDashboard,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import AdminSidebar from "@/features/admin/AdminSidebar";
 import {
   AdminSidebarProvider,
   useAdminSidebar,
 } from "@/features/admin/AdminSidebarContext";
+import { createClient } from "@/lib/supabase/client";
 
 function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
+  const router = useRouter();
   const { isCollapsed, setMobileOpen } = useAdminSidebar();
+
+  // Dropdown States
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+      if (adminMenuRef.current && !adminMenuRef.current.contains(event.target as Node)) {
+        setShowAdminMenu(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        setShowAdminMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     // Admin dashboard strictly enforces bright light theme.
@@ -28,6 +77,29 @@ function AdminShellInner({ children }: { children: ReactNode }) {
       document.documentElement.style.colorScheme = previousColorScheme;
     };
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    }
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore Supabase errors if unconfigured
+    }
+    router.push("/admin/login");
+    router.refresh();
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/admin/inquiries?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   if (pathname.startsWith("/admin/login")) return <>{children}</>;
 
@@ -55,68 +127,211 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="relative w-full max-w-md">
+            {/* Search Input without K badge, with search icon preserved */}
+            <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                <Search className="h-4 w-4" />
               </div>
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search subscribers, posts, media, or anything..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50/70 py-1.5 pl-9 pr-14 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38] transition"
+                className="w-full rounded-lg border border-slate-200 bg-slate-50/70 py-1.5 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38] transition"
               />
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5">
-                <kbd className="inline-flex items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-500 shadow-2xs">
-                  <span>⌘</span>
-                  <span>K</span>
-                </kbd>
-              </div>
-            </div>
+            </form>
           </div>
 
           {/* Right: Notifications & Admin Profile */}
-          <div className="flex items-center gap-4 shrink-0 pl-3">
-            {/* Notification Bell */}
-            <button
-              type="button"
-              className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition focus:outline-none"
-              title="Notifications"
-              aria-label="Notifications"
-            >
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0 pl-3">
+            {/* Notification Bell with interactive dropdown */}
+            <div ref={notifRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNotifications((prev) => !prev);
+                  setShowAdminMenu(false);
+                }}
+                className={`relative rounded-lg p-2 transition focus:outline-none ${
+                  showNotifications
+                    ? "bg-slate-100 text-slate-900"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                }`}
+                title="Notifications"
+                aria-label="Notifications"
+                aria-expanded={showNotifications}
               >
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
-            </button>
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              </button>
 
-            {/* Profile Info */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-2xs">
-                N
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-bold text-slate-900 leading-tight">Admin</p>
-                <p className="text-[11px] text-slate-400 leading-tight mt-0.5">Administrator</p>
-              </div>
+              {/* Notification Dropdown Panel */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-xl border border-slate-200 bg-white p-3 shadow-xl z-50">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900">Notifications</span>
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#075e38]">
+                        3 new
+                      </span>
+                    </div>
+                    <Link
+                      href="/admin/inquiries"
+                      onClick={() => setShowNotifications(false)}
+                      className="text-[11px] font-semibold text-[#075e38] hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </div>
+
+                  <div className="mt-2 divide-y divide-slate-100 text-xs">
+                    {/* Item 1 */}
+                    <Link
+                      href="/admin/inquiries"
+                      onClick={() => setShowNotifications(false)}
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 mt-0.5">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 truncate">
+                          New consultation inquiry
+                        </p>
+                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                          Ali Khan: Income Tax Filing guidance
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">9 hours ago</span>
+                      </div>
+                    </Link>
+
+                    {/* Item 2 */}
+                    <Link
+                      href="/admin/subscribers"
+                      onClick={() => setShowNotifications(false)}
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 mt-0.5">
+                        <Users className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 truncate">
+                          New subscriber opted-in
+                        </p>
+                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                          Chaudhry Usama: Property & Capital Tax
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">2 hours ago</span>
+                      </div>
+                    </Link>
+
+                    {/* Item 3 */}
+                    <Link
+                      href="/admin/deadlines"
+                      onClick={() => setShowNotifications(false)}
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 mt-0.5">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 truncate">
+                          System Status: Operational
+                        </p>
+                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                          Tax reminders and dispatches synchronized
+                        </p>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">1 day ago</span>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Info with interactive dropdown menu */}
+            <div ref={adminMenuRef} className="relative pl-2 border-l border-slate-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAdminMenu((prev) => !prev);
+                  setShowNotifications(false);
+                }}
+                className="flex items-center gap-2.5 rounded-lg p-1 hover:bg-slate-100 transition focus:outline-none"
+                aria-expanded={showAdminMenu}
+                title="Admin Account Menu"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-2xs">
+                  N
+                </div>
+                <div className="hidden sm:block text-left">
+                  <div className="flex items-center gap-1">
+                    <p className="text-xs font-bold text-slate-900 leading-tight">Admin</p>
+                    <ChevronDown className="h-3 w-3 text-slate-400" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-tight mt-0.5">Administrator</p>
+                </div>
+              </button>
+
+              {/* Admin Profile Dropdown Panel */}
+              {showAdminMenu && (
+                <div className="absolute right-0 mt-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl z-50 text-xs">
+                  {/* User info banner */}
+                  <div className="p-2.5 border-b border-slate-100 mb-1">
+                    <p className="font-bold text-slate-900">Admin Account</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">admin@ch-law.pk</p>
+                    <span className="inline-block mt-1.5 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#075e38]">
+                      Authorized Administrator
+                    </span>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/admin"
+                      onClick={() => setShowAdminMenu(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-slate-400" />
+                      <span>Dashboard Overview</span>
+                    </Link>
+
+                    <Link
+                      href="/admin/settings"
+                      onClick={() => setShowAdminMenu(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                    >
+                      <Settings className="h-4 w-4 text-slate-400" />
+                      <span>Firm & Site Settings</span>
+                    </Link>
+
+                    <Link
+                      href="/"
+                      target="_blank"
+                      onClick={() => setShowAdminMenu(false)}
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                    >
+                      <ExternalLink className="h-4 w-4 text-slate-400" />
+                      <span>Open Live Website</span>
+                    </Link>
+                  </div>
+
+                  {/* Sign Out Button */}
+                  <div className="border-t border-slate-100 mt-1.5 pt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAdminMenu(false);
+                        handleSignOut();
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-rose-600 hover:bg-rose-50 transition"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
