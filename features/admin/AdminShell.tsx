@@ -115,7 +115,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
           isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"
         }`}
       >
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white px-4 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200/80 bg-white px-4 sm:px-6 lg:px-8">
           {/* Left: Mobile hamburger & Search input */}
           <div className="flex items-center gap-3 flex-1 max-w-xl">
             <button
