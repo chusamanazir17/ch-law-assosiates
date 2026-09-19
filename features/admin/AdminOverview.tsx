@@ -24,7 +24,7 @@ import {
   Sliders,
   Compass,
 } from "lucide-react";
-import type { ConsultationInquiry, Post, SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
+import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
 
 interface InquiryItem {
   id: string;
@@ -194,26 +194,26 @@ export default function AdminOverview() {
     switch (status) {
       case "New":
         return (
-          <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+          <span className="inline-flex items-center rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
             New
           </span>
         );
       case "In Progress":
         return (
-          <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+          <span className="inline-flex items-center rounded bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
             In Progress
           </span>
         );
       case "Replied":
         return (
-          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+          <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
             Replied
           </span>
         );
       case "Closed":
       default:
         return (
-          <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+          <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
             Closed
           </span>
         );
@@ -412,64 +412,56 @@ export default function AdminOverview() {
               </div>
             </div>
 
-            {/* Horizontal Progress Bars */}
-            <div className="mt-5 space-y-4">
+            {/* Horizontal Progress Bars - Inline Format matching screenshot */}
+            <div className="mt-5 space-y-3.5">
               {/* Category 1: Income Tax */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-semibold text-slate-800">
-                    Income Tax - Individuals & AOPs
-                  </span>
-                  <span className="font-bold text-slate-900">3</span>
+              <div className="flex items-center gap-4 text-xs">
+                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                  Income Tax - Individuals & AOPs
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div className="h-full rounded-full bg-emerald-600" style={{ width: "70%" }} />
                 </div>
-                <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-emerald-600" style={{ width: "75%" }} />
-                </div>
+                <span className="w-4 text-right font-bold text-slate-800 shrink-0">3</span>
               </div>
 
               {/* Category 2: Property & Capital Value Tax */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-semibold text-slate-800">
-                    Property & Capital Value Tax
-                  </span>
-                  <span className="font-bold text-slate-900">2</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="flex items-center gap-4 text-xs">
+                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                  Property & Capital Value Tax
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div className="h-full rounded-full bg-sky-500" style={{ width: "50%" }} />
                 </div>
+                <span className="w-4 text-right font-bold text-slate-800 shrink-0">2</span>
               </div>
 
               {/* Category 3: Business & Corporate Tax */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-semibold text-slate-800">
-                    Business & Corporate Tax
-                  </span>
-                  <span className="font-bold text-slate-900">2</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="flex items-center gap-4 text-xs">
+                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                  Business & Corporate Tax
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div className="h-full rounded-full bg-orange-500" style={{ width: "50%" }} />
                 </div>
+                <span className="w-4 text-right font-bold text-slate-800 shrink-0">2</span>
               </div>
 
               {/* Category 4: Sales Tax */}
-              <div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-semibold text-slate-800">
-                    Sales Tax (Federal & PRA)
-                  </span>
-                  <span className="font-bold text-slate-900">1</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div className="flex items-center gap-4 text-xs">
+                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                  Sales Tax (Federal & PRA)
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div className="h-full rounded-full bg-purple-500" style={{ width: "25%" }} />
                 </div>
+                <span className="w-4 text-right font-bold text-slate-800 shrink-0">1</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Quick Actions (Span 1) */}
+        {/* Right Column: Quick Actions (Span 1) - 2x2 Grid matching screenshot */}
         <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
@@ -482,25 +474,25 @@ export default function AdminOverview() {
               </div>
             </div>
 
-            {/* 4 Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 mt-3.5">
+            {/* 2x2 Action Buttons Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3.5">
               {/* Action 1: Create Post */}
               <Link
                 href="/admin/posts/editor"
                 className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 transition hover:border-emerald-200 hover:bg-white hover:shadow-2xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                    <FileText className="h-4 w-4" />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                    <FileText className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-emerald-800">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-emerald-800 truncate">
                       Create Post
                     </p>
-                    <p className="text-[11px] text-slate-400">Publish news or updates</p>
+                    <p className="text-[10.5px] text-slate-400 truncate">Publish news or updates</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 transition" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-emerald-700 transition" />
               </Link>
 
               {/* Action 2: Media Library */}
@@ -508,18 +500,18 @@ export default function AdminOverview() {
                 href="/admin/media"
                 className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 transition hover:border-blue-200 hover:bg-white hover:shadow-2xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-                    <ImageIcon className="h-4 w-4" />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <ImageIcon className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-blue-800">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-blue-800 truncate">
                       Media Library
                     </p>
-                    <p className="text-[11px] text-slate-400">Manage images & files</p>
+                    <p className="text-[10.5px] text-slate-400 truncate">Manage images & files</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-blue-700 transition" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-blue-700 transition" />
               </Link>
 
               {/* Action 3: Add Consultation */}
@@ -527,18 +519,18 @@ export default function AdminOverview() {
                 href="/admin/inquiries"
                 className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 transition hover:border-orange-200 hover:bg-white hover:shadow-2xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
-                    <MessageSquare className="h-4 w-4" />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+                    <MessageSquare className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-orange-800">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-orange-800 truncate">
                       Add Consultation
                     </p>
-                    <p className="text-[11px] text-slate-400">Track client inquiries</p>
+                    <p className="text-[10.5px] text-slate-400 truncate">Track client inquiries</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-orange-700 transition" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-orange-700 transition" />
               </Link>
 
               {/* Action 4: E-Stamp Services */}
@@ -546,18 +538,18 @@ export default function AdminOverview() {
                 href="/admin/services"
                 className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 transition hover:border-purple-200 hover:bg-white hover:shadow-2xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
-                    <Compass className="h-4 w-4" />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
+                    <Compass className="h-3.5 w-3.5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-purple-800">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 group-hover:text-purple-800 truncate">
                       E-Stamp Services
                     </p>
-                    <p className="text-[11px] text-slate-400">Manage e-stamp content</p>
+                    <p className="text-[10.5px] text-slate-400 truncate">Manage e-stamp content</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-purple-700 transition" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-purple-700 transition" />
               </Link>
             </div>
           </div>
@@ -571,21 +563,21 @@ export default function AdminOverview() {
           href="/admin/posts"
           className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:border-emerald-300 transition flex items-center justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
               <FileText className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-800">Articles & Posts</p>
-              <p className="text-xl font-bold text-slate-900 mt-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">Articles & Posts</p>
+              <p className="text-2xl font-bold text-slate-900 mt-0.5">
                 {cmsStats.totalPosts}
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-400 truncate">
                 {cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft
               </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700 transition" />
         </Link>
 
         {/* Card 2: Media & Images */}
@@ -593,19 +585,19 @@ export default function AdminOverview() {
           href="/admin/media"
           className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:border-blue-300 transition flex items-center justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
               <ImageIcon className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-800">Media & Images</p>
-              <p className="text-xl font-bold text-slate-900 mt-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">Media & Images</p>
+              <p className="text-2xl font-bold text-slate-900 mt-0.5">
                 {cmsStats.totalMedia}
               </p>
-              <p className="text-[11px] text-slate-400">Stored image assets & banners</p>
+              <p className="text-[11px] text-slate-400 truncate">Stored image assets & banners</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700 transition" />
         </Link>
 
         {/* Card 3: Consultation Leads */}
@@ -613,26 +605,26 @@ export default function AdminOverview() {
           href="/admin/inquiries"
           className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:border-emerald-300 transition flex items-center justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
               <MessageSquare className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-bold text-slate-800">Consultation Leads</p>
+                <p className="text-xs font-bold text-slate-800 truncate">Consultation Leads</p>
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xl font-bold text-slate-900">
+                <span className="text-2xl font-bold text-slate-900">
                   {cmsStats.newInquiries}
                 </span>
-                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
                   NEW
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Direct client requests</p>
+              <p className="text-[11px] text-slate-400 truncate">Direct client requests</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700 transition" />
         </Link>
 
         {/* Card 4: Site Notice / Ticker */}
@@ -640,17 +632,17 @@ export default function AdminOverview() {
           href="/admin/announcements"
           className="group rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs hover:border-amber-300 transition flex items-center justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
               <Megaphone className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-800">Site Notice / Ticker</p>
-              <p className="text-xl font-bold text-slate-900 mt-0.5">0</p>
-              <p className="text-[11px] text-slate-400">No active announcement</p>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">Site Notice / Ticker</p>
+              <p className="text-2xl font-bold text-slate-900 mt-0.5">0</p>
+              <p className="text-[11px] text-slate-400 truncate">No active announcement</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-700 transition" />
         </Link>
       </div>
 
@@ -686,18 +678,18 @@ export default function AdminOverview() {
             href="/admin/pages"
             className="group flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 transition hover:border-emerald-300 hover:bg-white hover:shadow-2xs"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
                 <FileText className="h-4.5 w-4.5" />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-800">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-800 truncate">
                   Page Content Editor
                 </p>
-                <p className="text-[11px] text-slate-500">Manage pages, about, legal info</p>
+                <p className="text-[11px] text-slate-500 truncate">Manage pages, about, legal info</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 transition" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-700 transition" />
           </Link>
 
           {/* Hub 2: Service Categories */}
@@ -705,18 +697,18 @@ export default function AdminOverview() {
             href="/admin/services"
             className="group flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 transition hover:border-blue-300 hover:bg-white hover:shadow-2xs"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
                 <LayoutGrid className="h-4.5 w-4.5" />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 group-hover:text-blue-800">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 group-hover:text-blue-800 truncate">
                   Service Categories
                 </p>
-                <p className="text-[11px] text-slate-500">Organize tax & e-stamp services</p>
+                <p className="text-[11px] text-slate-500 truncate">Organize tax & e-stamp services</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-blue-700 transition" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-blue-700 transition" />
           </Link>
 
           {/* Hub 3: Featured Sections */}
@@ -724,18 +716,18 @@ export default function AdminOverview() {
             href="/admin/pages"
             className="group flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 transition hover:border-amber-300 hover:bg-white hover:shadow-2xs"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
                 <Sliders className="h-4.5 w-4.5" />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 group-hover:text-amber-800">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 group-hover:text-amber-800 truncate">
                   Featured Sections
                 </p>
-                <p className="text-[11px] text-slate-500">Update homepage content</p>
+                <p className="text-[11px] text-slate-500 truncate">Update homepage content</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-amber-700 transition" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-amber-700 transition" />
           </Link>
 
           {/* Hub 4: Media Management */}
@@ -743,18 +735,18 @@ export default function AdminOverview() {
             href="/admin/media"
             className="group flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 transition hover:border-purple-300 hover:bg-white hover:shadow-2xs"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
                 <ImageIcon className="h-4.5 w-4.5" />
               </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 group-hover:text-purple-800">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 group-hover:text-purple-800 truncate">
                   Media Management
                 </p>
-                <p className="text-[11px] text-slate-500">Upload & manage files</p>
+                <p className="text-[11px] text-slate-500 truncate">Upload & manage files</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-purple-700 transition" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-purple-700 transition" />
           </Link>
         </div>
       </div>
@@ -798,10 +790,10 @@ export default function AdminOverview() {
               <tbody className="divide-y divide-slate-100">
                 {inquiries.map((inq) => (
                   <tr key={inq.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 font-semibold text-slate-900 pr-2">
+                    <td className="py-3 font-semibold text-slate-900 pr-2 whitespace-nowrap">
                       {inq.name}
                     </td>
-                    <td className="py-3 text-slate-600 pr-2">{inq.service_needed}</td>
+                    <td className="py-3 text-slate-600 pr-2 whitespace-nowrap">{inq.service_needed}</td>
                     <td className="py-3 text-slate-500 max-w-[200px] truncate pr-2">
                       {inq.message}
                     </td>
@@ -851,7 +843,7 @@ export default function AdminOverview() {
               {activities.map((act) => (
                 <div key={act.id} className="flex items-start justify-between gap-3 text-xs">
                   <div className="flex items-start gap-2.5 min-w-0">
-                    <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${act.dotColor}`} />
+                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${act.dotColor}`} />
                     <div className="min-w-0">
                       <p className="font-semibold text-slate-800 truncate">{act.title}</p>
                       <p className="text-[11px] text-slate-400 truncate">{act.subtitle}</p>

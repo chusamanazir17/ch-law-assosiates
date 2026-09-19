@@ -244,11 +244,11 @@ export default function AdminSidebar({
                       className={`group relative flex items-center rounded-lg transition-all duration-150 ${
                         isCollapsed
                           ? "justify-center h-10 w-full"
-                          : "gap-3 px-2.5 py-2 text-[13.5px]"
+                          : "gap-3 px-2.5 py-2 text-[13px]"
                       } ${
                         isActive
-                          ? "bg-[#eef7f2] text-[#075e38] font-semibold"
-                          : "text-slate-700 hover:bg-[#eef7f2]/60 hover:text-[#075e38] font-medium"
+                          ? "bg-[#eef7f2] text-[#075e38] font-semibold border-l-[3px] border-[#075e38] rounded-l-none"
+                          : "border-l-[3px] border-transparent text-slate-700 hover:bg-[#eef7f2]/60 hover:text-[#075e38] font-medium"
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
