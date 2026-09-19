@@ -28,8 +28,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Authenticated admin accessing /admin routes
-    if (pathname.startsWith("/admin")) {
+    // Authenticated admin accessing /admin or /api/admin routes
+    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
       return response;
     }
   }
@@ -39,6 +39,12 @@ export async function updateSession(request: NextRequest) {
 
   if (!config) {
     // If Supabase is not configured and not logged in as admin:
+    if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Admin authentication required." },
+        { status: 401 }
+      );
+    }
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
       return loginRedirect(request);
     }
@@ -66,30 +72,41 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let isSupabaseAdmin = false;
+  if (user) {
+    const { data: isAdmin } = await supabase.rpc("is_admin", {
+      p_user_id: user.id,
+    });
+    isSupabaseAdmin = !!isAdmin;
+  }
+
+  const isAuthenticatedAdmin = isLocalAdmin || isSupabaseAdmin;
+
+  // Guard /api/admin/* endpoints
+  if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login") {
+    if (!isAuthenticatedAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Admin authentication required." },
+        { status: 401 }
+      );
+    }
+    return response;
+  }
+
+  // Guard /admin UI routes
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (!user && !isLocalAdmin) return loginRedirect(request);
-
-    if (user) {
-      const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin", {
-        p_user_id: user.id,
-      });
-
-      if ((adminError || !isAdmin) && !isLocalAdmin) {
-        return loginRedirect(request, "unauthorized");
-      }
+    if (!isAuthenticatedAdmin) {
+      return loginRedirect(request);
     }
   }
 
-  if (pathname === "/admin/login" && user) {
-    const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: user.id });
-    if (isAdmin) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin";
-      url.search = "";
-      const redirectResponse = NextResponse.redirect(url);
-      response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
-      return redirectResponse;
-    }
+  if (pathname === "/admin/login" && isAuthenticatedAdmin) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin";
+    url.search = "";
+    const redirectResponse = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   return response;

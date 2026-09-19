@@ -8,6 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck",
+    "test": "node scripts/smoke-test.mjs",
     "clean": "node -e \"const fs=require('fs'); for (const p of ['.next','tsconfig.tsbuildinfo']) fs.rmSync(p,{recursive:true,force:true})\"",
     "verify": "npm run typecheck && npm run build"
   },

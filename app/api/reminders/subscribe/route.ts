@@ -1,11 +1,30 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { validateSubscription } from "@/lib/validation/subscription";
 import { addOrUpdateSubscriber } from "@/lib/db/subscribersStore";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateLimitResult = checkRateLimit(`subscribe:${ip}`, 5, 10 * 60 * 1000); // 5 submissions per 10 min
+
+    if (!rateLimitResult.success) {
+      const retrySeconds = Math.ceil(rateLimitResult.resetMs / 1000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too many subscription attempts. Please try again in a few minutes.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retrySeconds),
+          },
+        }
+      );
+    }
     const body = (await request.json()) as Record<string, unknown>;
 
     // Honeypots must look successful to automated submitters without storing

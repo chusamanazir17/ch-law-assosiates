@@ -1,12 +1,39 @@
-const ADMIN_USERNAME = "admin";
-const ADMIN_EMAIL = "admin@chcomposing.pk";
-const ADMIN_PASSWORD = "admin2026";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@chcomposing.pk";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin2026";
 
-const SESSION_SECRET =
-  process.env.ADMIN_SESSION_SECRET ||
-  "ch-law-admin-secret-key-2026-sahiwal-chamber121";
+const DEFAULT_SECRET = "ch-law-admin-secret-key-2026-sahiwal-chamber121";
+const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || DEFAULT_SECRET;
+
+if (process.env.NODE_ENV === "production") {
+  if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin2026") {
+    console.warn(
+      "[Security Warning] ADMIN_PASSWORD is using the default value. Set a strong ADMIN_PASSWORD in your production environment variables."
+    );
+  }
+  if (!process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET === DEFAULT_SECRET) {
+    console.warn(
+      "[Security Warning] ADMIN_SESSION_SECRET is using the default fallback. Set a unique 32+ character ADMIN_SESSION_SECRET in your production environment variables."
+    );
+  }
+}
 
 export const ADMIN_COOKIE_NAME = "ch_admin_session";
+
+function constantTimeEquals(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) {
+      diff |= a.charCodeAt(i) ^ a.charCodeAt(i);
+    }
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
 
 export function validateAdminCredentials(
   userOrEmail: string,
@@ -16,11 +43,11 @@ export function validateAdminCredentials(
 
   const normalized = userOrEmail.trim().toLowerCase();
   const isValidUser =
-    normalized === ADMIN_USERNAME ||
-    normalized === ADMIN_EMAIL ||
-    normalized === "admin@ch-law.pk";
+    constantTimeEquals(normalized, ADMIN_USERNAME.toLowerCase()) ||
+    constantTimeEquals(normalized, ADMIN_EMAIL.toLowerCase()) ||
+    constantTimeEquals(normalized, "admin@ch-law.pk");
 
-  const isPassValid = pass.trim() === ADMIN_PASSWORD;
+  const isPassValid = constantTimeEquals(pass.trim(), ADMIN_PASSWORD);
 
   return isValidUser && isPassValid;
 }
