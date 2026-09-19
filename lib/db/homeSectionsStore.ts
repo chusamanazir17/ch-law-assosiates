@@ -332,8 +332,6 @@ export function getDefaultHomeSections(): HomeSectionsData {
       "about",
       "whyTrust",
       "reminders",
-      "testimonials",
-      "faq",
       "office",
       "finalCta",
     ],

@@ -772,17 +772,15 @@ function FinalCta() {
 export default function HomePageClient({ initialCms }: { initialCms?: any }) {
   const { homeSections } = useCms(initialCms);
 
-  const order = homeSections?.sectionOrder || [
+  const order = (homeSections?.sectionOrder || [
     "hero",
     "services",
     "about",
     "whyTrust",
     "reminders",
-    "testimonials",
-    "faq",
     "office",
     "finalCta",
-  ];
+  ]).filter((key) => key !== "testimonials" && key !== "faq");
 
   const sectionMap: Record<string, React.ReactNode> = {
     hero: <Hero key="hero" />,
