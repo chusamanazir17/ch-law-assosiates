@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -8,6 +8,7 @@ import {
   Clock,
   AlertTriangle,
   BarChart2,
+  TrendingUp,
   ChevronDown,
   Zap,
   FileText,
@@ -23,16 +24,21 @@ import {
   LayoutGrid,
   Sliders,
   Compass,
+  Check,
+  X,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
 
 interface InquiryItem {
   id: string;
   name: string;
+  phone?: string;
   service_needed: string;
   message: string;
   created_at: string;
-  status: string;
+  status: "New" | "In Progress" | "Replied" | "Closed";
 }
 
 interface ActivityItem {
@@ -43,8 +49,96 @@ interface ActivityItem {
   dotColor: string;
 }
 
+type Timeframe = "daily" | "weekly" | "monthly" | "yearly";
+
+interface CategoryData {
+  name: string;
+  count: number;
+  color: string;
+  points: number[];
+}
+
+const TIMEFRAME_DATA: Record<Timeframe, { label: string; xLabels: string[]; categories: CategoryData[] }> = {
+  daily: {
+    label: "Daily (Today)",
+    xLabels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
+    categories: [
+      { name: "Income Tax - Individuals & AOPs", count: 1, color: "#059669", points: [0, 0, 1, 1, 1, 1] },
+      { name: "Property & Capital Value Tax", count: 1, color: "#0284c7", points: [0, 0, 0, 0, 1, 1] },
+      { name: "Business & Corporate Tax", count: 0, color: "#ea580c", points: [0, 0, 0, 0, 0, 0] },
+      { name: "Sales Tax (Federal & PRA)", count: 0, color: "#9333ea", points: [0, 0, 0, 0, 0, 0] },
+    ],
+  },
+  weekly: {
+    label: "Weekly (Last 7 Days)",
+    xLabels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    categories: [
+      { name: "Income Tax - Individuals & AOPs", count: 3, color: "#059669", points: [1, 1, 2, 2, 3, 3, 3] },
+      { name: "Property & Capital Value Tax", count: 2, color: "#0284c7", points: [0, 1, 1, 1, 2, 2, 2] },
+      { name: "Business & Corporate Tax", count: 2, color: "#ea580c", points: [1, 1, 1, 2, 2, 2, 2] },
+      { name: "Sales Tax (Federal & PRA)", count: 1, color: "#9333ea", points: [0, 0, 1, 1, 1, 1, 1] },
+    ],
+  },
+  monthly: {
+    label: "Monthly (Last 30 Days)",
+    xLabels: ["Aug 25", "Sep 01", "Sep 07", "Sep 13", "Sep 19"],
+    categories: [
+      { name: "Income Tax - Individuals & AOPs", count: 3, color: "#059669", points: [1, 2, 2, 3, 3] },
+      { name: "Property & Capital Value Tax", count: 2, color: "#0284c7", points: [1, 1, 2, 2, 2] },
+      { name: "Business & Corporate Tax", count: 2, color: "#ea580c", points: [0, 1, 1, 2, 2] },
+      { name: "Sales Tax (Federal & PRA)", count: 1, color: "#9333ea", points: [0, 0, 1, 1, 1] },
+    ],
+  },
+  yearly: {
+    label: "Yearly (Year to Date)",
+    xLabels: ["Jan", "Mar", "May", "Jul", "Sep"],
+    categories: [
+      { name: "Income Tax - Individuals & AOPs", count: 12, color: "#059669", points: [2, 5, 8, 10, 12] },
+      { name: "Property & Capital Value Tax", count: 8, color: "#0284c7", points: [1, 3, 5, 7, 8] },
+      { name: "Business & Corporate Tax", count: 9, color: "#ea580c", points: [2, 4, 6, 8, 9] },
+      { name: "Sales Tax (Federal & PRA)", count: 5, color: "#9333ea", points: [1, 2, 3, 4, 5] },
+    ],
+  },
+};
+
 export default function AdminOverview() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
+
+  // Timeframe states
+  const [globalTimeframe, setGlobalTimeframe] = useState<Timeframe>("weekly");
+  const [showGlobalDropdown, setShowGlobalDropdown] = useState(false);
+  const [chartView, setChartView] = useState<"bars" | "graph">("bars");
+  const [chartTimeframe, setChartTimeframe] = useState<Timeframe>("monthly");
+  const [showChartDropdown, setShowChartDropdown] = useState(false);
+
+  // Modals & Interactive States
+  const [showAddConsultationModal, setShowAddConsultationModal] = useState(false);
+  const [activeInquiryAction, setActiveInquiryAction] = useState<string | null>(null);
+  const [selectedInquiryDetail, setSelectedInquiryDetail] = useState<InquiryItem | null>(null);
+
+  // New Consultation Form State
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
+  const [newClientService, setNewClientService] = useState("Income Tax Filing");
+  const [newClientMessage, setNewClientMessage] = useState("");
+  const [addConsultationSuccess, setAddConsultationSuccess] = useState(false);
+
+  // Click outside handlers
+  const globalRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (globalRef.current && !globalRef.current.contains(event.target as Node)) {
+        setShowGlobalDropdown(false);
+      }
+      if (chartRef.current && !chartRef.current.contains(event.target as Node)) {
+        setShowChartDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Email Signups Telemetry State
   const [subscriberAnalytics, setSubscriberAnalytics] = useState<SubscriberAnalytics>({
@@ -67,37 +161,41 @@ export default function AdminOverview() {
     activeNotice: null as SiteAnnouncement | null,
   });
 
-  // Recent Inquiries
+  // Recent Inquiries State
   const [inquiries, setInquiries] = useState<InquiryItem[]>([
     {
       id: "inq-1",
       name: "Ali Khan",
+      phone: "0300 9876543",
       service_needed: "Income Tax Filing",
-      message: "Need guidance on salaried tax filing...",
+      message: "Need guidance on salaried tax filing and wealth statement reconciliation.",
       created_at: "Sep 19, 2026",
       status: "New",
     },
     {
       id: "inq-2",
       name: "Sara Ahmed",
+      phone: "0321 4567890",
       service_needed: "Property Tax",
-      message: "Property tax calculation for commercial...",
+      message: "Property tax calculation for commercial plot transfer in Sahiwal.",
       created_at: "Sep 18, 2026",
       status: "In Progress",
     },
     {
       id: "inq-3",
       name: "Bilal Hussain",
+      phone: "0333 1122334",
       service_needed: "E-Stamp Services",
-      message: "Need help with e-stamp registration...",
+      message: "Need help with e-stamp Challan 32-A generation for registry.",
       created_at: "Sep 17, 2026",
       status: "Replied",
     },
     {
       id: "inq-4",
       name: "Ayesha Malik",
+      phone: "0345 9988776",
       service_needed: "Corporate Tax",
-      message: "Looking for consultation on business tax...",
+      message: "Looking for consultation on business tax registration and PRA compliance.",
       created_at: "Sep 16, 2026",
       status: "Closed",
     },
@@ -167,13 +265,27 @@ export default function AdminOverview() {
             }));
           }
           if (json.recentInquiries && json.recentInquiries.length > 0) {
-            const mapped = json.recentInquiries.map((inq: any) => ({
+            const mapped: InquiryItem[] = json.recentInquiries.map((inq: any) => ({
               id: inq.id,
               name: inq.name || "Client",
+              phone: inq.phone || "0300 0000000",
               service_needed: inq.service_needed || "Tax Filing",
               message: inq.message || "Consultation request submitted.",
-              created_at: inq.created_at ? new Date(inq.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recently",
-              status: inq.status === "new" ? "New" : inq.status === "in_progress" ? "In Progress" : inq.status === "replied" ? "Replied" : "Closed",
+              created_at: inq.created_at
+                ? new Date(inq.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Recently",
+              status:
+                inq.status === "new"
+                  ? "New"
+                  : inq.status === "in_progress"
+                  ? "In Progress"
+                  : inq.status === "replied"
+                  ? "Replied"
+                  : "Closed",
             }));
             setInquiries(mapped);
           }
@@ -189,6 +301,40 @@ export default function AdminOverview() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleAddConsultationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClientName.trim()) return;
+
+    const newInq: InquiryItem = {
+      id: `inq-${Date.now()}`,
+      name: newClientName.trim(),
+      phone: newClientPhone.trim() || "0300 0000000",
+      service_needed: newClientService,
+      message: newClientMessage.trim() || "In-chamber consultation inquiry recorded.",
+      created_at: "Just now",
+      status: "New",
+    };
+
+    setInquiries((prev) => [newInq, ...prev]);
+    setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
+    setAddConsultationSuccess(true);
+
+    setTimeout(() => {
+      setNewClientName("");
+      setNewClientPhone("");
+      setNewClientMessage("");
+      setAddConsultationSuccess(false);
+      setShowAddConsultationModal(false);
+    }, 1000);
+  };
+
+  const handleUpdateStatus = (id: string, newStatus: "New" | "In Progress" | "Replied" | "Closed") => {
+    setInquiries((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+    );
+    setActiveInquiryAction(null);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -220,6 +366,148 @@ export default function AdminOverview() {
     }
   };
 
+  const currentChartData = TIMEFRAME_DATA[chartTimeframe];
+
+  // Helper to render SVG line paths for chart
+  const renderSvgChart = () => {
+    const width = 560;
+    const height = 180;
+    const padX = 40;
+    const padY = 25;
+
+    const allValues = currentChartData.categories.flatMap((c) => c.points);
+    const maxVal = Math.max(...allValues, 1);
+
+    const getX = (index: number, total: number) => {
+      return padX + (index / (total - 1)) * (width - padX * 2);
+    };
+
+    const getY = (val: number) => {
+      return height - padY - (val / maxVal) * (height - padY * 2);
+    };
+
+    return (
+      <div className="w-full overflow-hidden pt-2">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44 overflow-visible">
+          <defs>
+            {currentChartData.categories.map((cat, i) => (
+              <linearGradient key={cat.name} id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={cat.color} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={cat.color} stopOpacity="0.0" />
+              </linearGradient>
+            ))}
+          </defs>
+
+          {/* Horizontal Grid lines */}
+          {[0, 0.5, 1].map((pct, idx) => {
+            const y = padY + pct * (height - padY * 2);
+            return (
+              <g key={idx}>
+                <line
+                  x1={padX}
+                  y1={y}
+                  x2={width - padX}
+                  y2={y}
+                  stroke="#e2e8f0"
+                  strokeDasharray="4 4"
+                  strokeWidth="1"
+                />
+                <text
+                  x={padX - 8}
+                  y={y + 3}
+                  textAnchor="end"
+                  fontSize="9"
+                  fill="#94a3b8"
+                  className="font-mono font-medium"
+                >
+                  {Math.round(maxVal * (1 - pct))}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Category Lines & Area */}
+          {currentChartData.categories.map((cat, catIdx) => {
+            const points = cat.points;
+            const pathCommands = points.map((p, i) => {
+              const x = getX(i, points.length);
+              const y = getY(p);
+              return `${i === 0 ? "M" : "L"} ${x} ${y}`;
+            });
+            const linePath = pathCommands.join(" ");
+            const areaPath = `${linePath} L ${getX(points.length - 1, points.length)} ${height - padY} L ${getX(0, points.length)} ${height - padY} Z`;
+
+            return (
+              <g key={cat.name}>
+                {/* Area Gradient Fill */}
+                <path d={areaPath} fill={`url(#grad-${catIdx})`} />
+
+                {/* Main Line */}
+                <path
+                  d={linePath}
+                  fill="none"
+                  stroke={cat.color}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* Point Dots */}
+                {points.map((p, i) => {
+                  const cx = getX(i, points.length);
+                  const cy = getY(p);
+                  return (
+                    <circle
+                      key={i}
+                      cx={cx}
+                      cy={cy}
+                      r="3.5"
+                      fill="#ffffff"
+                      stroke={cat.color}
+                      strokeWidth="2"
+                      className="cursor-pointer hover:r-5 transition-all"
+                    >
+                      <title>{`${cat.name}: ${p} subscriber(s)`}</title>
+                    </circle>
+                  );
+                })}
+              </g>
+            );
+          })}
+
+          {/* X Axis Labels */}
+          {currentChartData.xLabels.map((lbl, idx) => {
+            const x = getX(idx, currentChartData.xLabels.length);
+            return (
+              <text
+                key={lbl}
+                x={x}
+                y={height - 5}
+                textAnchor="middle"
+                fontSize="10"
+                fill="#64748b"
+                className="font-medium"
+              >
+                {lbl}
+              </text>
+            );
+          })}
+        </svg>
+
+        {/* Legend */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-3 pt-3 border-t border-slate-100 text-xs">
+          {currentChartData.categories.map((cat) => (
+            <div key={cat.name} className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+              <span className="text-slate-600 font-medium">{cat.name}</span>
+              <span className="font-bold text-slate-800">({cat.count})</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-5 max-w-7xl mx-auto font-sans pb-10">
       {/* 1. Breadcrumbs */}
@@ -241,11 +529,42 @@ export default function AdminOverview() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Date Picker Button */}
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs">
-            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-            <span>Sep 13, 2026 - Sep 19, 2026</span>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-0.5" />
+          {/* Interactive Date Range Dropdown */}
+          <div ref={globalRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowGlobalDropdown((prev) => !prev)}
+              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+              aria-expanded={showGlobalDropdown}
+            >
+              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              <span>{TIMEFRAME_DATA[globalTimeframe].label}</span>
+              <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-0.5" />
+            </button>
+
+            {showGlobalDropdown && (
+              <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs">
+                {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
+                  <button
+                    key={tf}
+                    type="button"
+                    onClick={() => {
+                      setGlobalTimeframe(tf);
+                      setChartTimeframe(tf);
+                      setShowGlobalDropdown(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
+                      globalTimeframe === tf
+                        ? "bg-[#eef7f2] font-bold text-[#075e38]"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{TIMEFRAME_DATA[tf].label}</span>
+                    {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#075e38]" />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Create Post Button */}
@@ -389,12 +708,12 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* 4. Section 2: Two Columns (Subscriber Interest & Quick Actions) */}
+      {/* 4. Section 2: Two Columns (Subscriber Interest / Chart & Quick Actions) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left Column: Subscriber Interest by Tax Category (Span 2) */}
+        {/* Left Column: Subscriber Interest with BARS & GRAPH TOGGLE (Span 2) */}
         <div className="lg:col-span-2 rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <BarChart2 className="h-4.5 w-4.5 text-[#075e38]" />
                 <div>
@@ -406,62 +725,109 @@ export default function AdminOverview() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs">
-                <span>Last 30 days</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+
+              {/* View Switcher & Timeframe Buttons */}
+              <div className="flex items-center gap-2">
+                {/* Switcher between Bars & Line Graph */}
+                <div className="flex items-center rounded-lg bg-slate-100 p-0.5 border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setChartView("bars")}
+                    className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                      chartView === "bars"
+                        ? "bg-white text-[#075e38] shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="View as Horizontal Bars"
+                  >
+                    <BarChart2 className="h-3.5 w-3.5" />
+                    <span>Bars</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChartView("graph")}
+                    className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                      chartView === "graph"
+                        ? "bg-white text-[#075e38] shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="View as Line Graph & Chart"
+                  >
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    <span>Graph</span>
+                  </button>
+                </div>
+
+                {/* Dropdown for timeframe */}
+                <div ref={chartRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowChartDropdown((prev) => !prev)}
+                    className="flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+                  >
+                    <span>{TIMEFRAME_DATA[chartTimeframe].label}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                  </button>
+
+                  {showChartDropdown && (
+                    <div className="absolute right-0 mt-1.5 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs">
+                      {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
+                        <button
+                          key={tf}
+                          type="button"
+                          onClick={() => {
+                            setChartTimeframe(tf);
+                            setShowChartDropdown(false);
+                          }}
+                          className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
+                            chartTimeframe === tf
+                              ? "bg-[#eef7f2] font-bold text-[#075e38]"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <span>{TIMEFRAME_DATA[tf].label}</span>
+                          {chartTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#075e38]" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Horizontal Progress Bars - Inline Format matching screenshot */}
-            <div className="mt-5 space-y-3.5">
-              {/* Category 1: Income Tax */}
-              <div className="flex items-center gap-4 text-xs">
-                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
-                  Income Tax - Individuals & AOPs
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-emerald-600" style={{ width: "70%" }} />
-                </div>
-                <span className="w-4 text-right font-bold text-slate-800 shrink-0">3</span>
-              </div>
+            {/* Render Bars View OR Graph/Line Chart View */}
+            {chartView === "bars" ? (
+              <div className="mt-5 space-y-3.5">
+                {currentChartData.categories.map((cat) => {
+                  const maxCount = Math.max(...currentChartData.categories.map((c) => c.count), 1);
+                  const percentage = Math.max(12, Math.round((cat.count / maxCount) * 100));
 
-              {/* Category 2: Property & Capital Value Tax */}
-              <div className="flex items-center gap-4 text-xs">
-                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
-                  Property & Capital Value Tax
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-sky-500" style={{ width: "50%" }} />
-                </div>
-                <span className="w-4 text-right font-bold text-slate-800 shrink-0">2</span>
+                  return (
+                    <div key={cat.name} className="flex items-center gap-4 text-xs">
+                      <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                        {cat.name}
+                      </span>
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${percentage}%`, backgroundColor: cat.color }}
+                        />
+                      </div>
+                      <span className="w-4 text-right font-bold text-slate-800 shrink-0">
+                        {cat.count}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Category 3: Business & Corporate Tax */}
-              <div className="flex items-center gap-4 text-xs">
-                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
-                  Business & Corporate Tax
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-orange-500" style={{ width: "50%" }} />
-                </div>
-                <span className="w-4 text-right font-bold text-slate-800 shrink-0">2</span>
-              </div>
-
-              {/* Category 4: Sales Tax */}
-              <div className="flex items-center gap-4 text-xs">
-                <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
-                  Sales Tax (Federal & PRA)
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full rounded-full bg-purple-500" style={{ width: "25%" }} />
-                </div>
-                <span className="w-4 text-right font-bold text-slate-800 shrink-0">1</span>
-              </div>
-            </div>
+            ) : (
+              renderSvgChart()
+            )}
           </div>
         </div>
 
-        {/* Right Column: Quick Actions (Span 1) - 2x2 Grid matching screenshot */}
+        {/* Right Column: Quick Actions (Span 1) */}
         <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
@@ -514,10 +880,11 @@ export default function AdminOverview() {
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-blue-700 transition" />
               </Link>
 
-              {/* Action 3: Add Consultation */}
-              <Link
-                href="/admin/inquiries"
-                className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 transition hover:border-orange-200 hover:bg-white hover:shadow-2xs"
+              {/* Action 3: Add Consultation (Interactive Modal Trigger) */}
+              <button
+                type="button"
+                onClick={() => setShowAddConsultationModal(true)}
+                className="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 text-left transition hover:border-orange-200 hover:bg-white hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
@@ -531,7 +898,7 @@ export default function AdminOverview() {
                   </div>
                 </div>
                 <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400 group-hover:text-orange-700 transition" />
-              </Link>
+              </button>
 
               {/* Action 4: E-Stamp Services */}
               <Link
@@ -791,9 +1158,17 @@ export default function AdminOverview() {
                 {inquiries.map((inq) => (
                   <tr key={inq.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-3 font-semibold text-slate-900 pr-2 whitespace-nowrap">
-                      {inq.name}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInquiryDetail(inq)}
+                        className="hover:text-[#075e38] hover:underline text-left font-semibold"
+                      >
+                        {inq.name}
+                      </button>
                     </td>
-                    <td className="py-3 text-slate-600 pr-2 whitespace-nowrap">{inq.service_needed}</td>
+                    <td className="py-3 text-slate-600 pr-2 whitespace-nowrap">
+                      {inq.service_needed}
+                    </td>
                     <td className="py-3 text-slate-500 max-w-[200px] truncate pr-2">
                       {inq.message}
                     </td>
@@ -803,13 +1178,70 @@ export default function AdminOverview() {
                     <td className="py-3 whitespace-nowrap pr-2">
                       {getStatusBadge(inq.status)}
                     </td>
-                    <td className="py-3 text-right">
-                      <Link
-                        href={`/admin/inquiries`}
+                    <td className="py-3 text-right relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveInquiryAction((prev) => (prev === inq.id ? null : inq.id))
+                        }
                         className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                        title="Actions"
                       >
                         <MoreHorizontal className="h-4 w-4" />
-                      </Link>
+                      </button>
+
+                      {/* Dropdown Action Menu */}
+                      {activeInquiryAction === inq.id && (
+                        <div className="absolute right-0 top-10 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs text-left">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedInquiryDetail(inq);
+                              setActiveInquiryAction(null);
+                            }}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-slate-700 hover:bg-slate-50"
+                          >
+                            <FileText className="h-3.5 w-3.5 text-slate-400" />
+                            <span>View Details</span>
+                          </button>
+
+                          {inq.phone && (
+                            <a
+                              href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                                `Hello ${inq.name}, thank you for reaching out to Chaudhry Law Associates regarding ${inq.service_needed}.`
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => setActiveInquiryAction(null)}
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              <span>WhatsApp Reply</span>
+                            </a>
+                          )}
+
+                          <div className="my-1 border-t border-slate-100" />
+                          <p className="px-2 py-1 text-[10px] font-bold uppercase text-slate-400">
+                            Change Status
+                          </p>
+
+                          {(["New", "In Progress", "Replied", "Closed"] as const).map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              onClick={() => handleUpdateStatus(inq.id, st)}
+                              className={`flex w-full items-center justify-between rounded-lg px-2 py-1 text-[11px] ${
+                                inq.status === st
+                                  ? "font-bold text-[#075e38] bg-[#eef7f2]"
+                                  : "text-slate-600 hover:bg-slate-50"
+                              }`}
+                            >
+                              <span>{st}</span>
+                              {inq.status === st && <Check className="h-3 w-3 text-[#075e38]" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -858,6 +1290,207 @@ export default function AdminOverview() {
           </div>
         </div>
       </div>
+
+      {/* MODAL 1: ADD CONSULTATION */}
+      {showAddConsultationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+                  <MessageSquare className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">Add New Client Consultation</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddConsultationModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {addConsultationSuccess ? (
+              <div className="my-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-3">
+                  <Check className="h-6 w-6" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900">Consultation Recorded!</h4>
+                <p className="text-xs text-slate-500 mt-1">
+                  Client inquiry has been added to your dashboard list.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleAddConsultationSubmit} className="mt-4 space-y-3.5 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Client Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newClientName}
+                    onChange={(e) => setNewClientName(e.target.value)}
+                    placeholder="e.g. Muhammad Usman"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    value={newClientPhone}
+                    onChange={(e) => setNewClientPhone(e.target.value)}
+                    placeholder="e.g. 0300 1234567"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Service Required
+                  </label>
+                  <select
+                    value={newClientService}
+                    onChange={(e) => setNewClientService(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  >
+                    <option value="Income Tax Filing">FBR Income Tax Filing</option>
+                    <option value="Property Tax">Property & Capital Value Tax</option>
+                    <option value="E-Stamp Services">E-Stamp Challan 32-A</option>
+                    <option value="Business Registration">Business / NTN Registration</option>
+                    <option value="Registry & Legal Deeds">Registry & Legal Deeds</option>
+                    <option value="Court Litigation">Civil & Criminal Legal Matters</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Consultation Notes / Message
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={newClientMessage}
+                    onChange={(e) => setNewClientMessage(e.target.value)}
+                    placeholder="Enter discussion notes or client requirement..."
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddConsultationModal(false)}
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-[#075e38] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#064e2e] shadow-2xs transition"
+                  >
+                    Save Consultation
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: INQUIRY DETAILS */}
+      {selectedInquiryDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    {selectedInquiryDetail.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Received on {selectedInquiryDetail.created_at}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedInquiryDetail(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-400">Service Interest</p>
+                  <p className="text-xs font-bold text-slate-800 mt-0.5">
+                    {selectedInquiryDetail.service_needed}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-400">Status</p>
+                  <div className="mt-0.5">{getStatusBadge(selectedInquiryDetail.status)}</div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold text-slate-400">Client Phone</p>
+                <p className="text-xs font-bold text-slate-800 mt-0.5">
+                  {selectedInquiryDetail.phone || "Not provided"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold text-slate-400">Message / Inquiry Details</p>
+                <div className="mt-1 p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 leading-relaxed">
+                  {selectedInquiryDetail.message}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-slate-100">
+              {selectedInquiryDetail.phone ? (
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://wa.me/${selectedInquiryDetail.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                      `Assalam-o-Alaikum ${selectedInquiryDetail.name}, Chaudhry Law Associates responding regarding your inquiry on ${selectedInquiryDetail.service_needed}.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white px-3 py-1.5 font-bold shadow-2xs transition"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+                  <a
+                    href={`tel:${selectedInquiryDetail.phone.replace(/[^0-9]/g, "")}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 font-bold shadow-2xs transition"
+                  >
+                    <Phone className="h-3.5 w-3.5 text-slate-400" />
+                    <span>Call</span>
+                  </a>
+                </div>
+              ) : (
+                <div />
+              )}
+
+              <button
+                type="button"
+                onClick={() => setSelectedInquiryDetail(null)}
+                className="rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 font-semibold shadow-2xs transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
