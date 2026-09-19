@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -15,8 +16,11 @@ import {
   FileCheck2,
   CalendarCheck,
   BadgeCheck,
+  Star,
+  ChevronDown,
+  HelpCircle,
 } from "lucide-react";
-import { HOME_SERVICES, HERO_IMAGES, SITE } from "@/lib/site";
+import { HOME_SERVICES, SITE, buildWhatsAppUrl } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import Stagger, { StaggerItem } from "@/components/motion/Stagger";
 import OfficeSection from "@/components/ui/OfficeSection";
@@ -31,13 +35,37 @@ const BUILDING_IMG =
 
 function Hero() {
   const { isUrdu, t } = useLanguage();
-  const { getPageContent, settings } = useCms();
+  const { getPageContent, settings, homeSections } = useCms();
   const homeCms = getPageContent("/");
+  const heroSec = homeSections?.hero;
 
-  const eyebrowText = isUrdu ? t.hero.eyebrow : (homeCms?.heroBadge || t.hero.eyebrow);
-  const heroDescription = isUrdu ? t.hero.description : (homeCms?.heroSubtitle || t.hero.description);
-  const visitOfficeText = isUrdu ? t.hero.visitOfficeBtn : (homeCms?.primaryCtaText || t.hero.visitOfficeBtn);
-  const visitOfficeUrl = homeCms?.primaryCtaHref || "#office";
+  const eyebrowText = heroSec?.badge || (isUrdu ? t.hero.eyebrow : homeCms?.heroBadge || t.hero.eyebrow);
+  const heroTitle = heroSec?.headline || (homeCms?.heroHeadline || (isUrdu ? t.hero.titlePart1 : "Premier Legal Documentation & Chamber Services"));
+  const heroHighlight = heroSec?.highlight || t.hero.countryHighlight;
+  const heroDescription = heroSec?.subtitle || (homeCms?.heroSubtitle || (isUrdu ? t.hero.description : "Providing reliable E-Stamping, property registry, and business registration solutions with absolute transparency and professional excellence."));
+
+  const primaryBtn = heroSec?.primaryBtn || {
+    text: isUrdu ? t.hero.visitOfficeBtn : (homeCms?.primaryCtaText || t.hero.visitOfficeBtn),
+    href: homeCms?.primaryCtaHref || "#office",
+    enabled: true,
+  };
+
+  const secondaryBtn = heroSec?.secondaryBtn || {
+    text: isUrdu ? t.hero.whatsappBtn : "Chat on WhatsApp",
+    message: settings?.whatsappSettings?.sectionMessages?.hero || "",
+    enabled: true,
+  };
+
+  const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const whatsappUrl = buildWhatsAppUrl(whatsappPhone, secondaryBtn.message);
+
+  const trustBadges = (heroSec?.trustBadges || [
+    { id: "1", label: t.hero.govVerified, enabled: true },
+    { id: "2", label: t.hero.sameDay, enabled: true },
+    { id: "3", label: t.hero.confidential, enabled: true },
+  ]).filter((b) => b.enabled !== false);
+
+  const trustIcons = [FileCheck2, CalendarCheck, ShieldCheck];
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#050f1f] via-[#081730] to-[#061226] text-white">
@@ -63,34 +91,17 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.12 }}
           className="mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl"
         >
-          {isUrdu ? (
-            <>
-              {t.hero.titlePart1}{" "}
-              <span className="relative whitespace-nowrap text-gold-400">
-                {t.hero.countryHighlight}
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.8, delay: 0.9 }}
-                  className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
-                />
-              </span>
-            </>
-          ) : homeCms?.heroHeadline ? (
-            homeCms.heroHeadline
-          ) : (
-            <>
-              {t.hero.titlePart1}{" "}
-              <span className="relative whitespace-nowrap text-gold-400">
-                {t.hero.countryHighlight}
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.8, delay: 0.9 }}
-                  className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
-                />
-              </span>
-            </>
+          {heroTitle}{" "}
+          {heroHighlight && (
+            <span className="relative whitespace-nowrap text-gold-400">
+              {heroHighlight}
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+                className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
+              />
+            </span>
           )}
         </motion.h1>
 
@@ -109,34 +120,40 @@ function Hero() {
           transition={{ duration: 0.75, delay: 0.36 }}
           className="mt-8 sm:mt-10 flex flex-wrap gap-4"
         >
-          <Link href={visitOfficeUrl} className="btn-gold px-8 py-3.5 text-sm">
-            <MapPin className="h-4 w-4" /> {visitOfficeText}
-          </Link>
-          <OfficialWhatsAppButton
-            href={settings?.whatsapp ? `https://wa.me/92${settings.whatsapp.replace(/^0|[^\d]/g, "")}` : SITE.whatsappHref}
-            label={t.hero.whatsappBtn}
-            size="lg"
-          />
+          {primaryBtn.enabled !== false && (
+            <Link href={primaryBtn.href || "#office"} className="btn-gold px-8 py-3.5 text-sm">
+              <MapPin className="h-4 w-4" /> {primaryBtn.text}
+            </Link>
+          )}
+
+          {secondaryBtn.enabled !== false && (
+            <OfficialWhatsAppButton
+              href={whatsappUrl}
+              label={secondaryBtn.text}
+              size="lg"
+            />
+          )}
         </motion.div>
 
         {/* trust strip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.7 }}
-          className="mt-12 sm:mt-16 flex flex-wrap gap-x-10 gap-y-4 text-white/70"
-        >
-          {[
-            { icon: FileCheck2, label: t.hero.govVerified },
-            { icon: CalendarCheck, label: t.hero.sameDay },
-            { icon: ShieldCheck, label: t.hero.confidential },
-          ].map((s) => (
-            <span key={s.label} className="flex items-center gap-2.5 text-xs font-medium uppercase tracking-wider">
-              <s.icon className="h-4 w-4 text-gold-400" />
-              {s.label}
-            </span>
-          ))}
-        </motion.div>
+        {trustBadges.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.7 }}
+            className="mt-12 sm:mt-16 flex flex-wrap gap-x-10 gap-y-4 text-white/70"
+          >
+            {trustBadges.map((s, idx) => {
+              const Icon = trustIcons[idx % trustIcons.length];
+              return (
+                <span key={s.id || s.label} className="flex items-center gap-2.5 text-xs font-medium uppercase tracking-wider">
+                  <Icon className="h-4 w-4 text-gold-400" />
+                  {s.label}
+                </span>
+              );
+            })}
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Bottom fade for smooth transition to services section */}
@@ -147,7 +164,10 @@ function Hero() {
 
 function ServicesGrid() {
   const { isUrdu, t } = useLanguage();
-  const { services } = useCms();
+  const { services, homeSections } = useCms();
+  const sec = homeSections?.servicesSection;
+
+  if (sec?.enabled === false) return null;
 
   const defaultServicesData = [
     {
@@ -187,13 +207,16 @@ function ServicesGrid() {
         }))
       : defaultServicesData;
 
+  const sectionTitle = sec?.title || t.servicesSection.title;
+  const sectionSubtitle = sec?.subtitle || t.servicesSection.subtitle;
+
   return (
     <section id="services" className="bg-[#f5f7fa] dark:bg-[#071224] py-24 transition-colors duration-200">
       <div className="container-x">
         <FadeIn className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title text-navy-900 dark:text-white">{t.servicesSection.title}</h2>
+          <h2 className="section-title text-navy-900 dark:text-white">{sectionTitle}</h2>
           <p className="mt-4 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">
-            {t.servicesSection.subtitle}
+            {sectionSubtitle}
           </p>
         </FadeIn>
 
@@ -239,6 +262,34 @@ function ServicesGrid() {
 
 function PrepareVisit() {
   const { isUrdu, t } = useLanguage();
+  const { homeSections, settings } = useCms();
+  const sec = homeSections?.aboutSection;
+
+  if (sec?.enabled === false) return null;
+
+  const badgeText = sec?.badge || t.prepareVisit.badge;
+  const titleText = sec?.title || t.prepareVisit.title;
+  const descText = sec?.description || t.prepareVisit.description;
+  const steps = sec?.steps && sec.steps.length > 0 ? sec.steps : t.prepareVisit.steps;
+
+  const callBtn = sec?.callBtn || {
+    text: t.prepareVisit.callNowBtn,
+    href: SITE.phoneHref,
+    enabled: true,
+  };
+
+  const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const whatsappMsg = sec?.whatsappBtn?.message || settings?.whatsappSettings?.sectionMessages?.about || "Hello, please send me the required documents checklist for visiting Chamber 121.";
+  const whatsappUrl = buildWhatsAppUrl(whatsappPhone, whatsappMsg);
+
+  const officeCard = sec?.officeCard || {
+    image: BUILDING_IMG,
+    badgeText: isUrdu ? "ساہیوال کچہری • چیمبر 121" : "Sahiwal District Court • Chamber 121",
+    title: isUrdu ? "چیمبر نمبر 121، ڈسٹرکٹ کورٹ" : "Chamber No 121, District Court",
+    description: t.prepareVisit.officeCardDesc,
+    directionsBtnText: t.prepareVisit.getDirectionsBtn,
+    callBtnText: t.prepareVisit.callNowBtn,
+  };
 
   return (
     <section id="about" className="bg-white dark:bg-[#091528] py-14 sm:py-20 lg:py-24 transition-colors duration-200 overflow-hidden">
@@ -246,17 +297,17 @@ function PrepareVisit() {
         <FadeIn direction="right">
           <span className="inline-flex items-center gap-2 rounded border border-red-200 dark:border-red-800/40 bg-red-50 dark:bg-red-950/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-red-600 dark:text-red-400">
             <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-            {t.prepareVisit.badge}
+            {badgeText}
           </span>
           <h2 className="mt-5 font-serif text-2xl sm:text-3xl font-bold text-navy-900 dark:text-white">
-            {t.prepareVisit.title}
+            {titleText}
           </h2>
           <p className="mt-3 sm:mt-4 max-w-xl text-sm leading-relaxed text-navy-800/70 dark:text-slate-300">
-            {t.prepareVisit.description}
+            {descText}
           </p>
 
           <div className="mt-8 sm:mt-10 space-y-4">
-            {t.prepareVisit.steps.map((step, idx) => (
+            {steps.map((step, idx) => (
               <div key={step.title} className="flex items-start gap-3.5 sm:gap-4">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-400/15 text-xs font-bold text-gold-600 dark:text-gold-400">
                   {idx + 1}
@@ -272,18 +323,22 @@ function PrepareVisit() {
           </div>
 
           <div className="mt-8 sm:mt-10 flex flex-wrap gap-3.5 sm:gap-4">
-            <a href={SITE.phoneHref} className="btn-navy w-full sm:w-auto text-center justify-center">
-              <Phone className="h-4 w-4" /> {t.prepareVisit.callNowBtn}
-            </a>
-            <a
-              href={SITE.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-6 py-3 text-xs shadow-md shadow-[#25D366]/25 transition hover:shadow-lg hover:shadow-[#25D366]/35 w-full sm:w-auto"
-            >
-              <WhatsAppIcon className="h-4 w-4" />
-              <span>{t.prepareVisit.requestChecklistBtn}</span>
-            </a>
+            {callBtn.enabled !== false && (
+              <a href={callBtn.href || SITE.phoneHref} className="btn-navy w-full sm:w-auto text-center justify-center">
+                <Phone className="h-4 w-4" /> {callBtn.text}
+              </a>
+            )}
+            {sec?.whatsappBtn?.enabled !== false && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-6 py-3 text-xs shadow-md shadow-[#25D366]/25 transition hover:shadow-lg hover:shadow-[#25D366]/35 w-full sm:w-auto"
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+                <span>{sec?.whatsappBtn?.text || t.prepareVisit.requestChecklistBtn}</span>
+              </a>
+            )}
           </div>
         </FadeIn>
 
@@ -292,8 +347,8 @@ function PrepareVisit() {
             {/* Top Building Image Banner */}
             <div className="relative h-56 sm:h-64 lg:h-72 w-full">
               <Image
-                src={BUILDING_IMG}
-                alt="Ch Composing Chamber 121, District Court Sahiwal"
+                src={officeCard.image || BUILDING_IMG}
+                alt={officeCard.title || "Ch Composing Chamber 121, District Court Sahiwal"}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
@@ -303,7 +358,7 @@ function PrepareVisit() {
               {/* Location Badge */}
               <div className="absolute top-3.5 left-3.5 rounded-full bg-navy-900/85 dark:bg-black/85 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur border border-white/10 flex items-center gap-1.5 shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>{isUrdu ? "ساہیوال کچہری • چیمبر 121" : "Sahiwal District Court • Chamber 121"}</span>
+                <span>{officeCard.badgeText}</span>
               </div>
 
               {/* Bottom Image Overlay Title */}
@@ -312,7 +367,7 @@ function PrepareVisit() {
                   {isUrdu ? "مرکزی چیمبر کا پتہ" : "Chamber Location"}
                 </p>
                 <h3 className="font-serif text-lg sm:text-xl font-bold text-white drop-shadow-sm leading-tight">
-                  {isUrdu ? "چیمبر نمبر 121، ڈسٹرکٹ کورٹ" : "Chamber No 121, District Court"}
+                  {officeCard.title}
                 </h3>
               </div>
             </div>
@@ -328,13 +383,13 @@ function PrepareVisit() {
                     {t.prepareVisit.officeCardTitle}
                   </h4>
                   <p className="text-xs sm:text-sm font-semibold text-gold-600 dark:text-gold-400 mt-0.5 leading-relaxed">
-                    {SITE.address}
+                    {settings?.address || SITE.address}
                   </p>
                 </div>
               </div>
 
               <p className="text-xs sm:text-sm leading-relaxed text-navy-800/70 dark:text-slate-300">
-                {t.prepareVisit.officeCardDesc}
+                {officeCard.description}
               </p>
 
               {/* Direct Advisor Contacts Box */}
@@ -350,86 +405,61 @@ function PrepareVisit() {
                 </div>
 
                 <div className="grid gap-2.5 sm:grid-cols-2">
-                  {/* Haji Nazir Ahmad */}
-                  <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
-                      {isUrdu ? "سینئر مشیر" : "Senior Consultant"}
-                    </span>
-                    <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
-                      {isUrdu ? "حاجی نذیر احمد" : "Haji Nazir Ahmad"}
-                    </p>
-                    <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
-                      0301-6922573
-                    </p>
-                    <div className="mt-2 flex gap-1.5">
-                      <a
-                        href="tel:+923016922573"
-                        className="flex-1 rounded bg-navy-900 dark:bg-white/10 py-1.5 text-center text-[10px] font-bold text-white hover:bg-navy-800 transition flex items-center justify-center gap-1"
-                      >
-                        <Phone className="h-2.5 w-2.5 text-gold-400" />
-                        <span>{isUrdu ? "کال کریں" : "Call"}</span>
-                      </a>
-                      <a
-                        href="https://wa.me/923016922573"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
-                        title="WhatsApp Haji Nazir Ahmad"
-                      >
-                        <WhatsAppIcon className="h-3.5 w-3.5" />
-                      </a>
+                  {(settings?.contacts || [
+                    { name: "Haji Nazir Ahmad", nameUrdu: "حاجی نذیر احمد", role: "Senior Consultant", roleUrdu: "سینئر مشیر", phone: "0301-6922573", whatsapp: "0301-6922573" },
+                    { name: "Usama Nazir Ch", nameUrdu: "اسامہ نذیر چوہدری", role: "E-Stamp & Tax Advisor", roleUrdu: "ای سٹامپ و ٹیکس ایڈوائزر", phone: "0305-7902744", whatsapp: "0305-7902744" }
+                  ]).map((contact, i) => (
+                    <div key={contact.name} className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
+                        {isUrdu && contact.roleUrdu ? contact.roleUrdu : contact.role}
+                      </span>
+                      <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
+                        {isUrdu && contact.nameUrdu ? contact.nameUrdu : contact.name}
+                      </p>
+                      <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
+                        {contact.phone}
+                      </p>
+                      <div className="mt-2 flex gap-1.5">
+                        <a
+                          href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}
+                          className={`flex-1 rounded py-1.5 text-center text-[10px] font-bold transition flex items-center justify-center gap-1 ${
+                            i === 1 ? "bg-gold-500 text-navy-950 hover:bg-gold-400" : "bg-navy-900 dark:bg-white/10 text-white hover:bg-navy-800"
+                          }`}
+                        >
+                          <Phone className="h-2.5 w-2.5" />
+                          <span>{isUrdu ? "کال کریں" : "Call"}</span>
+                        </a>
+                        <a
+                          href={buildWhatsAppUrl(contact.whatsapp || contact.phone)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
+                          title={`WhatsApp ${contact.name}`}
+                        >
+                          <WhatsAppIcon className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Usama Nazir Ch */}
-                  <div className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
-                      {isUrdu ? "ای سٹامپ و ٹیکس ایڈوائزر" : "E-Stamp & Tax Advisor"}
-                    </span>
-                    <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
-                      {isUrdu ? "اسامہ نذیر چوہدری" : "Usama Nazir Ch"}
-                    </p>
-                    <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
-                      0305-7902744
-                    </p>
-                    <div className="mt-2 flex gap-1.5">
-                      <a
-                        href="tel:+923057902744"
-                        className="flex-1 rounded bg-gold-500 py-1.5 text-center text-[10px] font-bold text-navy-950 hover:bg-gold-400 transition flex items-center justify-center gap-1"
-                      >
-                        <Phone className="h-2.5 w-2.5" />
-                        <span>{isUrdu ? "کال کریں" : "Call"}</span>
-                      </a>
-                      <a
-                        href="https://wa.me/923057902744"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
-                        title="WhatsApp Usama Nazir Ch"
-                      >
-                        <WhatsAppIcon className="h-3.5 w-3.5" />
-                      </a>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               <div className="pt-2 border-t border-navy-900/5 dark:border-white/10 flex flex-col sm:flex-row gap-3">
                 <a
-                  href={SITE.mapsUrl}
+                  href={settings?.mapsUrl || SITE.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-gold flex-1 py-3 text-xs text-center flex items-center justify-center gap-2 shadow-sm"
                 >
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  <span>{t.prepareVisit.getDirectionsBtn}</span>
+                  <span>{officeCard.directionsBtnText || t.prepareVisit.getDirectionsBtn}</span>
                 </a>
                 <a
-                  href={SITE.phoneHref}
+                  href={`tel:${(settings?.phone || SITE.phone).replace(/[^\d+]/g, "")}`}
                   className="btn-outline-navy dark:border-white/20 dark:text-white dark:hover:bg-white/10 flex-1 py-3 text-xs text-center flex items-center justify-center gap-2"
                 >
                   <Phone className="h-3.5 w-3.5 shrink-0" />
-                  <span>{t.prepareVisit.callNowBtn}</span>
+                  <span>{officeCard.callBtnText || t.prepareVisit.callNowBtn}</span>
                 </a>
               </div>
             </div>
@@ -442,8 +472,17 @@ function PrepareVisit() {
 
 function WhyTrust() {
   const { isUrdu, t } = useLanguage();
+  const { homeSections } = useCms();
+  const sec = homeSections?.whyTrustSection;
+
+  if (sec?.enabled === false) return null;
 
   const trustIcons = [ShieldCheck, Zap, Users, Eye];
+  const sectionTitle = sec?.title || t.whyTrust.title;
+  const metricNumber = sec?.metricNumber || t.whyTrust.yearsMetric;
+  const metricLabel = sec?.metricLabel || t.whyTrust.yearsLabel;
+  const features = sec?.features && sec.features.length > 0 ? sec.features : t.whyTrust.features;
+  const imageSrc = sec?.image || "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=70";
 
   return (
     <section className="bg-[#f5f7fa] dark:bg-[#071224] py-24 transition-colors duration-200">
@@ -453,7 +492,7 @@ function WhyTrust() {
             <div className="overflow-hidden rounded-2xl bg-gold-100/40 dark:bg-gold-900/20 p-6">
               <div className="relative h-64 sm:h-80 w-full">
                 <Image
-                  src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=70"
+                  src={imageSrc}
                   alt="Legal agreement handshake"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -466,19 +505,19 @@ function WhyTrust() {
               transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
               className="absolute -right-4 -top-4 rounded-xl bg-navy-900 border border-gold-400/30 px-6 py-5 text-center shadow-card-hover transform-gpu will-change-transform"
             >
-              <p className="font-serif text-2xl font-bold text-gold-400">{t.whyTrust.yearsMetric}</p>
+              <p className="font-serif text-2xl font-bold text-gold-400">{metricNumber}</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
-                {t.whyTrust.yearsLabel}
+                {metricLabel}
               </p>
             </motion.div>
           </div>
         </FadeIn>
 
         <FadeIn direction="left" delay={0.1} className="order-1 lg:order-2">
-          <h2 className="section-title text-navy-900 dark:text-white">{t.whyTrust.title}</h2>
+          <h2 className="section-title text-navy-900 dark:text-white">{sectionTitle}</h2>
           <div className="mt-10 grid gap-x-8 gap-y-9 sm:grid-cols-2">
-            {t.whyTrust.features.map((f, i) => {
-              const Icon = trustIcons[i] || ShieldCheck;
+            {features.map((f, i) => {
+              const Icon = trustIcons[i % trustIcons.length] || ShieldCheck;
               return (
                 <FadeIn key={f.title} delay={i * 0.08}>
                   <div className="flex gap-4">
@@ -504,14 +543,165 @@ function WhyTrust() {
   );
 }
 
+function TestimonialsSection() {
+  const { isUrdu } = useLanguage();
+  const { homeSections } = useCms();
+  const sec = homeSections?.testimonialsSection;
+
+  if (sec?.enabled === false) return null;
+  const items = sec?.items?.filter((i) => i.visible !== false) || [];
+  if (items.length === 0) return null;
+
+  return (
+    <section id="testimonials" className="bg-[#f5f7fa] dark:bg-[#071224] py-20 transition-colors duration-200">
+      <div className="container-x">
+        <FadeIn className="mx-auto max-w-2xl text-center">
+          <span className="eyebrow">
+            <Star className="h-3.5 w-3.5 fill-gold-400 text-gold-400" />
+            {isUrdu ? "کلائنٹ کے تاثرات" : "Client Testimonials"}
+          </span>
+          <h2 className="section-title text-navy-900 dark:text-white mt-4">
+            {sec?.title || (isUrdu ? "ہمارے معزز سائلین و کلائنٹس کے تاثرات" : "What Our Clients Say")}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">
+            {sec?.subtitle || (isUrdu ? "ڈسٹرکٹ کورٹ ساہیوال میں ہمارے مشورے اور خدمات پر سائلین کا اعتماد" : "Real feedback from individuals and business owners supported by Chamber 121.")}
+          </p>
+        </FadeIn>
+
+        <Stagger className="mt-12 grid gap-6 md:grid-cols-3">
+          {items.map((item) => (
+            <StaggerItem key={item.id}>
+              <div className="flex h-full flex-col justify-between rounded-xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-6 shadow-soft transition-shadow hover:shadow-card-hover">
+                <div>
+                  <div className="flex items-center gap-1 text-gold-400 mb-3">
+                    {Array.from({ length: item.rating || 5 }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-gold-400 text-gold-400" />
+                    ))}
+                  </div>
+                  <p className="text-sm leading-relaxed text-navy-800/80 dark:text-slate-200 italic">
+                    "{item.text}"
+                  </p>
+                </div>
+                <div className="mt-6 border-t border-navy-900/6 dark:border-white/10 pt-4">
+                  <h4 className="font-bold text-navy-900 dark:text-white text-sm">{item.clientName}</h4>
+                  <p className="text-xs text-navy-800/60 dark:text-slate-400 mt-0.5">{item.clientRole}</p>
+                </div>
+              </div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+  );
+}
+
+function FaqSection() {
+  const { isUrdu } = useLanguage();
+  const { homeSections } = useCms();
+  const [openId, setOpenId] = React.useState<string | null>("faq-1");
+  const sec = homeSections?.faqSection;
+
+  if (sec?.enabled === false) return null;
+  const items = (sec?.items?.filter((i) => i.visible !== false) || []).sort((a, b) => a.order - b.order);
+  if (items.length === 0) return null;
+
+  return (
+    <section id="faq" className="bg-white dark:bg-[#091528] py-20 transition-colors duration-200">
+      <div className="container-x max-w-4xl">
+        <FadeIn className="text-center">
+          <span className="eyebrow">
+            <HelpCircle className="h-3.5 w-3.5 text-gold-400" />
+            {isUrdu ? "عمومی سوالات" : "Common Inquiries"}
+          </span>
+          <h2 className="section-title text-navy-900 dark:text-white mt-4">
+            {sec?.title || (isUrdu ? "اکثر پوچھے جانے والے سوالات" : "Frequently Asked Questions")}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">
+            {sec?.subtitle || (isUrdu ? "ای سٹامپ، ٹیکس ریٹرن، اور کچہری امور کے بارے میں ضروری معلومات" : "Quick answers regarding E-Stamping, FBR tax filings, and visiting Chamber 121.")}
+          </p>
+        </FadeIn>
+
+        <div className="mt-12 space-y-3.5">
+          {items.map((item) => {
+            const isOpen = openId === item.id;
+            return (
+              <div
+                key={item.id}
+                className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-navy-50/40 dark:bg-white/[0.03] overflow-hidden transition"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenId(isOpen ? null : item.id)}
+                  className="w-full flex items-center justify-between p-5 text-left transition hover:bg-navy-50/80 dark:hover:bg-white/[0.05]"
+                  aria-expanded={isOpen}
+                >
+                  <span className="font-bold text-navy-900 dark:text-white text-sm sm:text-base pr-4">
+                    {item.question}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gold-500 shrink-0 transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 pt-1 text-sm leading-relaxed text-navy-800/75 dark:text-slate-300 border-t border-navy-900/5 dark:border-white/5">
+                    {item.answer}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FinalCta() {
   const { isUrdu, t } = useLanguage();
+  const { homeSections, settings } = useCms();
+  const sec = homeSections?.finalCtaSection;
+
+  if (sec?.enabled === false) return null;
+
+  const phone = settings?.phone || SITE.phone;
+  const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
+  const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const whatsappMsg = settings?.whatsappSettings?.sectionMessages?.finalCta || "Hello, I need urgent legal/tax consultation from Chamber 121.";
+  const whatsappHref = buildWhatsAppUrl(whatsappPhone, whatsappMsg);
 
   const cards = [
-    { icon: Phone, title: t.finalCta.callSupport, value: SITE.phone, href: SITE.phoneHref, isWhatsApp: false },
-    { icon: WhatsAppIcon, title: t.finalCta.whatsappDirect, value: SITE.whatsapp, href: SITE.whatsappHref, isWhatsApp: true },
-    { icon: Clock, title: t.finalCta.visitHours, value: t.finalCta.hoursVal, href: "#office", isWhatsApp: false },
+    {
+      icon: Phone,
+      title: sec?.callCardTitle || t.finalCta.callSupport,
+      value: phone,
+      href: phoneHref,
+      isWhatsApp: false,
+    },
+    {
+      icon: WhatsAppIcon,
+      title: sec?.whatsappCardTitle || t.finalCta.whatsappDirect,
+      value: whatsappPhone,
+      href: whatsappHref,
+      isWhatsApp: true,
+    },
+    {
+      icon: Clock,
+      title: sec?.hoursCardTitle || t.finalCta.visitHours,
+      value: t.finalCta.hoursVal,
+      href: "#office",
+      isWhatsApp: false,
+    },
   ];
+
+  const sectionTitle = sec?.title || t.finalCta.title;
+  const sectionDesc = sec?.description || t.finalCta.description;
+  const visitOfficeBtn = sec?.visitOfficeBtn || {
+    text: t.finalCta.visitOfficeBtn,
+    href: "#office",
+    enabled: true,
+  };
 
   return (
     <section id="contact" className="relative overflow-hidden bg-navy-900 py-24 texture-grid">
@@ -521,10 +711,10 @@ function FinalCta() {
       <div className="container-x relative">
         <FadeIn className="mx-auto max-w-2xl text-center">
           <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">
-            {t.finalCta.title}
+            {sectionTitle}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
-            {t.finalCta.description}
+            {sectionDesc}
           </p>
         </FadeIn>
 
@@ -560,30 +750,67 @@ function FinalCta() {
           ))}
         </Stagger>
 
-        <FadeIn delay={0.2} className="mt-14 max-w-2xl mx-auto">
-          <ConsultationForm />
-        </FadeIn>
+        {sec?.consultationFormEnabled !== false && (
+          <FadeIn delay={0.2} className="mt-14 max-w-2xl mx-auto">
+            <ConsultationForm />
+          </FadeIn>
+        )}
 
-        <FadeIn delay={0.3} className="mt-10 text-center">
-          <Link href="#office" className="btn-gold px-10 py-4 text-sm">
-            <MapPin className="h-4 w-4" /> {t.finalCta.visitOfficeBtn}
-          </Link>
-        </FadeIn>
+        {visitOfficeBtn.enabled !== false && (
+          <FadeIn delay={0.3} className="mt-10 text-center">
+            <Link href={visitOfficeBtn.href || "#office"} className="btn-gold px-10 py-4 text-sm">
+              <MapPin className="h-4 w-4" /> {visitOfficeBtn.text}
+            </Link>
+          </FadeIn>
+        )}
       </div>
     </section>
   );
 }
 
 export default function HomePageClient() {
+  const { homeSections } = useCms();
+
+  const order = homeSections?.sectionOrder || [
+    "hero",
+    "services",
+    "about",
+    "whyTrust",
+    "reminders",
+    "testimonials",
+    "faq",
+    "office",
+    "finalCta",
+  ];
+
+  const sectionMap: Record<string, React.ReactNode> = {
+    hero: <Hero key="hero" />,
+    services: <ServicesGrid key="services" />,
+    about: <PrepareVisit key="about" />,
+    whyTrust: <WhyTrust key="whyTrust" />,
+    reminders: <TaxReminderSection key="reminders" />,
+    testimonials: <TestimonialsSection key="testimonials" />,
+    faq: <FaqSection key="faq" />,
+    office: (
+      <OfficeSection
+        key="office"
+        title={homeSections?.officeSection?.title}
+        text={homeSections?.officeSection?.subtitle}
+        addressText={homeSections?.officeSection?.addressText}
+        weekdayHours={homeSections?.officeSection?.weekdayHours}
+        saturdayHours={homeSections?.officeSection?.saturdayHours}
+        guideTitle={homeSections?.officeSection?.guideTitle}
+        guidePoints={homeSections?.officeSection?.guidePoints}
+        whatsappBtnText={homeSections?.officeSection?.whatsappBtnText}
+        callBtnText={homeSections?.officeSection?.callBtnText}
+      />
+    ),
+    finalCta: <FinalCta key="finalCta" />,
+  };
+
   return (
     <>
-      <Hero />
-      <ServicesGrid />
-      <PrepareVisit />
-      <WhyTrust />
-      <TaxReminderSection />
-      <OfficeSection />
-      <FinalCta />
+      {order.map((key) => sectionMap[key] || null)}
     </>
   );
 }

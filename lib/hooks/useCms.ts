@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import type { SiteSettings } from "@/lib/db/siteSettingsStore";
 import type { CmsService } from "@/lib/db/servicesStore";
 import type { PageContentItem } from "@/lib/db/pagesContentStore";
+import type { HomeSectionsData } from "@/lib/db/homeSectionsStore";
 
 interface CmsState {
   settings: SiteSettings | null;
   services: CmsService[];
   pages: PageContentItem[];
+  homeSections: HomeSectionsData | null;
   isLoading: boolean;
 }
 
@@ -21,6 +23,7 @@ export function useCms() {
       settings: null,
       services: [],
       pages: [],
+      homeSections: null,
       isLoading: true,
     }
   );
@@ -37,6 +40,7 @@ export function useCms() {
               settings: data.settings,
               services: data.services || [],
               pages: data.pages || [],
+              homeSections: data.homeSections || null,
               isLoading: false,
             };
             cachedCmsState = newState;
@@ -66,8 +70,10 @@ export function useCms() {
     settings: state.settings,
     services: state.services,
     pages: state.pages,
+    homeSections: state.homeSections,
     isLoading: state.isLoading,
     getPageContent,
     getService,
   };
 }
+

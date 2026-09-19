@@ -24,8 +24,19 @@ import {
   Globe,
   Compass,
   ArrowUpRight,
+  MessageCircle,
+  Sliders,
+  Sparkles,
 } from "lucide-react";
-import type { SiteSettings, NavMenuItem, ContactPerson } from "@/lib/db/siteSettingsStore";
+import type {
+  SiteSettings,
+  NavMenuItem,
+  ContactPerson,
+  WhatsAppSettings,
+  HeaderSettings,
+  FooterSettings,
+} from "@/lib/db/siteSettingsStore";
+import { buildWhatsAppUrl } from "@/lib/site";
 
 export default function SiteSettingsManager() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -35,7 +46,9 @@ export default function SiteSettingsManager() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"identity" | "contact" | "hours" | "navigation">("identity");
+  const [activeTab, setActiveTab] = useState<
+    "identity" | "contact" | "whatsapp" | "headerFooter" | "hours" | "navigation"
+  >("identity");
 
   const fetchSettings = async () => {
     setIsLoading(true);
@@ -121,6 +134,68 @@ export default function SiteSettingsManager() {
     setFormData({ ...formData, contacts: updated });
   };
 
+  // WhatsApp Helpers
+  const updateWhatsAppSettings = (field: keyof WhatsAppSettings, value: any) => {
+    const current = formData.whatsappSettings || {
+      number: "0305-7902744",
+      defaultMessage: "",
+      floatingButtonEnabled: true,
+      floatingButtonMessage: "",
+      sectionMessages: {},
+    };
+    setFormData({
+      ...formData,
+      whatsappSettings: { ...current, [field]: value },
+    });
+  };
+
+  const updateSectionMessage = (section: string, msg: string) => {
+    const current = formData.whatsappSettings || {
+      number: "0305-7902744",
+      defaultMessage: "",
+      floatingButtonEnabled: true,
+      floatingButtonMessage: "",
+      sectionMessages: {},
+    };
+    setFormData({
+      ...formData,
+      whatsappSettings: {
+        ...current,
+        sectionMessages: { ...current.sectionMessages, [section]: msg },
+      },
+    });
+  };
+
+  // Header/Footer Helpers
+  const updateHeaderSettings = (field: keyof HeaderSettings, value: any) => {
+    const current = formData.headerSettings || {
+      logoText: "Ch Composing",
+      logoSubtitle: "Estamp & Tax Advisor",
+      phone: "0305-7902744",
+      whatsapp: "0305-7902744",
+      primaryCtaText: "Visit Chamber",
+      primaryCtaHref: "/#office",
+      primaryCtaEnabled: true,
+    };
+    setFormData({
+      ...formData,
+      headerSettings: { ...current, [field]: value },
+    });
+  };
+
+  const updateFooterSettings = (field: keyof FooterSettings, value: any) => {
+    const current = formData.footerSettings || {
+      description: "",
+      descriptionUrdu: "",
+      copyrightText: "",
+      showSocials: true,
+    };
+    setFormData({
+      ...formData,
+      footerSettings: { ...current, [field]: value },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center shadow-2xs">
@@ -146,6 +221,10 @@ export default function SiteSettingsManager() {
     );
   }
 
+  const currentWaNumber = formData.whatsappSettings?.number || formData.whatsapp || "0305-7902744";
+  const currentWaMsg = formData.whatsappSettings?.defaultMessage || "Hello, I need consultation regarding legal/tax documentation.";
+  const testWaUrl = buildWhatsAppUrl(currentWaNumber, currentWaMsg);
+
   return (
     <form onSubmit={handleSave} className="space-y-6">
       {/* Top Header */}
@@ -157,10 +236,10 @@ export default function SiteSettingsManager() {
             <span className="text-slate-700">Site Settings</span>
           </div>
           <h1 className="mt-1 text-[32px] font-bold leading-tight tracking-tight text-slate-900">
-            Office Identity & Navigation CMS
+            Site Configuration & WhatsApp CMS
           </h1>
           <p className="mt-1 text-[14.5px] text-slate-500">
-            Control the public firm identity, Chamber 121 address, emergency contacts, opening hours, and header navigation menu.
+            Manage firm credentials, Chamber 121 contacts, WhatsApp messages, header branding, and footer text.
           </p>
         </div>
 
@@ -185,7 +264,7 @@ export default function SiteSettingsManager() {
           <button
             type="submit"
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#075e38] px-5 py-2 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-[#064e2e] disabled:opacity-50 cursor-pointer"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             <span>{isSaving ? "Saving Settings..." : "Save All Changes"}</span>
@@ -208,12 +287,14 @@ export default function SiteSettingsManager() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 bg-white px-2 shadow-2xs rounded-t-xl">
+      <div className="flex border-b border-slate-200 bg-white px-2 shadow-2xs rounded-t-xl overflow-x-auto scrollbar-thin">
         {[
           { id: "identity", label: "Firm Identity & Location", icon: Building },
-          { id: "contact", label: "Contact & Key Personnel", icon: Phone },
+          { id: "whatsapp", label: "WhatsApp Configuration", icon: Smartphone },
+          { id: "headerFooter", label: "Header & Footer", icon: Sliders },
+          { id: "contact", label: "Key Personnel & Phones", icon: Phone },
           { id: "hours", label: "Working Hours", icon: Clock },
-          { id: "navigation", label: "Header & Menu Navigation", icon: Menu },
+          { id: "navigation", label: "Menu Navigation", icon: Menu },
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -221,9 +302,9 @@ export default function SiteSettingsManager() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 border-b-2 px-5 py-3.5 text-xs font-semibold transition ${
+              className={`flex shrink-0 items-center gap-2 border-b-2 px-5 py-3.5 text-xs font-semibold transition ${
                 activeTab === tab.id
-                  ? "border-emerald-600 text-emerald-700"
+                  ? "border-emerald-600 text-emerald-700 bg-emerald-50/40"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
@@ -247,7 +328,7 @@ export default function SiteSettingsManager() {
                   required
                   value={formData.name || ""}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Ch-Law Associates"
+                  placeholder="e.g. Ch Composing"
                   className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
@@ -259,7 +340,7 @@ export default function SiteSettingsManager() {
                   required
                   value={formData.fullName || ""}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  placeholder="e.g. Ch-Law Associates & Legal Consultants"
+                  placeholder="e.g. Ch Composing Estamp and Tax Advisor"
                   className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
@@ -326,7 +407,215 @@ export default function SiteSettingsManager() {
           </div>
         )}
 
-        {/* TAB 2: CONTACT & KEY PERSONNEL */}
+        {/* TAB 2: WHATSAPP CONFIGURATION */}
+        {activeTab === "whatsapp" && (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-xs text-emerald-900 flex items-start gap-3">
+              <Smartphone className="h-5 w-5 text-emerald-700 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-bold text-sm text-emerald-900">Centralized WhatsApp CTA Control</p>
+                <p className="mt-0.5 text-emerald-800 leading-relaxed">
+                  The public website is designed to convert visitors directly into WhatsApp chats.
+                  All WhatsApp buttons (Hero, Floating button, Services, Office card, and Final CTA) automatically use the number and messages configured below.
+                </p>
+              </div>
+              <a
+                href={testWaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] px-3 py-1.5 font-bold text-white shadow-xs"
+              >
+                <span>Test Live Link</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Primary WhatsApp Mobile Number</label>
+                <input
+                  type="text"
+                  value={formData.whatsappSettings?.number || formData.whatsapp || "0305-7902744"}
+                  onChange={(e) => updateWhatsAppSettings("number", e.target.value)}
+                  placeholder="0305-7902744"
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 font-semibold focus:border-emerald-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Accepts Pakistani local format (0305-7902744) or international (+923057902744).</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Floating Button State</label>
+                <div className="mt-2 flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={formData.whatsappSettings?.floatingButtonEnabled ?? true}
+                      onChange={(e) => updateWhatsAppSettings("floatingButtonEnabled", e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>Show Floating WhatsApp Button on Public Website</span>
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  value={formData.whatsappSettings?.floatingButtonMessage || "Chat with Tax & Legal Consultant"}
+                  onChange={(e) => updateWhatsAppSettings("floatingButtonMessage", e.target.value)}
+                  placeholder="Hover label / tooltip text"
+                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700">Default Global WhatsApp Message</label>
+              <textarea
+                rows={2}
+                value={formData.whatsappSettings?.defaultMessage || ""}
+                onChange={(e) => updateWhatsAppSettings("defaultMessage", e.target.value)}
+                placeholder="Hello, I would like to inquire about legal documentation and tax advisory services."
+                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Section Specific Overrides */}
+            <div className="border-t border-slate-100 pt-5 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900">Pre-Filled Messages Per Website Section</h3>
+              <p className="text-xs text-slate-500">
+                When a user clicks a WhatsApp button in a specific section, this customized message will be pre-filled so you know which service they need!
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Hero Section WhatsApp Message</label>
+                  <textarea
+                    rows={2}
+                    value={formData.whatsappSettings?.sectionMessages?.hero || ""}
+                    onChange={(e) => updateSectionMessage("hero", e.target.value)}
+                    placeholder="Hello, I visited your homepage and would like immediate assistance with legal documentation."
+                    className="w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800"
+                  />
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Services Section Inquiry Message</label>
+                  <textarea
+                    rows={2}
+                    value={formData.whatsappSettings?.sectionMessages?.services || ""}
+                    onChange={(e) => updateSectionMessage("services", e.target.value)}
+                    placeholder="Hello, I am interested in consulting about your chamber legal services."
+                    className="w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800"
+                  />
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">About / Visiting Guide Message</label>
+                  <textarea
+                    rows={2}
+                    value={formData.whatsappSettings?.sectionMessages?.about || ""}
+                    onChange={(e) => updateSectionMessage("about", e.target.value)}
+                    placeholder="Hello, please send me the required documents checklist for visiting Chamber 121."
+                    className="w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800"
+                  />
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Chamber 121 & Map Section Message</label>
+                  <textarea
+                    rows={2}
+                    value={formData.whatsappSettings?.sectionMessages?.office || ""}
+                    onChange={(e) => updateSectionMessage("office", e.target.value)}
+                    placeholder="Hello, I am on my way to Chamber 121 District Court Sahiwal."
+                    className="w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800"
+                  />
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-bold text-slate-700">Final Bottom Banner WhatsApp Message</label>
+                  <textarea
+                    rows={2}
+                    value={formData.whatsappSettings?.sectionMessages?.finalCta || ""}
+                    onChange={(e) => updateSectionMessage("finalCta", e.target.value)}
+                    placeholder="Hello, I need urgent legal/tax consultation from Chamber 121."
+                    className="w-full rounded border border-slate-200 bg-white p-2 text-xs text-slate-800"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: HEADER & FOOTER */}
+        {activeTab === "headerFooter" && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Header Branding & Action Buttons</h3>
+              <p className="text-xs text-slate-500">Customize the top navigation bar branding and quick action buttons.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Header Logo Main Text</label>
+                <input
+                  type="text"
+                  value={formData.headerSettings?.logoText || "Ch Composing"}
+                  onChange={(e) => updateHeaderSettings("logoText", e.target.value)}
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 font-semibold focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Header Logo Subtitle</label>
+                <input
+                  type="text"
+                  value={formData.headerSettings?.logoSubtitle || "Estamp & Tax Advisor"}
+                  onChange={(e) => updateHeaderSettings("logoSubtitle", e.target.value)}
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-5 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900">Footer Text & Disclaimers</h3>
+              <p className="text-xs text-slate-500">Edit the summary and copyright statement appearing at the very bottom of every page.</p>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Footer About Summary (English)</label>
+                <textarea
+                  rows={2}
+                  value={formData.footerSettings?.description || ""}
+                  onChange={(e) => updateFooterSettings("description", e.target.value)}
+                  placeholder="Authorized legal documentation & tax advisory firm providing verified E-Stamping, property registration, and corporate compliance services at District Court Sahiwal."
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Footer About Summary (Urdu)</label>
+                <textarea
+                  rows={2}
+                  dir="rtl"
+                  value={formData.footerSettings?.descriptionUrdu || ""}
+                  onChange={(e) => updateFooterSettings("descriptionUrdu", e.target.value)}
+                  placeholder="ڈسٹرکٹ کورٹ ساہیوال میں ای سٹامپنگ، پراپرٹی رجسٹری، ٹیکس اور قانونی دستاویزات کا مستند و بااعتماد ادارہ۔"
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">Copyright Statement</label>
+                <input
+                  type="text"
+                  value={formData.footerSettings?.copyrightText || ""}
+                  onChange={(e) => updateFooterSettings("copyrightText", e.target.value)}
+                  placeholder="© 2026 Ch Composing Estamp and Tax Advisor. Chamber 121 District Court Sahiwal. All rights reserved."
+                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: CONTACT & KEY PERSONNEL */}
         {activeTab === "contact" && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -339,7 +628,7 @@ export default function SiteSettingsManager() {
                     value={formData.phone || ""}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="0305-7902744"
-                    className="w-full text-sm text-slate-800 focus:outline-none"
+                    className="w-full text-sm text-slate-800 focus:outline-none font-semibold"
                   />
                 </div>
               </div>
@@ -353,7 +642,7 @@ export default function SiteSettingsManager() {
                     value={formData.whatsapp || ""}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                     placeholder="0305-7902744"
-                    className="w-full text-sm text-slate-800 focus:outline-none"
+                    className="w-full text-sm text-slate-800 focus:outline-none font-semibold"
                   />
                 </div>
               </div>
@@ -438,7 +727,7 @@ export default function SiteSettingsManager() {
           </div>
         )}
 
-        {/* TAB 3: WORKING HOURS */}
+        {/* TAB 5: WORKING HOURS */}
         {activeTab === "hours" && (
           <div className="space-y-5">
             <div>
@@ -498,7 +787,7 @@ export default function SiteSettingsManager() {
           </div>
         )}
 
-        {/* TAB 4: NAVIGATION MENU CMS */}
+        {/* TAB 6: NAVIGATION MENU CMS */}
         {activeTab === "navigation" && (
           <div className="space-y-5">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -511,7 +800,7 @@ export default function SiteSettingsManager() {
               <button
                 type="button"
                 onClick={handleAddNavItem}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5 text-emerald-600" />
                 <span>Add Navigation Link</span>
@@ -570,7 +859,7 @@ export default function SiteSettingsManager() {
                     <button
                       type="button"
                       onClick={() => handleRemoveNavItem(idx)}
-                      className="p-1.5 text-slate-400 hover:text-red-600"
+                      className="p-1.5 text-slate-400 hover:text-red-600 cursor-pointer"
                       title="Delete Link"
                     >
                       <Trash2 className="h-4 w-4" />

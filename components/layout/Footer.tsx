@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   FileText,
 } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { SITE, buildWhatsAppUrl } from "@/lib/site";
 import { useLanguage } from "@/providers/LanguageProvider";
 import Logo from "./Logo";
 import { useCms } from "@/lib/hooks/useCms";
@@ -56,8 +56,8 @@ export default function Footer() {
           <Logo isUrdu={isUrdu} size="lg" />
           <p className="max-w-md text-xs sm:text-sm text-navy-800/70 dark:text-slate-400 leading-relaxed">
             {isUrdu 
-              ? "ڈسٹرکٹ کورٹ ساہیوال میں ای سٹامپنگ، پراپرٹی رجسٹری، ٹیکس اور قانونی دستاویزات کا مستند و بااعتماد ادارہ۔" 
-              : "Authorized legal documentation & tax advisory firm providing verified E-Stamping, property registration, and corporate compliance services at District Court Sahiwal."}
+              ? (settings?.footerSettings?.descriptionUrdu || "ڈسٹرکٹ کورٹ ساہیوال میں ای سٹامپنگ، پراپرٹی رجسٹری، ٹیکس اور قانونی دستاویزات کا مستند و بااعتماد ادارہ۔")
+              : (settings?.footerSettings?.description || "Authorized legal documentation & tax advisory firm providing verified E-Stamping, property registration, and corporate compliance services at District Court Sahiwal.")}
           </p>
         </div>
         <div className="container-x grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-4">
@@ -161,14 +161,18 @@ export default function Footer() {
             </h4>
             <div className="grid gap-2.5">
               <a
-                href={SITE.phoneHref}
+                href={settings?.phone ? `tel:${settings.phone.replace(/[^\d+]/g, "")}` : SITE.phoneHref}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-navy-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 dark:bg-white/10 dark:hover:bg-white/15"
               >
                 <Phone className="h-4 w-4 text-gold-400" />
-                {isUrdu ? "ابھی کال کریں" : `Call ${SITE.phone}`}
+                {isUrdu ? "ابھی کال کریں" : `Call ${settings?.phone || SITE.phone}`}
               </a>
               <a
-                href={SITE.whatsappHref}
+                href={
+                  settings?.whatsappSettings
+                    ? buildWhatsAppUrl(settings.whatsappSettings.number, settings.whatsappSettings.defaultMessage)
+                    : SITE.whatsappHref
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-[#25D366]/20 transition hover:shadow-md hover:shadow-[#25D366]/30"
@@ -185,7 +189,7 @@ export default function Footer() {
 
         <div className="border-t border-navy-900/10 dark:border-white/10">
           <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-xs text-navy-800/55 dark:text-slate-400 sm:flex-row">
-            <p>{t.footer.rights}</p>
+            <p>{settings?.footerSettings?.copyrightText || t.footer.rights}</p>
             <div className="flex gap-6">
               <button
                 type="button"

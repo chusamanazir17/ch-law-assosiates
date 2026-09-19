@@ -65,13 +65,26 @@ export function OfficialWhatsAppButton({
   );
 }
 
+import { useCms } from "@/lib/hooks/useCms";
+import { buildWhatsAppUrl } from "@/lib/site";
+
 export function FloatingWhatsApp() {
   const pathname = usePathname() || "";
   const { isUrdu } = useLanguage();
+  const { settings } = useCms();
 
   if (pathname.startsWith("/admin")) {
     return null;
   }
+
+  const ws = settings?.whatsappSettings;
+  const isEnabled = ws?.floatingButtonEnabled !== false;
+  if (!isEnabled) return null;
+
+  const phone = ws?.number || settings?.whatsapp || SITE.whatsapp;
+  const message = ws?.defaultMessage || "Hello, I would like to consult with an advisor at Chamber 121.";
+  const whatsappHref = buildWhatsAppUrl(phone, message);
+  const tooltipText = ws?.floatingButtonMessage || (isUrdu ? "واٹس ایپ پر فوری رابطہ کریں" : "Chat on WhatsApp");
 
   return (
     <aside
@@ -79,7 +92,7 @@ export function FloatingWhatsApp() {
       className="fixed bottom-6 right-6 z-50 flex items-center group pointer-events-auto select-none"
     >
       <a
-        href={SITE.whatsappHref}
+        href={whatsappHref}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={isUrdu ? "واٹس ایپ پر فوری رابطہ کریں" : "Chat on WhatsApp with Advisor"}
@@ -93,7 +106,7 @@ export function FloatingWhatsApp() {
 
         {/* Floating Tooltip Pill on Hover */}
         <span className="absolute right-16 hidden sm:inline-flex whitespace-nowrap rounded-lg bg-navy-900/90 dark:bg-black/90 px-3.5 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none border border-white/10">
-          {isUrdu ? "واٹس ایپ پر فوری رابطہ کریں" : "Chat on WhatsApp"}
+          {tooltipText}
         </span>
       </a>
     </aside>
@@ -103,3 +116,4 @@ export function FloatingWhatsApp() {
 const floatingIconSize = "h-7 w-7";
 
 export default WhatsAppIcon;
+

@@ -1,0 +1,220 @@
+{
+  "hero": {
+    "badge": "AUTHORIZED DOCUMENTATION EXPERTS",
+    "headline": "Premier Legal Documentation & Chamber Services",
+    "highlight": "Chamber 121 Sahiwal",
+    "subtitle": "Providing reliable E-Stamping, property registry, and business registration solutions with absolute transparency and professional excellence.",
+    "primaryBtn": {
+      "text": "VISIT OUR OFFICE",
+      "href": "#office",
+      "enabled": true
+    },
+    "secondaryBtn": {
+      "text": "WhatsApp Us",
+      "message": "Hello, I would like to inquire about legal documentation and tax advisory services.",
+      "enabled": true
+    },
+    "trustBadges": [
+      {
+        "id": "1",
+        "label": "Govt Portal Verified",
+        "enabled": true
+      },
+      {
+        "id": "2",
+        "label": "Same-Day Issuance",
+        "enabled": true
+      },
+      {
+        "id": "3",
+        "label": "100% Confidential",
+        "enabled": true
+      }
+    ]
+  },
+  "servicesSection": {
+    "enabled": true,
+    "title": "Practice Areas & Legal Documentation",
+    "subtitle": "Authorized chamber services delivering high-precision documentation, official government portal filing, and court representations."
+  },
+  "aboutSection": {
+    "enabled": true,
+    "badge": "BEFORE VISITING CHAMBER 121",
+    "title": "Court Visiting Guide & Preparation",
+    "description": "Follow these streamlined steps to guarantee rapid same-day processing for your legal paperwork and revenue documents.",
+    "steps": [
+      {
+        "title": "Identify Required Service",
+        "text": "Determine whether your transaction requires non-judicial stamp papers, Challan 32-A, property deed drafting, or tax returns."
+      },
+      {
+        "title": "Gather Necessary Identifications",
+        "text": "Bring original CNICs of all executing parties, seller/buyer records, title deeds, and relevant tax NTN details."
+      },
+      {
+        "title": "Visit Chamber 121 (Sharki Gate)",
+        "text": "Located directly at Sharki Gate, District Court Sahiwal. Ground floor legal corridor for easy public accessibility."
+      }
+    ],
+    "callBtn": {
+      "text": "Call Chamber",
+      "href": "tel:+923057902744",
+      "enabled": true
+    },
+    "whatsappBtn": {
+      "text": "Request Document Checklist",
+      "message": "Hello, please send me the required documents checklist for visiting Chamber 121.",
+      "enabled": true
+    },
+    "officeCard": {
+      "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70",
+      "badgeText": "Sahiwal District Court • Chamber 121",
+      "title": "Chamber No 121, District Court",
+      "description": "Situated right at Sharki Gate within District Court premises. Fast access with direct consultant desks.",
+      "directionsBtnText": "Get Directions",
+      "callBtnText": "Call Now"
+    }
+  },
+  "whyTrustSection": {
+    "enabled": true,
+    "title": "Why Sahiwal Citizens & Businesses Trust Chamber 121",
+    "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=600&q=70",
+    "metricNumber": "15+",
+    "metricLabel": "Years Registered Legal Practice",
+    "features": [
+      {
+        "title": "100% Official Validation",
+        "text": "Every digital stamp paper, Challan 32-A, and deed is verified directly via Punjab E-Stamping and FBR IRIS portals.",
+        "icon": "ShieldCheck"
+      },
+      {
+        "title": "Expedited Processing",
+        "text": "Most routine affidavits, sales deeds, and tax filings are drafted and issued within hours.",
+        "icon": "Zap"
+      },
+      {
+        "title": "Senior Legal Counsel",
+        "text": "Guided directly by senior court practitioners and authorized revenue consultants.",
+        "icon": "Users"
+      },
+      {
+        "title": "Absolute Transparency",
+        "text": "No hidden vendor margins or unofficial processing fees. Clear, honest, and accountable service.",
+        "icon": "Eye"
+      }
+    ]
+  },
+  "remindersSection": {
+    "enabled": true,
+    "title": "Upcoming Statutory Tax & Filing Deadlines",
+    "subtitle": "Stay fully compliant with FBR, PRA, and SECP schedules. Select your categories to receive verified SMS & WhatsApp alerts."
+  },
+  "testimonialsSection": {
+    "enabled": true,
+    "title": "Client Testimonials & Trust",
+    "subtitle": "Read feedback from local property owners, business founders, and corporate clients.",
+    "items": [
+      {
+        "id": "test-1",
+        "clientName": "Mian Muhammad Asif",
+        "clientRole": "Managing Director, Sahiwal Agro Traders",
+        "text": "Chamber 121 managed our company registration and annual FBR returns smoothly. Their prompt response on WhatsApp and accuracy saved us significant time.",
+        "rating": 5,
+        "visible": true
+      },
+      {
+        "id": "test-2",
+        "clientName": "Chaudhry Tariq Mehmood",
+        "clientRole": "Commercial Property Investor",
+        "text": "Handled our commercial property transfer deed and e-stamping seamlessly at the Sub-Registrar office. 100% verified documentation with zero hassle.",
+        "rating": 5,
+        "visible": true
+      },
+      {
+        "id": "test-3",
+        "clientName": "Rana Shahid Iqbal",
+        "clientRole": "Textile Mill Executive",
+        "text": "Outstanding tax consultation and active taxpayer filing. Professional team with deep knowledge of local courts and FBR regulations.",
+        "rating": 5,
+        "visible": true
+      }
+    ]
+  },
+  "faqSection": {
+    "enabled": true,
+    "title": "Frequently Asked Questions",
+    "subtitle": "Common answers regarding E-Stamping, property registry, tax filing, and visiting Chamber 121.",
+    "items": [
+      {
+        "id": "faq-1",
+        "question": "How can I verify the authenticity of an E-Stamp paper?",
+        "answer": "Every e-stamp paper generated has a unique 16-digit e-stamp code and a QR code. You can verify it instantly on the official Punjab E-Stamping portal (es.punjab.gov.pk) or through our office scanner.",
+        "order": 1,
+        "visible": true
+      },
+      {
+        "id": "faq-2",
+        "question": "What documents are required to file an annual income tax return?",
+        "answer": "You need your CNIC, salary certificates or business bank statements for the tax year (July 1 to June 30), utility bills, property/vehicle purchase receipts, and wealth reconciliation details.",
+        "order": 2,
+        "visible": true
+      },
+      {
+        "id": "faq-3",
+        "question": "How long does property registration take at District Court Sahiwal?",
+        "answer": "Once Fard Malkiat is retrieved and e-stamp duty is deposited, deed drafting and witness execution before the Sub-Registrar can typically be completed on the same day.",
+        "order": 3,
+        "visible": true
+      },
+      {
+        "id": "faq-4",
+        "question": "Can I send documents on WhatsApp before visiting?",
+        "answer": "Yes! You can WhatsApp your documents to 0305-7902744. Our team will review them, calculate the required stamp duty or taxes, and prepare drafts in advance.",
+        "order": 4,
+        "visible": true
+      }
+    ]
+  },
+  "officeSection": {
+    "enabled": true,
+    "title": "Our Sahiwal Chamber",
+    "subtitle": "Located at Sharki Gate, District Court Sahiwal. Convenient access for litigants, advocates, and commercial clients.",
+    "addressText": "Sharki Gate Chamber No 121 District Court Sahiwal",
+    "weekdayHours": "9:00 AM - 6:00 PM",
+    "saturdayHours": "9:00 AM - 3:00 PM",
+    "guideTitle": "Court Premises Visiting Guide",
+    "guidePoints": [
+      "Enter via Sharki Gate — Chamber 121 is directly accessible on the ground floor legal corridor.",
+      "Send required documents on WhatsApp before visiting for accelerated same-day processing.",
+      "All legal drafting, agreements, sale deeds, and tax filings processed on-site."
+    ],
+    "whatsappBtnText": "Chat with Chamber on WhatsApp",
+    "callBtnText": "Call Chamber Desk"
+  },
+  "finalCtaSection": {
+    "enabled": true,
+    "title": "Visit Chamber 121 or Get Instant Consultation",
+    "description": "Whether you need an urgent digital stamp paper, property registry execution, or comprehensive tax defense, our experienced advocates are ready to assist.",
+    "callCardTitle": "Official Phone Support",
+    "whatsappCardTitle": "Official Chamber WhatsApp",
+    "hoursCardTitle": "Chamber Working Hours",
+    "consultationFormEnabled": true,
+    "visitOfficeBtn": {
+      "text": "VISIT OUR OFFICE",
+      "href": "#office",
+      "enabled": true
+    }
+  },
+  "sectionOrder": [
+    "hero",
+    "services",
+    "about",
+    "whyTrust",
+    "reminders",
+    "testimonials",
+    "faq",
+    "office",
+    "finalCta"
+  ],
+  "updatedAt": "2026-09-19T09:40:17.572Z"
+}

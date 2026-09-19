@@ -10,14 +10,48 @@ import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIc
 export default function OfficeSection({
   title,
   text,
+  addressText,
+  weekdayHours,
+  saturdayHours,
+  guideTitle,
+  guidePoints,
+  whatsappBtnText,
+  callBtnText,
 }: {
   title?: string;
   text?: string;
+  addressText?: string;
+  weekdayHours?: string;
+  saturdayHours?: string;
+  guideTitle?: string;
+  guidePoints?: string[];
+  whatsappBtnText?: string;
+  callBtnText?: string;
 }) {
   const { isUrdu, t } = useLanguage();
 
   const sectionTitle = title || t.officeSection.title;
   const sectionText = text || t.officeSection.subtitle;
+  const displayAddress = addressText || (isUrdu
+    ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
+    : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`);
+  const displayWeekday = weekdayHours || (isUrdu ? "9:00 بجے صبح تا 6:00 بجے شام" : "9:00 AM - 6:00 PM");
+  const displaySaturday = saturdayHours || (isUrdu ? "9:00 بجے صبح تا 3:00 بجے دوپہر" : "9:00 AM - 3:00 PM");
+  const displayGuideTitle = guideTitle || (isUrdu ? "کچہری تشریف آوری سے پہلے رہنمائی" : "Court Premises Visiting Guide");
+  const defaultGuidePoints = [
+    isUrdu
+      ? "ڈسٹرکٹ کورٹ کے شرقی گیٹ سے داخل ہوتے ہی سامنے گراؤنڈ فلور پر چیمبر 121 واقع ہے۔"
+      : "Enter via Sharki Gate — Chamber 121 is directly accessible on the ground floor legal corridor.",
+    isUrdu
+      ? "ای سٹامپ اور ٹیکس دستاویزات کے لیے پیشگی واٹس ایپ پر تفصیلات بھیج سکتے ہیں۔"
+      : "Send required documents on WhatsApp before visiting for accelerated same-day processing.",
+    isUrdu
+      ? "تمام قانونی ڈرافٹنگ، معاہدہ جات اور بیعانہ سروسز موقع پر دستیاب ہیں۔"
+      : "All legal drafting, agreements, sale deeds, and tax filings processed on-site.",
+  ];
+  const displayGuidePoints = guidePoints && guidePoints.length > 0 ? guidePoints : defaultGuidePoints;
+  const displayWhatsAppBtn = whatsappBtnText || (isUrdu ? "واٹس ایپ پر پیشگی رہنمائی لیں" : "Chat with Chamber on WhatsApp");
+  const displayCallBtn = callBtnText || (isUrdu ? "چیمبر فون رابطہ" : "Call Chamber Desk");
 
   return (
     <section id="office" className="bg-white dark:bg-[#071224] py-14 sm:py-20 transition-colors duration-200 overflow-hidden">
@@ -41,9 +75,7 @@ export default function OfficeSection({
                   </h3>
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">
-                  {isUrdu
-                    ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
-                    : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`}
+                  {displayAddress}
                 </p>
               </div>
 
@@ -53,7 +85,7 @@ export default function OfficeSection({
                     {isUrdu ? "پیر تا جمعہ" : "Weekdays"}
                   </span>
                   <span className="font-semibold text-navy-900 dark:text-slate-100">
-                    {isUrdu ? "9:00 بجے صبح تا 6:00 بجے شام" : "9:00 AM - 6:00 PM"}
+                    {displayWeekday}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
@@ -61,7 +93,7 @@ export default function OfficeSection({
                     {isUrdu ? "ہفتہ" : "Saturdays"}
                   </span>
                   <span className="font-semibold text-navy-900 dark:text-slate-100">
-                    {isUrdu ? "9:00 بجے صبح تا 3:00 بجے دوپہر" : "9:00 AM - 3:00 PM"}
+                    {displaySaturday}
                   </span>
                 </div>
               </div>
@@ -188,7 +220,7 @@ export default function OfficeSection({
               <div className="mt-6 pt-5 border-t border-white/10 space-y-3">
                 <OfficialWhatsAppButton
                   href={SITE.whatsappHref}
-                  label={isUrdu ? "واٹس ایپ پر پیشگی رہنمائی لیں" : "Chat with Chamber on WhatsApp"}
+                  label={displayWhatsAppBtn}
                   size="md"
                   className="w-full text-center"
                 />
@@ -197,7 +229,7 @@ export default function OfficeSection({
                   className="w-full rounded-lg border border-white/20 py-2.5 text-center text-xs font-semibold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
                 >
                   <Phone className="h-3.5 w-3.5 text-gold-400" />
-                  <span>{isUrdu ? "چیمبر فون رابطہ" : "Call Chamber Desk"}</span>
+                  <span>{displayCallBtn}</span>
                 </a>
               </div>
             </div>

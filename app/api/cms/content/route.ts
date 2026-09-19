@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSiteSettings } from "@/lib/db/siteSettingsStore";
 import { getAllServices, getServiceBySlug } from "@/lib/db/servicesStore";
 import { getAllPagesContent, getPageContentByRoute } from "@/lib/db/pagesContentStore";
+import { getHomeSections } from "@/lib/db/homeSectionsStore";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +14,14 @@ export async function GET(request: Request) {
 
     const settings = getSiteSettings();
     const services = getAllServices();
+    const homeSections = getHomeSections();
 
     if (route) {
       const page = getPageContentByRoute(route);
       return NextResponse.json({
         success: true,
         settings,
+        homeSections,
         page,
       });
     }
@@ -28,6 +31,7 @@ export async function GET(request: Request) {
       return NextResponse.json({
         success: true,
         settings,
+        homeSections,
         service,
       });
     }
@@ -36,6 +40,7 @@ export async function GET(request: Request) {
       success: true,
       settings,
       services,
+      homeSections,
       pages: getAllPagesContent(),
     });
   } catch (error) {

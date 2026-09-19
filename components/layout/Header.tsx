@@ -19,6 +19,7 @@ import {
   ArrowRight,
   ChevronDown,
   Globe,
+  MapPin,
   Menu as MenuIcon,
   Moon,
   Phone,
@@ -26,7 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
-import { SERVICE_CATEGORIES, SITE, type ServiceCategory } from "@/lib/site";
+import { SERVICE_CATEGORIES, SITE, type ServiceCategory, buildWhatsAppUrl } from "@/lib/site";
 import type { CategoryTrans, Translations } from "@/lib/translations";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { useAppTheme } from "@/providers/ThemeProvider";
@@ -386,6 +387,16 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              {settings?.headerSettings?.primaryCtaEnabled && (
+                <Link
+                  href={settings.headerSettings.primaryCtaHref || "/#office"}
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] text-white px-3 py-1.5 text-xs font-bold shadow-2xs transition"
+                >
+                  <MapPin className="h-3.5 w-3.5 text-gold-400" />
+                  <span>{settings.headerSettings.primaryCtaText || "Visit Chamber"}</span>
+                </Link>
+              )}
+
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -633,7 +644,7 @@ export default function Header() {
         <div className={`p-3 ${isDark ? "bg-[#0a1830]" : "bg-white"}`}>
           <div className="grid grid-cols-2 gap-2">
             <a
-              href={SITE.phoneHref}
+              href={settings?.phone ? `tel:${settings.phone.replace(/[^\d+]/g, "")}` : SITE.phoneHref}
               className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-semibold ${
                 isDark
                   ? "border-white/20 text-slate-200 hover:bg-white/5"
@@ -644,7 +655,11 @@ export default function Header() {
               {t.site.phoneLabel}
             </a>
             <a
-              href={SITE.whatsappHref}
+              href={
+                settings?.whatsappSettings
+                  ? buildWhatsAppUrl(settings.whatsappSettings.number, settings.whatsappSettings.defaultMessage)
+                  : SITE.whatsappHref
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] py-2 text-xs font-bold text-white shadow-sm shadow-[#25D366]/20 transition"

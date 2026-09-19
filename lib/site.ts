@@ -45,6 +45,20 @@ export const SITE = {
   directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=30.665373,73.097928",
 };
 
+export function buildWhatsAppUrl(phone?: string, message?: string): string {
+  const rawNumber = (phone || SITE.whatsapp || "0305-7902744").replace(/[^\d]/g, "");
+  const normalizedNumber = rawNumber.startsWith("92")
+    ? rawNumber
+    : rawNumber.startsWith("0")
+    ? `92${rawNumber.slice(1)}`
+    : `92${rawNumber}`;
+
+  if (!message || !message.trim()) {
+    return `https://wa.me/${normalizedNumber}`;
+  }
+  return `https://wa.me/${normalizedNumber}?text=${encodeURIComponent(message.trim())}`;
+}
+
 export type NavService = {
   title: string;
   href: string;
