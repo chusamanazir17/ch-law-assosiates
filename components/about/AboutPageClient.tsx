@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   Users,
   ThumbsUp,
-  Award,
   Phone,
   MapPin,
   Sparkles,
@@ -37,11 +36,8 @@ export default function AboutPageClient() {
       {/* 1. FIRST: OUR FOUNDER (Late Haji Faqir Muhammad)                          */}
       {/* ========================================================================= */}
       <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-24 border-b border-navy-900/5 dark:border-white/10 bg-gradient-to-b from-slate-50 via-white to-white dark:from-[#091833] dark:via-[#071224] dark:to-[#071224]">
-        {/* Subtle decorative background glow & watermark */}
+        {/* Subtle decorative background glow */}
         <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-96 w-[700px] rounded-full bg-gold-400/10 dark:bg-gold-500/5 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-5 dark:opacity-10 text-gold-500">
-          <Award className="w-full h-full" />
-        </div>
 
         <div className="container-x relative">
           <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14">
