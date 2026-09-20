@@ -143,11 +143,11 @@ function Hero() {
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/30 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] border border-emerald-400/30 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium text-white shadow-lg shadow-[#25D366]/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[#25D366]/35"
                   >
-                    <WhatsAppIcon className="h-4 w-4 text-emerald-400" />
+                    <WhatsAppIcon className="h-4 w-4 text-white" />
                     <span>{secondaryBtn.text}</span>
-                    <ChevronDown className="h-4 w-4 text-white/60" />
+                    <ChevronDown className="h-4 w-4 text-white/80" />
                   </a>
                 )}
               </div>
