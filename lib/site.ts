@@ -13,10 +13,10 @@ export const SITE = {
   city: "Sahiwal",
   contacts: [
     {
-      name: "Haji Nazir Ahmad",
+      name: "Haji Nazir Ahmed",
       nameUrdu: "حاجی نذیر احمد",
-      role: "Senior Consultant",
-      roleUrdu: "سینئر کنسلٹنٹ",
+      role: "Stamp Vendor & Consultant",
+      roleUrdu: "اسٹامپ وینڈر و کنسلٹنٹ",
       phone: "0301-6922573",
       phoneHref: "tel:+923016922573",
       whatsappHref: "https://wa.me/923016922573",
