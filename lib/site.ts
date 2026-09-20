@@ -465,8 +465,7 @@ export const HERO_IMAGES = {
     "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
   estamp:
     "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=70",
-  family:
-    "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1280&q=70",
+  family: "/images/services/family-court.jpg",
   legal:
     "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1280&q=70",
   property:
@@ -474,6 +473,5 @@ export const HERO_IMAGES = {
   registry:
     "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1280&q=70",
   tax: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
-  trademark:
-    "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1280&q=70",
+  trademark: "/images/services/trademark-ipo.jpg",
 };
