@@ -218,7 +218,7 @@ export default function AboutPageClient() {
                           {isUrdu ? lateFounder.nameUrdu : lateFounder.name}
                         </p>
                         <p className="text-[9px] font-bold uppercase tracking-wider text-navy-900/80">
-                          {isUrdu ? "بانی چیمبر 121 • رحمتہ اللہ علیہ" : "In Loving Memory • Founder"}
+                          {isUrdu ? "بانی • 1988–2014" : "Founder • 1988–2014"}
                         </p>
                       </div>
                     </div>
@@ -240,9 +240,12 @@ export default function AboutPageClient() {
             {/* Founder Biography & Quote Callout */}
             <div className="lg:col-span-7">
               <FadeIn direction="left">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <span className="text-xs font-bold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
                     {isUrdu ? "ہمارے بانی" : "OUR FOUNDER"}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300/50">
+                    {isUrdu ? lateFounder.badgeUrdu : lateFounder.badge}
                   </span>
                   <span className="h-0.5 w-12 bg-gold-500/60" />
                 </div>
@@ -251,20 +254,13 @@ export default function AboutPageClient() {
                   {isUrdu ? lateFounder.nameUrdu : lateFounder.name}
                 </h2>
 
-                <p className="mt-1 text-sm font-semibold text-gold-600 dark:text-gold-400">
-                  {isUrdu ? lateFounder.roleUrdu : "Founder of Chamber 121 & Pioneer of Honest Legal Practice"}
+                <p className="mt-2 text-sm sm:text-base font-semibold text-gold-600 dark:text-gold-400">
+                  {isUrdu ? lateFounder.roleUrdu : lateFounder.role}
                 </p>
 
                 <div className="mt-5 space-y-4 text-sm sm:text-base leading-relaxed text-navy-800/80 dark:text-slate-300">
                   <p>
-                    {isUrdu
-                      ? "حاجی فقیر محمد (مرحوم) نے ساہیوال ڈسٹرکٹ کورٹ میں چیمبر 121 کا آغاز دیانت، محنت اور سچے عوامی خدمت کے جذبے کے ساتھ کیا۔ ان کا مقصد تھا کہ ساہیوال اور گردونواح سے آنے والے سائلین، کسانوں، جائیداد خریداروں اور تاجروں کو عدالتی دستاویزات، اسٹامپ پیپرز اور رجسٹری کے عمل میں بلارکاوٹ اور مکمل شفاف رہنمائی میسر آئے۔"
-                      : "Late Haji Faqir Muhammad started Chamber 121 with honesty, dedication, and a deep sense of service to the community. His vision was to make legal document services easier, transparent, and more accessible for everyone across Sahiwal District Court."}
-                  </p>
-                  <p>
-                    {isUrdu
-                      ? "اگرچہ آج وہ ہمارے درمیان نہیں ہیں، لیکن ان کے وضع کردہ اعلیٰ اخلاقی اصول، دیانت داری اور ہمدردی کی روایات آج بھی ہمارے ہر روز کے کام اور فیصلے کی رہنمائی کرتی ہیں۔"
-                      : "Although he is no longer with us, his values, principles, and compassion continue to guide our work every single day."}
+                    {isUrdu ? lateFounder.bioUrdu : lateFounder.bio}
                   </p>
                 </div>
 
