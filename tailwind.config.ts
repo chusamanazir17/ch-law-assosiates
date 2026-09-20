@@ -39,6 +39,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         serif: ["var(--font-playfair)", "Georgia", "serif"],
+        script: ["var(--font-script)", "cursive"],
       },
       boxShadow: {
         card: "0 4px 24px rgba(11, 29, 56, 0.08)",

@@ -19,6 +19,10 @@ import {
   Star,
   ChevronDown,
   HelpCircle,
+  Calendar,
+  Award,
+  FileText,
+  Headphones,
 } from "lucide-react";
 import { HOME_SERVICES, SITE, buildWhatsAppUrl } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
@@ -42,33 +46,25 @@ function Hero() {
   const heroSec = homeSections?.hero;
 
   const eyebrowText = isUrdu
-    ? t.hero.eyebrow
-    : (heroSec?.badge || homeCms?.heroBadge || t.hero.eyebrow);
+    ? "ساہیوال میں بااعتماد قانونی و ٹیکس ایڈوائزری"
+    : (heroSec?.badge || "TRUSTED LEGAL & TAX ADVISORY IN SAHIWAL");
 
-  const heroTitle = isUrdu
-    ? t.hero.titlePart1
-    : (heroSec?.headline || homeCms?.heroHeadline || "Premier Legal Documentation & Chamber Services");
-
-  const heroHighlight = isUrdu
-    ? t.hero.countryHighlight
-    : (heroSec?.highlight || "Chamber 121 Sahiwal");
+  const heroTitleLine1 = isUrdu ? "آپ کے قانونی اور" : "Your Legal &";
+  const heroTitleLine2 = isUrdu ? "ٹیکس کے معاملات" : "Tax Matters";
+  const heroTitleHighlight = isUrdu ? "ہماری ترجیح" : "Our Priority";
 
   const heroDescription = isUrdu
-    ? t.hero.description
-    : (heroSec?.subtitle || homeCms?.heroSubtitle || "Providing reliable E-Stamping, property registry, and business registration solutions with absolute transparency and professional excellence.");
+    ? "ساہیوال میں مکمل شفافیت اور پیشہ ورانہ مہارت کے ساتھ ای سٹیمپنگ، پراپرٹی رجسٹری، ٹیکس ایڈوائزری اور قانونی دستاویزات کی قابل اعتماد خدمات۔"
+    : (heroSec?.subtitle || homeCms?.heroSubtitle || "Providing reliable e-Stamping, property registry, tax advisory and legal documentation services in Sahiwal with complete transparency and professional excellence.");
 
   const primaryBtn = {
-    text: isUrdu
-      ? t.hero.visitOfficeBtn
-      : (heroSec?.primaryBtn?.text || homeCms?.primaryCtaText || t.hero.visitOfficeBtn),
-    href: heroSec?.primaryBtn?.href || homeCms?.primaryCtaHref || "#office",
+    text: isUrdu ? "مشاورت بک کریں" : (heroSec?.primaryBtn?.text || "Book a Consultation"),
+    href: heroSec?.primaryBtn?.href || "#contact",
     enabled: heroSec?.primaryBtn?.enabled !== false,
   };
 
   const secondaryBtn = {
-    text: isUrdu
-      ? t.hero.whatsappBtn
-      : (heroSec?.secondaryBtn?.text || "Chat on WhatsApp"),
+    text: isUrdu ? "واٹس ایپ پر رابطہ" : (heroSec?.secondaryBtn?.text || "WhatsApp Now"),
     message: isUrdu
       ? "السلام علیکم، میں چیمبر 121 سے قانونی دستاویزات اور ٹیکس ایڈوائزری کے بارے میں معلومات حاصل کرنا چاہتا ہوں۔"
       : (settings?.whatsappSettings?.sectionMessages?.hero || "Hello, I would like to inquire about legal documentation and tax advisory services."),
@@ -78,113 +74,250 @@ function Hero() {
   const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
   const whatsappUrl = buildWhatsAppUrl(whatsappPhone, secondaryBtn.message);
 
-  const trustBadges = (
-    isUrdu
-      ? [
-          { id: "1", label: t.hero.govVerified, enabled: true },
-          { id: "2", label: t.hero.sameDay, enabled: true },
-          { id: "3", label: t.hero.confidential, enabled: true },
-        ]
-      : (heroSec?.trustBadges || [
-          { id: "1", label: t.hero.govVerified, enabled: true },
-          { id: "2", label: t.hero.sameDay, enabled: true },
-          { id: "3", label: t.hero.confidential, enabled: true },
-        ])
-  ).filter((b) => b.enabled !== false);
-
-  const trustIcons = [FileCheck2, CalendarCheck, ShieldCheck];
-
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#050f1f] via-[#081730] to-[#061226] text-white">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#040c18] via-[#071427] to-[#050f1f] text-white">
       {/* Ambient background styling */}
-      <div className="pointer-events-none absolute inset-0 texture-grid opacity-35" />
-      <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-gold-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute inset-0 texture-grid opacity-25" />
+      <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-gold-500/10 blur-[140px]" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-navy-600/20 blur-[140px]" />
 
-      <motion.div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-20 text-left">
-        <motion.span
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="eyebrow inline-flex items-center gap-2 text-left"
-          suppressHydrationWarning
-        >
-          <BadgeCheck className="h-3.5 w-3.5 shrink-0" />
-          <span>{eyebrowText}</span>
-        </motion.span>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.12 }}
-          className={`mt-6 max-w-3xl font-serif text-3xl font-bold leading-[1.14] text-white sm:text-5xl lg:text-6xl text-left ${
-            isUrdu ? "leading-[1.35]" : ""
-          }`}
-        >
-          {heroTitle}{" "}
-          {heroHighlight && (
-            <span className="relative whitespace-nowrap text-gold-400">
-              {heroHighlight}
-              <motion.span
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.8, delay: 0.9 }}
-                className="absolute -bottom-1 left-0 h-[3px] w-full origin-left rounded bg-gold-400/70"
-              />
-            </span>
-          )}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.24 }}
-          className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg text-left"
-        >
-          {heroDescription}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.36 }}
-          className="mt-8 sm:mt-10 flex flex-wrap items-center justify-start gap-4 text-left"
-        >
-          {primaryBtn.enabled !== false && (
-            <Link href={primaryBtn.href || "#office"} className="btn-gold px-8 py-3.5 text-sm">
-              <MapPin className="h-4 w-4" /> {primaryBtn.text}
-            </Link>
-          )}
-
-          {secondaryBtn.enabled !== false && (
-            <OfficialWhatsAppButton
-              href={whatsappUrl}
-              label={secondaryBtn.text}
-              size="lg"
-            />
-          )}
-        </motion.div>
-
-        {/* trust strip */}
-        {trustBadges.length > 0 && (
+      <div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-16">
+        {/* Main 2-Column Hero Grid: 65% Column 1 and 35% Column 2 */}
+        <div className="flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12">
+          {/* Column 1 (Left 65% width) */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.7 }}
-            className="mt-12 sm:mt-16 flex flex-wrap items-center justify-start gap-x-10 gap-y-4 text-white/70 text-left"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="w-full lg:w-[63%] flex flex-col justify-between text-left"
           >
-            {trustBadges.map((s, idx) => {
-              const Icon = trustIcons[idx % trustIcons.length];
-              return (
-                <span key={s.id || s.label} className="flex items-center gap-2.5 text-xs font-medium uppercase tracking-wider">
-                  <Icon className="h-4 w-4 text-gold-400" />
-                  {s.label}
+            <div>
+              {/* Eyebrow */}
+              <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-gold-400">
+                <BadgeCheck className="h-4 w-4 text-gold-400" />
+                <span>{eyebrowText}</span>
+              </span>
+
+              {/* Headline */}
+              <h1 className="mt-4 font-serif text-4xl sm:text-5xl lg:text-[62px] font-bold leading-[1.1] text-white tracking-tight">
+                {heroTitleLine1}
+                <br />
+                {heroTitleLine2}
+                <br />
+                <span className="text-gold-400 relative inline-block">
+                  {heroTitleHighlight}
                 </span>
-              );
-            })}
+              </h1>
+
+              {/* Description Paragraph */}
+              <p className="mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-slate-300 font-normal">
+                {heroDescription}
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                {primaryBtn.enabled !== false && (
+                  <Link
+                    href={primaryBtn.href}
+                    className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 px-6 py-3.5 text-sm sm:text-base font-bold text-navy-950 shadow-lg shadow-gold-500/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                  >
+                    <Calendar className="h-4 w-4 text-navy-950" />
+                    <span>{primaryBtn.text}</span>
+                    <ArrowRight className="h-4 w-4 text-navy-950 ml-0.5" />
+                  </Link>
+                )}
+
+                {secondaryBtn.enabled !== false && (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/30 px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <WhatsAppIcon className="h-4 w-4 text-emerald-400" />
+                    <span>{secondaryBtn.text}</span>
+                    <ChevronDown className="h-4 w-4 text-white/60" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Stats Row */}
+            <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center gap-6 sm:gap-10">
+              {/* Stat 1 */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">500+</div>
+                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                    {isUrdu ? "مطمئن کلائنٹس" : "Satisfied Clients"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stat 2 */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
+                  <BadgeCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">99%</div>
+                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                    {isUrdu ? "کامیابی کی شرح" : "Success Rate"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stat 3 */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
+                  <Award className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">35+</div>
+                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                    {isUrdu ? "سال کا تجربہ (1988 سے)" : "Years of Experience"}
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
-        )}
-      </motion.div>
+
+          {/* Column 2 (Right Remaining ~37% width) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full lg:w-[37%] relative"
+          >
+            <div className="relative w-full h-[460px] sm:h-[540px] lg:h-full min-h-[460px] rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-[#081730]">
+              <Image
+                src="/images/hero-scales-justice.jpg"
+                alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, 38vw"
+              />
+
+              {/* Cinematic Vignette Overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/20 to-navy-950/40 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/30 to-transparent pointer-events-none" />
+
+              {/* Elegant Script Overlay in Top Right */}
+              <div className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20 text-right pointer-events-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+                <p className="font-script text-3xl sm:text-4xl lg:text-[42px] text-white leading-[1.08] -rotate-3 select-none">
+                  Legal Guidance
+                  <br />
+                  <span className="text-white/95">for a Better</span>
+                  <br />
+                  <span className="relative inline-block text-gold-300">
+                    Tomorrow
+                    <svg
+                      className="absolute -bottom-1.5 left-0 w-full h-3 text-gold-400"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    >
+                      <path d="M2,12 Q50,19 98,8" />
+                    </svg>
+                  </span>
+                </p>
+              </div>
+
+              {/* Floating Pill Badge at Bottom Right */}
+              <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 z-20 flex items-center gap-3 rounded-2xl bg-navy-950/90 backdrop-blur-md border border-white/20 px-4 py-3 shadow-2xl max-w-[280px]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/20 text-gold-400 border border-gold-400/30">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[10.5px] uppercase tracking-wider text-slate-300 block font-medium">
+                    {isUrdu ? "بااعتماد برائے" : "Trusted by"}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
+                    {isUrdu ? "کاروبار، خاندان اور افراد" : "Businesses, Families & Individuals"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Feature Ribbon Strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, delay: 0.45 }}
+          className="mt-10 lg:mt-14 w-full rounded-2xl bg-white dark:bg-[#081730] border border-slate-200/80 dark:border-white/10 shadow-xl p-5 sm:p-6 text-slate-800 dark:text-slate-100"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/10">
+            {/* Feature 1 */}
+            <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0 first:pt-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+                <ShieldCheck className="h-5 w-5 text-gold-500 dark:text-gold-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                  {isUrdu ? "تیز اور محفوظ عمل" : "Fast & Secure Process"}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-300">
+                  {isUrdu ? "آسان اور شفاف دستاویزات" : "Hassle-free documentation"}
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+                <MapPin className="h-5 w-5 text-gold-500 dark:text-gold-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                  {isUrdu ? "مقامی تجربہ" : "Local Expertise"}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-300">
+                  {isUrdu ? "ساہیوال بیسڈ، ہر وقت دستیاب" : "Sahiwal based, always here"}
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+                <FileText className="h-5 w-5 text-gold-500 dark:text-gold-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                  {isUrdu ? "واضح اور شفاف فیس" : "Transparent Fees"}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-300">
+                  {isUrdu ? "کوئی پوشیدہ چارجز نہیں" : "No hidden charges"}
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+                <Headphones className="h-5 w-5 text-gold-500 dark:text-gold-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                  {isUrdu ? "مکمل معاونت" : "Complete Support"}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-300">
+                  {isUrdu ? "آغاز سے اختتام تک" : "From start to finish"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Bottom fade for smooth transition to services section */}
       <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#f5f7fa] dark:from-[#071224] to-transparent pointer-events-none" />
