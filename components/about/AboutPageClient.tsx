@@ -12,6 +12,10 @@ import {
   Sparkles,
   Heart,
   ExternalLink,
+  BadgeCheck,
+  Calendar,
+  ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -33,157 +37,175 @@ export default function AboutPageClient() {
   return (
     <div className="min-h-screen bg-white dark:bg-[#071224] text-navy-900 dark:text-white transition-colors duration-200">
       {/* ========================================================================= */}
-      {/* 1. FIRST: ABOUT OUR CHAMBER                                               */}
+      {/* 1. FIRST: ABOUT OUR CHAMBER HERO                                         */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-20 border-b border-navy-900/5 dark:border-white/10 bg-gradient-to-b from-slate-50 via-white to-white dark:from-[#091833] dark:via-[#071224] dark:to-[#071224]">
-        <div className="container-x relative">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-            {/* Left Column: Heading & Description */}
-            <div className="lg:col-span-7">
-              <FadeIn direction="up">
-                <span className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
-                  {isUrdu ? "ہماری تاریخ اور عزم • چیمبر 121" : "OUR STORY. A STRONGER TOMORROW."}
+      <section className="relative overflow-hidden bg-[#040c18] text-white">
+        {/* Full-bleed Background Image Layer */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hero-scales-justice.jpg"
+            alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
+            fill
+            priority
+            className="object-cover object-right sm:object-center"
+            sizes="100vw"
+          />
+          {/* Left-side gradient shadow to ensure 100% solid dark navy under text on all screen sizes */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#040c18] via-[#040c18]/90 via-45% to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#040c18]/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#040c18] to-transparent" />
+        </div>
+
+        <div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-16">
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[460px] lg:min-h-[520px]">
+            {/* Left Column (Text, Buttons, Trust Badges) - sits directly on clean dark navy */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="lg:col-span-7 flex flex-col justify-center text-left py-4"
+            >
+              <div>
+                {/* Eyebrow */}
+                <span className="inline-flex items-center gap-2 text-[11.5px] font-bold uppercase tracking-[0.2em] text-gold-400">
+                  <BadgeCheck className="h-4 w-4 text-gold-400" />
+                  <span>
+                    {isUrdu ? "ہماری تاریخ اور عزم • چیمبر 121" : "OUR STORY. A STRONGER TOMORROW."}
+                  </span>
                 </span>
 
-                <h1 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-navy-900 dark:text-white leading-[1.15]">
+                {/* Headline */}
+                <h1 className="mt-4 font-serif text-[clamp(2.5rem,5vw+0.5rem,3.875rem)] font-bold leading-[1.1] text-white tracking-tight">
                   {isUrdu ? (
                     <>
-                      ہمارے چیمبر کے <span className="text-gold-600 dark:text-gold-400">بارے میں</span>
+                      ہمارے چیمبر کے <br />
+                      <span className="text-gold-400 relative inline-block">بارے میں</span>
                     </>
                   ) : (
                     <>
-                      About <span className="text-gold-600 dark:text-gold-400">Our Chamber</span>
+                      About Our <br />
+                      <span className="text-gold-400 relative inline-block">Legal Chamber</span>
                     </>
                   )}
                 </h1>
 
-                <p className="mt-5 text-sm sm:text-base leading-relaxed text-navy-800/80 dark:text-slate-300 max-w-2xl">
+                {/* Description */}
+                <p className="mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-[#F4F6F8]/90 font-normal">
                   {isUrdu
                     ? "چوہدری کمپوزنگ، ای اسٹامپ و ٹیکس ایڈوائزر ساہیوال کی معزز اور مستند قانونی فرم ہے۔ ہم ای اسٹیمپنگ، رجسٹری بیعنامہ، ایف بی آر انکم ٹیکس و سیلز ٹیکس، عدالتی بیاناتِ حلفی، دستاویزات کی اردو و انگلش کمپوزنگ اور ایس ای سی پی کارپوریٹ رجسٹریشن کی مکمل، فوری اور شفاف خدمات فراہم کرتے ہیں۔ ہمارا مقصد شہریوں اور کاروباری اداروں کو پیچیدہ قانونی عمل سے بچا کر آسان، محفوظ اور تیز ترین سروس فراہم کرنا ہے۔"
                     : "Ch Composing Estamp & Tax Advisor provides reliable e-stamp, property registry, tax advisory, document composing, typing, affidavit, scanning, printing, and online filing services to individuals, property owners, and businesses. We are committed to making your important legal and documentation work simple, fast, and completely hassle-free."}
                 </p>
 
-                {/* 3 Trust Badges */}
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-6 border-t border-navy-900/10 dark:border-white/10">
-                  <div className="flex items-center gap-3 rounded-xl border border-navy-900/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] p-3 shadow-xs">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                      <ShieldCheck className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-navy-900 dark:text-white">
-                        {isUrdu ? "مستند سروس" : "Reliable Service"}
-                      </p>
-                      <p className="text-[10px] text-navy-600 dark:text-slate-400">
-                        {isUrdu ? "100% قانونی تصدیق" : "100% Gov Verified"}
-                      </p>
-                    </div>
-                  </div>
+                {/* Action Buttons */}
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/#office"
+                    className="btn-gold inline-flex items-center gap-2.5 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium shadow-lg shadow-gold-500/20"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span>{isUrdu ? "ہمارے دفتر تشریف لائیں" : "Visit Our Chamber"}</span>
+                    <ArrowRight className="h-4 w-4 ml-0.5" />
+                  </Link>
 
-                  <div className="flex items-center gap-3 rounded-xl border border-navy-900/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] p-3 shadow-xs">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold-400/20 text-gold-600 dark:text-gold-400">
-                      <Users className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-navy-900 dark:text-white">
-                        {isUrdu ? "عوامی خدمت" : "Community Focused"}
-                      </p>
-                      <p className="text-[10px] text-navy-600 dark:text-slate-400">
-                        {isUrdu ? "شہریوں کا بھروسہ" : "Decades of Trust"}
-                      </p>
-                    </div>
-                  </div>
+                  <a
+                    href={SITE.whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] border border-emerald-400/30 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium text-white shadow-lg shadow-[#25D366]/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[#25D366]/35"
+                  >
+                    <WhatsAppIcon className="h-4 w-4 text-white" />
+                    <span>{isUrdu ? "واٹس ایپ پر رابطہ" : "WhatsApp Us"}</span>
+                    <ChevronDown className="h-4 w-4 text-white/80" />
+                  </a>
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-3 rounded-xl border border-navy-900/5 dark:border-white/10 bg-slate-50/70 dark:bg-white/[0.03] p-3 shadow-xs">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400">
-                      <ThumbsUp className="h-5 w-5" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-navy-900 dark:text-white">
-                        {isUrdu ? "ہماری کمٹمنٹ" : "Your Documents"}
-                      </p>
-                      <p className="text-[10px] text-navy-600 dark:text-slate-400">
-                        {isUrdu ? "مکمل رازداری و حفاظت" : "Our Commitment"}
-                      </p>
-                    </div>
+              {/* 3 Trust Badges */}
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-8 border-t border-white/10">
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#05162B]/80 backdrop-blur-md p-3 shadow-lg">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <ShieldCheck className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-white">
+                      {isUrdu ? "مستند سروس" : "Reliable Service"}
+                    </p>
+                    <p className="text-[10px] text-[#8792A1]">
+                      {isUrdu ? "100% قانونی تصدیق" : "100% Gov Verified"}
+                    </p>
                   </div>
                 </div>
-              </FadeIn>
-            </div>
 
-            {/* Right Column: Center Visual & Service Highlight Card */}
-            <div className="lg:col-span-5">
-              <FadeIn direction="left" delay={0.2}>
-                <div className="relative mx-auto max-w-md rounded-2xl border border-navy-900/10 dark:border-white/15 bg-gradient-to-br from-[#0a1b38] via-[#0d2247] to-[#071328] p-6 sm:p-7 text-white shadow-2xl overflow-hidden">
-                  {/* Gold accent top bar */}
-                  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-gold-400 via-amber-300 to-gold-600" />
-                  
-                  <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                    <div>
-                      <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-gold-400">
-                        {isUrdu ? "چیمبر 121 • ڈسٹرکٹ کورٹ" : "CHAMBER 121 • DISTRICT COURT"}
-                      </span>
-                      <h3 className="mt-1 font-serif text-lg font-bold">
-                        {isUrdu ? "دستاویزات اور ٹیکس ایڈوائزری" : "Legal Documentation & Tax Hub"}
-                      </h3>
-                    </div>
-                    <div className="rounded-lg bg-gold-400/15 border border-gold-400/30 px-2.5 py-1 text-[10px] font-bold text-gold-300">
-                      {isUrdu ? "ساہیوال" : "Sahiwal"}
-                    </div>
-                  </div>
-
-                  <div className="my-5 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-center">
-                    <p className="font-serif text-base sm:text-lg italic text-amber-200 leading-snug">
-                      &ldquo;Documents Today, A Brighter Tomorrow&rdquo;
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#05162B]/80 backdrop-blur-md p-3 shadow-lg">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold-400/20 text-gold-400 border border-gold-400/30">
+                    <Users className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-white">
+                      {isUrdu ? "عوامی خدمت" : "Community Focused"}
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-300">
-                      {isUrdu ? "آج کی مستند دستاویزات، کل کا پرسکون مستقبل" : "Serving with Integrity, Precision & Timely Delivery"}
+                    <p className="text-[10px] text-[#8792A1]">
+                      {isUrdu ? "شہریوں کا بھروسہ" : "Decades of Trust"}
                     </p>
                   </div>
+                </div>
 
-                  <div className="space-y-2.5 text-xs text-slate-200">
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "پنجاب ای اسٹیمپنگ و 32-A چالان" : "Punjab E-Stamping & Challan 32-A"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "رجسٹری بیعنامہ، انتقال و اقرار نامہ" : "Property Registry, Sale Deeds & Transfer"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "عدالتی بیاناتِ حلفی و قانونی ڈرافٹنگ" : "Court Affidavits, Agreements & Attestation"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "ایف بی آر انکم ٹیکس و سیلز ٹیکس فائلنگ" : "FBR IRIS Income Tax, Sales Tax & PRA"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "ایس ای سی پی کارپوریٹ و فرم رجسٹریشن" : "SECP Company, Firm & NTN Registration"}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-white/[0.03]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
-                      <span>{isUrdu ? "آن لائن فارمز، اسکیننگ و قانونی کمپوزنگ" : "Online Forms, Scanning & Legal Composing"}</span>
-                    </div>
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#05162B]/80 backdrop-blur-md p-3 shadow-lg">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <ThumbsUp className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-white">
+                      {isUrdu ? "ہماری کمٹمنٹ" : "Your Documents"}
+                    </p>
+                    <p className="text-[10px] text-[#8792A1]">
+                      {isUrdu ? "مکمل رازداری و حفاظت" : "Our Commitment"}
+                    </p>
                   </div>
+                </div>
+              </div>
+            </motion.div>
 
-                  <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gold-300">
-                    <span className="flex items-center gap-1.5 text-[11px]">
-                      <MapPin className="h-3.5 w-3.5 text-gold-400" />
-                      <span>Sharki Gate, Chamber 121</span>
-                    </span>
-                    <a
-                      href={SITE.directionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline font-bold text-[11px] flex items-center gap-1"
+            {/* Right Column: Floating overlays matching the home hero */}
+            <div className="hidden lg:block lg:col-span-5 relative h-full min-h-[300px] lg:min-h-[460px] pointer-events-none">
+              {/* Elegant Script Overlay in Top Right */}
+              <div className="absolute top-2 right-0 sm:top-6 sm:right-4 z-20 text-right drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+                <p className="font-script text-3xl sm:text-4xl lg:text-[42px] text-white leading-[1.08] -rotate-3 select-none">
+                  Legal Guidance
+                  <br />
+                  <span className="text-white/95">for a Better</span>
+                  <br />
+                  <span className="relative inline-block text-gold-300">
+                    Tomorrow
+                    <svg
+                      className="absolute -bottom-1.5 left-0 w-full h-3 text-gold-400"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
                     >
-                      <span>{isUrdu ? "راستہ دیکھیں" : "Get Directions"}</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
+                      <path d="M2,12 Q50,19 98,8" />
+                    </svg>
+                  </span>
+                </p>
+              </div>
+
+              {/* Floating Pill Badge at Bottom Right */}
+              <div className="absolute bottom-4 right-0 sm:bottom-6 sm:right-4 z-20 flex items-center gap-3 rounded-2xl bg-[#05162B]/90 backdrop-blur-md border border-white/20 px-4 py-3 shadow-2xl max-w-[280px] pointer-events-auto">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/20 text-gold-400 border border-gold-400/30">
+                  <Users className="h-5 w-5" />
                 </div>
-              </FadeIn>
+                <div className="text-left">
+                  <span className="text-[10.5px] uppercase tracking-wider text-[#8792A1] block font-medium">
+                    {isUrdu ? "بااعتماد برائے" : "Trusted by"}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
+                    {isUrdu ? "کاروبار، خاندان اور افراد" : "Businesses, Families & Individuals"}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

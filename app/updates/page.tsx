@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import {
@@ -8,10 +9,12 @@ import {
   MapPin,
   Phone,
   MessageCircle,
+  Users,
 } from "lucide-react";
 import { getPublishedPosts } from "@/lib/cms/publicPosts";
 import type { Post } from "@/types/cms";
 import { SITE } from "@/lib/site";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -65,33 +68,117 @@ export default async function UpdatesPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#071328] text-navy-950 dark:text-slate-100 transition-colors">
       {/* Hero Header */}
-      <section className="relative overflow-hidden border-b border-navy-900/10 dark:border-white/10 bg-gradient-to-b from-navy-900 via-[#0a1e3d] to-[#071328] py-16 lg:py-20 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1 text-xs font-semibold text-gold-400 mb-4">
-              <Shield className="h-3.5 w-3.5" />
-              <span>Chamber 121 Legal & Tax Insights</span>
-            </div>
-            <h1 className="font-serif text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-white">
-              Legal Guides, FBR Updates & E-Stamp Advice
-            </h1>
-            <p className="mt-3 text-sm sm:text-base text-white/70 leading-relaxed">
-              Step-by-step documentation guides, tax deadline explanations, and official filing instructions prepared by certified practitioners at District Court Sahiwal.
-            </p>
-          </div>
+      <section className="relative overflow-hidden bg-[#040c18] text-white">
+        {/* Full-bleed Background Image Layer */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hero-scales-justice.jpg"
+            alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
+            fill
+            priority
+            className="object-cover object-right sm:object-center"
+            sizes="100vw"
+          />
+          {/* Left-side gradient shadow to ensure 100% solid dark navy under text on all screen sizes */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#040c18] via-[#040c18]/90 via-45% to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#040c18]/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#040c18] to-transparent" />
+        </div>
 
-          {/* In-Person Office Strip */}
-          <div className="mt-8 inline-flex flex-wrap items-center gap-4 rounded-xl border border-white/15 bg-white/[0.05] p-3 text-xs text-white/80">
-            <div className="flex items-center gap-1.5 font-medium">
-              <MapPin className="h-4 w-4 text-gold-400" />
-              <span>Sharki Gate, Chamber No. 121, District Court Sahiwal</span>
+        <div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-16">
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[380px] lg:min-h-[460px]">
+            {/* Left Column (spans 7 cols): Eyebrow, H1, Description, Office Strip & Buttons */}
+            <div className="lg:col-span-7 flex flex-col justify-center text-left py-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-3.5 py-1 text-xs font-semibold text-gold-400 mb-4 w-fit">
+                <Shield className="h-3.5 w-3.5" />
+                <span>Chamber 121 Legal & Tax Insights</span>
+              </div>
+
+              <h1 className="font-serif text-[clamp(2rem,4vw+0.5rem,3.25rem)] font-bold leading-tight text-white tracking-tight">
+                Legal Guides, FBR Updates & <span className="text-gold-400">E-Stamp Advice</span>
+              </h1>
+
+              <p className="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-[#F4F6F8]/90 font-normal">
+                Step-by-step documentation guides, tax deadline explanations, and official filing instructions prepared by certified practitioners at District Court Sahiwal.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <a
+                  href={SITE.phoneHref}
+                  className="btn-gold inline-flex items-center gap-2.5 px-6 py-3 text-[13.5px] font-medium shadow-lg shadow-gold-500/20"
+                >
+                  <Phone className="h-4 w-4" />
+                  <span>Call {SITE.phone}</span>
+                </a>
+
+                <a
+                  href={SITE.whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] border border-emerald-400/30 px-6 py-3 text-[13.5px] font-medium text-white shadow-lg shadow-[#25D366]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#25D366]/35"
+                >
+                  <WhatsAppIcon className="h-4 w-4 text-white" />
+                  <span>Ask on WhatsApp</span>
+                </a>
+              </div>
+
+              {/* In-Person Office Strip */}
+              <div className="mt-8 inline-flex flex-wrap items-center gap-4 rounded-xl border border-white/15 bg-[#05162B]/80 backdrop-blur-md p-3 text-xs text-white/80 w-fit">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <MapPin className="h-4 w-4 text-gold-400" />
+                  <span>Sharki Gate, Chamber No. 121, District Court Sahiwal</span>
+                </div>
+                <span className="hidden sm:inline text-white/30">•</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#8792A1]">Direct Consultation:</span>
+                  <a href={SITE.phoneHref} className="text-gold-400 font-bold hover:underline">
+                    {SITE.phone}
+                  </a>
+                </div>
+              </div>
             </div>
-            <span className="hidden sm:inline text-white/30">•</span>
-            <div className="flex items-center gap-1.5">
-              <span>Direct Consultation:</span>
-              <a href={SITE.phoneHref} className="text-gold-400 font-bold hover:underline">
-                {SITE.phone}
-              </a>
+
+            {/* Right Column (spans 5 cols): Script overlay and floating pill badge */}
+            <div className="hidden lg:block lg:col-span-5 relative h-full min-h-[300px] pointer-events-none">
+              {/* Elegant Script Overlay in Top Right */}
+              <div className="absolute top-2 right-0 z-20 text-right drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+                <p className="font-script text-3xl sm:text-4xl lg:text-[40px] text-white leading-[1.08] -rotate-3 select-none">
+                  Legal Guidance
+                  <br />
+                  <span className="text-white/95">for a Better</span>
+                  <br />
+                  <span className="relative inline-block text-gold-300">
+                    Tomorrow
+                    <svg
+                      className="absolute -bottom-1.5 left-0 w-full h-3 text-gold-400"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    >
+                      <path d="M2,12 Q50,19 98,8" />
+                    </svg>
+                  </span>
+                </p>
+              </div>
+
+              {/* Floating Pill Badge at Bottom Right */}
+              <div className="absolute bottom-2 right-0 z-20 flex items-center gap-3 rounded-2xl bg-[#05162B]/90 backdrop-blur-md border border-white/20 px-4 py-3 shadow-2xl max-w-[280px] pointer-events-auto">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/20 text-gold-400 border border-gold-400/30">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[10.5px] uppercase tracking-wider text-[#8792A1] block font-medium">
+                    Trusted by
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
+                    Businesses, Families & Individuals
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

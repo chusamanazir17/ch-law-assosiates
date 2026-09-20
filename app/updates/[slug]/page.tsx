@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -62,8 +63,23 @@ export default async function PostReaderPage({
   return (
     <article className="min-h-screen bg-slate-50 dark:bg-[#071328] text-navy-950 dark:text-slate-100 transition-colors">
       {/* Top Header Section */}
-      <header className="border-b border-navy-900/10 dark:border-white/10 bg-navy-900 text-white py-12 lg:py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <header className="relative overflow-hidden bg-[#040c18] text-white py-12 lg:py-16 border-b border-navy-900/10 dark:border-white/10">
+        {/* Full-bleed Background Image Layer */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/images/hero-scales-justice.jpg"
+            alt="Legal desk background"
+            fill
+            priority
+            className="object-cover object-right sm:object-center"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#040c18] via-[#040c18]/90 via-45% to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#040c18]/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#040c18] to-transparent" />
+        </div>
+
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative z-10">
           <Link
             href="/updates"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold-400 hover:text-gold-300 transition mb-6"
