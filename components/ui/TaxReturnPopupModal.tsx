@@ -79,15 +79,15 @@ export default function TaxReturnPopupModal() {
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-2xl rounded-2xl overflow-hidden bg-white shadow-2xl ring-1 ring-black/10 transition-transform duration-300 animate-in zoom-in-95"
+        className="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 transition-transform duration-300 animate-in zoom-in-95"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button (X) */}
+        {/* Floating Close Button (X) */}
         <button
           type="button"
           onClick={handleClose}
-          aria-label="Close tax return notification"
-          className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-30 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-navy-950/85 text-white hover:bg-navy-900 hover:scale-105 active:scale-95 transition shadow-md border border-white/20"
+          aria-label="Close notification"
+          className="absolute -top-3 -right-3 sm:-top-3.5 sm:-right-3.5 z-30 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-navy-950 text-white hover:bg-gold-500 hover:text-navy-950 hover:scale-110 active:scale-95 transition shadow-xl border-2 border-white cursor-pointer"
         >
           <X className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
@@ -97,7 +97,7 @@ export default function TaxReturnPopupModal() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="group block relative cursor-pointer overflow-hidden"
+          className="group block relative cursor-pointer overflow-hidden rounded-2xl"
           title="Click to get assistance filing your Income Tax Return on WhatsApp"
         >
           <Image
@@ -108,9 +108,6 @@ export default function TaxReturnPopupModal() {
             priority
             className="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-[1.01]"
           />
-
-          {/* Subtle hover overlay on "Get Assistance Now" area */}
-          <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         </a>
 
         {/* Mobile Quick Action Footer Bar */}
