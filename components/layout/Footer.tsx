@@ -51,10 +51,10 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="border-t border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#071224] transition-colors duration-200">
-        <div className="container-x pt-12 pb-8 border-b border-navy-900/10 dark:border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <Logo isUrdu={isUrdu} size="lg" />
-          <p className="max-w-md text-xs sm:text-sm text-navy-800/70 dark:text-slate-400 leading-relaxed">
+      <footer className="border-t border-[#E3E7EC] dark:border-white/10 bg-[#05162B] text-white transition-colors duration-200">
+        <div className="container-x pt-12 pb-8 border-b border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <Logo isUrdu={isUrdu} isDark={true} size="lg" />
+          <p className="max-w-md text-xs sm:text-sm text-[#8792A1] leading-relaxed">
             {isUrdu 
               ? (settings?.footerSettings?.descriptionUrdu || "ڈسٹرکٹ کورٹ ساہیوال میں ای سٹامپنگ، پراپرٹی رجسٹری، ٹیکس اور قانونی دستاویزات کا مستند و بااعتماد ادارہ۔")
               : (settings?.footerSettings?.description || "Authorized legal documentation & tax advisory firm providing verified E-Stamping, property registration, and corporate compliance services at District Court Sahiwal.")}
@@ -63,24 +63,24 @@ export default function Footer() {
         <div className="container-x grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Contact */}
           <div>
-            <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
+            <h4 className="mb-5 font-serif text-sm font-bold uppercase tracking-wider text-white">
               {t.footer.contactUs}
             </h4>
-            <ul className="space-y-4 text-sm text-navy-800/70 dark:text-slate-300">
+            <ul className="space-y-4 text-sm text-[#8792A1]">
               <li className="flex gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#D39D3D]" />
                 <span>{settings?.address || (isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address)}</span>
               </li>
               <li className="flex gap-3">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#D39D3D]" />
                 <div className="space-y-1">
                   {settings?.contacts && settings.contacts.length > 0 ? (
                     settings.contacts.map((c, i) => (
                       <div key={i} className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                        <span className="text-xs font-semibold text-white">
                           {isUrdu && c.nameUrdu ? `${c.nameUrdu}:` : `${c.name}:`}
                         </span>
-                        <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`} className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                        <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`} className="transition hover:text-[#DCAA4A]">
                           {c.phone}
                         </a>
                       </div>
@@ -88,18 +88,18 @@ export default function Footer() {
                   ) : (
                     <>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                        <span className="text-xs font-semibold text-white">
                           {isUrdu ? "حاجی نذیر احمد:" : "Haji Nazir Ahmed:"}
                         </span>
-                        <a href="tel:+923016922573" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                        <a href="tel:+923016922573" className="transition hover:text-[#DCAA4A]">
                           0301-6922573
                         </a>
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs font-semibold text-navy-900 dark:text-white">
+                        <span className="text-xs font-semibold text-white">
                           {isUrdu ? "اسامہ چوہدری:" : "Usama Ch:"}
                         </span>
-                        <a href="tel:+923057902744" className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                        <a href="tel:+923057902744" className="transition hover:text-[#DCAA4A]">
                           0305-7902744
                         </a>
                       </div>
@@ -108,8 +108,8 @@ export default function Footer() {
                 </div>
               </li>
               <li className="flex gap-3">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
-                <a href={`mailto:${settings?.email || SITE.email}`} className="transition hover:text-gold-600 dark:hover:text-gold-400">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#D39D3D]" />
+                <a href={`mailto:${settings?.email || SITE.email}`} className="transition hover:text-[#DCAA4A]">
                   {settings?.email || SITE.email}
                 </a>
               </li>
@@ -118,12 +118,12 @@ export default function Footer() {
 
           {/* Hours */}
           <div>
-            <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
+            <h4 className="mb-5 font-serif text-sm font-bold uppercase tracking-wider text-white">
               {t.footer.businessHours}
             </h4>
-            <ul className="space-y-3 text-sm text-navy-800/70 dark:text-slate-300">
+            <ul className="space-y-3 text-sm text-[#8792A1]">
               <li className="flex gap-3">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" />
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#D39D3D]" />
                 <span>{settings?.hours?.weekdays ? `${isUrdu ? "پیر تا جمعہ: " : ""}${settings.hours.weekdays}` : (isUrdu ? "پیر تا جمعہ: 9:00 بجے صبح تا 6:00 بجے شام" : SITE.hours.weekdays)}</span>
               </li>
               <li className="flex gap-3 pl-7">
@@ -137,7 +137,7 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
+            <h4 className="mb-5 font-serif text-sm font-bold uppercase tracking-wider text-white">
               {t.footer.quickLinks}
             </h4>
             <ul className="space-y-3 text-sm">
@@ -145,7 +145,7 @@ export default function Footer() {
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-navy-800/70 dark:text-slate-300 transition hover:pl-1 hover:text-gold-600 dark:hover:text-gold-400"
+                    className="text-[#8792A1] transition hover:pl-1 hover:text-[#DCAA4A]"
                   >
                     {l.label}
                   </Link>
@@ -156,15 +156,15 @@ export default function Footer() {
 
           {/* Direct assistance */}
           <div>
-            <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-navy-900 dark:text-white">
+            <h4 className="mb-5 font-serif text-sm font-bold uppercase tracking-wider text-white">
               {isUrdu ? "براہ راست رابطہ" : "Direct assistance"}
             </h4>
             <div className="grid gap-2.5">
               <a
                 href={settings?.phone ? `tel:${settings.phone.replace(/[^\d+]/g, "")}` : SITE.phoneHref}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-navy-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 dark:bg-white/10 dark:hover:bg-white/15"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D39D3D]"
               >
-                <Phone className="h-4 w-4 text-gold-400" />
+                <Phone className="h-4 w-4 text-[#DCAA4A]" />
                 {isUrdu ? "ابھی کال کریں" : `Call ${settings?.phone || SITE.phone}`}
               </a>
               <a
@@ -181,27 +181,27 @@ export default function Footer() {
                 {isUrdu ? "واٹس ایپ پر رابطہ" : "Message on WhatsApp"}
               </a>
             </div>
-            <div className="mt-4 rounded-lg border border-navy-900/5 bg-navy-900/[0.04] p-4 text-xs leading-relaxed text-navy-800/70 dark:border-white/5 dark:bg-white/[0.06] dark:text-slate-300">
+            <div className="mt-4 rounded-lg border border-white/5 bg-white/[0.04] p-4 text-xs leading-relaxed text-[#8792A1]">
               {t.footer.disclaimer}
             </div>
           </div>
         </div>
 
-        <div className="border-t border-navy-900/10 dark:border-white/10">
-          <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-xs text-navy-800/55 dark:text-slate-400 sm:flex-row">
+        <div className="border-t border-white/10">
+          <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-xs text-[#8792A1] sm:flex-row">
             <p>{settings?.footerSettings?.copyrightText || t.footer.rights}</p>
             <div className="flex gap-6">
               <button
                 type="button"
                 onClick={() => setPolicyType("privacy")}
-                className="transition hover:text-gold-600 dark:hover:text-gold-400 cursor-pointer underline-offset-4 hover:underline focus:outline-none"
+                className="transition hover:text-[#DCAA4A] cursor-pointer underline-offset-4 hover:underline focus:outline-none"
               >
                 {t.footer.privacy}
               </button>
               <button
                 type="button"
                 onClick={() => setPolicyType("terms")}
-                className="transition hover:text-gold-600 dark:hover:text-gold-400 cursor-pointer underline-offset-4 hover:underline focus:outline-none"
+                className="transition hover:text-[#DCAA4A] cursor-pointer underline-offset-4 hover:underline focus:outline-none"
               >
                 {t.footer.terms}
               </button>

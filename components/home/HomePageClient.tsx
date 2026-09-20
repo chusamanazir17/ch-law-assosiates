@@ -93,13 +93,13 @@ function Hero() {
           >
             <div>
               {/* Eyebrow */}
-              <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-gold-400">
+              <span className="inline-flex items-center gap-2 text-[11.5px] font-bold uppercase tracking-[0.2em] text-gold-400">
                 <BadgeCheck className="h-4 w-4 text-gold-400" />
                 <span>{eyebrowText}</span>
               </span>
 
               {/* Headline */}
-              <h1 className="mt-4 font-serif text-4xl sm:text-5xl lg:text-[62px] font-bold leading-[1.1] text-white tracking-tight">
+              <h1 className="mt-4 font-serif text-[clamp(2.5rem,5vw+0.5rem,3.875rem)] font-bold leading-[1.1] text-white tracking-tight">
                 {heroTitleLine1}
                 <br />
                 {heroTitleLine2}
@@ -110,7 +110,7 @@ function Hero() {
               </h1>
 
               {/* Description Paragraph */}
-              <p className="mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-slate-300 font-normal">
+              <p className="mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-[#F4F6F8]/90 font-normal">
                 {heroDescription}
               </p>
 
@@ -119,11 +119,11 @@ function Hero() {
                 {primaryBtn.enabled !== false && (
                   <Link
                     href={primaryBtn.href}
-                    className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-500 hover:from-gold-300 hover:to-gold-400 px-6 py-3.5 text-sm sm:text-base font-bold text-navy-950 shadow-lg shadow-gold-500/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                    className="btn-gold inline-flex items-center gap-2.5 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium shadow-lg shadow-gold-500/20"
                   >
-                    <Calendar className="h-4 w-4 text-navy-950" />
+                    <Calendar className="h-4 w-4" />
                     <span>{primaryBtn.text}</span>
-                    <ArrowRight className="h-4 w-4 text-navy-950 ml-0.5" />
+                    <ArrowRight className="h-4 w-4 ml-0.5" />
                   </Link>
                 )}
 
@@ -132,7 +132,7 @@ function Hero() {
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/30 px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex items-center gap-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/30 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <WhatsAppIcon className="h-4 w-4 text-emerald-400" />
                     <span>{secondaryBtn.text}</span>
@@ -151,7 +151,7 @@ function Hero() {
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">500+</div>
-                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
                     {isUrdu ? "مطمئن کلائنٹس" : "Satisfied Clients"}
                   </div>
                 </div>
@@ -164,7 +164,7 @@ function Hero() {
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">99%</div>
-                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
                     {isUrdu ? "کامیابی کی شرح" : "Success Rate"}
                   </div>
                 </div>
@@ -177,7 +177,7 @@ function Hero() {
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">35+</div>
-                  <div className="text-[11.5px] sm:text-xs text-slate-300 mt-1">
+                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
                     {isUrdu ? "سال کا تجربہ (1988 سے)" : "Years of Experience"}
                   </div>
                 </div>
@@ -253,19 +253,19 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.45 }}
-          className="mt-10 lg:mt-14 w-full rounded-2xl bg-white dark:bg-[#081730] border border-slate-200/80 dark:border-white/10 shadow-xl p-5 sm:p-6 text-slate-800 dark:text-slate-100"
+          className="mt-10 lg:mt-14 w-full rounded-2xl bg-white dark:bg-[#102943] border border-[#E3E7EC] dark:border-white/10 shadow-xl p-5 sm:p-6 text-slate-800 dark:text-slate-100"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-[#E3E7EC] dark:divide-white/10">
             {/* Feature 1 */}
             <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0 first:pt-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-[#E3E7EC] dark:border-white/10">
                 <ShieldCheck className="h-5 w-5 text-gold-500 dark:text-gold-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                <h4 className="text-sm font-bold text-[#0B1F36] dark:text-white">
                   {isUrdu ? "تیز اور محفوظ عمل" : "Fast & Secure Process"}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-300">
+                <p className="text-xs text-[#657184] dark:text-[#8792A1]">
                   {isUrdu ? "آسان اور شفاف دستاویزات" : "Hassle-free documentation"}
                 </p>
               </div>
@@ -273,14 +273,14 @@ function Hero() {
 
             {/* Feature 2 */}
             <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-[#E3E7EC] dark:border-white/10">
                 <MapPin className="h-5 w-5 text-gold-500 dark:text-gold-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                <h4 className="text-sm font-bold text-[#0B1F36] dark:text-white">
                   {isUrdu ? "مقامی تجربہ" : "Local Expertise"}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-300">
+                <p className="text-xs text-[#657184] dark:text-[#8792A1]">
                   {isUrdu ? "ساہیوال بیسڈ، ہر وقت دستیاب" : "Sahiwal based, always here"}
                 </p>
               </div>
@@ -288,14 +288,14 @@ function Hero() {
 
             {/* Feature 3 */}
             <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-[#E3E7EC] dark:border-white/10">
                 <FileText className="h-5 w-5 text-gold-500 dark:text-gold-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                <h4 className="text-sm font-bold text-[#0B1F36] dark:text-white">
                   {isUrdu ? "واضح اور شفاف فیس" : "Transparent Fees"}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-300">
+                <p className="text-xs text-[#657184] dark:text-[#8792A1]">
                   {isUrdu ? "کوئی پوشیدہ چارجز نہیں" : "No hidden charges"}
                 </p>
               </div>
@@ -303,14 +303,14 @@ function Hero() {
 
             {/* Feature 4 */}
             <div className="flex items-center gap-3.5 lg:px-4 pt-4 sm:pt-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-navy-950/10 dark:border-white/10">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy-950/5 dark:bg-white/10 text-navy-950 dark:text-gold-400 border border-[#E3E7EC] dark:border-white/10">
                 <Headphones className="h-5 w-5 text-gold-500 dark:text-gold-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-navy-950 dark:text-white">
+                <h4 className="text-sm font-bold text-[#0B1F36] dark:text-white">
                   {isUrdu ? "مکمل معاونت" : "Complete Support"}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-300">
+                <p className="text-xs text-[#657184] dark:text-[#8792A1]">
                   {isUrdu ? "آغاز سے اختتام تک" : "From start to finish"}
                 </p>
               </div>
@@ -374,11 +374,11 @@ function ServicesGrid() {
   const sectionSubtitle = sec?.subtitle || t.servicesSection.subtitle;
 
   return (
-    <section id="services" className="bg-[#f5f7fa] dark:bg-[#071224] py-24 transition-colors duration-200">
+    <section id="services" className="bg-[#F7F9FB] dark:bg-[#05162B] py-24 transition-colors duration-200">
       <div className="container-x">
         <FadeIn className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title text-navy-900 dark:text-white">{sectionTitle}</h2>
-          <p className="mt-4 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">
+          <h2 className="section-title text-[#0B1F36] dark:text-white">{sectionTitle}</h2>
+          <p className="mt-4 text-sm sm:text-base leading-relaxed text-[#657184] dark:text-[#8792A1]">
             {sectionSubtitle}
           </p>
         </FadeIn>
@@ -389,7 +389,7 @@ function ServicesGrid() {
               <motion.article
                 whileHover={{ y: -10 }}
                 transition={{ type: "spring", stiffness: 240, damping: 20 }}
-                className="group flex h-full flex-col overflow-hidden rounded-lg border border-navy-900/5 dark:border-white/10 bg-white dark:bg-[#0c1c33] shadow-soft transition-shadow hover:shadow-card-hover"
+                className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#E3E7EC] dark:border-white/10 bg-white dark:bg-[#102943] shadow-soft transition-all duration-300 hover:shadow-card-hover"
               >
                 <div className="relative h-44 overflow-hidden">
                   <Image
@@ -402,13 +402,13 @@ function ServicesGrid() {
                   <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-navy-950/10 to-transparent" />
                 </div>
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-lg font-bold text-navy-900 dark:text-white">{s.title}</h3>
-                  <p className="mt-2 flex-1 text-[13px] leading-relaxed text-navy-800/65 dark:text-slate-300">
+                  <h3 className="text-lg font-bold text-[#0B1F36] dark:text-white">{s.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-[#657184] dark:text-[#8792A1]">
                     {s.description}
                   </p>
                   <Link
                     href={s.href}
-                    className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gold-600 dark:text-gold-400 transition hover:text-gold-700"
+                    className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[#D39D3D] dark:text-[#DCAA4A] transition hover:text-[#DCAA4A]"
                   >
                     <span>{t.servicesSection.learnMore}</span>
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />

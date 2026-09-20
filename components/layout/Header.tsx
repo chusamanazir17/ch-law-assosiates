@@ -57,12 +57,12 @@ function desktopLinkClass(active: boolean, isDark: boolean) {
   if (active) {
     return isDark
       ? "bg-gold-400/15 text-gold-400 ring-1 ring-gold-400/25"
-      : "bg-gold-400/10 text-gold-700 ring-1 ring-gold-400/20";
+      : "bg-gold-500/10 text-gold-600 ring-1 ring-gold-500/25";
   }
 
   return isDark
     ? "text-white hover:bg-white/10 hover:text-gold-400"
-    : "text-navy-900 hover:bg-navy-900/5 hover:text-gold-700";
+    : "text-[#0B1F36] hover:bg-[#0B1F36]/5 hover:text-[#05162B]";
 }
 
 function DesktopCategoryNavItem({
@@ -96,7 +96,7 @@ function DesktopCategoryNavItem({
         onKeyDown={(event) => {
           if (event.key === "Escape") onClose();
         }}
-        className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+        className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
           isActive,
           isDark
         )}`}
@@ -108,7 +108,7 @@ function DesktopCategoryNavItem({
         <span>{label}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-200 ${
-            isOpen ? "rotate-180 text-gold-500" : isDark ? "text-slate-300" : "text-navy-400"
+            isOpen ? "rotate-180 text-gold-500" : isDark ? "text-slate-300" : "text-[#657184]"
           }`}
         />
       </Link>
@@ -242,17 +242,17 @@ export default function Header() {
         sx={{
           background: scrolled
             ? isDark
-              ? "rgba(7, 18, 36, 0.96)"
-              : "rgba(255,255,255,0.96)"
+              ? "rgba(5, 22, 43, 0.96)"
+              : "rgba(255, 255, 255, 0.96)"
             : isDark
-            ? "#071224"
-            : "#ffffff",
+            ? "#05162B"
+            : "#FFFFFF",
           backdropFilter: "blur(14px)",
-          borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(11,29,56,0.07)",
+          borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #E3E7EC",
           boxShadow: scrolled
             ? isDark
               ? "0 8px 30px rgba(0,0,0,0.28)"
-              : "0 8px 30px rgba(6,18,38,0.08)"
+              : "0 8px 30px rgba(5,22,43,0.06)"
             : "none",
           transition: "background-color 0.2s ease, box-shadow 0.2s ease",
           zIndex: 1100,
@@ -270,7 +270,7 @@ export default function Header() {
               <Link
                 href="/"
                 aria-current={pathname === "/" ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
                   pathname === "/",
                   isDark
                 )}`}
@@ -315,7 +315,7 @@ export default function Header() {
                   onKeyDown={(event) => {
                     if (event.key === "Escape") closeDropdown();
                   }}
-                  className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                  className={`flex items-center gap-1 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
                     legalGroupActive,
                     isDark
                   )}`}
@@ -330,7 +330,7 @@ export default function Header() {
                         ? "rotate-180 text-gold-500"
                         : isDark
                         ? "text-slate-300"
-                        : "text-navy-400"
+                        : "text-[#657184]"
                     }`}
                   />
                 </Link>
@@ -352,7 +352,7 @@ export default function Header() {
               <Link
                 href="/about"
                 aria-current={pathname.startsWith("/about") ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
                   pathname.startsWith("/about"),
                   isDark
                 )}`}
@@ -362,7 +362,7 @@ export default function Header() {
               <Link
                 href="/updates"
                 aria-current={pathname.startsWith("/updates") ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
                   pathname.startsWith("/updates"),
                   isDark
                 )}`}
@@ -377,7 +377,7 @@ export default function Header() {
                     href={item.href}
                     target={item.isExternal ? "_blank" : undefined}
                     rel={item.isExternal ? "noreferrer noopener" : undefined}
-                    className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
+                    className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
                       pathname === item.href,
                       isDark
                     )}`}

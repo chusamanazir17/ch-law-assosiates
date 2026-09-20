@@ -120,7 +120,7 @@ export default function PageHero({
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.18 }}
-          className="mt-4 max-w-2xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl"
+          className="mt-4 max-w-2xl font-serif text-[clamp(2rem,4vw+0.5rem,3.25rem)] font-bold leading-tight text-white"
         >
           {effectiveTitle}
           {highlight && <span className="text-gold-400"> {highlight}</span>}
@@ -130,7 +130,7 @@ export default function PageHero({
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.28 }}
-          className="mt-4 max-w-xl text-base leading-relaxed text-white/80"
+          className="mt-4 max-w-xl text-base leading-relaxed text-[#F4F6F8]/90 font-normal"
         >
           {effectiveDescription}
         </motion.p>
@@ -141,7 +141,7 @@ export default function PageHero({
           transition={{ duration: 0.65, delay: 0.38 }}
           className="mt-8 flex flex-wrap gap-4"
         >
-          <Link href={effectivePrimaryCta.href} className="btn-gold px-7 py-3 text-sm">
+          <Link href={effectivePrimaryCta.href} className="btn-gold px-7 py-3 text-[13.5px] font-medium">
             <MapPin className="h-4 w-4" /> {effectivePrimaryCta.label}
           </Link>
           {whatsapp && (
@@ -149,7 +149,7 @@ export default function PageHero({
               href={SITE.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-7 py-3 text-sm shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#25D366]/40 hover:-translate-y-0.5 active:translate-y-0 border border-emerald-400/30"
+              className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white font-medium px-7 py-3 text-[13.5px] shadow-lg shadow-[#25D366]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#25D366]/40 hover:-translate-y-0.5 active:translate-y-0 border border-emerald-400/30"
             >
               <WhatsAppIcon className="h-4 w-4" />
               <span>{t.common.whatsappUs}</span>

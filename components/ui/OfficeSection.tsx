@@ -54,45 +54,45 @@ export default function OfficeSection({
   const displayCallBtn = callBtnText || (isUrdu ? "چیمبر فون رابطہ" : "Call Chamber Desk");
 
   return (
-    <section id="office" className="bg-white dark:bg-[#071224] py-14 sm:py-20 transition-colors duration-200 overflow-hidden">
+    <section id="office" className="bg-white dark:bg-[#05162B] py-14 sm:py-20 transition-colors duration-200 overflow-hidden">
       <div className="container-x">
         <FadeIn className="mx-auto max-w-2xl text-center">
-          <h2 className="section-title text-navy-900 dark:text-white">{sectionTitle}</h2>
-          <p className="mt-3 sm:mt-4 text-sm leading-relaxed text-navy-800/60 dark:text-slate-300">{sectionText}</p>
+          <h2 className="section-title text-[#0B1F36] dark:text-white">{sectionTitle}</h2>
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-[#657184] dark:text-[#8792A1]">{sectionText}</p>
         </FadeIn>
 
         <div className="mt-10 sm:mt-12 grid gap-6 lg:grid-cols-12">
           {/* Office info card */}
           <FadeIn direction="right" className="lg:col-span-4">
-            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] p-5 sm:p-7 lg:p-8 shadow-card text-navy-900 dark:text-white">
+            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-[#E3E7EC] dark:border-white/10 bg-white dark:bg-[#102943] p-5 sm:p-7 lg:p-8 shadow-card text-[#0B1F36] dark:text-white">
               <div>
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/12 text-gold-500">
                     <MapPin className="h-5 w-5" />
                   </span>
-                  <h3 className="text-lg font-bold text-navy-900 dark:text-white">
+                  <h3 className="text-lg font-bold text-[#0B1F36] dark:text-white">
                     {isUrdu ? "ہمارا ساہیوال چیمبر" : "Our Sahiwal Chamber"}
                   </h3>
                 </div>
-                <p className="mt-4 text-sm leading-relaxed text-navy-800/65 dark:text-slate-300">
+                <p className="mt-4 text-sm leading-relaxed text-[#657184] dark:text-[#8792A1]">
                   {displayAddress}
                 </p>
               </div>
 
-              <div className="mt-6 space-y-3 border-t border-navy-900/8 dark:border-white/10 pt-6">
+              <div className="mt-6 space-y-3 border-t border-[#E3E7EC] dark:border-white/10 pt-6">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold uppercase tracking-wider text-navy-800/50 dark:text-slate-400">
+                  <span className="font-bold uppercase tracking-wider text-[#8792A1]">
                     {isUrdu ? "پیر تا جمعہ" : "Weekdays"}
                   </span>
-                  <span className="font-semibold text-navy-900 dark:text-slate-100">
+                  <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
                     {displayWeekday}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold uppercase tracking-wider text-navy-800/50 dark:text-slate-400">
+                  <span className="font-bold uppercase tracking-wider text-[#8792A1]">
                     {isUrdu ? "ہفتہ" : "Saturdays"}
                   </span>
-                  <span className="font-semibold text-navy-900 dark:text-slate-100">
+                  <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
                     {displaySaturday}
                   </span>
                 </div>
@@ -102,15 +102,15 @@ export default function OfficeSection({
 
           {/* Live Interactive Map Card */}
           <FadeIn delay={0.1} className="lg:col-span-4">
-            <div className="flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#0c1c33] shadow-card text-navy-900 dark:text-white">
+            <div className="flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl border border-[#E3E7EC] dark:border-white/10 bg-white dark:bg-[#102943] shadow-card text-[#0B1F36] dark:text-white">
               {/* Map Card Header with Live GPS indicator */}
-              <div className="flex items-center justify-between border-b border-navy-900/8 dark:border-white/10 px-4 py-3 sm:px-5 bg-navy-50/60 dark:bg-white/[0.03]">
+              <div className="flex items-center justify-between border-b border-[#E3E7EC] dark:border-white/10 px-4 py-3 sm:px-5 bg-[#F7F9FB] dark:bg-white/[0.03]">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
-                  <span className="text-xs font-bold tracking-wide text-navy-900 dark:text-white">
+                  <span className="text-xs font-bold tracking-wide text-[#0B1F36] dark:text-white">
                     {isUrdu ? "براہ راست GPS لوکیشن" : "Live GPS Map"}
                   </span>
                 </div>
@@ -132,16 +132,16 @@ export default function OfficeSection({
               </div>
 
               {/* Map Footer Info and Direct Directions Action */}
-              <div className="border-t border-navy-900/8 dark:border-white/10 p-4 sm:p-5 bg-white dark:bg-[#0c1c33] space-y-3">
+              <div className="border-t border-[#E3E7EC] dark:border-white/10 p-4 sm:p-5 bg-white dark:bg-[#102943] space-y-3">
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-gold-500 shrink-0 mt-0.5" />
                   <div className="text-xs">
-                    <p className="font-bold text-navy-900 dark:text-white">
+                    <p className="font-bold text-[#0B1F36] dark:text-white">
                       {isUrdu
                         ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال"
                         : "Chamber 121, Sharki Gate, District Court Sahiwal"}
                     </p>
-                    <p className="text-[11px] text-navy-800/60 dark:text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-[#657184] dark:text-[#8792A1] mt-0.5">
                       {isUrdu ? "ساہیوال، پنجاب، پاکستان" : "Sahiwal, Punjab, Pakistan"}
                     </p>
                   </div>
@@ -161,7 +161,7 @@ export default function OfficeSection({
                     href={SITE.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg border border-navy-900/15 dark:border-white/15 p-2 text-xs font-semibold text-navy-800 dark:text-slate-200 hover:bg-navy-50 dark:hover:bg-white/5 transition flex items-center justify-center"
+                    className="rounded-lg border border-[#E3E7EC] dark:border-white/15 p-2 text-xs font-semibold text-[#0B1F36] dark:text-slate-200 hover:bg-navy-50 dark:hover:bg-white/5 transition flex items-center justify-center"
                     title={isUrdu ? "بڑے گوگل میپ پر کھولیں" : "Open in Google Maps"}
                     aria-label="Open in Google Maps"
                   >
@@ -174,7 +174,7 @@ export default function OfficeSection({
 
           {/* Visiting Guidance & Direct Official WhatsApp Action */}
           <FadeIn direction="left" className="lg:col-span-4">
-            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-navy-900/8 dark:border-white/10 bg-navy-900 p-5 sm:p-7 lg:p-8 text-white shadow-card">
+            <div className="flex h-full flex-col justify-between rounded-xl sm:rounded-2xl border border-white/10 bg-[#05162B] p-5 sm:p-7 lg:p-8 text-white shadow-card">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gold-400/20 text-gold-400">
@@ -189,7 +189,7 @@ export default function OfficeSection({
                   {isUrdu ? "کچہری تشریف آوری سے پہلے رہنمائی" : "Court Premises Visiting Guide"}
                 </h3>
 
-                <ul className="mt-4 space-y-3 text-xs leading-relaxed text-white/75">
+                <ul className="mt-4 space-y-3 text-xs leading-relaxed text-[#8792A1]">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
                     <span>
