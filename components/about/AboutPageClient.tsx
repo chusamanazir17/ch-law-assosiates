@@ -292,7 +292,7 @@ export default function AboutPageClient() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. THIRD: NOW MANAGED BY (Haji Nazir Ahmad & Usama Nazir Ch)              */}
+      {/* 3. THIRD: NOW MANAGED BY (Haji Nazir Ahmed & Usama Ch)                    */}
       {/* ========================================================================= */}
       <section className="py-16 sm:py-20 lg:py-24 bg-white dark:bg-[#071224] border-b border-navy-900/5 dark:border-white/10">
         <div className="container-x">
