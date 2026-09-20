@@ -412,7 +412,94 @@ export default function AboutPageClient() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 4. FOURTH: VISIT CHAMBER 121 CTA BANNER                                   */}
+      {/* 4. FOURTH: OUR COMMITMENT & OUR SERVICES                                  */}
+      {/* ========================================================================= */}
+      <section className="py-16 sm:py-20 bg-slate-50/70 dark:bg-[#060e1d] border-b border-navy-900/5 dark:border-white/10">
+        <div className="container-x">
+          <div className="max-w-4xl mx-auto text-center">
+            <FadeIn>
+              {/* Legacy Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-gold-400/15 border border-gold-400/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gold-700 dark:text-gold-300">
+                <Sparkles className="h-3.5 w-3.5 text-gold-500" />
+                <span>
+                  {isUrdu
+                    ? "1988 سے خدمت کی لازوال روایت، اگلی نسل تک جاری"
+                    : "A legacy of service since 1988, continuing into the next generation."}
+                </span>
+              </div>
+
+              {/* Our Commitment */}
+              <h2 className="mt-6 font-serif text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-900 dark:text-white">
+                {isUrdu ? "ہمارا عزم" : "Our Commitment"}
+              </h2>
+
+              <p className="mt-4 font-serif text-base sm:text-lg lg:text-xl italic text-navy-800/90 dark:text-slate-200 leading-relaxed max-w-3xl mx-auto">
+                &ldquo;{isUrdu
+                  ? "تین دہائیوں سے زائد عرصے سے، ہمارا کام بھروسے، وسیع تجربے، دیانت داری، ذمہ داری اور پیشہ ورانہ خدمات کے اعلیٰ معیار پر مبنی ہے۔"
+                  : "For more than three decades, our work has been guided by trust, experience, integrity, responsibility, and professional service."}&rdquo;
+              </p>
+
+              {/* 5 Core Values Pillars */}
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { en: "Trust", ur: "بھروسہ" },
+                  { en: "Experience", ur: "تجربہ" },
+                  { en: "Integrity", ur: "دیانت داری" },
+                  { en: "Responsibility", ur: "ذمہ داری" },
+                  { en: "Professional Service", ur: "پیشہ ورانہ خدمت" },
+                ].map((val, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#0b1930] p-3 shadow-xs text-center"
+                  >
+                    <p className="text-xs font-bold text-navy-900 dark:text-white">
+                      {isUrdu ? val.ur : val.en}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="my-10 h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
+
+              {/* Our Services */}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-gold-600 dark:text-gold-400">
+                  {isUrdu ? "ہماری خدمات" : "OUR SERVICES"}
+                </span>
+                <h3 className="mt-2 font-serif text-xl sm:text-2xl font-bold text-navy-900 dark:text-white">
+                  {isUrdu ? "مکمل قانونی، دستاویزی و مشاورتی سہولیات" : "Comprehensive Legal, Documentation & Advisory Services"}
+                </h3>
+
+                {/* Service Pills / Chips */}
+                <div className="mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-3">
+                  {[
+                    { en: "Stamp Vendor Services", ur: "اسٹامپ وینڈر سروسز" },
+                    { en: "Documentation", ur: "دستاویزی تیاری" },
+                    { en: "E-Stamping", ur: "ای اسٹیمپنگ" },
+                    { en: "Property Documentation", ur: "پراپرٹی دستاویزات" },
+                    { en: "Agreements", ur: "اقرار نامہ و معاہدات" },
+                    { en: "Affidavits", ur: "بیاناتِ حلفی" },
+                    { en: "Taxation", ur: "ٹیکسیشن سروسز" },
+                    { en: "Legal Support", ur: "قانونی معاونت" },
+                    { en: "Consultancy", ur: "کنسلٹنسی و مشاورت" },
+                  ].map((service, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-2 rounded-xl border border-navy-900/10 dark:border-white/10 bg-white dark:bg-[#0b1930] px-4 py-2.5 text-xs sm:text-sm font-semibold text-navy-900 dark:text-slate-200 shadow-xs hover:border-gold-500/40 transition"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-gold-500" />
+                      <span>{isUrdu ? service.ur : service.en}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. FIFTH: VISIT CHAMBER 121 CTA BANNER                                    */}
       {/* ========================================================================= */}
       <section className="py-16 sm:py-20 bg-gradient-to-r from-[#08152b] via-[#0d2146] to-[#08152b] text-white">
         <div className="container-x text-center max-w-3xl mx-auto">
