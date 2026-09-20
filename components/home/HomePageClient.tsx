@@ -75,21 +75,32 @@ function Hero() {
   const whatsappUrl = buildWhatsAppUrl(whatsappPhone, secondaryBtn.message);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#040c18] via-[#071427] to-[#050f1f] text-white">
-      {/* Ambient background styling */}
-      <div className="pointer-events-none absolute inset-0 texture-grid opacity-25" />
-      <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-gold-500/10 blur-[140px]" />
-      <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-navy-600/20 blur-[140px]" />
+    <section className="relative overflow-hidden bg-[#040c18] text-white">
+      {/* Full-bleed Background Image Layer */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/hero-scales-justice.jpg"
+          alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
+          fill
+          priority
+          className="object-cover object-right sm:object-center"
+          sizes="100vw"
+        />
+        {/* Left-side gradient shadow to ensure 100% solid dark navy under text on all screen sizes */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#040c18] via-[#040c18]/90 via-45% to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#040c18]/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#040c18] to-transparent" />
+      </div>
 
       <div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-16">
-        {/* Main 2-Column Hero Grid: 65% Column 1 and 35% Column 2 */}
-        <div className="flex flex-col lg:flex-row items-stretch gap-8 lg:gap-12">
-          {/* Column 1 (Left 65% width) */}
+        {/* Main Hero Content Area */}
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[460px] lg:min-h-[520px]">
+          {/* Left Column (Text, Buttons, Stats) - sits directly on clean dark navy */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="w-full lg:w-[63%] flex flex-col justify-between text-left"
+            className="lg:col-span-7 flex flex-col justify-center text-left py-4"
           >
             <div>
               {/* Eyebrow */}
@@ -185,67 +196,47 @@ function Hero() {
             </div>
           </motion.div>
 
-          {/* Column 2 (Right Remaining ~37% width) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="w-full lg:w-[37%] relative"
-          >
-            <div className="relative w-full h-[460px] sm:h-[540px] lg:h-full min-h-[460px] rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-[#081730]">
-              <Image
-                src="/images/hero-scales-justice.jpg"
-                alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
-                fill
-                priority
-                className="object-cover object-center"
-                sizes="(max-width: 1024px) 100vw, 38vw"
-              />
+          {/* Right Column: Floating overlays matching the mockup */}
+          <div className="lg:col-span-5 relative h-full min-h-[300px] lg:min-h-[460px] pointer-events-none">
+            {/* Elegant Script Overlay in Top Right */}
+            <div className="absolute top-2 right-0 sm:top-6 sm:right-4 z-20 text-right drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+              <p className="font-script text-3xl sm:text-4xl lg:text-[42px] text-white leading-[1.08] -rotate-3 select-none">
+                Legal Guidance
+                <br />
+                <span className="text-white/95">for a Better</span>
+                <br />
+                <span className="relative inline-block text-gold-300">
+                  Tomorrow
+                  <svg
+                    className="absolute -bottom-1.5 left-0 w-full h-3 text-gold-400"
+                    viewBox="0 0 100 20"
+                    preserveAspectRatio="none"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  >
+                    <path d="M2,12 Q50,19 98,8" />
+                  </svg>
+                </span>
+              </p>
+            </div>
 
-              {/* Cinematic Vignette Overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/20 to-navy-950/40 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/30 to-transparent pointer-events-none" />
-
-              {/* Elegant Script Overlay in Top Right */}
-              <div className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20 text-right pointer-events-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-                <p className="font-script text-3xl sm:text-4xl lg:text-[42px] text-white leading-[1.08] -rotate-3 select-none">
-                  Legal Guidance
-                  <br />
-                  <span className="text-white/95">for a Better</span>
-                  <br />
-                  <span className="relative inline-block text-gold-300">
-                    Tomorrow
-                    <svg
-                      className="absolute -bottom-1.5 left-0 w-full h-3 text-gold-400"
-                      viewBox="0 0 100 20"
-                      preserveAspectRatio="none"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    >
-                      <path d="M2,12 Q50,19 98,8" />
-                    </svg>
-                  </span>
-                </p>
+            {/* Floating Pill Badge at Bottom Right */}
+            <div className="absolute bottom-4 right-0 sm:bottom-6 sm:right-4 z-20 flex items-center gap-3 rounded-2xl bg-[#05162B]/90 backdrop-blur-md border border-white/20 px-4 py-3 shadow-2xl max-w-[280px] pointer-events-auto">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/20 text-gold-400 border border-gold-400/30">
+                <Users className="h-5 w-5" />
               </div>
-
-              {/* Floating Pill Badge at Bottom Right */}
-              <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 z-20 flex items-center gap-3 rounded-2xl bg-navy-950/90 backdrop-blur-md border border-white/20 px-4 py-3 shadow-2xl max-w-[280px]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-400/20 text-gold-400 border border-gold-400/30">
-                  <Users className="h-5 w-5" />
-                </div>
-                <div className="text-left">
-                  <span className="text-[10.5px] uppercase tracking-wider text-slate-300 block font-medium">
-                    {isUrdu ? "بااعتماد برائے" : "Trusted by"}
-                  </span>
-                  <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
-                    {isUrdu ? "کاروبار، خاندان اور افراد" : "Businesses, Families & Individuals"}
-                  </span>
-                </div>
+              <div className="text-left">
+                <span className="text-[10.5px] uppercase tracking-wider text-[#8792A1] block font-medium">
+                  {isUrdu ? "بااعتماد برائے" : "Trusted by"}
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-white block leading-tight">
+                  {isUrdu ? "کاروبار، خاندان اور افراد" : "Businesses, Families & Individuals"}
+                </span>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom Feature Ribbon Strip */}
