@@ -835,12 +835,10 @@ export default function HomePageClient({ initialCms }: { initialCms?: any }) {
   const order = (homeSections?.sectionOrder || [
     "hero",
     "services",
-    "about",
-    "whyTrust",
     "reminders",
     "office",
     "finalCta",
-  ]).filter((key) => key !== "testimonials" && key !== "faq");
+  ]).filter((key) => key !== "about" && key !== "whyTrust" && key !== "testimonials" && key !== "faq");
 
   const sectionMap: Record<string, React.ReactNode> = {
     hero: <Hero key="hero" />,

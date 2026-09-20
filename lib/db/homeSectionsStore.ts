@@ -329,8 +329,6 @@ export function getDefaultHomeSections(): HomeSectionsData {
     sectionOrder: [
       "hero",
       "services",
-      "about",
-      "whyTrust",
       "reminders",
       "office",
       "finalCta",
