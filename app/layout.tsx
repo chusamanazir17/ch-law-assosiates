@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
 import JsonLd from "@/components/seo/JsonLd";
 import { FloatingWhatsApp } from "@/components/ui/WhatsAppIcon";
+import TaxReturnPopupModal from "@/components/ui/TaxReturnPopupModal";
 import { getSiteUrl } from "@/config/env";
 import "./globals.css";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
           <main id="main-content">{children}</main>
           <Footer />
           <FloatingWhatsApp />
+          <TaxReturnPopupModal />
         </AppProviders>
       </body>
     </html>
