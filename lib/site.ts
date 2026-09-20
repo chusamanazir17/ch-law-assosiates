@@ -137,8 +137,8 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
         href: "/services/e-stamping",
       },
       {
-        title: "High-Value Judicial",
-        description: "For court petitions, formal litigation, and legal declarations",
+        title: "High-Value Non-Judicial",
+        description: "For high-value transactions, commercial contracts, and legal declarations",
         href: "/services/e-stamping",
       },
       {

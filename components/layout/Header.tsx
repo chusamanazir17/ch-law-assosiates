@@ -17,6 +17,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
+  Award,
   ChevronDown,
   Globe,
   Menu as MenuIcon,
@@ -352,9 +353,10 @@ export default function Header() {
               </div>
 
               <Link
-                href="/#about"
+                href="/about"
+                aria-current={pathname.startsWith("/about") ? "page" : undefined}
                 className={`rounded-lg px-2.5 py-2 text-[12px] font-semibold transition-colors 2xl:px-3 2xl:text-[13px] ${desktopLinkClass(
-                  false,
+                  pathname.startsWith("/about"),
                   isDark
                 )}`}
               >
@@ -621,8 +623,19 @@ export default function Header() {
 
             <Divider sx={{ my: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
 
-            <ListItemButton component={Link} href="/#about" onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
-              <ListItemText primary={t.nav.about} primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }} />
+            <ListItemButton
+              component={Link}
+              href="/about"
+              onClick={() => setDrawerOpen(false)}
+              selected={pathname.startsWith("/about")}
+              sx={{ borderRadius: 2, py: 1.2 }}
+            >
+              <ListItemText
+                primary={t.nav.about}
+                secondary={isUrdu ? "بانی و چیمبر 121 کی تاریخ" : "Our Founder, Story & Leadership"}
+                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                secondaryTypographyProps={{ fontSize: 11 }}
+              />
             </ListItemButton>
             <ListItemButton component={Link} href="/updates" onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
               <ListItemText

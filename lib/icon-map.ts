@@ -49,6 +49,7 @@ export const ICON_MAP: Record<string, IconComponent> = {
   "Chamber of Commerce": Building2,
   // E-Stamping
   "Non-Judicial E-Stamp": Stamp,
+  "High-Value Non-Judicial": Scale,
   "High-Value Judicial": Scale,
   "Property Sale Deed": Home,
   "Partnership Deed": Handshake,

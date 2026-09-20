@@ -46,7 +46,7 @@ const INITIAL_SERVICES: CmsService[] = [
     governmentFeeInfo: "Calculated at official 1% DC rate for transfer of property; PKR 50–1,000 for standard affidavits.",
     items: [
       { id: "es-1", title: "Non-Judicial E-Stamp", description: "PKR 50 to 1,000+ for commercial agreements, affidavits & contracts" },
-      { id: "es-2", title: "High-Value Judicial", description: "For court petitions, formal litigation, and legal declarations" },
+      { id: "es-2", title: "High-Value Non-Judicial", description: "For high-value commercial agreements, formal contracts, and legal declarations" },
       { id: "es-3", title: "Property Sale Deed", description: "Calculated at official 1% DC rate for plot and house transfers" },
       { id: "es-4", title: "Partnership Deed", description: "Authorized stamp papers for business partnerships and firm deeds" },
       { id: "es-5", title: "Bank Documentation", description: "Custom stamp papers for loan agreements and mortgage deeds" },

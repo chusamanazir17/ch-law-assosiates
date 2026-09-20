@@ -46,7 +46,7 @@ export default function Footer() {
     { label: isUrdu ? "پراپرٹی رجسٹری و انتقال" : "Property Registry", href: "/services/property-land" },
     { label: isUrdu ? "بزنس و کمپنی رجسٹریشن" : "Business Registration", href: "/services/business-registration" },
     { label: isUrdu ? "ٹیکس سروسز (FBR)" : "Tax Services", href: "/services/tax" },
-    { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/#about" },
+    { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/about" },
   ];
 
   return (

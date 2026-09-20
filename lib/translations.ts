@@ -388,7 +388,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           "Official digital stamp papers processed instantly with government portal verification.",
         items: [
           { title: "Non-Judicial E-Stamp", description: "PKR 50 to 1,000+ for commercial agreements, affidavits & contracts" },
-          { title: "High-Value Judicial", description: "For court petitions, formal litigation, and legal declarations" },
+          { title: "High-Value Non-Judicial", description: "For high-value transactions, commercial contracts, and legal declarations" },
           { title: "Property Sale Deed", description: "Calculated at official 1% DC rate for plot and house transfers" },
           { title: "Partnership Deed", description: "Authorized stamp papers for business partnerships and firm deeds" },
           { title: "Bank Documentation", description: "Custom stamp papers for loan agreements and mortgage deeds" },
@@ -515,9 +515,9 @@ export const TRANSLATIONS: Record<Language, Translations> = {
             linkLabel: "Requirement Details",
           },
           {
-            title: "High-Value Judicial",
-            meta: "Value: Variable based on court fees",
-            description: "Stamp papers required for court proceedings, litigation, and formal legal representation in Pakistani courts.",
+            title: "High-Value Non-Judicial",
+            meta: "Value: Variable based on contract value",
+            description: "High-value digital stamp papers required for commercial transactions, formal contracts, and legal representation in Pakistan.",
             listLabel: "Common Applications",
             bullets: ["Power of Attorney", "Court Petitions", "Legal Declarations", "Succession Papers"],
             linkLabel: "Requirement Details",
@@ -1269,7 +1269,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
           "عدالتی و غیر عدالتی سرکاری ڈیجیٹل ای سٹامپ پیپرز کا فوری اور تصدیق شدہ اجراء۔",
         items: [
           { title: "غیر عدالتی ای سٹامپ", description: "کرایہ نامہ، حلف نامہ، اقرار نامہ اور عام تجارتی معاہدات (50 تا 1000+ روپے)" },
-          { title: "ہائی ویلیو عدالتی سٹامپ", description: "عدالتی چالان، مقدمات، قانونی دعوے اور پاور آف اٹارنی کے لیے" },
+          { title: "ہائی ویلیو غیر عدالتی سٹامپ", description: "بڑے مالیاتی معاہدات، شراکت داری، پاور آف اٹارنی اور قانونی اقرار ناموں کے لیے" },
           { title: "پراپرٹی بیع نامہ ای سٹامپ", description: "پلاٹ، مکان اور زمین کی منتقلی کے لیے سرکاری 1% ڈی سی ریٹ چالان" },
           { title: "شراکت داری معاہدہ (پارٹنرشپ)", description: "بزنس پارٹنرشپ اور فرم رجسٹریشن کے مجاز اسٹامپ پیپرز" },
           { title: "بینک دستاویزات اسٹامپ", description: "قرضہ جات، مارگیج اور مالیاتی گارنٹیوں کے لیے اسٹامپ پیپرز" },
@@ -1396,9 +1396,9 @@ export const TRANSLATIONS: Record<Language, Translations> = {
             linkLabel: "مطلوبہ تفصیلات",
           },
           {
-            title: "ہائی ویلیو عدالتی سٹامپ",
-            meta: "مالیت: عدالتی فیس شیڈول کے مطابق",
-            description: "عدالتی کارروائی، دعویٰ جات، اپیل اور قانونی پیروی کے لیے درکار مجاز سرکاری عدالتی اسٹامپ پیپرز۔",
+            title: "ہائی ویلیو غیر عدالتی سٹامپ",
+            meta: "مالیت: معاہدہ یا جائیداد شیڈول کے مطابق",
+            description: "بڑے کمرشل معاہدات، پاور آف اٹارنی، ڈکلیئریشن اور قانونی دستاویزات کے لیے درکار مجاز سرکاری غیر عدالتی ای سٹامپ۔",
             listLabel: "عام استعمالات",
             bullets: ["پاور آف اٹارنی", "عدالتی پٹیشن و دعویٰ", "قانونی بیانات", "وراثتی کاغذات"],
             linkLabel: "مطلوبہ تفصیلات",

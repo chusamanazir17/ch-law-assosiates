@@ -29,6 +29,8 @@ import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
 import TaxReminderSection from "@/features/reminders/TaxReminderSection";
 import { useCms } from "@/lib/hooks/useCms";
+import { OWNERS } from "@/lib/owners";
+import { OwnerAvatar } from "@/components/ui/OwnerAvatar";
 
 const BUILDING_IMG =
   "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
@@ -420,55 +422,86 @@ function PrepareVisit() {
                 {officeCard.description}
               </p>
 
-              {/* Direct Advisor Contacts Box */}
+              {/* Chamber 121 Leadership & Contacts Box */}
               <div className="rounded-xl border border-navy-900/10 dark:border-white/10 bg-navy-50/70 dark:bg-white/[0.03] p-3.5 sm:p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-navy-900 dark:text-white flex items-center gap-1.5">
                     <Phone className="h-3.5 w-3.5 text-gold-500" />
-                    {isUrdu ? "براہ راست رابطہ برائے رہنمائی" : "Direct Advisor Contacts"}
+                    {isUrdu ? "چیمبر قیادت و رابطہ" : "Chamber Leadership & Contacts"}
                   </span>
                   <span className="text-[10px] font-semibold text-gold-600 dark:text-gold-400 bg-gold-400/10 px-2 py-0.5 rounded">
-                    {isUrdu ? "فوری رابطہ" : "Fast Response"}
+                    {isUrdu ? "بانی و سربراہان" : "Founder & Owners"}
                   </span>
                 </div>
 
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  {(settings?.contacts || [
-                    { name: "Haji Nazir Ahmad", nameUrdu: "حاجی نذیر احمد", role: "Senior Consultant", roleUrdu: "سینئر مشیر", phone: "0301-6922573", whatsapp: "0301-6922573" },
-                    { name: "Usama Nazir Ch", nameUrdu: "اسامہ نذیر چوہدری", role: "E-Stamp & Tax Advisor", roleUrdu: "ای سٹامپ و ٹیکس ایڈوائزر", phone: "0305-7902744", whatsapp: "0305-7902744" }
-                  ]).map((contact, i) => (
-                    <div key={contact.name} className="rounded-lg border border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] p-3 shadow-xs">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
-                        {isUrdu && contact.roleUrdu ? contact.roleUrdu : contact.role}
-                      </span>
-                      <p className="mt-0.5 text-xs font-bold text-navy-900 dark:text-white">
-                        {isUrdu && contact.nameUrdu ? contact.nameUrdu : contact.name}
-                      </p>
-                      <p className="text-[11px] font-mono font-bold text-navy-800 dark:text-slate-200 mt-0.5">
-                        {contact.phone}
-                      </p>
-                      <div className="mt-2 flex gap-1.5">
-                        <a
-                          href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}
-                          className={`flex-1 rounded py-1.5 text-center text-[10px] font-bold transition flex items-center justify-center gap-1 ${
-                            i === 1 ? "bg-gold-500 text-navy-950 hover:bg-gold-400" : "bg-navy-900 dark:bg-white/10 text-white hover:bg-navy-800"
-                          }`}
-                        >
-                          <Phone className="h-2.5 w-2.5" />
-                          <span>{isUrdu ? "کال کریں" : "Call"}</span>
-                        </a>
-                        <a
-                          href={buildWhatsAppUrl(contact.whatsapp || contact.phone)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2.5 py-1.5 text-white text-[10px] font-semibold transition shadow-sm"
-                          title={`WhatsApp ${contact.name}`}
-                        >
-                          <WhatsAppIcon className="h-3.5 w-3.5" />
-                        </a>
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  {OWNERS.map((owner, i) => {
+                    const isLate = owner.status === "late";
+                    return (
+                      <div
+                        key={owner.id}
+                        className={`rounded-lg border p-2.5 flex flex-col justify-between ${
+                          isLate
+                            ? "border-amber-400/30 bg-amber-50/50 dark:bg-amber-950/20"
+                            : "border-navy-900/8 dark:border-white/10 bg-white dark:bg-[#091528] shadow-xs"
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <OwnerAvatar owner={owner} size="sm" />
+                            <div className="min-w-0 flex-1">
+                              <span
+                                className={`text-[8px] font-bold uppercase tracking-wider ${
+                                  isLate
+                                    ? "text-amber-700 dark:text-amber-300"
+                                    : "text-gold-600 dark:text-gold-400"
+                                }`}
+                              >
+                                {isUrdu ? owner.badgeUrdu : owner.badge}
+                              </span>
+                              <p className="truncate text-[11px] font-bold text-navy-900 dark:text-white">
+                                {isUrdu ? owner.nameUrdu : owner.name}
+                              </p>
+                              <p className="truncate text-[9px] text-navy-600 dark:text-slate-400">
+                                {isUrdu ? owner.roleUrdu : owner.role}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-2 pt-1.5 border-t border-navy-900/5 dark:border-white/10">
+                          {owner.phone ? (
+                            <div className="flex gap-1">
+                              <a
+                                href={owner.phoneHref}
+                                className={`flex-1 rounded py-1 text-center text-[9px] font-bold transition flex items-center justify-center gap-1 ${
+                                  i === 2
+                                    ? "bg-gold-500 text-navy-950 hover:bg-gold-400"
+                                    : "bg-navy-900 dark:bg-white/10 text-white hover:bg-navy-800"
+                                }`}
+                              >
+                                <Phone className="h-2 w-2" />
+                                <span>{isUrdu ? "کال" : "Call"}</span>
+                              </a>
+                              <a
+                                href={buildWhatsAppUrl(owner.whatsapp)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center rounded bg-[#25D366] hover:bg-[#20bd5a] px-2 py-1 text-white text-[9px] font-semibold transition shadow-xs"
+                                title={`WhatsApp ${owner.name}`}
+                              >
+                                <WhatsAppIcon className="h-2.5 w-2.5" />
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-[9px] italic text-amber-700 dark:text-amber-400 text-center py-0.5">
+                              {isUrdu ? "بانی چیمبر 121" : "Late Founder"}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
