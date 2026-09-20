@@ -31,7 +31,7 @@ export default function SubscriptionForm() {
   // Form states
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<{ message: string; emailSent: boolean } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,12 +85,14 @@ export default function SubscriptionForm() {
       });
 
       if (res.success) {
-        setSubmitSuccess(
-          res.message ||
+        setSubmitSuccess({
+          message:
+            res.message ||
             (isUrdu
-              ? "اگر یہ ای میل درست ہے تو ایک تصدیقی لنک آپ کے ان باکس میں بھیج دیا گیا ہے۔"
-              : "If this email address is valid, a confirmation link has been sent to your inbox.")
-        );
+              ? "آپ کا ای میل ٹیکس ریمائنڈرز کے لیے کامیابی سے رجسٹر ہو گیا ہے۔"
+              : "Thank you for subscribing! Your email has been registered for tax and legal compliance reminders."),
+          emailSent: Boolean(res.emailSent),
+        });
         setName("");
         setEmail("");
         setSelectedCategories([]);
@@ -131,13 +133,19 @@ export default function SubscriptionForm() {
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" />
             <div>
               <p className="font-semibold text-sm text-emerald-200">
-                {isUrdu ? "تصدیقی ای میل بھیج دی گئی!" : "Confirmation Sent!"}
+                {submitSuccess.emailSent
+                  ? (isUrdu ? "تصدیقی ای میل بھیج دی گئی!" : "Confirmation Sent!")
+                  : (isUrdu ? "سبسکرپشن رجسٹر ہو گئی!" : "Subscription Registered!")}
               </p>
-              <p className="mt-1 text-xs leading-relaxed">{submitSuccess}</p>
+              <p className="mt-1 text-xs leading-relaxed">{submitSuccess.message}</p>
               <p className="mt-2 text-[11px] text-emerald-400/80">
-                {isUrdu
-                  ? "براہ کرم اپنا ان باکس (اور سپیم فولڈر) چیک کریں تاکہ ریمائنڈرز فعال ہو سکیں۔"
-                  : "Please check your inbox (and spam folder) to activate your reminders."}
+                {submitSuccess.emailSent
+                  ? (isUrdu
+                      ? "براہ کرم اپنا ان باکس (اور سپیم فولڈر) چیک کریں تاکہ ریمائنڈرز فعال ہو سکیں۔"
+                      : "Please check your inbox (and spam folder) to activate your reminders.")
+                  : (isUrdu
+                      ? "آپ کا ای میل ہمارے ریکارڈ میں محفوظ ہو گیا ہے اور آپ کو بر وقت ٹیکس الرٹس موصول ہوں گے۔"
+                      : "Your email has been recorded in our client registry for statutory deadline reminders.")}
               </p>
             </div>
           </div>

@@ -17,6 +17,7 @@ export interface SubscriptionApiResponse {
   success: boolean;
   message?: string;
   error?: string;
+  emailSent?: boolean;
 }
 
 export interface SubscriberWithCategories extends Subscriber {

@@ -22,6 +22,7 @@ import {
   Mail,
   Calendar,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { SubscriberWithCategories, TaxCategory } from "@/types/reminders";
@@ -37,6 +38,7 @@ export default function SubscribersManager() {
   const [allSubscribers, setAllSubscribers] = useState<SubscriberWithCategories[]>([]);
   const [categories, setCategories] = useState<TaxCategory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [emailConfigured, setEmailConfigured] = useState<boolean | null>(null);
 
   // Filters
   const [activeTab, setActiveTab] = useState<SubscriberTab>("all");
@@ -89,6 +91,10 @@ export default function SubscribersManager() {
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to load subscribers");
+      }
+
+      if (typeof data.emailConfigured === "boolean") {
+        setEmailConfigured(data.emailConfigured);
       }
 
       setAllSubscribers(data.subscribers || []);
@@ -320,6 +326,19 @@ export default function SubscribersManager() {
             <Ban className="h-4 w-4 text-rose-600 shrink-0" />
           )}
           <span>{actionFeedback.message}</span>
+        </div>
+      )}
+
+      {/* Email Service Warning when unconfigured */}
+      {emailConfigured === false && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 shadow-2xs flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-semibold text-amber-950">Email Delivery Setup Note</p>
+            <p className="text-amber-800 leading-relaxed">
+              Subscribers are being saved in the database, but <code className="bg-amber-100/80 px-1.5 py-0.5 rounded text-[11px] font-mono">RESEND_API_KEY</code> is not yet configured in environment variables. To send live confirmation emails to subscribers, add your <code className="bg-amber-100/80 px-1.5 py-0.5 rounded text-[11px] font-mono">RESEND_API_KEY</code> in Vercel Project Settings (or <code className="bg-amber-100/80 px-1.5 py-0.5 rounded text-[11px] font-mono">.env.local</code>).
+            </p>
+          </div>
         </div>
       )}
 

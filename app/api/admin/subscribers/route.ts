@@ -21,6 +21,7 @@ export async function GET() {
       success: true,
       subscribers,
       totalCount: subscribers.length,
+      emailConfigured: Boolean(process.env.RESEND_API_KEY),
     });
   } catch (error) {
     console.error("[Admin Subscribers] Load failed:", error);

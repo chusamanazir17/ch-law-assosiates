@@ -46,7 +46,11 @@ export async function submitSubscription(
       };
     }
 
-    return { success: true, message: data.message };
+    return {
+      success: true,
+      message: data.message,
+      emailSent: data.emailSent,
+    };
   } catch (error) {
     return {
       success: false,

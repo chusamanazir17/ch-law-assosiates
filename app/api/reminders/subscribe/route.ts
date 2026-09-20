@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { validateSubscription } from "@/lib/validation/subscription";
-import { addOrUpdateSubscriber } from "@/lib/db/subscribersStore";
+import { addOrUpdateSubscriber, TAX_CATEGORY_MAP } from "@/lib/db/subscribersStore";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { sendSubscriptionConfirmationEmail } from "@/lib/email/emailService";
 
 export const dynamic = "force-dynamic";
 
@@ -60,9 +61,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Subscription Registered] Email: ${email}, Name: ${name}, Categories: ${categoryIds.join(", ")}`);
 
+    // Dispatch confirmation email to subscriber
+    const categoryNames = categoryIds.map((id) => TAX_CATEGORY_MAP[id]?.name || id);
+    const emailResult = await sendSubscriptionConfirmationEmail({
+      to: email,
+      name,
+      categoryNames,
+    });
+
+    const emailSent = emailResult.success;
+    const responseMessage = emailSent
+      ? "Thank you for subscribing! A confirmation email has been sent to your inbox."
+      : "Thank you for subscribing! Your email has been registered for tax and legal compliance reminders.";
+
     return NextResponse.json({
       success: true,
-      message: "Thank you for subscribing! Your email has been registered for tax and legal compliance reminders.",
+      emailSent,
+      message: responseMessage,
       subscriber: {
         id: subscriber.id,
         email: subscriber.email,
@@ -77,3 +92,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
