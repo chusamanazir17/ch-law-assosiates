@@ -35,7 +35,7 @@ export default function AboutPageClient() {
       {/* ========================================================================= */}
       {/* 1. FIRST: ABOUT OUR CHAMBER                                               */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-24 border-b border-navy-900/5 dark:border-white/10 bg-gradient-to-b from-slate-50 via-white to-white dark:from-[#091833] dark:via-[#071224] dark:to-[#071224]">
+      <section className="relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-20 border-b border-navy-900/5 dark:border-white/10 bg-gradient-to-b from-slate-50 via-white to-white dark:from-[#091833] dark:via-[#071224] dark:to-[#071224]">
         <div className="container-x relative">
           <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
             {/* Left Column: Heading & Description */}

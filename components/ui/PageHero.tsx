@@ -63,7 +63,7 @@ export default function PageHero({
   return (
     <section
       className={`relative flex items-center overflow-hidden bg-gradient-to-b from-[#050f1f] via-[#081730] to-[#071328] text-white ${
-        tall ? "min-h-[480px]" : "min-h-[360px]"
+        tall ? "min-h-[380px]" : "min-h-[280px]"
       }`}
     >
       {/* Ambient background styling */}
@@ -71,7 +71,7 @@ export default function PageHero({
       <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-gold-500/10 blur-[100px]" />
       <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-navy-600/20 blur-[120px]" />
 
-      <div className="container-x relative z-10 py-16 sm:py-20">
+      <div className="container-x relative z-10 pt-8 pb-12 sm:pt-10 sm:pb-16 lg:pt-12 lg:pb-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
