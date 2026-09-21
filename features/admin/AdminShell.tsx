@@ -26,7 +26,7 @@ import { createClient } from "@/lib/supabase/client";
 function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   const router = useRouter();
-  const { isCollapsed, setMobileOpen } = useAdminSidebar();
+  const { isCollapsed, setMobileOpen, isReady } = useAdminSidebar();
 
   // Dropdown States
   const [showNotifications, setShowNotifications] = useState(false);
@@ -111,9 +111,9 @@ function AdminShellInner({ children }: { children: ReactNode }) {
       <AdminSidebar />
 
       <div
-        className={`flex min-w-0 flex-1 flex-col bg-slate-50 transition-[padding] duration-300 ease-out ${
-          isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"
-        }`}
+        className={`flex min-w-0 flex-1 flex-col bg-slate-50 ${
+          isReady ? "transition-[padding] duration-300 ease-out" : ""
+        } ${isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}
       >
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200/80 bg-white px-4 sm:px-6 lg:px-8">
           {/* Left: Mobile hamburger & Search input */}
@@ -127,17 +127,17 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Search Input without K badge, with search icon preserved */}
+            {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#94A3B8]">
                 <Search className="h-4 w-4" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search subscribers, posts, media, or anything..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50/70 py-1.5 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38] transition"
+                placeholder="Search subscribers, posts, media, or inquiries..."
+                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-1.5 pl-9 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
             </form>
           </div>
@@ -154,54 +154,54 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 }}
                 className={`relative rounded-lg p-2 transition focus:outline-none ${
                   showNotifications
-                    ? "bg-slate-100 text-slate-900"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    ? "bg-[#F1F5F9] text-[#0B1F36]"
+                    : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0B1F36]"
                 }`}
                 title="Notifications"
                 aria-label="Notifications"
                 aria-expanded={showNotifications}
               >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#C8973D] ring-2 ring-white" />
               </button>
 
               {/* Notification Dropdown Panel */}
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-xl border border-slate-200 bg-white p-3 shadow-xl z-50">
-                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-xl z-50">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-[#F1F5F9]">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900">Notifications</span>
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#075e38]">
+                      <span className="text-xs font-semibold text-[#0B1F36]">Notifications</span>
+                      <span className="rounded-full bg-[#0B1F36]/8 px-2 py-0.5 text-[10px] font-semibold text-[#0B1F36]">
                         3 new
                       </span>
                     </div>
                     <Link
                       href="/admin/inquiries"
                       onClick={() => setShowNotifications(false)}
-                      className="text-[11px] font-semibold text-[#075e38] hover:underline"
+                      className="text-[11px] font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
                     >
                       View all
                     </Link>
                   </div>
 
-                  <div className="mt-2 divide-y divide-slate-100 text-xs">
+                  <div className="mt-2 divide-y divide-[#F1F5F9] text-xs">
                     {/* Item 1 */}
                     <Link
                       href="/admin/inquiries"
                       onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] rounded-lg px-2 transition -mx-1"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 mt-0.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0B1F36]/8 text-[#0B1F36] mt-0.5">
                         <MessageSquare className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 truncate">
+                        <p className="font-semibold text-[#0B1F36] truncate">
                           New consultation inquiry
                         </p>
-                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                        <p className="text-[11px] text-[#52627A] line-clamp-1">
                           Ali Khan: Income Tax Filing guidance
                         </p>
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">9 hours ago</span>
+                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">9 hours ago</span>
                       </div>
                     </Link>
 
@@ -209,19 +209,19 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                     <Link
                       href="/admin/subscribers"
                       onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] rounded-lg px-2 transition -mx-1"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 mt-0.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#C8973D]/15 text-[#B8832A] mt-0.5">
                         <Users className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 truncate">
+                        <p className="font-semibold text-[#0B1F36] truncate">
                           New subscriber opted-in
                         </p>
-                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                        <p className="text-[11px] text-[#52627A] line-clamp-1">
                           Chaudhry Usama: Property & Capital Tax
                         </p>
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">2 hours ago</span>
+                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">2 hours ago</span>
                       </div>
                     </Link>
 
@@ -229,19 +229,19 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                     <Link
                       href="/admin/deadlines"
                       onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-slate-50 rounded-lg px-2 transition -mx-1"
+                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] rounded-lg px-2 transition -mx-1"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 mt-0.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[#475569] mt-0.5">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 truncate">
+                        <p className="font-semibold text-[#0B1F36] truncate">
                           System Status: Operational
                         </p>
-                        <p className="text-[11px] text-slate-500 line-clamp-1">
+                        <p className="text-[11px] text-[#52627A] line-clamp-1">
                           Tax reminders and dispatches synchronized
                         </p>
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">1 day ago</span>
+                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">1 day ago</span>
                       </div>
                     </Link>
                   </div>
@@ -250,37 +250,37 @@ function AdminShellInner({ children }: { children: ReactNode }) {
             </div>
 
             {/* Profile Info with interactive dropdown menu */}
-            <div ref={adminMenuRef} className="relative pl-2 border-l border-slate-200">
+            <div ref={adminMenuRef} className="relative pl-2 border-l border-[#E2E8F0]">
               <button
                 type="button"
                 onClick={() => {
                   setShowAdminMenu((prev) => !prev);
                   setShowNotifications(false);
                 }}
-                className="flex items-center gap-2.5 rounded-lg p-1 hover:bg-slate-100 transition focus:outline-none"
+                className="flex items-center gap-2.5 rounded-lg p-1 hover:bg-[#F1F5F9] transition focus:outline-none"
                 aria-expanded={showAdminMenu}
                 title="Admin Account Menu"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-2xs">
-                  N
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36] text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30 shadow-2xs">
+                  C
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="flex items-center gap-1">
-                    <p className="text-xs font-bold text-slate-900 leading-tight">Admin</p>
-                    <ChevronDown className="h-3 w-3 text-slate-400" />
+                    <p className="text-xs font-semibold text-[#0B1F36] leading-tight">Chaudhry Admin</p>
+                    <ChevronDown className="h-3 w-3 text-[#94A3B8]" />
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-tight mt-0.5">Administrator</p>
+                  <p className="text-[11px] text-[#64748B] font-medium leading-tight mt-0.5">Principal Practitioner</p>
                 </div>
               </button>
 
               {/* Admin Profile Dropdown Panel */}
               {showAdminMenu && (
-                <div className="absolute right-0 mt-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl z-50 text-xs">
+                <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl z-50 text-xs">
                   {/* User info banner */}
-                  <div className="p-2.5 border-b border-slate-100 mb-1">
-                    <p className="font-bold text-slate-900">Admin Account</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">admin@ch-law.pk</p>
-                    <span className="inline-block mt-1.5 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-[#075e38]">
+                  <div className="p-2.5 border-b border-[#F1F5F9] mb-1">
+                    <p className="font-semibold text-[#0B1F36]">Chamber Admin</p>
+                    <p className="text-[11px] text-[#64748B] mt-0.5 font-medium">admin@ch-law.pk</p>
+                    <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 border border-[#0B1F36]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0B1F36]">
                       Authorized Administrator
                     </span>
                   </div>
@@ -290,18 +290,18 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                     <Link
                       href="/admin"
                       onClick={() => setShowAdminMenu(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
                     >
-                      <LayoutDashboard className="h-4 w-4 text-slate-400" />
+                      <LayoutDashboard className="h-4 w-4 text-[#64748B]" />
                       <span>Dashboard Overview</span>
                     </Link>
 
                     <Link
                       href="/admin/settings"
                       onClick={() => setShowAdminMenu(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
                     >
-                      <Settings className="h-4 w-4 text-slate-400" />
+                      <Settings className="h-4 w-4 text-[#64748B]" />
                       <span>Firm & Site Settings</span>
                     </Link>
 
@@ -309,15 +309,15 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                       href="/"
                       target="_blank"
                       onClick={() => setShowAdminMenu(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 font-medium text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
                     >
-                      <ExternalLink className="h-4 w-4 text-slate-400" />
+                      <ExternalLink className="h-4 w-4 text-[#64748B]" />
                       <span>Open Live Website</span>
                     </Link>
                   </div>
 
                   {/* Sign Out Button */}
-                  <div className="border-t border-slate-100 mt-1.5 pt-1.5">
+                  <div className="border-t border-[#F1F5F9] mt-1.5 pt-1.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -344,9 +344,15 @@ function AdminShellInner({ children }: { children: ReactNode }) {
   );
 }
 
-export default function AdminShell({ children }: { children: ReactNode }) {
+export default function AdminShell({
+  children,
+  initialCollapsed = false,
+}: {
+  children: ReactNode;
+  initialCollapsed?: boolean;
+}) {
   return (
-    <AdminSidebarProvider>
+    <AdminSidebarProvider initialCollapsed={initialCollapsed}>
       <AdminShellInner>{children}</AdminShellInner>
     </AdminSidebarProvider>
   );

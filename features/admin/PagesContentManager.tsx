@@ -153,6 +153,9 @@ export default function PagesContentManager() {
 
       if (res.ok && data.success) {
         setSaveSuccess(data.message || "Page updated successfully!");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("cms-updated"));
+        }
         setPages((prev) => prev.map((p) => (p.id === data.page.id ? data.page : p)));
         setSelectedPage(data.page);
       } else {
@@ -194,6 +197,9 @@ export default function PagesContentManager() {
 
       if (res.ok && data.success) {
         setSaveSuccess("Homepage sections updated and published live!");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("cms-updated"));
+        }
         setHomeSections(data.sections);
       } else {
         throw new Error(data.error || "Failed to save homepage sections");
@@ -369,21 +375,21 @@ export default function PagesContentManager() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans">
       {/* Breadcrumb Navigation */}
-      <div className="flex items-center text-[13px] text-slate-500">
-        <Link href="/admin" className="hover:text-slate-800 transition">
+      <div className="flex items-center text-xs text-[#52627A] font-medium">
+        <Link href="/admin" className="hover:text-[#0B1F36] transition">
           Office CMS
         </Link>
-        <span className="mx-2 text-slate-400">/</span>
-        <span className="text-slate-900 font-medium">Page Content & Page Builder</span>
+        <span className="mx-2 text-[#94A3B8]">/</span>
+        <span className="text-[#0B1F36] font-semibold">Page Content & Page Builder</span>
       </div>
 
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#E2E8F0]">
         <div>
-          <h1 className="text-[30px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Page Builder & Content CMS
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
+          <p className="mt-0.5 text-xs text-[#52627A] leading-relaxed">
             Complete visual control over Homepage sections (order, headlines, CTAs, testimonials, FAQ, and office details) and all sub-pages.
           </p>
         </div>
@@ -396,9 +402,9 @@ export default function PagesContentManager() {
                 const homePage = pages.find((p) => p.id === "home");
                 if (homePage) openEditor(homePage);
               }}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#075e38] px-4 py-2 text-[13.5px] font-semibold text-white shadow-sm hover:bg-[#064e2e] transition cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#0B1F36] px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#102943] transition cursor-pointer"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-3.5 w-3.5 text-[#C8973D]" />
               <span>Customize Homepage Sections</span>
             </button>
           )}
@@ -407,19 +413,19 @@ export default function PagesContentManager() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-xs hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
           >
-            <ExternalLink className="h-4 w-4 text-slate-500" />
+            <ExternalLink className="h-3.5 w-3.5 text-[#94A3B8]" />
             <span>Open Website</span>
           </Link>
           <button
             type="button"
             onClick={fetchPages}
             disabled={isLoading}
-            className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 shadow-2xs transition"
+            className="rounded-lg border border-[#E2E8F0] bg-white p-2 text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] shadow-xs transition"
             title="Refresh list"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin text-emerald-700" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-[#C8973D]" : ""}`} />
           </button>
         </div>
       </div>
@@ -427,25 +433,25 @@ export default function PagesContentManager() {
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#94A3B8]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search pages by title or route..."
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/10 shadow-2xs"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-9 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-xs transition"
           />
         </div>
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
           {filteredPages.length} Pages Available for Editing
         </div>
       </div>
 
       {/* Error Alert if Load Fails */}
       {loadError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertCircle className="h-4 w-4 text-rose-600" />
             <span>{loadError}</span>
           </div>
           <button onClick={fetchPages} className="font-semibold underline underline-offset-2">
@@ -456,8 +462,8 @@ export default function PagesContentManager() {
 
       {/* Pages Grid */}
       {isLoading ? (
-        <div className="flex min-h-64 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-500">
-          <Loader2 className="h-5 w-5 animate-spin text-emerald-700" />
+        <div className="flex min-h-64 items-center justify-center gap-3 rounded-xl border border-[#E2E8F0] bg-white text-xs text-[#52627A]">
+          <Loader2 className="h-5 w-5 animate-spin text-[#C8973D]" />
           <span>Loading page content catalog...</span>
         </div>
       ) : (
@@ -467,12 +473,12 @@ export default function PagesContentManager() {
             return (
               <div
                 key={page.id}
-                className={`group flex flex-col justify-between rounded-xl border bg-white overflow-hidden shadow-2xs transition hover:shadow-xs ${
-                  isHome ? "border-emerald-300 ring-2 ring-emerald-500/10" : "border-slate-200 hover:border-slate-300"
+                className={`group flex flex-col justify-between rounded-xl border bg-white overflow-hidden shadow-xs transition hover:shadow-sm ${
+                  isHome ? "border-[#C8973D]/50 ring-2 ring-[#C8973D]/10" : "border-[#E2E8F0] hover:border-[#CBD5E1]"
                 }`}
               >
                 {/* Thumbnail Image with Route Overlay */}
-                <div className="relative h-36 w-full bg-slate-100 overflow-hidden border-b border-slate-100">
+                <div className="relative h-36 w-full bg-[#F8FAFC] overflow-hidden border-b border-[#E2E8F0]">
                   <img
                     src={page.heroImage}
                     alt={page.title}
@@ -482,19 +488,19 @@ export default function PagesContentManager() {
                         "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=640&q=70";
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#05162B]/85 via-[#05162B]/30 to-transparent" />
                   <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
-                    <span className="font-mono text-[11px] font-semibold bg-slate-900/70 px-2 py-0.5 rounded backdrop-blur-xs">
+                    <span className="font-mono text-[11px] font-semibold bg-[#0B1F36]/80 px-2 py-0.5 rounded backdrop-blur-xs border border-white/10">
                       {page.route}
                     </span>
                     {isHome ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C8973D] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#05162B]">
                         <Sparkles className="h-2.5 w-2.5" />
                         Main Landing Page
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                        <CheckCircle2 className="h-2.5 w-2.5" />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#FDF8EE] border border-[#C8973D]/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#96641E]">
+                        <CheckCircle2 className="h-2.5 w-2.5 text-[#C8973D]" />
                         {page.status}
                       </span>
                     )}
@@ -504,27 +510,25 @@ export default function PagesContentManager() {
                 {/* Card Body */}
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900 text-base group-hover:text-emerald-800 transition leading-snug">
+                    <h3 className="font-semibold text-[#0B1F36] text-sm group-hover:text-[#0B1F36] transition leading-snug">
                       {page.title}
                     </h3>
-                    <p className="text-xs text-emerald-800 font-medium uppercase tracking-wider mt-1">
+                    <p className="text-[11px] text-[#96641E] font-semibold uppercase tracking-wider mt-1">
                       {page.heroBadge}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#52627A] mt-1.5 line-clamp-2 leading-relaxed">
                       {page.heroHeadline}
                     </p>
                   </div>
 
                   {/* Footer Buttons */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="mt-4 pt-3 border-t border-[#F1F5F9] flex items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => openEditor(page)}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs transition cursor-pointer ${
-                        isHome ? "bg-emerald-700 hover:bg-emerald-800" : "bg-[#075e38] hover:bg-[#064e2e]"
-                      }`}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition cursor-pointer bg-[#0B1F36] hover:bg-[#102943]"
                     >
-                      <Edit3 className="h-3.5 w-3.5" />
+                      <Edit3 className="h-3.5 w-3.5 text-[#C8973D]" />
                       <span>{isHome ? "Open Page Builder" : "Edit Content"}</span>
                     </button>
 
@@ -532,7 +536,7 @@ export default function PagesContentManager() {
                       href={page.route}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#52627A] transition hover:bg-[#F8FAFC] hover:text-[#0B1F36]"
                     >
                       <span>Live Page</span>
                       <ExternalLink className="h-3 w-3" />
@@ -550,23 +554,23 @@ export default function PagesContentManager() {
       {/* ========================================================================= */}
       {isEditing && selectedPage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
-          <div className="relative w-full max-w-5xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+          <div className="relative w-full max-w-5xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-[#E2E8F0] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/90">
+            <div className="flex items-center justify-between border-b border-[#E2E8F0] px-6 py-4 bg-[#F8FAFC]">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FDF8EE] text-[#C8973D]">
                   {isHomeBuilder ? <Sparkles className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-slate-900 leading-tight">
+                    <h2 className="text-base font-bold text-[#0B1F36] leading-tight">
                       {isHomeBuilder ? "Homepage Section Builder" : `Edit ${selectedPage.title}`}
                     </h2>
-                    <span className="font-mono text-xs text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded">
+                    <span className="font-mono text-[11px] text-[#52627A] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded">
                       {selectedPage.route}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-[#52627A] mt-0.5">
                     {isHomeBuilder
                       ? "Control section visibility, order, headlines, FAQs, reviews, and buttons with immediate live preview."
                       : "Modifications will be reflected live on this public route."}
@@ -579,7 +583,7 @@ export default function PagesContentManager() {
                   href={selectedPage.route}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:underline px-2 py-1"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#96641E] hover:underline px-2 py-1"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   <span>Preview Live Page</span>
@@ -587,7 +591,7 @@ export default function PagesContentManager() {
                 <button
                   type="button"
                   onClick={closeEditor}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+                  className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -596,7 +600,7 @@ export default function PagesContentManager() {
 
             {/* Modal Navigation Tabs */}
             {isHomeBuilder ? (
-              <div className="flex border-b border-slate-200 bg-white px-4 overflow-x-auto scrollbar-thin">
+              <div className="flex border-b border-[#E2E8F0] bg-white px-4 overflow-x-auto scrollbar-thin">
                 {[
                   { id: "order", label: "Section Order & Visibility", icon: Layers },
                   { id: "hero", label: "Hero Header", icon: ImageIcon },
@@ -618,8 +622,8 @@ export default function PagesContentManager() {
                       onClick={() => setHomeActiveTab(tab.id as any)}
                       className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3.5 py-3 text-xs font-semibold transition ${
                         isActive
-                          ? "border-[#075e38] text-[#075e38] bg-emerald-50/30"
-                          : "border-transparent text-slate-500 hover:text-slate-800"
+                          ? "border-[#0B1F36] text-[#0B1F36] bg-[#F8FAFC]"
+                          : "border-transparent text-[#52627A] hover:text-[#0B1F36]"
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -629,7 +633,7 @@ export default function PagesContentManager() {
                 })}
               </div>
             ) : (
-              <div className="flex border-b border-slate-200 bg-white px-6">
+              <div className="flex border-b border-[#E2E8F0] bg-white px-6">
                 {[
                   { id: "hero", label: "Hero & Banner", icon: ImageIcon },
                   { id: "cta", label: "Calls-to-Action", icon: Sliders },
@@ -645,8 +649,8 @@ export default function PagesContentManager() {
                       onClick={() => setActiveTab(tab.id as any)}
                       className={`flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition ${
                         isActive
-                          ? "border-[#075e38] text-[#075e38]"
-                          : "border-transparent text-slate-500 hover:text-slate-800"
+                          ? "border-[#0B1F36] text-[#0B1F36] bg-[#F8FAFC]"
+                          : "border-transparent text-[#52627A] hover:text-[#0B1F36]"
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -659,20 +663,20 @@ export default function PagesContentManager() {
 
             {/* Notifications */}
             {saveSuccess && (
-              <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-800">
-                <Check className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div className="mx-6 mt-4 flex items-center gap-2 rounded-xl border border-[#C8973D]/40 bg-[#FDF8EE] px-4 py-2.5 text-xs text-[#96641E]">
+                <Check className="h-4 w-4 text-[#C8973D] shrink-0" />
                 <span>{saveSuccess}</span>
               </div>
             )}
             {saveError && (
-              <div className="mx-6 mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-800">
-                <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+              <div className="mx-6 mt-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs text-rose-800">
+                <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
                 <span>{saveError}</span>
               </div>
             )}
 
             {/* Form Fields Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/30">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-[#F8FAFC]/50">
               {/* ================================================================= */}
               {/* HOMEPAGE SECTIONS BUILDER CONTENT                                */}
               {/* ================================================================= */}
@@ -1812,11 +1816,11 @@ export default function PagesContentManager() {
             </div>
 
             {/* Modal Footer Bar */}
-            <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between">
+            <div className="p-4 border-t border-[#E2E8F0] bg-white flex items-center justify-between">
               <button
                 type="button"
                 onClick={closeEditor}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                className="rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition cursor-pointer"
               >
                 Close Editor
               </button>
@@ -1826,9 +1830,9 @@ export default function PagesContentManager() {
                   href={selectedPage.route || "/"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 bg-white px-3 py-2 rounded-lg"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#52627A] hover:text-[#0B1F36] border border-[#E2E8F0] bg-white px-3 py-2 rounded-lg hover:bg-[#F8FAFC] transition"
                 >
-                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  <ArrowUpRight className="h-3.5 w-3.5 text-[#94A3B8]" />
                   <span>View Public Route</span>
                 </Link>
 
@@ -1836,16 +1840,16 @@ export default function PagesContentManager() {
                   type="button"
                   disabled={isSaving}
                   onClick={isHomeBuilder ? () => handleSaveHomeSections() : handleSaveStandardPage}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#075e38] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#064e2e] transition disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0B1F36] px-5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#102943] transition disabled:opacity-50 cursor-pointer"
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C8973D]" />
                       <span>Saving Changes...</span>
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" />
+                      <Save className="h-3.5 w-3.5 text-[#C8973D]" />
                       <span>{isHomeBuilder ? "Save & Publish Sections" : "Save & Publish Page"}</span>
                     </>
                   )}

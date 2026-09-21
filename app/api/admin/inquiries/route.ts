@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getAdminSession } from "@/lib/auth/admin";
 import {
   getAllInquiries,
+  addInquiry,
   updateInquiryStatus,
   deleteInquiry,
 } from "@/lib/db/inquiriesStore";
@@ -39,10 +40,36 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as {
-      action?: "status" | "delete";
+      action?: "create" | "status" | "delete";
       id?: string;
       status?: ConsultationInquiry["status"];
+      name?: string;
+      phone?: string;
+      service?: string;
+      message?: string;
+      email?: string;
     };
+
+    if (body.action === "create") {
+      if (!body.name || !body.phone) {
+        return NextResponse.json(
+          { success: false, error: "Name and phone are required." },
+          { status: 400 }
+        );
+      }
+      const inquiry = await addInquiry({
+        name: body.name,
+        phone: body.phone,
+        service: body.service || "General Inquiry",
+        message: body.message,
+        email: body.email,
+      });
+      return NextResponse.json({
+        success: true,
+        inquiry,
+        message: "Consultation inquiry recorded.",
+      });
+    }
 
     if (!body.id) {
       return NextResponse.json({ success: false, error: "Inquiry ID is required." }, { status: 400 });

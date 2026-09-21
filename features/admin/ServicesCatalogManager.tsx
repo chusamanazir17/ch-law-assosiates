@@ -153,6 +153,9 @@ export default function ServicesCatalogManager() {
       }
 
       setSaveSuccess(isCreatingNew ? "Service created successfully!" : "Service updated successfully!");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
       await fetchServices();
       setTimeout(() => {
         closeModal();
@@ -178,6 +181,9 @@ export default function ServicesCatalogManager() {
         setServices((prev) =>
           prev.map((s) => (s.id === service.id ? { ...s, active: !s.active } : s))
         );
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("cms-updated"));
+        }
       }
     } catch {
       // ignore
@@ -238,19 +244,21 @@ export default function ServicesCatalogManager() {
   const activeCount = services.filter((s) => s.active).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-10">
       {/* Breadcrumb & Top Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-[13px] font-normal text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748B]">
+            <span>Chamber 121</span>
+            <span className="text-slate-300">›</span>
             <span>Website CMS</span>
-            <span className="mx-2 text-slate-400">/</span>
-            <span className="text-slate-700">Services Catalog</span>
+            <span className="text-slate-300">›</span>
+            <span className="text-[#0B1F36] font-semibold">Services Catalog</span>
           </div>
-          <h1 className="mt-1 text-[32px] font-bold leading-tight tracking-tight text-slate-900">
+          <h1 className="mt-1 text-2xl font-bold leading-tight tracking-tight text-[#0B1F36]">
             Legal Services Catalog
           </h1>
-          <p className="mt-1 text-[14.5px] text-slate-500">
+          <p className="mt-0.5 text-xs text-[#52627A] leading-relaxed">
             Live catalog of 9 Chamber legal practices. Modify titles, Urdu terminology, fee structures, required documents, and hero photography.
           </p>
         </div>
@@ -259,26 +267,26 @@ export default function ServicesCatalogManager() {
           <button
             type="button"
             onClick={fetchServices}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-1.5 text-xs font-medium text-[#334155] shadow-2xs transition hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36]"
           >
-            <RefreshCw className={`h-4 w-4 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-[#64748B] ${isLoading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </button>
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:shadow-sm transition"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             <span>Add Legal Service</span>
           </button>
           <Link
             href="/#services"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-1.5 text-xs font-medium text-[#334155] shadow-2xs transition hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36]"
           >
-            <ExternalLink className="h-4 w-4 text-slate-500" />
+            <ExternalLink className="h-3.5 w-3.5 text-[#64748B]" />
             <span>View Public Grid</span>
           </Link>
         </div>
@@ -286,61 +294,61 @@ export default function ServicesCatalogManager() {
 
       {/* Metrics Banner */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-[0_1px_3px_rgba(11,29,56,0.04)] hover:border-[#CBD5E1] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Services</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+            <span className="text-xs font-medium text-[#64748B]">Total Services</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
               <Boxes className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{services.length}</p>
-          <p className="mt-0.5 text-xs text-slate-500">Core legal practice areas</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#0B1F36]">{services.length}</p>
+          <p className="mt-0.5 text-[11px] text-[#64748B]">Core legal practice areas</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-[0_1px_3px_rgba(11,29,56,0.04)] hover:border-[#CBD5E1] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Public</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
+            <span className="text-xs font-medium text-[#64748B]">Active Public</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
               <CheckCircle2 className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">{activeCount}</p>
-          <p className="mt-0.5 text-xs text-slate-500">Visible on main portal</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-700">{activeCount}</p>
+          <p className="mt-0.5 text-[11px] text-[#64748B]">Visible on main portal</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-[0_1px_3px_rgba(11,29,56,0.04)] hover:border-[#CBD5E1] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Categories</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+            <span className="text-xs font-medium text-[#64748B]">Categories</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
               <Tag className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900">{categories.length}</p>
-          <p className="mt-0.5 text-xs text-slate-500">Practice categories</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#0B1F36]">{categories.length}</p>
+          <p className="mt-0.5 text-[11px] text-[#64748B]">Practice categories</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-[0_1px_3px_rgba(11,29,56,0.04)] hover:border-[#CBD5E1] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">CMS Persistence</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-50 text-amber-600">
+            <span className="text-xs font-medium text-[#64748B]">CMS Persistence</span>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
               <ShieldCheck className="h-4 w-4" />
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900">100% Live</p>
-          <p className="mt-0.5 text-xs text-slate-500">Synchronized instant updates</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-[#0B1F36]">100% Live</p>
+          <p className="mt-0.5 text-[11px] text-[#64748B]">Synchronized instant updates</p>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-[0_1px_3px_rgba(11,29,56,0.04)] md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
           <input
             type="text"
             placeholder="Search services by title, Urdu name, slug, or keywords..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-slate-50/50 py-2 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-10 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
           />
         </div>
 
@@ -351,8 +359,8 @@ export default function ServicesCatalogManager() {
             onClick={() => setSelectedCategory("All")}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
               selectedCategory === "All"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[#0B1F36] text-white shadow-xs font-semibold"
+                : "bg-slate-100 text-[#64748B] hover:bg-slate-200 hover:text-[#0B1F36]"
             }`}
           >
             All ({services.length})
@@ -364,8 +372,8 @@ export default function ServicesCatalogManager() {
               onClick={() => setSelectedCategory(cat)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                 selectedCategory === cat
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-[#0B1F36] text-white shadow-xs font-semibold"
+                  : "bg-slate-100 text-[#64748B] hover:bg-slate-200 hover:text-[#0B1F36]"
               }`}
             >
               {cat}
@@ -376,34 +384,34 @@ export default function ServicesCatalogManager() {
 
       {/* Services Grid */}
       {isLoading ? (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center shadow-2xs">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-          <p className="mt-3 text-sm font-medium text-slate-600">Loading services catalog...</p>
+        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-[#E2E8F0] bg-white p-8 text-center shadow-2xs">
+          <Loader2 className="h-8 w-8 animate-spin text-[#C8973D]" />
+          <p className="mt-3 text-xs font-medium text-[#52627A]">Loading services catalog...</p>
         </div>
       ) : loadError ? (
         <div className="flex min-h-[200px] flex-col items-center justify-center rounded-xl border border-red-200 bg-red-50/60 p-8 text-center">
           <AlertCircle className="h-8 w-8 text-red-500" />
-          <p className="mt-2 text-sm font-semibold text-red-800">{loadError}</p>
+          <p className="mt-2 text-xs font-semibold text-red-800">{loadError}</p>
           <button
             type="button"
             onClick={fetchServices}
-            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700"
+            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-xs"
           >
             Retry
           </button>
         </div>
       ) : filteredServices.length === 0 ? (
-        <div className="flex min-h-[250px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center shadow-2xs">
+        <div className="flex min-h-[250px] flex-col items-center justify-center rounded-xl border border-[#E2E8F0] bg-white p-8 text-center shadow-2xs">
           <Boxes className="h-10 w-10 text-slate-300" />
-          <p className="mt-3 text-base font-semibold text-slate-700">No legal services match your filter</p>
-          <p className="mt-1 text-xs text-slate-400">Try changing search keywords or category filters</p>
+          <p className="mt-3 text-sm font-bold text-[#0B1F36]">No legal services match your filter</p>
+          <p className="mt-1 text-xs text-[#64748B]">Try changing search keywords or category filters</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredServices.map((service) => (
             <div
               key={service.id}
-              className="flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs transition duration-200 hover:border-slate-300 hover:shadow-md"
+              className="flex flex-col justify-between overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-2xs transition duration-200 hover:border-[#CBD5E1] hover:shadow-md"
             >
               {/* Header with image & badges */}
               <div className="relative h-44 w-full overflow-hidden bg-slate-900">
@@ -416,7 +424,7 @@ export default function ServicesCatalogManager() {
                 
                 {/* Category & Status Badges */}
                 <div className="absolute left-3 top-3 flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-md bg-slate-900/80 px-2 py-0.5 text-[11px] font-medium text-emerald-400 backdrop-blur-xs">
+                  <span className="rounded-md bg-[#0B1F36]/85 px-2 py-0.5 text-[10.5px] font-semibold tracking-wide text-[#E6C687] backdrop-blur-xs border border-[#C8973D]/30">
                     {service.category}
                   </span>
                 </div>
@@ -424,56 +432,56 @@ export default function ServicesCatalogManager() {
                   <button
                     type="button"
                     onClick={() => handleToggleActive(service)}
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-xs transition ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-xs transition ${
                       service.active
-                        ? "bg-emerald-500/90 text-white hover:bg-emerald-600"
+                        ? "bg-[#0B1F36] text-white hover:bg-[#102943] border border-[#C8973D]/40"
                         : "bg-slate-700/80 text-slate-300 hover:bg-slate-600"
                     }`}
                   >
-                    <span className={`h-1.5 w-1.5 rounded-full ${service.active ? "bg-white" : "bg-slate-400"}`} />
+                    <span className={`h-1.5 w-1.5 rounded-full ${service.active ? "bg-[#C8973D]" : "bg-slate-400"}`} />
                     {service.active ? "Active" : "Inactive"}
                   </button>
                 </div>
 
                 {/* Bottom title overlay */}
                 <div className="absolute bottom-3 left-3 right-3">
-                  <h3 className="text-base font-bold text-white drop-shadow-xs">{service.name}</h3>
-                  <p className="mt-0.5 text-xs font-urdu text-emerald-300 drop-shadow-xs">{service.nameUrdu}</p>
+                  <h3 className="text-sm font-bold text-white drop-shadow-xs">{service.name}</h3>
+                  <p className="mt-0.5 text-xs font-urdu text-[#E6C687] drop-shadow-xs">{service.nameUrdu}</p>
                 </div>
               </div>
 
               {/* Card Body */}
               <div className="flex flex-1 flex-col justify-between p-4">
                 <div>
-                  <p className="line-clamp-2 text-xs leading-relaxed text-slate-600">
+                  <p className="line-clamp-2 text-xs leading-relaxed text-[#52627A]">
                     {service.description}
                   </p>
 
-                  <div className="mt-3.5 space-y-2 border-t border-slate-100 pt-3 text-xs">
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
-                        <Clock className="h-3.5 w-3.5 text-amber-500" />
+                  <div className="mt-3.5 space-y-2 border-t border-[#E2E8F0] pt-3 text-xs">
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      <span className="inline-flex items-center gap-1.5 text-[#52627A] font-medium">
+                        <Clock className="h-3.5 w-3.5 text-[#C8973D]" />
                         Turnaround
                       </span>
-                      <span className="font-semibold text-slate-800">{service.turnaroundTime || "Standard"}</span>
+                      <span className="font-semibold text-[#0B1F36]">{service.turnaroundTime || "Standard"}</span>
                     </div>
 
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
-                        <FileCheck className="h-3.5 w-3.5 text-blue-500" />
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      <span className="inline-flex items-center gap-1.5 text-[#52627A] font-medium">
+                        <FileCheck className="h-3.5 w-3.5 text-[#0B1F36]" />
                         Documents
                       </span>
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-[#0B1F36]">
                         {service.requiredDocuments?.length || 0} required
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
-                        <Layers className="h-3.5 w-3.5 text-purple-500" />
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      <span className="inline-flex items-center gap-1.5 text-[#52627A] font-medium">
+                        <Layers className="h-3.5 w-3.5 text-[#0B1F36]" />
                         Sub-offerings
                       </span>
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-[#0B1F36]">
                         {service.items?.length || 0} items
                       </span>
                     </div>
@@ -481,31 +489,31 @@ export default function ServicesCatalogManager() {
                 </div>
 
                 {/* Actions */}
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+                <div className="mt-4 flex items-center justify-between border-t border-[#E2E8F0] pt-3">
                   <Link
                     href={`/services/${service.slug}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-emerald-700"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B] hover:text-[#B8832A] transition"
                   >
                     <span>/services/{service.slug}</span>
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    <ArrowUpRight className="h-3 w-3" />
                   </Link>
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => openEditModal(service)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0B1F36] shadow-2xs transition hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
                     >
-                      <Edit3 className="h-3.5 w-3.5 text-slate-500" />
+                      <Edit3 className="h-3.5 w-3.5 text-[#64748B]" />
                       <span>Edit</span>
                     </button>
                     <Link
                       href={`/services/${service.slug}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#C8973D]/30 bg-[#FDF8EE] px-2.5 py-1.5 text-xs font-semibold text-[#96641E] transition hover:bg-[#F9EDD0]"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       <span>View</span>
@@ -520,29 +528,29 @@ export default function ServicesCatalogManager() {
 
       {/* Service Editor Modal */}
       {(editingService || isCreatingNew) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05162B]/60 p-4 backdrop-blur-xs">
+          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-[#E2E8F0] bg-white shadow-2xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[#E2E8F0] px-6 py-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-base font-bold text-[#0B1F36] tracking-tight">
                   {isCreatingNew ? "Add New Legal Service" : `Edit Service: ${formData.name}`}
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#52627A] mt-0.5">
                   Manage service overview, Pakistani legal terms, timeline, government fees, and photography.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1.5 text-[#64748B] hover:bg-slate-100 hover:text-[#0B1F36] transition"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-200 bg-slate-50/50 px-6">
+            <div className="flex border-b border-[#E2E8F0] bg-[#F8FAFC]/50 px-6">
               {[
                 { id: "general", label: "General & Category" },
                 { id: "content", label: "Description & Fees" },
@@ -555,8 +563,8 @@ export default function ServicesCatalogManager() {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`border-b-2 px-4 py-3 text-xs font-semibold transition ${
                     activeTab === tab.id
-                      ? "border-emerald-600 text-emerald-700"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
+                      ? "border-[#0B1F36] text-[#0B1F36]"
+                      : "border-transparent text-[#64748B] hover:text-[#0B1F36]"
                   }`}
                 >
                   {tab.label}
@@ -584,37 +592,37 @@ export default function ServicesCatalogManager() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">Service Name (English) *</label>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Service Name (English) *</label>
                       <input
                         type="text"
                         required
                         value={formData.name || ""}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. E-Stamping & Stamp Paper"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">Urdu Name / Terminology</label>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Urdu Name / Terminology</label>
                       <input
                         type="text"
                         value={formData.nameUrdu || ""}
                         onChange={(e) => setFormData({ ...formData, nameUrdu: e.target.value })}
                         placeholder="مثال: ای سٹامپنگ و چالان 32-A"
                         dir="rtl"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-urdu text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">Practice Category *</label>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Practice Category *</label>
                       <select
                         value={formData.category || ""}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                       >
                         {categories.map((c) => (
                           <option key={c} value={c}>{c}</option>
@@ -623,8 +631,8 @@ export default function ServicesCatalogManager() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">URL Route Slug *</label>
-                      <div className="mt-1 flex items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                      <label className="block text-xs font-semibold text-[#0B1F36]">URL Route Slug *</label>
+                      <div className="mt-1 flex items-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#52627A]">
                         <span>/services/</span>
                         <input
                           type="text"
@@ -632,20 +640,20 @@ export default function ServicesCatalogManager() {
                           value={formData.slug || ""}
                           onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
                           placeholder="slug-name"
-                          className="w-full bg-transparent font-mono text-xs text-slate-800 focus:outline-none"
+                          className="w-full bg-transparent font-mono text-xs text-[#0B1F36] focus:outline-none"
                         />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700">Chamber Tagline / Badge</label>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">Chamber Tagline / Badge</label>
                     <input
                       type="text"
                       value={formData.tagline || ""}
                       onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                       placeholder="e.g. Authorized Government Stamp Vendor"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                     />
                   </div>
 
@@ -655,9 +663,9 @@ export default function ServicesCatalogManager() {
                       id="svc-active"
                       checked={formData.active ?? true}
                       onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                      className="h-4 w-4 rounded border-[#E2E8F0] text-[#0B1F36] focus:ring-[#C8973D]/30"
                     />
-                    <label htmlFor="svc-active" className="text-xs font-medium text-slate-700">
+                    <label htmlFor="svc-active" className="text-xs font-medium text-[#334155]">
                       Publish and display this service on the public website
                     </label>
                   </div>
@@ -668,49 +676,49 @@ export default function ServicesCatalogManager() {
               {activeTab === "content" && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700">Service Description *</label>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">Service Description *</label>
                     <textarea
                       rows={4}
                       required
                       value={formData.description || ""}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Detailed overview of legal service, chamber role, and client benefits..."
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs leading-relaxed text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">Expected Turnaround Time</label>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Expected Turnaround Time</label>
                       <input
                         type="text"
                         value={formData.turnaroundTime || ""}
                         onChange={(e) => setFormData({ ...formData, turnaroundTime: e.target.value })}
                         placeholder="e.g. Same-day (15 to 30 mins) or 2 to 3 days"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700">Display Order</label>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Display Order</label>
                       <input
                         type="number"
                         min={1}
                         value={formData.order || 1}
                         onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700">Government Fee Structure & Details</label>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">Government Fee Structure & Details</label>
                     <textarea
                       rows={3}
                       value={formData.governmentFeeInfo || ""}
                       onChange={(e) => setFormData({ ...formData, governmentFeeInfo: e.target.value })}
                       placeholder="Official 1% DC rate, stamp duty guidelines, or FBR tax brackets..."
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs leading-relaxed text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                     />
                   </div>
                 </div>
@@ -723,17 +731,17 @@ export default function ServicesCatalogManager() {
                   <div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        <h4 className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
                           Required Client Documents
                         </h4>
-                        <p className="text-[11px] text-slate-500">Documents needed from the client to process this service.</p>
+                        <p className="text-[11px] text-[#64748B]">Documents needed from the client to process this service.</p>
                       </div>
                       <button
                         type="button"
                         onClick={handleAddDocument}
-                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#0B1F36] hover:bg-[#F8FAFC] transition shadow-2xs"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-3 w-3 text-[#C8973D]" />
                         <span>Add Document</span>
                       </button>
                     </div>
@@ -741,18 +749,18 @@ export default function ServicesCatalogManager() {
                     <div className="mt-3 space-y-2">
                       {(formData.requiredDocuments || []).map((doc, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-slate-400">{idx + 1}.</span>
+                          <span className="text-xs font-semibold text-[#94A3B8]">{idx + 1}.</span>
                           <input
                             type="text"
                             value={doc}
                             onChange={(e) => handleUpdateDocument(idx, e.target.value)}
                             placeholder="e.g. Original CNIC, Proof of Ownership..."
-                            className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 focus:border-emerald-500 focus:outline-none"
+                            className="flex-1 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                           />
                           <button
                             type="button"
                             onClick={() => handleRemoveDocument(idx)}
-                            className="p-1 text-slate-400 hover:text-red-500"
+                            className="p-1 text-[#94A3B8] hover:text-red-500 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -762,39 +770,39 @@ export default function ServicesCatalogManager() {
                   </div>
 
                   {/* Sub-Services / Items Section */}
-                  <div className="border-t border-slate-100 pt-4">
+                  <div className="border-t border-[#E2E8F0] pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        <h4 className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
                           Specific Offerings / Packages
                         </h4>
-                        <p className="text-[11px] text-slate-500">List of specific services or tiers under this practice.</p>
+                        <p className="text-[11px] text-[#64748B]">List of specific services or tiers under this practice.</p>
                       </div>
                       <button
                         type="button"
                         onClick={handleAddSubService}
-                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        className="inline-flex items-center gap-1 rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#0B1F36] hover:bg-[#F8FAFC] transition shadow-2xs"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-3 w-3 text-[#C8973D]" />
                         <span>Add Offering</span>
                       </button>
                     </div>
 
                     <div className="mt-3 space-y-3">
                       {(formData.items || []).map((item, idx) => (
-                        <div key={item.id || idx} className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+                        <div key={item.id || idx} className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3">
                           <div className="flex items-center justify-between gap-2">
                             <input
                               type="text"
                               value={item.title}
                               onChange={(e) => handleUpdateSubService(idx, "title", e.target.value)}
                               placeholder="Offering Title (e.g. Partnership Deed Drafting)"
-                              className="w-full rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 focus:border-emerald-500 focus:outline-none"
+                              className="w-full rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#0B1F36] focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                             />
                             <button
                               type="button"
                               onClick={() => handleRemoveSubService(idx)}
-                              className="p-1 text-slate-400 hover:text-red-500"
+                              className="p-1 text-[#94A3B8] hover:text-red-500 transition"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -804,7 +812,7 @@ export default function ServicesCatalogManager() {
                             value={item.description}
                             onChange={(e) => handleUpdateSubService(idx, "description", e.target.value)}
                             placeholder="Brief description of what this offering includes..."
-                            className="mt-2 w-full rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 focus:border-emerald-500 focus:outline-none"
+                            className="mt-2 w-full rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs text-[#334155] focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                           />
                         </div>
                       ))}
@@ -817,20 +825,20 @@ export default function ServicesCatalogManager() {
               {activeTab === "image" && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700">Hero Image URL</label>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">Hero Image URL</label>
                     <input
                       type="url"
                       value={formData.heroImage || ""}
                       onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
                       placeholder="https://images.unsplash.com/..."
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                     />
                   </div>
 
                   {formData.heroImage && (
                     <div>
-                      <span className="block text-xs font-semibold text-slate-500">Live Preview:</span>
-                      <div className="relative mt-2 h-44 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+                      <span className="block text-xs font-semibold text-[#52627A]">Live Preview:</span>
+                      <div className="relative mt-2 h-44 w-full overflow-hidden rounded-xl border border-[#E2E8F0] bg-slate-900">
                         <img
                           src={formData.heroImage}
                           alt="Service Hero"
@@ -844,7 +852,7 @@ export default function ServicesCatalogManager() {
                   )}
 
                   <div className="pt-2">
-                    <span className="block text-xs font-semibold text-slate-700">Or pick from high-resolution legal presets:</span>
+                    <span className="block text-xs font-semibold text-[#0B1F36]">Or pick from high-resolution legal presets:</span>
                     <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                       {PRESET_IMAGES.map((preset) => (
                         <button
@@ -853,12 +861,12 @@ export default function ServicesCatalogManager() {
                           onClick={() => setFormData({ ...formData, heroImage: preset.url })}
                           className={`group relative h-20 overflow-hidden rounded-lg border text-left transition ${
                             formData.heroImage === preset.url
-                              ? "border-emerald-600 ring-2 ring-emerald-500"
-                              : "border-slate-200 hover:border-slate-300"
+                              ? "border-[#C8973D] ring-2 ring-[#C8973D]/40"
+                              : "border-[#E2E8F0] hover:border-[#CBD5E1]"
                           }`}
                         >
                           <img src={preset.url} alt={preset.label} className="h-full w-full object-cover" />
-                          <div className="absolute inset-0 bg-slate-900/60 p-1.5 transition group-hover:bg-slate-900/40">
+                          <div className="absolute inset-0 bg-[#05162B]/60 p-1.5 transition group-hover:bg-[#05162B]/40">
                             <span className="text-[10px] font-semibold text-white">{preset.label}</span>
                           </div>
                         </button>
@@ -869,11 +877,11 @@ export default function ServicesCatalogManager() {
               )}
 
               {/* Modal Footer */}
-              <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-4">
+              <div className="mt-6 flex items-center justify-between border-t border-[#E2E8F0] pt-4">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] transition"
                 >
                   Cancel
                 </button>
@@ -881,9 +889,9 @@ export default function ServicesCatalogManager() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0B1F36] px-5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#102943] disabled:opacity-50"
                 >
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin text-[#C8973D]" /> : <Save className="h-4 w-4 text-[#C8973D]" />}
                   <span>{isSaving ? "Saving..." : "Save Service"}</span>
                 </button>
               </div>

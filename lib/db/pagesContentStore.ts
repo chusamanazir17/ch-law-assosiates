@@ -223,6 +223,24 @@ const DEFAULT_PAGES: PageContentItem[] = [
     status: "published",
     updatedAt: new Date().toISOString(),
   },
+  {
+    id: "about",
+    route: "/about",
+    title: "About Us & Leadership",
+    heroBadge: "OUR STORY. A STRONGER TOMORROW.",
+    heroHeadline: "About Our Legal Chamber 121",
+    heroSubtitle: "Ch Composing Estamp & Tax Advisor provides reliable e-stamp, property registry, tax advisory, and court documentation services in Sahiwal.",
+    heroImage: HERO_IMAGES.home,
+    primaryCtaText: "Visit Our Chamber",
+    primaryCtaHref: "/#office",
+    secondaryCtaText: "WhatsApp Us",
+    secondaryCtaHref: SITE.whatsappHref,
+    leadContent: "Founded by Late Haji Faqir Muhammad and managed by Haji Nazir Ahmed & Usama Ch, Chamber 121 has served clients across Punjab for decades.",
+    metaTitle: "About Us & Leadership | Chamber 121 Sahiwal",
+    metaDescription: "Learn about Chamber 121 Sahiwal, our history, and leadership team providing trusted legal and tax services.",
+    status: "published",
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 export function getAllPagesContent(): PageContentItem[] {

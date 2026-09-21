@@ -213,7 +213,7 @@ export default function ReminderHistory() {
     switch (status) {
       case "sent":
         return (
-          <span className="rounded-full border border-emerald-200 bg-[#eef7f2] px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-[#075e38]">
+          <span className="rounded-full border border-[#C8973D]/40 bg-[#FDF8EE] px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-[#96641E]">
             Sent
           </span>
         );
@@ -237,13 +237,13 @@ export default function ReminderHistory() {
         );
       case "skipped":
         return (
-          <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-slate-600">
+          <span className="rounded-full border border-[#E2E8F0] bg-slate-100 px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-[#64748B]">
             Skipped
           </span>
         );
       case "cancelled":
         return (
-          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-zinc-600">
+          <span className="rounded-full border border-[#E2E8F0] bg-zinc-100 px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-[#64748B]">
             Cancelled
           </span>
         );
@@ -257,15 +257,15 @@ export default function ReminderHistory() {
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#52627A] mb-1">
             <span>Reminders</span>
-            <span>/</span>
-            <span className="text-slate-900 font-semibold">Delivery Logs</span>
+            <span className="text-[#94A3B8]">/</span>
+            <span className="text-[#0B1F36] font-semibold">Delivery Logs</span>
           </div>
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Reminder Delivery Logs
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
+          <p className="mt-0.5 text-xs text-[#52627A] leading-relaxed">
             Inspect automated email dispatches, retry transient failures, and test email layouts.
           </p>
         </div>
@@ -274,9 +274,9 @@ export default function ReminderHistory() {
           <button
             onClick={fetchDeliveries}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-xs hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-[#C8973D] ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </button>
           <button
@@ -284,9 +284,9 @@ export default function ReminderHistory() {
               setTestResult(null);
               setIsTestModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-[13.5px] font-medium text-white shadow-2xs transition"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition"
           >
-            <Mail className="h-4 w-4" /> Send Test Email
+            <Mail className="h-3.5 w-3.5 text-[#C8973D]" /> Send Test Email
           </button>
         </div>
       </div>
@@ -295,14 +295,14 @@ export default function ReminderHistory() {
       {actionNotice && (
         <div
           role="status"
-          className={`rounded-lg border p-3 text-xs flex items-center gap-2 shadow-2xs ${
+          className={`rounded-xl border p-3 text-xs flex items-center gap-2 shadow-xs ${
             actionNotice.type === "success"
-              ? "border-emerald-200 bg-[#eef7f2] text-emerald-800"
+              ? "border-[#C8973D]/40 bg-[#FDF8EE] text-[#96641E]"
               : "border-rose-200 bg-rose-50 text-rose-800"
           }`}
         >
           {actionNotice.type === "success" ? (
-            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle className="h-4 w-4 text-[#C8973D] shrink-0" />
           ) : (
             <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
           )}
@@ -311,9 +311,9 @@ export default function ReminderHistory() {
       )}
 
       {/* Filter Toolbar */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs">
-        <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
-          <Filter className="h-3.5 w-3.5 text-[#075e38]" />
+      <div className="flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-xs">
+        <div className="flex items-center gap-2 text-xs text-[#0B1F36] font-semibold">
+          <Filter className="h-3.5 w-3.5 text-[#C8973D]" />
           <span>Status Filter:</span>
         </div>
         <select
@@ -323,7 +323,7 @@ export default function ReminderHistory() {
             setCurrentPage(1);
           }}
           aria-label="Filter deliveries by Status"
-          className="rounded-lg border border-slate-200 bg-white py-1.5 px-3 text-xs text-slate-900 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+          className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-1.5 px-3 text-xs text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-xs transition"
         >
           <option value="all">All Deliveries</option>
           <option value="sent">Sent</option>
@@ -336,73 +336,73 @@ export default function ReminderHistory() {
       </div>
 
       {/* Delivery Log Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
+      <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-800">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11.5px] font-semibold text-slate-600">
+          <table className="w-full text-left text-xs text-[#334155]">
+            <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
               <tr>
-                <th className="py-3.5 px-4 font-semibold">Recipient</th>
-                <th className="py-3.5 px-4 font-semibold">Deadline & Period</th>
-                <th className="py-3.5 px-4 font-semibold">Interval</th>
-                <th className="py-3.5 px-4 font-semibold">Scheduled Date</th>
-                <th className="py-3.5 px-4 font-semibold">Status</th>
-                <th className="py-3.5 px-4 font-semibold">Attempts / Error Details</th>
-                <th className="py-3.5 px-4 font-semibold text-right">Action</th>
+                <th className="py-3 px-4 font-semibold">Recipient</th>
+                <th className="py-3 px-4 font-semibold">Deadline & Period</th>
+                <th className="py-3 px-4 font-semibold">Interval</th>
+                <th className="py-3 px-4 font-semibold">Scheduled Date</th>
+                <th className="py-3 px-4 font-semibold">Status</th>
+                <th className="py-3 px-4 font-semibold">Attempts / Error Details</th>
+                <th className="py-3 px-4 font-semibold text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#F1F5F9]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-[#075e38] mb-2" />
+                  <td colSpan={7} className="py-12 text-center text-[#52627A]">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-[#C8973D] mb-2" />
                     Loading delivery logs...
                   </td>
                 </tr>
               ) : deliveries.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={7} className="py-12 text-center text-[#52627A]">
                     No reminder delivery records found for this filter.
                   </td>
                 </tr>
               ) : (
                 deliveries.map((del) => (
-                  <tr key={del.id} className="hover:bg-slate-50/75 transition">
+                  <tr key={del.id} className="hover:bg-[#F8FAFC] transition">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-900">
+                      <div className="font-semibold text-xs text-[#0B1F36]">
                         {del.subscriber?.name || "Client"}
                       </div>
-                      <div className="text-[11.5px] font-mono text-slate-500 mt-0.5">
+                      <div className="text-[11px] font-mono text-[#52627A] mt-0.5">
                         {del.subscriber?.email}
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-medium text-slate-900">
+                      <div className="font-medium text-xs text-[#0B1F36]">
                         {del.deadline?.title || "Tax Filing"}
                       </div>
-                      <div className="text-[11.5px] text-slate-500 mt-0.5">
+                      <div className="text-[11px] text-[#52627A] mt-0.5">
                         {del.deadline?.category?.name} • Due: {del.deadline?.filing_deadline} (rev #{del.deadline_revision})
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-700 font-medium">
+                    <td className="py-3.5 px-4 text-[#334155] font-medium text-xs">
                       {del.reminder_interval === "30_days" ? "30 Days Before" : "7 Days Before"}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-[11.5px] text-slate-700">
+                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#52627A]">
                       {del.scheduled_date}
                     </td>
                     <td className="py-3.5 px-4">
                       {getStatusBadge(del.status)}
                     </td>
                     <td className="py-3.5 px-4 max-w-xs">
-                      <div className="text-[11.5px] text-slate-600">
+                      <div className="text-[11px] text-[#52627A]">
                         Attempts: {del.attempt_count}
                         {del.sent_at && (
-                          <span className="block text-emerald-700 font-medium">
+                          <span className="block text-[#96641E] font-medium">
                             Sent at {new Date(del.sent_at).toLocaleTimeString()}
                           </span>
                         )}
                       </div>
                       {del.error_details && (
-                        <p className="text-[10.5px] text-rose-600 mt-1 line-clamp-2" title={del.error_details}>
+                        <p className="text-[11px] text-rose-600 mt-1 line-clamp-2" title={del.error_details}>
                           {del.error_details}
                         </p>
                       )}
@@ -412,7 +412,7 @@ export default function ReminderHistory() {
                         <button
                           onClick={() => handleRetryDelivery(del.id)}
                           disabled={retryingId === del.id}
-                          className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11.5px] font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-50 shadow-2xs transition"
+                          className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50 shadow-xs transition"
                           title="Retry delivery in next scheduled run"
                         >
                           <RotateCcw className={`h-3 w-3 ${retryingId === del.id ? "animate-spin" : ""}`} />
@@ -430,26 +430,26 @@ export default function ReminderHistory() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-xs text-slate-500 bg-slate-50">
+        <div className="flex items-center justify-between border-t border-[#E2E8F0] px-4 py-3 text-xs text-[#52627A] bg-[#F8FAFC]">
           <div>
-            Showing <strong className="text-slate-900">{deliveries.length}</strong> of{" "}
-            <strong className="text-slate-900">{totalCount}</strong> logs
+            Showing <strong className="text-[#0B1F36]">{deliveries.length}</strong> of{" "}
+            <strong className="text-[#0B1F36]">{totalCount}</strong> logs
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1 || isLoading}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-100 disabled:opacity-40 shadow-2xs font-medium"
+              className="flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] disabled:opacity-40 shadow-xs transition"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Prev
             </button>
-            <span className="px-2 font-medium text-slate-600">
+            <span className="px-2 font-medium text-[#52627A]">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages || isLoading}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-100 disabled:opacity-40 shadow-2xs font-medium"
+              className="flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] disabled:opacity-40 shadow-xs transition"
             >
               Next <ChevronRight className="h-3.5 w-3.5" />
             </button>
@@ -460,33 +460,33 @@ export default function ReminderHistory() {
       {/* Admin Test Email Modal */}
       {isTestModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#075e38]" /> Dispatch Test Reminder
+          <div className="w-full max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-6 text-[#0B1F36] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+              <h3 className="text-sm font-bold text-[#0B1F36] flex items-center gap-2">
+                <Mail className="h-4 w-4 text-[#C8973D]" /> Dispatch Test Reminder
               </h3>
               <button
                 onClick={() => setIsTestModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition"
+                className="text-[#94A3B8] hover:bg-[#F8FAFC] hover:text-[#0B1F36] p-1 rounded-lg transition"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[#52627A] leading-relaxed">
               Test emails are strictly dispatched to your authenticated administrator email address to preview template styling and deliverability.
             </p>
 
             {testResult && (
               <div
-                className={`rounded-lg border p-3 text-xs flex items-center gap-2 shadow-2xs ${
+                className={`rounded-xl border p-3 text-xs flex items-center gap-2 shadow-xs ${
                   testResult.success
-                    ? "border-emerald-200 bg-[#eef7f2] text-emerald-800"
+                    ? "border-[#C8973D]/40 bg-[#FDF8EE] text-[#96641E]"
                     : "border-rose-200 bg-rose-50 text-rose-800"
                 }`}
               >
                 {testResult.success ? (
-                  <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <CheckCircle className="h-4 w-4 text-[#C8973D] shrink-0" />
                 ) : (
                   <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
                 )}
@@ -496,7 +496,7 @@ export default function ReminderHistory() {
 
             <form onSubmit={handleSendTestEmail} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                   Select Verified Deadline
                 </label>
                 {verifiedDeadlines.length === 0 ? (
@@ -507,7 +507,7 @@ export default function ReminderHistory() {
                   <select
                     value={selectedDeadlineId}
                     onChange={(e) => setSelectedDeadlineId(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2 px-3 text-xs text-slate-900 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 px-3 text-xs text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-xs transition"
                     required
                   >
                     {verifiedDeadlines.map((dl) => (
@@ -520,7 +520,7 @@ export default function ReminderHistory() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                   Reminder Interval
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -529,8 +529,8 @@ export default function ReminderHistory() {
                     onClick={() => setSelectedInterval("30_days")}
                     className={`rounded-lg border p-2 text-xs font-semibold transition ${
                       selectedInterval === "30_days"
-                        ? "border-emerald-300 bg-[#eef7f2] text-[#075e38]"
-                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        ? "border-[#C8973D] bg-[#FDF8EE] text-[#96641E]"
+                        : "border-[#E2E8F0] bg-[#F8FAFC] text-[#52627A] hover:bg-slate-100"
                     }`}
                   >
                     30 Days Before
@@ -540,8 +540,8 @@ export default function ReminderHistory() {
                     onClick={() => setSelectedInterval("7_days")}
                     className={`rounded-lg border p-2 text-xs font-semibold transition ${
                       selectedInterval === "7_days"
-                        ? "border-emerald-300 bg-[#eef7f2] text-[#075e38]"
-                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        ? "border-[#C8973D] bg-[#FDF8EE] text-[#96641E]"
+                        : "border-[#E2E8F0] bg-[#F8FAFC] text-[#52627A] hover:bg-slate-100"
                     }`}
                   >
                     7 Days Before
@@ -549,22 +549,22 @@ export default function ReminderHistory() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
+              <div className="flex justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
                 <button
                   type="button"
                   onClick={() => setIsTestModalOpen(false)}
-                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition shadow-xs"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={isSendingTest || verifiedDeadlines.length === 0}
-                  className="rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-xs font-medium text-white shadow-2xs inline-flex items-center gap-1.5 transition disabled:opacity-50"
+                  className="rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-2 text-xs font-semibold text-white shadow-xs inline-flex items-center gap-1.5 transition disabled:opacity-50"
                 >
                   {isSendingTest ? (
                     <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Dispatching...
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C8973D]" /> Dispatching...
                     </>
                   ) : (
                     "Send Test Email"

@@ -221,34 +221,34 @@ export default function SubscribersManager() {
     switch (status) {
       case "active":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef7f2] border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-[#075e38]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#075e38] animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FDF8EE] border border-[#C8973D]/40 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-[#96641E]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#C8973D]" />
             Active
           </span>
         );
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-amber-800">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
             Pending
           </span>
         );
       case "unsubscribed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-            <UserX className="h-3 w-3 text-slate-400" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-[#E2E8F0] px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-[#64748B]">
+            <UserX className="h-3 w-3 text-[#94A3B8]" />
             Unsubscribed
           </span>
         );
       case "suppressed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-rose-700">
             <Ban className="h-3 w-3 text-rose-500" />
             Suppressed
           </span>
         );
       default:
-        return <span className="capitalize text-slate-700">{status}</span>;
+        return <span className="capitalize text-[#334155]">{status}</span>;
     }
   };
 
@@ -263,19 +263,19 @@ export default function SubscribersManager() {
   return (
     <div className="space-y-6">
       {/* Top Breadcrumb */}
-      <div className="text-[13px] text-slate-500 font-normal">
+      <div className="text-xs font-medium text-[#64748B] flex items-center gap-1.5">
         <span>Reminders</span>
-        <span className="mx-2 text-slate-400">/</span>
-        <span className="text-slate-800 font-medium">Subscribers</span>
+        <span className="text-[#94A3B8]">/</span>
+        <span className="text-[#0B1F36] font-semibold">Subscribers</span>
       </div>
 
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Subscribers Management
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
+          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">
             View registered clients, monitor statutory consent records, and manage tax reminder categories.
           </p>
         </div>
@@ -285,26 +285,26 @@ export default function SubscribersManager() {
           <button
             onClick={fetchSubscribers}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-2xs hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
           >
-            <RefreshCw className={`h-4 w-4 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 text-[#64748B] ${isLoading ? "animate-spin" : ""}`} />
             <span>Refresh</span>
           </button>
 
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-[13.5px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-2xs hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
           >
-            <Download className="h-4 w-4 text-slate-500" />
+            <Download className="h-3.5 w-3.5 text-[#64748B]" />
             <span>Export CSV</span>
           </button>
 
           <Link
             href="/#tax-reminders"
             target="_blank"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-[13.5px] font-medium text-white shadow-2xs transition"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-4 py-2 text-xs font-semibold text-white shadow-xs transition"
           >
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="h-3.5 w-3.5 text-[#C8973D]" />
             <span>View alert form</span>
           </Link>
         </div>
@@ -316,12 +316,12 @@ export default function SubscribersManager() {
           role="status"
           className={`rounded-xl border p-3.5 text-xs flex items-center gap-2.5 shadow-2xs ${
             actionFeedback.type === "success"
-              ? "border-emerald-200 bg-emerald-50/80 text-emerald-900"
+              ? "border-[#C8973D]/40 bg-[#FDF8EE] text-[#96641E]"
               : "border-rose-200 bg-rose-50 text-rose-800"
           }`}
         >
           {actionFeedback.type === "success" ? (
-            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+            <CheckCircle className="h-4 w-4 text-[#C8973D] shrink-0" />
           ) : (
             <Ban className="h-4 w-4 text-rose-600 shrink-0" />
           )}
@@ -345,91 +345,91 @@ export default function SubscribersManager() {
       {/* 4 Uniform Metric KPI Stat Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Registered */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs transition hover:border-[#CBD5E1] flex flex-col justify-between h-[124px]">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-slate-600">Total Subscribers</span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-              <Users className="h-4.5 w-4.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Total Subscribers</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/6 text-[#0B1F36]">
+              <Users className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900">
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-slate-400" /> : totalCount}
+            <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-[#94A3B8]" /> : totalCount}
             </span>
-            <span className="text-[11.5px] font-medium text-slate-500">Registered</span>
+            <span className="text-[11px] font-medium text-[#64748B]">Registered</span>
           </div>
-          <p className="text-[12px] text-slate-500 truncate">
+          <p className="text-[11px] text-[#52627A] truncate">
             Opted-in via public website forms
           </p>
         </div>
 
         {/* Card 2: Active Alerts */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs transition hover:border-[#CBD5E1] flex flex-col justify-between h-[124px]">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-slate-600">Active Recipients</span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eef7f2] text-[#075e38]">
-              <UserCheck className="h-4.5 w-4.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Active Recipients</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FDF8EE] text-[#96641E]">
+              <UserCheck className="h-4 w-4 text-[#C8973D]" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900">
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-emerald-600" /> : activeCount}
+            <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-[#C8973D]" /> : activeCount}
             </span>
-            <span className="inline-flex items-center rounded-full bg-[#eef7f2] border border-emerald-200/60 px-2 py-0.5 text-[11px] font-semibold text-[#075e38]">
+            <span className="inline-flex items-center rounded-full bg-[#FDF8EE] border border-[#C8973D]/30 px-2 py-0.5 text-[10.5px] font-semibold text-[#96641E]">
               {totalCount > 0 ? `${Math.round((activeCount / totalCount) * 100)}% active` : "0%"}
             </span>
           </div>
-          <p className="text-[12px] text-slate-500 truncate">
+          <p className="text-[11px] text-[#52627A] truncate">
             Receiving statutory reminder dispatches
           </p>
         </div>
 
         {/* Card 3: Pending Confirmation */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs transition hover:border-[#CBD5E1] flex flex-col justify-between h-[124px]">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-slate-600">Pending Verification</span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-              <Clock className="h-4.5 w-4.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Pending Verification</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+              <Clock className="h-4 w-4 text-amber-600" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900">
+            <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
               {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-amber-600" /> : pendingCount}
             </span>
-            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10.5px] font-semibold text-amber-800">
               Double opt-in
             </span>
           </div>
-          <p className="text-[12px] text-slate-500 truncate">
+          <p className="text-[11px] text-[#52627A] truncate">
             Awaiting verification link confirmation
           </p>
         </div>
 
         {/* Card 4: Tax Categories */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition hover:border-slate-300 hover:shadow-xs flex flex-col justify-between h-[132px]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs transition hover:border-[#CBD5E1] flex flex-col justify-between h-[124px]">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-semibold text-slate-600">Tax Categories</span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-              <ShieldCheck className="h-4.5 w-4.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Tax Categories</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/6 text-[#0B1F36]">
+              <ShieldCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900">
+            <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
               {categories.length}
             </span>
-            <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+            <span className="inline-flex items-center rounded-full bg-slate-100 border border-[#E2E8F0] px-2 py-0.5 text-[10.5px] font-medium text-[#64748B]">
               Active schedules
             </span>
           </div>
-          <p className="text-[12px] text-slate-500 truncate">
+          <p className="text-[11px] text-[#52627A] truncate">
             FBR, PRA, E-Stamping & Withholding
           </p>
         </div>
       </div>
 
-      {/* Status Filter Tabs matching Dashboard & PostsManager */}
-      <div className="border-b border-slate-200">
-        <nav className="flex space-x-6 text-[14px]">
+      {/* Status Filter Tabs */}
+      <div className="border-b border-[#E2E8F0]">
+        <nav className="flex space-x-6">
           {statusTabs.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
@@ -439,18 +439,18 @@ export default function SubscribersManager() {
                   setActiveTab(tab.key);
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-2 pb-3 pt-1 text-[13.5px] font-medium transition-colors border-b-2 -mb-px ${
+                className={`flex items-center gap-2 pb-3 pt-1 text-xs font-semibold transition-colors border-b-2 -mb-px ${
                   isActive
-                    ? "border-[#075e38] text-[#075e38] font-semibold"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
+                    ? "border-[#0B1F36] text-[#0B1F36]"
+                    : "border-transparent text-[#64748B] hover:text-[#0B1F36]"
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                     isActive
-                      ? "bg-emerald-50 text-[#075e38]"
-                      : "bg-slate-100 text-slate-600"
+                      ? "bg-[#0B1F36] text-white"
+                      : "bg-slate-100 text-[#64748B]"
                   }`}
                 >
                   {tab.count}
@@ -465,7 +465,7 @@ export default function SubscribersManager() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
           <input
             type="text"
             value={searchQuery}
@@ -474,7 +474,7 @@ export default function SubscribersManager() {
               setCurrentPage(1);
             }}
             placeholder="Search by client name or email address..."
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-[13.5px] text-slate-800 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-10 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
         </div>
 
@@ -487,7 +487,7 @@ export default function SubscribersManager() {
               setCurrentPage(1);
             }}
             aria-label="Filter by Category"
-            className="w-full sm:w-auto appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-3.5 pr-9 text-[13.5px] font-normal text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-3.5 pr-9 text-xs font-medium text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs cursor-pointer transition"
           >
             <option value="all">All tax categories</option>
             {categories.map((c) => (
@@ -496,39 +496,39 @@ export default function SubscribersManager() {
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
         </div>
       </div>
 
       {/* Main Table Card */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="border-b border-slate-200 bg-slate-50/80 text-[11.5px] font-semibold uppercase tracking-wider text-slate-500">
+          <table className="w-full text-left text-xs text-[#334155]">
+            <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
               <tr>
-                <th className="py-3.5 px-4 font-semibold">Client Name & Email</th>
-                <th className="py-3.5 px-4 font-semibold">Status</th>
-                <th className="py-3.5 px-4 font-semibold">Subscribed Tax Categories</th>
-                <th className="py-3.5 px-4 font-semibold">Consent Record</th>
-                <th className="py-3.5 px-4 text-right font-semibold">Actions</th>
+                <th className="py-3 px-4 font-semibold">Client Name & Email</th>
+                <th className="py-3 px-4 font-semibold">Status</th>
+                <th className="py-3 px-4 font-semibold">Subscribed Tax Categories</th>
+                <th className="py-3 px-4 font-semibold">Consent Record</th>
+                <th className="py-3 px-4 text-right font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#E2E8F0]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center text-slate-500">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-[#075e38] mb-2" />
+                  <td colSpan={5} className="py-16 text-center text-[#64748B]">
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-[#C8973D] mb-2" />
                     <span className="text-xs font-medium">Loading database subscribers...</span>
                   </td>
                 </tr>
               ) : paginatedSubscribers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center text-slate-500">
-                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-2">
+                  <td colSpan={5} className="py-16 text-center text-[#64748B]">
+                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-[#94A3B8] mb-2">
                       <Users className="h-5 w-5" />
                     </div>
-                    <p className="font-semibold text-slate-800 text-sm">No subscribers found</p>
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="font-semibold text-[#0B1F36] text-sm">No subscribers found</p>
+                    <p className="mt-1 text-xs text-[#64748B]">
                       Try changing your search terms or filter selections.
                     </p>
                   </td>
@@ -548,17 +548,17 @@ export default function SubscribersManager() {
                   });
 
                   return (
-                    <tr key={sub.id} className="hover:bg-slate-50/75 transition">
+                    <tr key={sub.id} className="hover:bg-[#F8FAFC] transition">
                       {/* Name & Email with Avatar */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36]/8 border border-[#0B1F36]/15 text-xs font-bold text-[#0B1F36]">
                             {initials}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900 text-sm">{sub.name}</div>
-                            <div className="text-slate-500 text-xs font-mono flex items-center gap-1.5 mt-0.5">
-                              <Mail className="h-3 w-3 text-slate-400" />
+                            <div className="font-semibold text-[#0B1F36] text-xs">{sub.name}</div>
+                            <div className="text-[#52627A] text-[11px] font-mono flex items-center gap-1.5 mt-0.5">
+                              <Mail className="h-3 w-3 text-[#94A3B8]" />
                               <span>{sub.email}</span>
                             </div>
                           </div>
@@ -577,24 +577,24 @@ export default function SubscribersManager() {
                             sub.categories.map((c) => (
                               <span
                                 key={c.id}
-                                className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-medium text-slate-700"
+                                className="inline-flex items-center rounded-md bg-[#F1F5F9] border border-[#E2E8F0] px-2 py-0.5 text-[10.5px] font-medium text-[#334155]"
                               >
                                 {c.name}
                               </span>
                             ))
                           ) : (
-                            <span className="text-xs text-slate-400 italic">General Statutory Alerts</span>
+                            <span className="text-xs text-[#94A3B8] italic">General Statutory Alerts</span>
                           )}
                         </div>
                       </td>
 
                       {/* Consent Details */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="text-xs font-medium text-slate-800">{consentDate}</div>
-                        <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <div className="text-xs font-semibold text-[#0B1F36]">{consentDate}</div>
+                        <div className="text-[11px] text-[#64748B] flex items-center gap-1.5 mt-0.5">
                           <span>{consentTime}</span>
                           <span>•</span>
-                          <span className="font-mono text-[10px] uppercase">{sub.consent_text_version || "v1.0"}</span>
+                          <span className="font-mono text-[10px] uppercase text-[#64748B]">{sub.consent_text_version || "v1.0"}</span>
                         </div>
                       </td>
 
@@ -603,17 +603,17 @@ export default function SubscribersManager() {
                         {sub.status === "active" ? (
                           <button
                             onClick={() => handleUnsubscribeClient(sub.id, sub.email)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition shadow-2xs"
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#52627A] hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition shadow-2xs"
                             title="Unsubscribe client from automated emails"
                           >
                             Unsubscribe
                           </button>
                         ) : sub.status === "pending" ? (
-                          <span className="text-[11.5px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 rounded px-2 py-0.5">
+                          <span className="text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 rounded px-2 py-0.5">
                             Awaiting Click
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Inactive</span>
+                          <span className="text-xs text-[#94A3B8] italic">Inactive</span>
                         )}
                       </td>
                     </tr>
@@ -625,26 +625,26 @@ export default function SubscribersManager() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-3 text-xs text-slate-600">
+        <div className="flex items-center justify-between border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-xs text-[#52627A]">
           <div>
-            Showing <strong className="text-slate-900">{paginatedSubscribers.length}</strong> of{" "}
-            <strong className="text-slate-900">{filteredSubscribers.length}</strong> total records
+            Showing <strong className="text-[#0B1F36]">{paginatedSubscribers.length}</strong> of{" "}
+            <strong className="text-[#0B1F36]">{filteredSubscribers.length}</strong> total records
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1 || isLoading}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#0B1F36] shadow-2xs hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Prev
             </button>
-            <span className="px-2 text-slate-700 font-medium">
+            <span className="px-2 text-[#52627A] font-medium">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages || isLoading}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-semibold text-[#0B1F36] shadow-2xs hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               Next <ChevronRight className="h-3.5 w-3.5" />
             </button>

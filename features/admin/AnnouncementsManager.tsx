@@ -104,6 +104,9 @@ export default function AnnouncementsManager() {
       setAnnouncements((prev) =>
         prev.map((a) => (a.id === ann.id ? { ...a, is_active: !a.is_active } : { ...a, is_active: false }))
       );
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
       setMessage({
         type: "success",
         text: `Announcement "${ann.title}" is now ${!ann.is_active ? "ACTIVE" : "INACTIVE"}.`,
@@ -124,6 +127,9 @@ export default function AnnouncementsManager() {
       if (!data.success) throw new Error(data.error || "Failed to delete announcement");
 
       setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
       setMessage({ type: "success", text: "Announcement deleted successfully." });
     } catch (error) {
       setMessage({ type: "error", text: getErrorMessage(error, "Failed to delete announcement.") });
@@ -163,6 +169,9 @@ export default function AnnouncementsManager() {
         type: "success",
         text: editingId ? "Announcement updated successfully!" : "New announcement published!",
       });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
 
       resetForm();
       loadAnnouncements();
@@ -244,21 +253,23 @@ export default function AnnouncementsManager() {
   const CurrentIcon = currentTone.icon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto font-sans pb-10">
       {/* Top Breadcrumb */}
-      <div className="text-[13px] text-slate-500 font-normal">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748B]">
+        <span>Chamber 121</span>
+        <span className="text-slate-300">›</span>
         <span>Website</span>
-        <span className="mx-2 text-slate-400">/</span>
-        <span className="text-slate-700">Announcements</span>
+        <span className="text-slate-300">›</span>
+        <span className="text-[#0B1F36] font-semibold">Announcements & Tickers</span>
       </div>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Site Announcements & Tickers
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
+          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">
             Publish critical FBR deadline extensions, holiday office schedules, or urgent compliance alerts across the website.
           </p>
         </div>
@@ -269,12 +280,12 @@ export default function AnnouncementsManager() {
         <div
           className={`flex items-center justify-between rounded-xl p-3.5 text-xs font-medium border shadow-2xs ${
             message.type === "success"
-              ? "bg-[#eef7f2] text-[#075e38] border-emerald-200/80"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200/80"
               : "bg-rose-50 text-rose-800 border-rose-200"
           }`}
         >
           <span>{message.text}</span>
-          <button onClick={() => setMessage(null)} className="text-slate-500 hover:text-slate-800 ml-2">
+          <button onClick={() => setMessage(null)} className="text-[#64748B] hover:text-[#0B1F36] ml-2 font-medium">
             Dismiss
           </button>
         </div>
@@ -283,16 +294,16 @@ export default function AnnouncementsManager() {
       {/* Editor & Live Preview Grid */}
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Form Column (3 Cols) */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4 lg:col-span-3">
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Edit2 className="h-4 w-4 text-[#075e38]" />
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] space-y-4 lg:col-span-3">
+          <h2 className="text-sm font-semibold text-[#0B1F36] flex items-center gap-2">
+            <Edit2 className="h-4 w-4 text-[#C8973D]" />
             <span>{editingId ? "Edit Announcement" : "Create New Notice Banner"}</span>
           </h2>
 
           <form onSubmit={handleSave} className="space-y-4 text-xs">
             {/* Title */}
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-[#334155] font-semibold mb-1">
                 Notice Title *
               </label>
               <input
@@ -301,13 +312,13 @@ export default function AnnouncementsManager() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. FBR Extension: Annual Income Tax Returns"
-                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
             </div>
 
             {/* Message */}
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-[#334155] font-semibold mb-1">
                 Notice Message *
               </label>
               <textarea
@@ -316,31 +327,31 @@ export default function AnnouncementsManager() {
                 value={msgText}
                 onChange={(e) => setMsgText(e.target.value)}
                 placeholder="Add a concise public notice, filing update, or office announcement here."
-                className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
             </div>
 
             {/* Tone */}
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">
+              <label className="block text-[#334155] font-semibold mb-1">
                 Color Theme / Tone
               </label>
               <select
                 value={tone}
                 onChange={(e) => setTone(e.target.value as AnnouncementTone)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:border-[#075e38] focus:outline-none"
+                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
               >
                 <option value="warning">Warning (Amber)</option>
                 <option value="danger">Urgent Alert (Red)</option>
                 <option value="info">Informational (Blue)</option>
-                <option value="dark">Executive (Dark Slate)</option>
+                <option value="dark">Executive (Chamber Navy)</option>
               </select>
             </div>
 
             {/* Action Link & Text */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="block text-[#334155] font-semibold mb-1">
                   Action Link URL (Optional)
                 </label>
                 <input
@@ -348,12 +359,12 @@ export default function AnnouncementsManager() {
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="/updates/... or https://..."
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="block text-[#334155] font-semibold mb-1">
                   Button Text
                 </label>
                 <input
@@ -361,31 +372,31 @@ export default function AnnouncementsManager() {
                   value={linkText}
                   onChange={(e) => setLinkText(e.target.value)}
                   placeholder="e.g. Read Circular &rarr;"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                 />
               </div>
             </div>
 
             {/* Active Toggle */}
-            <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-slate-100">
+            <label className="flex items-center gap-2 cursor-pointer pt-2 border-t border-[#F1F5F9]">
               <input
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-[#075e38] focus:ring-[#075e38]"
+                className="h-4 w-4 rounded border-[#CBD5E1] text-[#0B1F36] focus:ring-[#C8973D]"
               />
-              <span className="text-slate-800 font-medium">
+              <span className="text-[#334155] font-medium">
                 Make this banner active immediately on the website
               </span>
             </label>
 
             {/* Form Actions */}
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#F1F5F9]">
               {editingId && (
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="rounded-lg border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 transition"
+                  className="rounded-lg border border-[#E2E8F0] px-3.5 py-2 text-[#64748B] hover:bg-slate-50 hover:text-[#0B1F36] transition font-medium"
                 >
                   Cancel Edit
                 </button>
@@ -393,7 +404,7 @@ export default function AnnouncementsManager() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 font-medium text-white shadow-2xs transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-4 py-2 font-semibold text-white shadow-xs hover:shadow-sm transition disabled:opacity-50"
               >
                 {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 <span>{editingId ? "Update Notice" : "Publish Notice"}</span>
@@ -403,13 +414,13 @@ export default function AnnouncementsManager() {
         </div>
 
         {/* Live Preview Column (2 Cols) */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4 lg:col-span-2 flex flex-col justify-between">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] space-y-4 lg:col-span-2 flex flex-col justify-between">
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 mb-3">
-              <Eye className="h-4 w-4 text-[#075e38]" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[#64748B] flex items-center gap-2 mb-3">
+              <Eye className="h-4 w-4 text-[#C8973D]" />
               <span>Live Website Banner Preview</span>
             </h2>
-            <p className="text-[12px] text-slate-500 mb-4">
+            <p className="text-xs text-[#52627A] mb-4">
               This preview reflects how visitors will see the notification at the top of the homepage and legal guides.
             </p>
 
@@ -424,13 +435,13 @@ export default function AnnouncementsManager() {
                     <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${currentTone.dotColor}`} />
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-bold tracking-wider uppercase border ${currentTone.badgeBg} ${currentTone.badgeText}`}
+                    className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[9.5px] font-bold tracking-wider uppercase border ${currentTone.badgeBg} ${currentTone.badgeText}`}
                   >
                     <CurrentIcon className="h-2.5 w-2.5" />
                     <span>{currentTone.badgeLabel}</span>
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className={`font-bold text-xs block truncate ${currentTone.titleColor}`}>
+                    <span className={`font-semibold text-xs block truncate ${currentTone.titleColor}`}>
                       {title || "Official Compliance Notice Title"}
                     </span>
                     <p className={`text-[11px] truncate ${currentTone.textColor}`}>
@@ -440,7 +451,7 @@ export default function AnnouncementsManager() {
                 </div>
 
                 {(linkUrl || linkText) && (
-                  <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded shadow-sm shrink-0 font-bold ${currentTone.btnBg}`}>
+                  <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded shadow-sm shrink-0 font-semibold ${currentTone.btnBg}`}>
                     <span>{linkText || "View Details"}</span>
                     <ExternalLink className="h-3 w-3" />
                   </span>
@@ -449,53 +460,53 @@ export default function AnnouncementsManager() {
             </div>
           </div>
 
-          <div className="rounded-lg bg-slate-50 p-3 border border-slate-200 text-[11.5px] text-slate-500">
-            <span className="text-slate-800 font-semibold">Tip:</span> Use "Urgent Alert" (Red) only for strict FBR penal deadlines, and "Warning" (Amber) for routine quarterly extension notices.
+          <div className="rounded-lg bg-[#F8FAFC] p-3 border border-[#E2E8F0] text-xs text-[#52627A]">
+            <span className="text-[#0B1F36] font-semibold">Tip:</span> Use "Urgent Alert" (Red) only for strict FBR penal deadlines, and "Warning" (Amber) for routine quarterly extension notices.
           </div>
         </div>
       </div>
 
       {/* Announcements Table */}
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
-        <div className="p-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
+        <div className="p-4 border-b border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-between">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-[#64748B]">
             All Recorded Announcements
           </h3>
-          <span className="text-xs text-slate-400 font-normal">{announcements.length} notices</span>
+          <span className="text-xs text-[#64748B] font-normal">{announcements.length} notices</span>
         </div>
 
         {isLoading ? (
-          <div className="py-12 text-center text-slate-400 text-xs">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#075e38] mb-2" />
+          <div className="py-12 text-center text-[#64748B] text-xs">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#0B1F36] mb-2" />
             Loading announcements...
           </div>
         ) : announcements.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-500">
+          <div className="p-8 text-center text-xs text-[#64748B]">
             No announcements created yet. Use the form above to post a site banner.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 text-xs">
+          <div className="divide-y divide-[#F1F5F9] text-xs">
             {announcements.map((ann) => (
               <div
                 key={ann.id}
-                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-slate-50/75 transition"
+                className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-[#F8FAFC] transition"
               >
                 <div className="space-y-1 max-w-xl">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-block rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase border ${
+                      className={`inline-block rounded-md px-2.5 py-0.5 text-[10.5px] font-semibold uppercase border ${
                         toneClasses[ann.tone]?.badgeBg || "bg-slate-100"
                       } ${toneClasses[ann.tone]?.badgeText || "text-slate-700"}`}
                     >
                       {ann.tone}
                     </span>
-                    <h4 className="font-bold text-slate-900 text-sm">{ann.title}</h4>
+                    <h4 className="font-semibold text-[#0B1F36] text-sm">{ann.title}</h4>
                   </div>
-                  <p className="text-slate-600 text-[11.5px] leading-relaxed line-clamp-2">
+                  <p className="text-[#334155] text-xs leading-relaxed line-clamp-2">
                     {ann.message}
                   </p>
                   {ann.link_url && (
-                    <span className="text-[11px] text-slate-400 font-mono block">
+                    <span className="text-[11px] text-[#64748B] font-mono block">
                       Link: {ann.link_url}
                     </span>
                   )}
@@ -507,22 +518,22 @@ export default function AnnouncementsManager() {
                     onClick={() => handleToggleActive(ann)}
                     className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
                       ann.is_active
-                        ? "bg-[#eef7f2] text-[#075e38] border border-emerald-200/80"
-                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                        : "bg-slate-100 text-[#64748B] border border-slate-200"
                     }`}
                   >
                     {ann.is_active ? "Active" : "Inactive"}
                   </button>
                   <button
                     onClick={() => handleEditClick(ann)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+                    className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-slate-100 hover:text-[#0B1F36] transition"
                     title="Edit Announcement"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(ann.id, ann.title)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                    className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-rose-50 hover:text-rose-600 transition"
                     title="Delete Announcement"
                   >
                     <Trash2 className="h-4 w-4" />

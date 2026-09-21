@@ -169,9 +169,9 @@ export default function PostEditor() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-slate-200 bg-white">
-        <div className="text-center text-sm text-slate-500">
-          <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-emerald-700" />
+      <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-[#E2E8F0] bg-white">
+        <div className="text-center text-xs text-[#52627A]">
+          <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-[#C8973D]" />
           Loading post...
         </div>
       </div>
@@ -184,15 +184,15 @@ export default function PostEditor() {
         <div>
           <Link
             href="/admin/posts"
-            className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-slate-900"
+            className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#52627A] transition hover:text-[#0B1F36]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to posts
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             {postId ? "Edit post" : "Create post"}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-0.5 text-xs text-[#52627A] leading-relaxed">
             Write the public update, then save it as a draft or publish it.
           </p>
         </div>
@@ -203,9 +203,9 @@ export default function PostEditor() {
               href={`/updates/${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-xs transition hover:bg-[#F8FAFC] hover:text-[#0B1F36]"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-3.5 w-3.5" />
               View live
             </Link>
           )}
@@ -213,40 +213,40 @@ export default function PostEditor() {
             type="button"
             onClick={() => void savePost("draft")}
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-xs transition hover:bg-[#F8FAFC] hover:text-[#0B1F36] disabled:cursor-wait disabled:opacity-60"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C8973D]" /> : <Save className="h-3.5 w-3.5 text-[#52627A]" />}
             Save draft
           </button>
           <button
             type="button"
             onClick={() => void savePost("published")}
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#075e38] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#064e2e] disabled:cursor-wait disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#0B1F36] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#102943] disabled:cursor-wait disabled:opacity-60"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5 text-[#C8973D]" />}
             Publish
           </button>
         </div>
       </div>
 
       {error && (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800">
           {error}
         </div>
       )}
       {notice && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-xl border border-[#C8973D]/40 bg-[#FDF8EE] px-4 py-3 text-xs font-medium text-[#96641E]">
           {notice}
         </div>
       )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="space-y-5 rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs sm:p-6">
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-4">
-              <label htmlFor="post-title" className="text-sm font-semibold text-slate-800">Title</label>
-              <span className="text-xs tabular-nums text-slate-400">{characterCounts.title}/180</span>
+              <label htmlFor="post-title" className="text-xs font-semibold text-[#0B1F36]">Title</label>
+              <span className="text-xs tabular-nums text-[#94A3B8]">{characterCounts.title}/180</span>
             </div>
             <input
               id="post-title"
@@ -254,28 +254,28 @@ export default function PostEditor() {
               maxLength={180}
               onChange={(event) => handleTitleChange(event.target.value)}
               placeholder="Enter a clear post title"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-lg font-semibold text-slate-950 outline-none transition placeholder:font-normal placeholder:text-slate-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              className="w-full rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-sm font-semibold text-[#0B1F36] outline-none transition placeholder:font-normal placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
             />
           </div>
 
           <div>
-            <label htmlFor="post-slug" className="mb-1.5 block text-sm font-semibold text-slate-800">URL slug</label>
-            <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-600/15">
-              <span className="hidden border-r border-slate-200 px-3 py-2.5 text-sm text-slate-400 sm:block">/updates/</span>
+            <label htmlFor="post-slug" className="mb-1.5 block text-xs font-semibold text-[#0B1F36]">URL slug</label>
+            <div className="flex overflow-hidden rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] focus-within:border-[#C8973D] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#C8973D]/20">
+              <span className="hidden border-r border-[#E2E8F0] px-3 py-2 text-xs text-[#64748B] sm:block">/updates/</span>
               <input
                 id="post-slug"
                 value={slug}
                 onChange={(event) => handleSlugChange(event.target.value)}
                 placeholder="post-url-slug"
-                className="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none"
+                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-[#0B1F36] outline-none placeholder:text-[#94A3B8]"
               />
             </div>
           </div>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-4">
-              <label htmlFor="post-excerpt" className="text-sm font-semibold text-slate-800">Excerpt</label>
-              <span className="text-xs tabular-nums text-slate-400">{characterCounts.excerpt}/500</span>
+              <label htmlFor="post-excerpt" className="text-xs font-semibold text-[#0B1F36]">Excerpt</label>
+              <span className="text-xs tabular-nums text-[#94A3B8]">{characterCounts.excerpt}/500</span>
             </div>
             <textarea
               id="post-excerpt"
@@ -284,14 +284,14 @@ export default function PostEditor() {
               rows={3}
               onChange={(event) => setExcerpt(event.target.value)}
               placeholder="Short summary shown in post listings."
-              className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              className="w-full resize-y rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5 text-xs leading-relaxed text-[#334155] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
             />
           </div>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-4">
-              <label htmlFor="post-content" className="text-sm font-semibold text-slate-800">Content</label>
-              <span className="text-xs text-slate-400">Markdown supported</span>
+              <label htmlFor="post-content" className="text-xs font-semibold text-[#0B1F36]">Content</label>
+              <span className="text-[11px] font-medium text-[#94A3B8]">Markdown supported</span>
             </div>
             <textarea
               id="post-content"
@@ -299,72 +299,72 @@ export default function PostEditor() {
               rows={22}
               onChange={(event) => setContent(event.target.value)}
               placeholder={"Write the full post here.\n\nUse ## for section headings and ordinary paragraphs for body copy."}
-              className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 font-mono text-[13.5px] leading-6 text-slate-800 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              className="w-full resize-y rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2.5 font-mono text-xs leading-relaxed text-[#334155] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
             />
           </div>
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-bold text-slate-900">Publishing</h2>
+          <section className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs">
+            <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36]">Publishing</h2>
             <div className="mt-4 space-y-4">
               <div>
-                <label htmlFor="post-status" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Status</label>
+                <label htmlFor="post-status" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Status</label>
                 <select
                   id="post-status"
                   value={status}
                   onChange={(event) => setStatus(event.target.value as EditorStatus)}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                 </select>
-                <p className="mt-1.5 text-xs leading-5 text-slate-400">Use the action buttons above to persist a status change.</p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[#94A3B8]">Use the action buttons above to persist a status change.</p>
               </div>
 
               <div>
-                <label htmlFor="post-category" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Category</label>
+                <label htmlFor="post-category" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Category</label>
                 <input
                   id="post-category"
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}
                   maxLength={100}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
                 />
               </div>
 
               <div>
-                <label htmlFor="post-author" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Author</label>
+                <label htmlFor="post-author" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Author</label>
                 <input
                   id="post-author"
                   value={authorName}
                   onChange={(event) => setAuthorName(event.target.value)}
                   maxLength={100}
                   autoComplete="name"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
                 />
               </div>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-slate-500" />
-                <h2 className="text-sm font-bold text-slate-900">Cover image</h2>
+                <ImageIcon className="h-4 w-4 text-[#C8973D]" />
+                <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36]">Cover image</h2>
               </div>
               {coverImageUrl && (
                 <button
                   type="button"
                   onClick={() => setCoverImageUrl("")}
-                  className="text-xs font-semibold text-red-600 hover:text-red-700"
+                  className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 transition"
                 >
                   Clear image
                 </button>
               )}
             </div>
 
-            <label htmlFor="cover-image-url" className="mt-4 mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label htmlFor="cover-image-url" className="mt-4 mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
               Image URL (Custom or Preset)
             </label>
             <input
@@ -373,12 +373,12 @@ export default function PostEditor() {
               value={coverImageUrl}
               onChange={(event) => setCoverImageUrl(event.target.value)}
               placeholder="https://images.unsplash.com/..."
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
             />
 
             {/* Quick Presets Gallery */}
             <div className="mt-4">
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] mb-2">
                 1-Click Curated Presets:
               </span>
               <div className="grid grid-cols-2 gap-2">
@@ -416,8 +416,8 @@ export default function PostEditor() {
                       onClick={() => setCoverImageUrl(preset.url)}
                       className={`flex items-center gap-1.5 rounded-lg border p-1.5 text-left text-xs transition ${
                         isSelected
-                          ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
-                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                          ? "border-[#C8973D] bg-[#FDF8EE] text-[#96641E] font-semibold"
+                          : "border-[#E2E8F0] bg-[#F8FAFC] text-[#52627A] hover:bg-slate-100"
                       }`}
                     >
                       <img
@@ -433,18 +433,18 @@ export default function PostEditor() {
             </div>
 
             {coverImageUrl ? (
-              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+              <div className="mt-4 overflow-hidden rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]">
                 <img
                   src={coverImageUrl}
                   alt="Cover preview"
                   className="aspect-video w-full object-cover"
                 />
-                <div className="bg-slate-50 p-2 text-center text-xs text-slate-500 font-medium">
+                <div className="bg-[#F8FAFC] p-2 text-center text-[11px] text-[#52627A] font-medium border-t border-[#E2E8F0]">
                   Cover Image Live Preview
                 </div>
               </div>
             ) : (
-              <div className="mt-4 flex aspect-video w-full items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-400">
+              <div className="mt-4 flex aspect-video w-full items-center justify-center rounded-xl border border-dashed border-[#E2E8F0] bg-[#F8FAFC] text-xs text-[#94A3B8]">
                 No cover image selected
               </div>
             )}

@@ -14,11 +14,12 @@ import {
   Send,
   type LucideIcon,
 } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { SITE, buildWhatsAppUrl } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { validateInquiry } from "@/lib/validation/inquiry";
+import { useCms } from "@/lib/hooks/useCms";
 
 const cardAnim = {
   hidden: { opacity: 0, y: 28 },
@@ -48,6 +49,12 @@ export function ContactCards({
   featuredFirst?: boolean;
 }) {
   const { isUrdu, t } = useLanguage();
+  const { settings } = useCms();
+
+  const phone = settings?.phone || SITE.phone;
+  const whatsapp = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const address = settings?.address || (isUrdu ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال" : SITE.address);
+  const mapsUrl = settings?.mapsUrl || SITE.mapsUrl;
 
   const defaultOptions: ContactOption[] = [
     {
@@ -58,7 +65,7 @@ export function ContactCards({
         isUrdu ? "ہمارے نمائندے سے بات کریں۔" : "documentation needs.",
       ],
       actionLabel: t.common.callSupport,
-      href: SITE.phoneHref,
+      href: `tel:${phone.replace(/[^\d+]/g, "")}`,
     },
     {
       icon: WhatsAppIcon,
@@ -68,7 +75,7 @@ export function ContactCards({
         isUrdu ? "کی چیک لسٹ کے لیے۔" : "checklist requests.",
       ],
       actionLabel: isUrdu ? "پیغام بھیجیں" : "Message Now",
-      href: SITE.whatsappHref,
+      href: buildWhatsAppUrl(whatsapp, "Hello Ch Composing, I would like to inquire about legal documentation and tax advisory services."),
       featured: true,
     },
     {
@@ -76,7 +83,7 @@ export function ContactCards({
       title: t.common.getDirections,
       lines: [isUrdu ? "ڈسٹرکٹ کورٹ ساہیوال" : "District Court Sahiwal", ""],
       actionLabel: isUrdu ? "نقشہ دیکھیں" : "Open Maps",
-      href: SITE.mapsUrl,
+      href: mapsUrl,
     },
     {
       icon: Home,
@@ -287,6 +294,7 @@ export function ConsultationPanel({
 /* Interactive Quick Consultation Form for users requesting document assistance */
 export function ConsultationForm() {
   const { isUrdu, t } = useLanguage();
+  const { services, settings } = useCms();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -300,13 +308,18 @@ export function ConsultationForm() {
     company: "",
   });
 
-  const serviceLabels: Record<string, string> = {
-    tax: isUrdu ? "ٹیکس سروسز" : "Tax Services",
-    estamp: isUrdu ? "ای سٹامپنگ" : "E-Stamping",
-    property: isUrdu ? "پراپرٹی سروسز" : "Property Services",
-    business: isUrdu ? "بزنس رجسٹریشن" : "Business Registration",
-    legal: isUrdu ? "قانونی دستاویزات" : "Legal Documentation",
-  };
+  const availableServices = services && services.length > 0
+    ? services.filter((s) => s.active).map((s) => ({
+        id: s.slug,
+        label: isUrdu ? (s.nameUrdu || s.name) : s.name,
+      }))
+    : [
+        { id: "tax", label: isUrdu ? "ٹیکس سروسز" : "Tax Services" },
+        { id: "e-stamping", label: isUrdu ? "ای سٹامپنگ" : "E-Stamping" },
+        { id: "property-land", label: isUrdu ? "پراپرٹی سروسز" : "Property Services" },
+        { id: "business-registration", label: isUrdu ? "بزنس رجسٹریشن" : "Business Registration" },
+        { id: "legal-documentation", label: isUrdu ? "قانونی دستاویزات" : "Legal Documentation" },
+      ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,12 +340,14 @@ export function ConsultationForm() {
 
     setLoading(true);
 
-    const serviceName = serviceLabels[formData.service] || formData.service;
+    const activeService = availableServices.find((s) => s.id === formData.service);
+    const serviceName = activeService ? activeService.label : formData.service;
     const message = isUrdu
       ? `السلام علیکم چوہدری کمپوزنگ ای سٹامپ اور ٹیکس ایڈوائزر،\n\nنام: ${formData.fullName}\nفون: ${formData.phone}\nسروس: ${serviceName}\n${formData.message ? `تفصیلات: ${formData.message}` : ""}`
       : `Hello Ch Composing Estamp and Tax Advisor,\n\nName: ${formData.fullName}\nPhone: ${formData.phone}\nService: ${serviceName}\n${formData.message ? `Details: ${formData.message}` : ""}`;
 
-    const whatsappUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(message.trim())}`;
+    const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+    const whatsappUrl = buildWhatsAppUrl(whatsappPhone, message.trim());
     setLastWhatsAppUrl(whatsappUrl);
 
     // Open from the original submit gesture so browser popup protection does not
@@ -480,11 +495,11 @@ export function ConsultationForm() {
             onChange={(e) => setFormData({ ...formData, service: e.target.value })}
             className="form-input cursor-pointer"
           >
-            <option value="tax">{t.form.services.tax}</option>
-            <option value="estamp">{t.form.services.estamp}</option>
-            <option value="property">{t.form.services.property}</option>
-            <option value="business">{t.form.services.business}</option>
-            <option value="legal">{t.form.services.legal}</option>
+            {availableServices.map((svc) => (
+              <option key={svc.id} value={svc.id}>
+                {svc.label}
+              </option>
+            ))}
           </select>
         </div>
 

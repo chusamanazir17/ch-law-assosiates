@@ -35,6 +35,7 @@ import { getCategoryHeaderIcon, getSubServiceIcon } from "@/lib/icon-map";
 import Logo from "./Logo";
 import { CategoryDropdownPanel, LegalGroupDropdownPanel } from "./NavDropdown";
 import { useCms } from "@/lib/hooks/useCms";
+import AnnouncementBanner from "./AnnouncementBanner";
 
 type DropdownAlign = "left" | "right" | "center";
 
@@ -143,6 +144,7 @@ export default function Header() {
   const { isUrdu, toggleLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useAppTheme();
   const { settings } = useCms();
+  const [bannerHeight, setBannerHeight] = React.useState(0);
 
   React.useEffect(() => {
     let lastScrolled = window.scrollY > 20;
@@ -258,6 +260,7 @@ export default function Header() {
           zIndex: 1100,
         }}
       >
+        <AnnouncementBanner onHeightChange={setBannerHeight} />
         <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
           <div className="flex h-[72px] items-center justify-between gap-4">
             <Logo isUrdu={isUrdu} isDark={isDark} />
@@ -674,7 +677,7 @@ export default function Header() {
         </div>
       </Drawer>
 
-      <div style={{ height: 72 }} aria-hidden="true" />
+      <div style={{ height: 72 + bannerHeight }} aria-hidden="true" />
     </>
   );
 }

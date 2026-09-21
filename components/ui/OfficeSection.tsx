@@ -1,11 +1,10 @@
-"use client";
-
 import { motion } from "framer-motion";
 import { MapPin, Navigation, Clock, Phone, CheckCircle2, Shield, ExternalLink } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { SITE, buildWhatsAppUrl } from "@/lib/site";
 import FadeIn from "@/components/motion/FadeIn";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { WhatsAppIcon, OfficialWhatsAppButton } from "@/components/ui/WhatsAppIcon";
+import { useCms } from "@/lib/hooks/useCms";
 
 export default function OfficeSection({
   title,
@@ -29,14 +28,16 @@ export default function OfficeSection({
   callBtnText?: string;
 }) {
   const { isUrdu, t } = useLanguage();
+  const { settings, homeSections } = useCms();
+  const officeSec = homeSections?.officeSection;
 
-  const sectionTitle = title || t.officeSection.title;
-  const sectionText = text || t.officeSection.subtitle;
-  const displayAddress = addressText || (isUrdu
+  const sectionTitle = title || officeSec?.title || t.officeSection.title;
+  const sectionText = text || officeSec?.subtitle || t.officeSection.subtitle;
+  const displayAddress = addressText || settings?.address || (isUrdu
     ? "شرقی گیٹ چیمبر نمبر 121، ڈسٹرکٹ کورٹ ساہیوال۔ کچہری احاطے کے مرکزی شرقی گیٹ پر واقع، سائلین، وکلاء اور کاروباری حضرات کے لیے انتہائی آسان رسائی۔"
     : `${SITE.address}. Situated right at Sharki Gate within the District Court premises for seamless accessibility.`);
-  const displayWeekday = weekdayHours || (isUrdu ? "9:00 بجے صبح تا 6:00 بجے شام" : "9:00 AM - 6:00 PM");
-  const displaySaturday = saturdayHours || (isUrdu ? "9:00 بجے صبح تا 3:00 بجے دوپہر" : "9:00 AM - 3:00 PM");
+  const displayWeekday = weekdayHours || settings?.hours?.weekdays || (isUrdu ? "9:00 بجے صبح تا 6:00 بجے شام" : "9:00 AM - 6:00 PM");
+  const displaySaturday = saturdayHours || settings?.hours?.saturday || (isUrdu ? "9:00 بجے صبح تا 3:00 بجے دوپہر" : "9:00 AM - 3:00 PM");
   const displayGuideTitle = guideTitle || (isUrdu ? "کچہری تشریف آوری سے پہلے رہنمائی" : "Court Premises Visiting Guide");
   const defaultGuidePoints = [
     isUrdu
@@ -52,6 +53,11 @@ export default function OfficeSection({
   const displayGuidePoints = guidePoints && guidePoints.length > 0 ? guidePoints : defaultGuidePoints;
   const displayWhatsAppBtn = whatsappBtnText || (isUrdu ? "واٹس ایپ پر پیشگی رہنمائی لیں" : "Chat with Chamber on WhatsApp");
   const displayCallBtn = callBtnText || (isUrdu ? "چیمبر فون رابطہ" : "Call Chamber Desk");
+
+  const phone = settings?.phone || SITE.phone;
+  const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const whatsappUrl = buildWhatsAppUrl(whatsappPhone, settings?.whatsappSettings?.sectionMessages?.office || "Hello, I am on my way to Chamber 121 District Court Sahiwal.");
+  const mapsUrl = settings?.mapsUrl || SITE.mapsUrl;
 
   return (
     <section id="office" className="bg-white dark:bg-[#05162B] py-14 sm:py-20 transition-colors duration-200 overflow-hidden">
@@ -149,7 +155,7 @@ export default function OfficeSection({
 
                 <div className="flex items-center gap-2 pt-1">
                   <a
-                    href={SITE.directionsUrl || SITE.mapsUrl}
+                    href={settings?.mapsUrl || SITE.directionsUrl || SITE.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-gold flex-1 text-center py-2 px-3 text-xs flex items-center justify-center gap-1.5 font-medium shadow-sm hover:shadow"
@@ -158,7 +164,7 @@ export default function OfficeSection({
                     <span>{isUrdu ? "گوگل میپس پر راستہ حاصل کریں" : "Get Directions"}</span>
                   </a>
                   <a
-                    href={SITE.mapsUrl}
+                    href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="rounded-lg border border-[#E3E7EC] dark:border-white/15 p-2 text-xs font-semibold text-[#0B1F36] dark:text-slate-200 hover:bg-navy-50 dark:hover:bg-white/5 transition flex items-center justify-center"
@@ -186,46 +192,28 @@ export default function OfficeSection({
                 </div>
 
                 <h3 className="mt-4 font-serif text-lg font-bold text-white">
-                  {isUrdu ? "کچہری تشریف آوری سے پہلے رہنمائی" : "Court Premises Visiting Guide"}
+                  {displayGuideTitle}
                 </h3>
 
                 <ul className="mt-4 space-y-3 text-xs leading-relaxed text-[#8792A1]">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
-                    <span>
-                      {isUrdu
-                        ? "ڈسٹرکٹ کورٹ کے شرقی گیٹ سے داخل ہوتے ہی سامنے گراؤنڈ فلور پر چیمبر 121 واقع ہے۔"
-                        : "Enter via Sharki Gate — Chamber 121 is directly accessible on the ground floor legal corridor."}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
-                    <span>
-                      {isUrdu
-                        ? "ای سٹامپ اور ٹیکس دستاویزات کے لیے پیشگی واٹس ایپ پر تفصیلات بھیج سکتے ہیں۔"
-                        : "Send required documents on WhatsApp before visiting for accelerated same-day processing."}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
-                    <span>
-                      {isUrdu
-                        ? "تمام قانونی ڈرافٹنگ، معاہدہ جات اور بیعانہ سروسز موقع پر دستیاب ہیں۔"
-                        : "All legal drafting, agreements, sale deeds, and tax filings processed on-site."}
-                    </span>
-                  </li>
+                  {displayGuidePoints.map((point, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-gold-400 shrink-0 mt-0.5" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
               <div className="mt-6 pt-5 border-t border-white/10 space-y-3">
                 <OfficialWhatsAppButton
-                  href={SITE.whatsappHref}
+                  href={whatsappUrl}
                   label={displayWhatsAppBtn}
                   size="md"
                   className="w-full text-center"
                 />
                 <a
-                  href={SITE.phoneHref}
+                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
                   className="w-full rounded-lg border border-white/20 py-2.5 text-center text-xs font-semibold text-white hover:bg-white/10 transition flex items-center justify-center gap-2"
                 >
                   <Phone className="h-3.5 w-3.5 text-gold-400" />

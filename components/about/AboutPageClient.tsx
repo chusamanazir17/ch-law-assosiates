@@ -26,13 +26,31 @@ import { OwnerAvatar } from "@/components/ui/OwnerAvatar";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import FadeIn from "@/components/motion/FadeIn";
 import Stagger, { StaggerItem } from "@/components/motion/Stagger";
+import { useCms } from "@/lib/hooks/useCms";
 
 export default function AboutPageClient() {
   const { isUrdu } = useLanguage();
   const { isDark } = useAppTheme();
+  const { getPageContent, settings } = useCms();
+  const aboutCms = getPageContent("/about");
 
   const lateFounder = OWNERS.find((o) => o.status === "late") || OWNERS[0];
   const currentOwners = OWNERS.filter((o) => o.status === "current");
+
+  const heroBadge = isUrdu
+    ? "ہماری تاریخ اور عزم • چیمبر 121"
+    : (aboutCms?.heroBadge || "OUR STORY. A STRONGER TOMORROW.");
+
+  const heroHeadline = isUrdu
+    ? "ہمارے چیمبر کے بارے میں"
+    : (aboutCms?.heroHeadline || "About Our Legal Chamber");
+
+  const heroDescription = isUrdu
+    ? "چوہدری کمپوزنگ، ای اسٹامپ و ٹیکس ایڈوائزر ساہیوال کی معزز اور مستند قانونی فرم ہے۔ ہم ای اسٹیمپنگ، رجسٹری بیعنامہ، ایف بی آر انکم ٹیکس و سیلز ٹیکس، عدالتی بیاناتِ حلفی، دستاویزات کی اردو و انگلش کمپوزنگ اور ایس ای سی پی کارپوریٹ رجسٹریشن کی مکمل، فوری اور شفاف خدمات فراہم کرتے ہیں۔ ہمارا مقصد شہریوں اور کاروباری اداروں کو پیچیدہ قانونی عمل سے بچا کر آسان، محفوظ اور تیز ترین سروس فراہم کرنا ہے۔"
+    : (aboutCms?.heroSubtitle || aboutCms?.leadContent || "Ch Composing Estamp & Tax Advisor provides reliable e-stamp, property registry, tax advisory, document composing, typing, affidavit, scanning, printing, and online filing services to individuals, property owners, and businesses.");
+
+  const whatsappPhone = settings?.whatsappSettings?.number || settings?.whatsapp || SITE.whatsapp;
+  const whatsappUrl = buildWhatsAppUrl(whatsappPhone, settings?.whatsappSettings?.sectionMessages?.about || "Hello, I would like to inquire about Chamber 121 legal services.");
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#071224] text-navy-900 dark:text-white transition-colors duration-200">
@@ -43,8 +61,8 @@ export default function AboutPageClient() {
         {/* Full-bleed Background Image Layer */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/hero-scales-justice.jpg"
-            alt="Legal desk with golden scales of justice, luxury fountain pen, and law books"
+            src="/images/about-hero.jpg"
+            alt="Chamber 121 legal consultation desk with heritage law library and scales of justice"
             fill
             priority
             className="object-cover object-right sm:object-center"
@@ -69,31 +87,17 @@ export default function AboutPageClient() {
                 {/* Eyebrow */}
                 <span className="inline-flex items-center gap-2 text-[11.5px] font-bold uppercase tracking-[0.2em] text-gold-400">
                   <BadgeCheck className="h-4 w-4 text-gold-400" />
-                  <span>
-                    {isUrdu ? "ہماری تاریخ اور عزم • چیمبر 121" : "OUR STORY. A STRONGER TOMORROW."}
-                  </span>
+                  <span>{heroBadge}</span>
                 </span>
 
                 {/* Headline */}
                 <h1 className="mt-4 font-serif text-[clamp(2.5rem,5vw+0.5rem,3.875rem)] font-bold leading-[1.1] text-white tracking-tight">
-                  {isUrdu ? (
-                    <>
-                      ہمارے چیمبر کے <br />
-                      <span className="text-gold-400 relative inline-block">بارے میں</span>
-                    </>
-                  ) : (
-                    <>
-                      About Our <br />
-                      <span className="text-gold-400 relative inline-block">Legal Chamber</span>
-                    </>
-                  )}
+                  {heroHeadline}
                 </h1>
 
                 {/* Description */}
                 <p className="mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-[#F4F6F8]/90 font-normal">
-                  {isUrdu
-                    ? "چوہدری کمپوزنگ، ای اسٹامپ و ٹیکس ایڈوائزر ساہیوال کی معزز اور مستند قانونی فرم ہے۔ ہم ای اسٹیمپنگ، رجسٹری بیعنامہ، ایف بی آر انکم ٹیکس و سیلز ٹیکس، عدالتی بیاناتِ حلفی، دستاویزات کی اردو و انگلش کمپوزنگ اور ایس ای سی پی کارپوریٹ رجسٹریشن کی مکمل، فوری اور شفاف خدمات فراہم کرتے ہیں۔ ہمارا مقصد شہریوں اور کاروباری اداروں کو پیچیدہ قانونی عمل سے بچا کر آسان، محفوظ اور تیز ترین سروس فراہم کرنا ہے۔"
-                    : "Ch Composing Estamp & Tax Advisor provides reliable e-stamp, property registry, tax advisory, document composing, typing, affidavit, scanning, printing, and online filing services to individuals, property owners, and businesses. We are committed to making your important legal and documentation work simple, fast, and completely hassle-free."}
+                  {heroDescription}
                 </p>
 
                 {/* Action Buttons */}
@@ -108,7 +112,7 @@ export default function AboutPageClient() {
                   </Link>
 
                   <a
-                    href={SITE.whatsappHref}
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] border border-emerald-400/30 px-6 py-3.5 text-[13.5px] sm:text-sm font-medium text-white shadow-lg shadow-[#25D366]/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-[#25D366]/35"

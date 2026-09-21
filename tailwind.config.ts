@@ -58,6 +58,7 @@ const config: Config = {
         sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
         serif: ["var(--font-dm-serif)", "Georgia", "serif"],
         script: ["var(--font-script)", "cursive"],
+        urdu: ["var(--font-urdu)", "system-ui", "sans-serif"],
       },
       boxShadow: {
         card: "0 4px 24px rgba(11, 29, 56, 0.08)",

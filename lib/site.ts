@@ -426,52 +426,42 @@ export const HOME_SERVICES = [
   {
     title: "E-Stamping",
     href: "/services/e-stamping",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=480&q=70",
+    image: "/images/services/estamp-hero.jpg",
     description:
       "Digital judicial and non-judicial stamp papers processed instantly with government verification.",
   },
   {
     title: "Property Registry",
     href: "/services/property-land",
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=480&q=70",
+    image: "/images/services/property-hero.jpg",
     description:
       "Complete assistance for property transfers, sale deeds, and title verification across Pakistan.",
   },
   {
     title: "Business Registry",
     href: "/services/business-registration",
-    image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=480&q=70",
+    image: "/images/services/business-hero.jpg",
     description:
       "Register your private limited or sole proprietorship with SECP and relevant chambers efficiently.",
   },
   {
     title: "Tax Services",
     href: "/services/tax",
-    image:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=480&q=70",
+    image: "/images/services/tax-hero.jpg",
     description:
       "FBR tax filings, NTN registrations, and sales tax certifications for individuals and firms.",
   },
 ];
 
 export const HERO_IMAGES = {
-  home: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=70",
-  banking:
-    "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1280&q=70",
-  business:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
-  estamp:
-    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=70",
+  home: "/images/hero-scales-justice.jpg",
+  banking: "/images/services/banking-hero.jpg",
+  business: "/images/services/business-hero.jpg",
+  estamp: "/images/services/estamp-hero.jpg",
   family: "/images/services/family-court.jpg",
-  legal:
-    "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1280&q=70",
-  property:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
-  registry:
-    "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1280&q=70",
-  tax: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
+  legal: "/images/services/legal-hero.jpg",
+  property: "/images/services/property-hero.jpg",
+  registry: "/images/services/registry-hero.jpg",
+  tax: "/images/services/tax-hero.jpg",
   trademark: "/images/services/trademark-ipo.jpg",
 };

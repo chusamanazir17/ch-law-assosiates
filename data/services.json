@@ -7,7 +7,7 @@
     "category": "Court Document Services",
     "description": "Official digital stamp papers processed instantly with government portal verification, Challan 32-A generation, and biometric compliance.",
     "tagline": "Authorized Government Stamp Vendor",
-    "heroImage": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/estamp-hero.jpg",
     "turnaroundTime": "Instant 15-30 mins Challan & Verification",
     "requiredDocuments": [
       "CNIC copies of buyer/seller",
@@ -59,7 +59,7 @@
     "category": "Revenue & Land Services",
     "description": "Complete assistance for property transfers, sale deeds, Fard Malkiat verification, and title verification across Punjab and Pakistan.",
     "tagline": "Real Estate Legal Verification",
-    "heroImage": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/property-hero.jpg",
     "turnaroundTime": "1 to 3 Business Days",
     "requiredDocuments": [
       "Original allotment / transfer letter",
@@ -111,7 +111,7 @@
     "category": "Revenue & Land Services",
     "description": "Sub-registrar office registrations, gift deeds, mortgage deeds, and certified revenue records with zero administrative delays.",
     "tagline": "Sub-Registrar & Revenue Records",
-    "heroImage": "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/registry-hero.jpg",
     "turnaroundTime": "2 to 4 Business Days",
     "requiredDocuments": [
       "Title deed (Sanad / Baye-Nama)",
@@ -163,7 +163,7 @@
     "category": "Taxation",
     "description": "FBR Iris tax filings, Active Taxpayer List (ATL) status, NTN registrations, sales tax (GST/PRA), and audit representation for individuals and firms.",
     "tagline": "Federal Board of Revenue & Iris Compliance",
-    "heroImage": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/tax-hero.jpg",
     "turnaroundTime": "24 Hours (NTN / ATL)",
     "requiredDocuments": [
       "CNIC",
@@ -215,7 +215,7 @@
     "category": "Corporate Services",
     "description": "End-to-end corporate formation with SECP, FBR, and local municipal chambers. Private Limited, Single Member, and Partnership registrations.",
     "tagline": "SECP & Corporate Documentation",
-    "heroImage": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/business-hero.jpg",
     "turnaroundTime": "3 to 7 Business Days",
     "requiredDocuments": [
       "CNICs of all directors/partners",
@@ -314,7 +314,7 @@
     "category": "Legal Documentation",
     "description": "Affidavits, power of attorney, lease agreements, undertakings, and formal legal notice drafting attested by Oath Commissioner.",
     "tagline": "Contracts & Attestations",
-    "heroImage": "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/legal-hero.jpg",
     "turnaroundTime": "Same-Day (within 1 hour)",
     "requiredDocuments": [
       "Original CNIC of deponent",
@@ -397,7 +397,7 @@
     "category": "Financial Legal Services",
     "description": "Loan documentation, mortgage charge creation with SECP (Form 10/12), bank guarantees, corporate hypothecation deeds, and financial affidavits.",
     "tagline": "Financial Institution Documentation",
-    "heroImage": "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1280&q=70",
+    "heroImage": "/images/services/banking-hero.jpg",
     "turnaroundTime": "1 to 3 Business Days",
     "requiredDocuments": [
       "Sanction letter from bank",

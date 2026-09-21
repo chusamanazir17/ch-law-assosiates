@@ -17,6 +17,31 @@ interface CmsState {
 let cachedCmsState: CmsState | null = null;
 const listeners = new Set<(state: CmsState) => void>();
 
+export function notifyCmsUpdated(state: CmsState) {
+  cachedCmsState = state;
+  listeners.forEach((listener) => listener(state));
+}
+
+export function refreshCms(): Promise<void> {
+  return fetch("/api/cms/content", { cache: "no-store" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        const newState: CmsState = {
+          settings: data.settings,
+          services: data.services || [],
+          pages: data.pages || [],
+          homeSections: data.homeSections || null,
+          isLoading: false,
+        };
+        notifyCmsUpdated(newState);
+      }
+    })
+    .catch((err) => {
+      console.warn("[useCms] Could not fetch CMS content:", err);
+    });
+}
+
 export function useCms(initialData?: Partial<CmsState>) {
   if (initialData && !cachedCmsState) {
     cachedCmsState = {
@@ -41,30 +66,20 @@ export function useCms(initialData?: Partial<CmsState>) {
   useEffect(() => {
     listeners.add(setState);
 
-    if (!cachedCmsState) {
-      fetch("/api/cms/content")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            const newState: CmsState = {
-              settings: data.settings,
-              services: data.services || [],
-              pages: data.pages || [],
-              homeSections: data.homeSections || null,
-              isLoading: false,
-            };
-            cachedCmsState = newState;
-            listeners.forEach((listener) => listener(newState));
-          }
-        })
-        .catch((err) => {
-          console.warn("[useCms] Could not fetch CMS content:", err);
-          setState((prev) => ({ ...prev, isLoading: false }));
-        });
-    }
+    // Always fetch fresh in background so admin edits show immediately
+    refreshCms();
+
+    const handleCmsEvent = () => {
+      refreshCms();
+    };
+
+    window.addEventListener("cms-updated", handleCmsEvent);
+    window.addEventListener("focus", handleCmsEvent);
 
     return () => {
       listeners.delete(setState);
+      window.removeEventListener("cms-updated", handleCmsEvent);
+      window.removeEventListener("focus", handleCmsEvent);
     };
   }, []);
 
@@ -84,6 +99,7 @@ export function useCms(initialData?: Partial<CmsState>) {
     isLoading: state.isLoading,
     getPageContent,
     getService,
+    refresh: refreshCms,
   };
 }
 

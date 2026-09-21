@@ -302,23 +302,56 @@ export default function AdminOverview() {
     loadData();
   }, []);
 
-  const handleAddConsultationSubmit = (e: React.FormEvent) => {
+  const handleAddConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newClientName.trim()) return;
 
-    const newInq: InquiryItem = {
-      id: `inq-${Date.now()}`,
-      name: newClientName.trim(),
-      phone: newClientPhone.trim() || "0300 0000000",
-      service_needed: newClientService,
-      message: newClientMessage.trim() || "In-chamber consultation inquiry recorded.",
-      created_at: "Just now",
-      status: "New",
-    };
+    const name = newClientName.trim();
+    const phone = newClientPhone.trim() || "0300 0000000";
+    const service = newClientService;
+    const message = newClientMessage.trim() || "In-chamber consultation inquiry recorded.";
 
-    setInquiries((prev) => [newInq, ...prev]);
-    setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
-    setAddConsultationSuccess(true);
+    try {
+      const res = await fetch("/api/admin/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          name,
+          phone,
+          service,
+          message,
+        }),
+      });
+      const data = await res.json();
+      const newInq: InquiryItem = {
+        id: data?.inquiry?.id || `inq-${Date.now()}`,
+        name,
+        phone,
+        service_needed: service,
+        message,
+        created_at: "Just now",
+        status: "New",
+      };
+
+      setInquiries((prev) => [newInq, ...prev]);
+      setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
+      setAddConsultationSuccess(true);
+    } catch (err) {
+      console.error("[Add Consultation]", err);
+      const newInq: InquiryItem = {
+        id: `inq-${Date.now()}`,
+        name,
+        phone,
+        service_needed: service,
+        message,
+        created_at: "Just now",
+        status: "New",
+      };
+      setInquiries((prev) => [newInq, ...prev]);
+      setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
+      setAddConsultationSuccess(true);
+    }
 
     setTimeout(() => {
       setNewClientName("");
@@ -329,37 +362,56 @@ export default function AdminOverview() {
     }, 1000);
   };
 
-  const handleUpdateStatus = (id: string, newStatus: "New" | "In Progress" | "Replied" | "Closed") => {
+  const handleUpdateStatus = async (id: string, newStatus: "New" | "In Progress" | "Replied" | "Closed") => {
     setInquiries((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
     );
     setActiveInquiryAction(null);
+
+    const mappedStatus =
+      newStatus === "New"
+        ? "new"
+        : newStatus === "In Progress"
+        ? "in_progress"
+        : newStatus === "Replied"
+        ? "replied"
+        : "closed";
+
+    try {
+      await fetch("/api/admin/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "status", id, status: mappedStatus }),
+      });
+    } catch (err) {
+      console.error("[Inquiry Status Update]", err);
+    }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "New":
         return (
-          <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+          <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700">
             New
           </span>
         );
       case "In Progress":
         return (
-          <span className="inline-flex items-center rounded-full bg-sky-50 border border-sky-200/70 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
+          <span className="inline-flex items-center rounded-md bg-sky-50 border border-sky-200/70 px-2 py-0.5 text-[10.5px] font-medium text-sky-700">
             In Progress
           </span>
         );
       case "Replied":
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+          <span className="inline-flex items-center rounded-md bg-[#0B1F36]/8 border border-[#0B1F36]/15 px-2 py-0.5 text-[10.5px] font-medium text-[#0B1F36]">
             Replied
           </span>
         );
       case "Closed":
       default:
         return (
-          <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+          <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10.5px] font-medium text-[#64748B]">
             Closed
           </span>
         );
@@ -511,19 +563,19 @@ export default function AdminOverview() {
   return (
     <div className="space-y-5 max-w-7xl mx-auto font-sans pb-10">
       {/* 1. Breadcrumbs */}
-      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-        <span>Office CMS</span>
+      <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748B]">
+        <span>Chamber 121</span>
         <span className="text-slate-300">›</span>
-        <span className="text-slate-700 font-semibold">Dashboard</span>
+        <span className="text-[#0B1F36] font-semibold">Dashboard Overview</span>
       </div>
 
       {/* 2. Main Title & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Dashboard
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">
             Monitor client subscriber signups, manage legal content, and review inquiries.
           </p>
         </div>
@@ -534,16 +586,16 @@ export default function AdminOverview() {
             <button
               type="button"
               onClick={() => setShowGlobalDropdown((prev) => !prev)}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition"
+              className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#334155] shadow-2xs hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36] transition"
               aria-expanded={showGlobalDropdown}
             >
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+              <Calendar className="h-3.5 w-3.5 text-[#64748B]" />
               <span>{TIMEFRAME_DATA[globalTimeframe].label}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-0.5" />
+              <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] ml-0.5" />
             </button>
 
             {showGlobalDropdown && (
-              <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs">
+              <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs">
                 {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
                   <button
                     key={tf}
@@ -555,12 +607,12 @@ export default function AdminOverview() {
                     }}
                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
                       globalTimeframe === tf
-                        ? "bg-[#e8f5e9] font-bold text-[#075e38]"
-                        : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#0B1F36]/8 font-semibold text-[#0B1F36]"
+                        : "text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
                     }`}
                   >
                     <span>{TIMEFRAME_DATA[tf].label}</span>
-                    {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#075e38]" />}
+                    {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
                   </button>
                 ))}
               </div>
@@ -570,7 +622,7 @@ export default function AdminOverview() {
           {/* Create Post Button */}
           <Link
             href="/admin/posts/editor"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] text-white px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs hover:shadow-sm transition"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Create Post</span>
@@ -579,33 +631,33 @@ export default function AdminOverview() {
           {/* Media Button */}
           <Link
             href="/admin/media"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-slate-50 hover:border-[#CBD5E1] text-[#334155] px-3.5 py-1.5 text-xs font-medium shadow-2xs hover:text-[#0B1F36] transition"
           >
-            <ImageIcon className="h-3.5 w-3.5 text-slate-500" />
+            <ImageIcon className="h-3.5 w-3.5 text-[#64748B]" />
             <span>Media</span>
           </Link>
         </div>
       </div>
 
       {/* 3. Section 1: Email Signups & Audience Telemetry */}
-      <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-[#F1F5F9]">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#075e38]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
               <Mail className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900 leading-tight">
+              <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
                 Email Signups & Audience Telemetry
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-[#52627A] mt-0.5">
                 Live counter and status of clients registered for automated tax deadline reminders.
               </p>
             </div>
           </div>
           <Link
             href="/admin/subscribers"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#075e38] hover:text-[#064e2e] hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
           >
             <span>View All Subscribers</span>
             <span>→</span>
@@ -615,93 +667,93 @@ export default function AdminOverview() {
         {/* 4 Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
           {/* Card 1: Total Subscribers */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500">Total Subscribers</p>
+                <p className="text-xs font-medium text-[#64748B]">Total Subscribers</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold text-slate-900">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
                     {subscriberAnalytics.totalEmails}
                   </span>
-                  <span className="text-[11px] font-semibold text-emerald-600">
+                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
                     ↑ +2 this month
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2.5">
+            <p className="text-[11px] text-[#64748B] mt-2.5">
               Clients opted-in via website reminders.
             </p>
           </div>
 
           {/* Card 2: Active Recipients */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C8973D]/15 text-[#B8832A]">
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500">Active Recipients</p>
+                <p className="text-xs font-medium text-[#64748B]">Active Recipients</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold text-slate-900">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
                     {subscriberAnalytics.activeCount}
                   </span>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                     100% active
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2.5">
+            <p className="text-[11px] text-[#64748B] mt-2.5">
               Receiving statutory reminder dispatches.
             </p>
           </div>
 
           {/* Card 3: Pending Verification */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500">Pending Verification</p>
+                <p className="text-xs font-medium text-[#64748B]">Pending Verification</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold text-slate-900">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
                     {subscriberAnalytics.pendingCount}
                   </span>
-                  <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                  <span className="inline-flex items-center rounded-md bg-amber-50 border border-amber-200/70 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
                     Double opt-in
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2.5">
+            <p className="text-[11px] text-[#64748B] mt-2.5">
               Awaiting verification link confirmation.
             </p>
           </div>
 
           {/* Card 4: Opted-Out */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500">Opted-Out</p>
+                <p className="text-xs font-medium text-[#64748B]">Opted-Out</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold text-slate-900">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
                     {subscriberAnalytics.unsubscribedCount + subscriberAnalytics.suppressedCount}
                   </span>
-                  <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-[#64748B]">
                     Inactive
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2.5">
+            <p className="text-[11px] text-[#64748B] mt-2.5">
               Safe unsubscription links honored.
             </p>
           </div>
@@ -711,16 +763,16 @@ export default function AdminOverview() {
       {/* 4. Section 2: Two Columns (Subscriber Interest / Chart & Quick Actions) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Column: Subscriber Interest with BARS & GRAPH TOGGLE (7 cols) */}
-        <div className="lg:col-span-7 rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs flex flex-col justify-between">
+        <div className="lg:col-span-7 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#F1F5F9]">
               <div className="flex items-center gap-2.5">
-                <BarChart2 className="h-4.5 w-4.5 text-[#075e38]" />
+                <BarChart2 className="h-4.5 w-4.5 text-[#0B1F36]" />
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
+                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
                     Subscriber Interest by Tax Category
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-[#52627A] mt-0.5">
                     Top categories based on subscriber interest and content engagement.
                   </p>
                 </div>
@@ -729,14 +781,14 @@ export default function AdminOverview() {
               {/* View Switcher & Timeframe Buttons */}
               <div className="flex items-center gap-2">
                 {/* Switcher between Bars & Line Graph */}
-                <div className="flex items-center rounded-lg bg-slate-100 p-0.5 border border-slate-200/80">
+                <div className="flex items-center rounded-lg bg-[#F1F5F9] p-0.5 border border-[#E2E8F0]">
                   <button
                     type="button"
                     onClick={() => setChartView("bars")}
                     className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
                       chartView === "bars"
-                        ? "bg-white text-[#075e38] shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-[#0B1F36] text-white shadow-xs"
+                        : "text-[#64748B] hover:text-[#0B1F36]"
                     }`}
                     title="View as Horizontal Bars"
                   >
@@ -749,8 +801,8 @@ export default function AdminOverview() {
                     onClick={() => setChartView("graph")}
                     className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
                       chartView === "graph"
-                        ? "bg-white text-[#075e38] shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
+                        ? "bg-[#0B1F36] text-white shadow-xs"
+                        : "text-[#64748B] hover:text-[#0B1F36]"
                     }`}
                     title="View as Line Graph & Chart"
                   >
@@ -764,14 +816,14 @@ export default function AdminOverview() {
                   <button
                     type="button"
                     onClick={() => setShowChartDropdown((prev) => !prev)}
-                    className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition"
+                    className="flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-medium text-[#334155] shadow-2xs hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36] transition"
                   >
                     <span>{TIMEFRAME_DATA[chartTimeframe].label}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                    <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8]" />
                   </button>
 
                   {showChartDropdown && (
-                    <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs">
+                    <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs">
                       {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
                         <button
                           key={tf}
@@ -782,12 +834,12 @@ export default function AdminOverview() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
                             chartTimeframe === tf
-                              ? "bg-[#e8f5e9] font-bold text-[#075e38]"
-                              : "text-slate-700 hover:bg-slate-50"
+                              ? "bg-[#0B1F36]/8 font-semibold text-[#0B1F36]"
+                              : "text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
                           }`}
                         >
                           <span>{TIMEFRAME_DATA[tf].label}</span>
-                          {chartTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#075e38]" />}
+                          {chartTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
                         </button>
                       ))}
                     </div>
@@ -805,7 +857,7 @@ export default function AdminOverview() {
 
                   return (
                     <div key={cat.name} className="flex items-center gap-4 text-xs">
-                      <span className="w-56 shrink-0 font-medium text-slate-700 truncate">
+                      <span className="w-56 shrink-0 font-medium text-[#334155] truncate">
                         {cat.name}
                       </span>
                       <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -814,7 +866,7 @@ export default function AdminOverview() {
                           style={{ width: `${percentage}%`, backgroundColor: cat.color }}
                         />
                       </div>
-                      <span className="w-4 text-right font-bold text-slate-800 shrink-0">
+                      <span className="w-4 text-right font-semibold text-[#0B1F36] shrink-0">
                         {cat.count}
                       </span>
                     </div>
@@ -828,13 +880,13 @@ export default function AdminOverview() {
         </div>
 
         {/* Right Column: Quick Actions (5 cols) */}
-        <div className="lg:col-span-5 rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs flex flex-col justify-between">
+        <div className="lg:col-span-5 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
-              <Zap className="h-4.5 w-4.5 text-[#075e38]" />
+            <div className="flex items-center gap-2 pb-4 border-b border-[#F1F5F9]">
+              <Zap className="h-4.5 w-4.5 text-[#0B1F36]" />
               <div>
-                <h3 className="text-sm font-bold text-slate-900 leading-tight">Quick Actions</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Quick Actions</h3>
+                <p className="text-xs text-[#52627A] mt-0.5">
                   Common tasks for content and client management.
                 </p>
               </div>
@@ -845,78 +897,78 @@ export default function AdminOverview() {
               {/* Action 1: Create Post */}
               <Link
                 href="/admin/posts/editor"
-                className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                     <FileText className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-slate-900 truncate">
+                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                       Create Post
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate">Publish news or updates</p>
+                    <p className="text-[11px] text-[#64748B] truncate">Publish news or updates</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               {/* Action 2: Media Library */}
               <Link
                 href="/admin/media"
-                className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
                     <ImageIcon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-slate-900 truncate">
+                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                       Media Library
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate">Manage images & files</p>
+                    <p className="text-[11px] text-[#64748B] truncate">Manage images & files</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               {/* Action 3: Add Consultation (Interactive Modal Trigger) */}
               <button
                 type="button"
                 onClick={() => setShowAddConsultationModal(true)}
-                className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3 text-left transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 text-left transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                     <MessageSquare className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-slate-900 truncate">
+                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                       Add Consultation
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate">Track client inquiries</p>
+                    <p className="text-[11px] text-[#64748B] truncate">Track client inquiries</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
               </button>
 
               {/* Action 4: E-Stamp Services */}
               <Link
                 href="/admin/services"
-                className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
                     <Compass className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 group-hover:text-slate-900 truncate">
+                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                       E-Stamp Services
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate">Manage e-stamp content</p>
+                    <p className="text-[11px] text-[#64748B] truncate">Manage e-stamp content</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
           </div>
@@ -928,103 +980,103 @@ export default function AdminOverview() {
         {/* Card 1: Articles & Posts */}
         <Link
           href="/admin/posts"
-          className="group rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs hover:border-slate-300 transition flex items-center justify-between"
+          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
               <FileText className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">Articles & Posts</p>
-              <p className="text-2xl font-bold text-slate-900 mt-0.5">
+              <p className="text-xs font-semibold text-[#64748B] truncate">Articles & Posts</p>
+              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">
                 {cmsStats.totalPosts}
               </p>
-              <p className="text-[11px] text-slate-400 truncate">
+              <p className="text-[11px] text-[#64748B] truncate">
                 {cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft
               </p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
         </Link>
 
         {/* Card 2: Media & Images */}
         <Link
           href="/admin/media"
-          className="group rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs hover:border-slate-300 transition flex items-center justify-between"
+          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C8973D]/15 text-[#B8832A]">
               <ImageIcon className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">Media & Images</p>
-              <p className="text-2xl font-bold text-slate-900 mt-0.5">
+              <p className="text-xs font-semibold text-[#64748B] truncate">Media & Images</p>
+              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">
                 {cmsStats.totalMedia}
               </p>
-              <p className="text-[11px] text-slate-400 truncate">Stored image assets & banners</p>
+              <p className="text-[11px] text-[#64748B] truncate">Stored image assets & banners</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
         </Link>
 
         {/* Card 3: Consultation Leads */}
         <Link
           href="/admin/inquiries"
-          className="group rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs hover:border-slate-300 transition flex items-center justify-between"
+          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
               <MessageSquare className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-bold text-slate-800 truncate">Consultation Leads</p>
+                <p className="text-xs font-semibold text-[#64748B] truncate">Consultation Leads</p>
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-2xl font-bold text-slate-900">
+                <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
                   {cmsStats.newInquiries}
                 </span>
-                <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                <span className="rounded bg-[#C8973D]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[#91651E]">
                   NEW
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 truncate">Direct client requests</p>
+              <p className="text-[11px] text-[#64748B] truncate">Direct client requests</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
         </Link>
 
         {/* Card 4: Site Notice / Ticker */}
         <Link
           href="/admin/announcements"
-          className="group rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs hover:border-slate-300 transition flex items-center justify-between"
+          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
               <Megaphone className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">Site Notice / Ticker</p>
-              <p className="text-2xl font-bold text-slate-900 mt-0.5">0</p>
-              <p className="text-[11px] text-slate-400 truncate">No active announcement</p>
+              <p className="text-xs font-semibold text-[#64748B] truncate">Site Notice / Ticker</p>
+              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">0</p>
+              <p className="text-[11px] text-[#64748B] truncate">No active announcement</p>
             </div>
           </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
         </Link>
       </div>
 
       {/* 6. Section 4: Website Content Management Hub */}
-      <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-slate-100">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-[#F1F5F9]">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#075e38]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
               <Layers className="h-4.5 w-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900 leading-tight">
+              <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
                 Website Content Management Hub
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-[#52627A] mt-0.5">
                 Customize text, headlines, hero photography, legal practices, and navigation in real time.
               </p>
             </div>
@@ -1033,7 +1085,7 @@ export default function AdminOverview() {
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#075e38] hover:text-[#064e2e] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
           >
             <span>Open Public Website</span>
             <ExternalLink className="h-3.5 w-3.5" />
@@ -1045,77 +1097,77 @@ export default function AdminOverview() {
           {/* Hub 1: Page Content Editor */}
           <Link
             href="/admin/pages"
-            className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                 <FileText className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 group-hover:text-[#075e38] truncate">
+                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                   Page Content Editor
                 </p>
-                <p className="text-[11px] text-slate-500 truncate">Manage pages, about, legal info</p>
+                <p className="text-[11px] text-[#64748B] truncate">Manage pages, about, legal info</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
           </Link>
 
           {/* Hub 2: Service Categories */}
           <Link
             href="/admin/services"
-            className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
                 <LayoutGrid className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 group-hover:text-blue-800 truncate">
+                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                   Service Categories
                 </p>
-                <p className="text-[11px] text-slate-500 truncate">Organize tax & e-stamp services</p>
+                <p className="text-[11px] text-[#64748B] truncate">Organize tax & e-stamp services</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
           </Link>
 
           {/* Hub 3: Featured Sections */}
           <Link
             href="/admin/pages"
-            className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
                 <Sliders className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 group-hover:text-amber-800 truncate">
+                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                   Featured Sections
                 </p>
-                <p className="text-[11px] text-slate-500 truncate">Update homepage content</p>
+                <p className="text-[11px] text-[#64748B] truncate">Update homepage content</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
           </Link>
 
           {/* Hub 4: Media Management */}
           <Link
             href="/admin/media"
-            className="group flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/50 p-3.5 transition-all hover:border-slate-300 hover:bg-white hover:shadow-2xs"
+            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                 <ImageIcon className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 group-hover:text-purple-800 truncate">
+                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
                   Media Management
                 </p>
-                <p className="text-[11px] text-slate-500 truncate">Upload & manage files</p>
+                <p className="text-[11px] text-[#64748B] truncate">Upload & manage files</p>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
           </Link>
         </div>
       </div>
@@ -1123,22 +1175,22 @@ export default function AdminOverview() {
       {/* 7. Section 5: Two Columns (Recent Inquiries & Recent Activity) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Column: Recent Inquiries Table (7 cols) */}
-        <div className="lg:col-span-7 rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="lg:col-span-7 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
+          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9]">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#075e38]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                 <Users className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 leading-tight">Recent Inquiries</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Recent Inquiries</h3>
+                <p className="text-xs text-[#52627A] mt-0.5">
                   Latest consultation requests from website visitors.
                 </p>
               </div>
             </div>
             <Link
               href="/admin/inquiries"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#075e38] hover:text-[#064e2e] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
             >
               <span>View All Inquiries</span>
               <span>→</span>
@@ -1149,34 +1201,34 @@ export default function AdminOverview() {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400">
-                  <th className="pb-2.5 font-medium">Name</th>
-                  <th className="pb-2.5 font-medium">Service Interest</th>
-                  <th className="pb-2.5 font-medium">Message</th>
-                  <th className="pb-2.5 font-medium">Date</th>
-                  <th className="pb-2.5 font-medium">Status</th>
-                  <th className="pb-2.5 text-right font-medium">Actions</th>
+                <tr className="border-b border-[#E2E8F0] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
+                  <th className="pb-2.5 font-semibold">Name</th>
+                  <th className="pb-2.5 font-semibold">Service Interest</th>
+                  <th className="pb-2.5 font-semibold">Message</th>
+                  <th className="pb-2.5 font-semibold">Date</th>
+                  <th className="pb-2.5 font-semibold">Status</th>
+                  <th className="pb-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#F1F5F9]">
                 {inquiries.map((inq) => (
-                  <tr key={inq.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 font-semibold text-slate-900 pr-2 whitespace-nowrap">
+                  <tr key={inq.id} className="hover:bg-[#F8FAFC] transition-colors">
+                    <td className="py-3 font-semibold text-[#0B1F36] pr-2 whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => setSelectedInquiryDetail(inq)}
-                        className="hover:text-[#075e38] hover:underline text-left font-semibold"
+                        className="hover:text-[#B8832A] hover:underline text-left font-semibold"
                       >
                         {inq.name}
                       </button>
                     </td>
-                    <td className="py-3 text-slate-600 pr-2 whitespace-nowrap">
+                    <td className="py-3 text-[#334155] font-medium pr-2 whitespace-nowrap">
                       {inq.service_needed}
                     </td>
-                    <td className="py-3 text-slate-500 max-w-[180px] truncate pr-2">
+                    <td className="py-3 text-[#64748B] max-w-[180px] truncate pr-2">
                       {inq.message}
                     </td>
-                    <td className="py-3 text-slate-500 whitespace-nowrap pr-2">
+                    <td className="py-3 text-[#64748B] whitespace-nowrap pr-2">
                       {inq.created_at}
                     </td>
                     <td className="py-3 whitespace-nowrap pr-2">
@@ -1188,7 +1240,7 @@ export default function AdminOverview() {
                         onClick={() =>
                           setActiveInquiryAction((prev) => (prev === inq.id ? null : inq.id))
                         }
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#94A3B8] hover:bg-slate-100 hover:text-[#0B1F36] transition"
                         title="Actions"
                       >
                         <MoreHorizontal className="h-4 w-4" />
@@ -1196,16 +1248,16 @@ export default function AdminOverview() {
 
                       {/* Dropdown Action Menu */}
                       {activeInquiryAction === inq.id && (
-                        <div className="absolute right-0 top-10 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 text-xs text-left">
+                        <div className="absolute right-0 top-10 w-44 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs text-left">
                           <button
                             type="button"
                             onClick={() => {
                               setSelectedInquiryDetail(inq);
                               setActiveInquiryAction(null);
                             }}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-slate-700 hover:bg-slate-50"
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
                           >
-                            <FileText className="h-3.5 w-3.5 text-slate-400" />
+                            <FileText className="h-3.5 w-3.5 text-[#64748B]" />
                             <span>View Details</span>
                           </button>
 
@@ -1224,8 +1276,8 @@ export default function AdminOverview() {
                             </a>
                           )}
 
-                          <div className="my-1 border-t border-slate-100" />
-                          <p className="px-2 py-1 text-[10px] font-bold uppercase text-slate-400">
+                          <div className="my-1 border-t border-[#F1F5F9]" />
+                          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
                             Change Status
                           </p>
 
@@ -1236,12 +1288,12 @@ export default function AdminOverview() {
                               onClick={() => handleUpdateStatus(inq.id, st)}
                               className={`flex w-full items-center justify-between rounded-lg px-2 py-1 text-[11px] ${
                                 inq.status === st
-                                  ? "font-bold text-[#075e38] bg-[#e8f5e9]"
-                                  : "text-slate-600 hover:bg-slate-50"
+                                  ? "font-semibold text-[#0B1F36] bg-[#0B1F36]/8"
+                                  : "text-[#64748B] hover:bg-slate-50 hover:text-[#0B1F36]"
                               }`}
                             >
                               <span>{st}</span>
-                              {inq.status === st && <Check className="h-3 w-3 text-[#075e38]" />}
+                              {inq.status === st && <Check className="h-3 w-3 text-[#C8973D]" />}
                             </button>
                           ))}
                         </div>
@@ -1255,21 +1307,21 @@ export default function AdminOverview() {
         </div>
 
         {/* Right Column: Recent Activity (5 cols) */}
-        <div className="lg:col-span-5 rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs flex flex-col justify-between">
+        <div className="lg:col-span-5 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9]">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[#075e38]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                   <Clock className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-tight">Recent Activity</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Latest updates in your CMS.</p>
+                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Recent Activity</h3>
+                  <p className="text-xs text-[#52627A] mt-0.5">Latest updates in your CMS.</p>
                 </div>
               </div>
               <Link
                 href="/admin/history"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#075e38] hover:text-[#064e2e] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
               >
                 <span>View All Activity</span>
                 <span>→</span>
@@ -1283,11 +1335,11 @@ export default function AdminOverview() {
                   <div className="flex items-start gap-2.5 min-w-0">
                     <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${act.dotColor}`} />
                     <div className="min-w-0">
-                      <p className="font-semibold text-slate-800 truncate">{act.title}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{act.subtitle}</p>
+                      <p className="font-medium text-[#1E293B] truncate">{act.title}</p>
+                      <p className="text-[11px] text-[#64748B] truncate">{act.subtitle}</p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-[11px] text-slate-400 whitespace-nowrap">
+                  <span className="shrink-0 text-[11px] text-[#94A3B8] whitespace-nowrap">
                     {act.time}
                   </span>
                 </div>
@@ -1300,18 +1352,18 @@ export default function AdminOverview() {
       {/* MODAL 1: ADD CONSULTATION */}
       {showAddConsultationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="w-full max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                   <MessageSquare className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900">Add New Client Consultation</h3>
+                <h3 className="text-sm font-semibold text-[#0B1F36]">Add New Client Consultation</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddConsultationModal(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 hover:text-slate-600 transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1322,44 +1374,44 @@ export default function AdminOverview() {
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-3">
                   <Check className="h-6 w-6" />
                 </div>
-                <h4 className="text-sm font-bold text-slate-900">Consultation Recorded!</h4>
-                <p className="text-xs text-slate-500 mt-1">
+                <h4 className="text-sm font-bold text-[#0B1F36]">Consultation Recorded!</h4>
+                <p className="text-xs text-[#52627A] mt-1">
                   Client inquiry has been added to your dashboard list.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleAddConsultationSubmit} className="mt-4 space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Client Name *</label>
+                  <label className="block font-semibold text-[#334155] mb-1">Client Name *</label>
                   <input
                     type="text"
                     required
                     value={newClientName}
                     onChange={(e) => setNewClientName(e.target.value)}
                     placeholder="e.g. Muhammad Usman"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <label className="block font-semibold text-[#334155] mb-1">Phone Number</label>
                   <input
                     type="text"
                     value={newClientPhone}
                     onChange={(e) => setNewClientPhone(e.target.value)}
                     placeholder="e.g. 0300 1234567"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#334155] mb-1">
                     Service Required
                   </label>
                   <select
                     value={newClientService}
                     onChange={(e) => setNewClientService(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   >
                     <option value="Income Tax Filing">FBR Income Tax Filing</option>
                     <option value="Property Tax">Property & Capital Value Tax</option>
@@ -1371,7 +1423,7 @@ export default function AdminOverview() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
+                  <label className="block font-semibold text-[#334155] mb-1">
                     Consultation Notes / Message
                   </label>
                   <textarea
@@ -1379,21 +1431,21 @@ export default function AdminOverview() {
                     value={newClientMessage}
                     onChange={(e) => setNewClientMessage(e.target.value)}
                     placeholder="Enter discussion notes or client requirement..."
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-[#075e38] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#F1F5F9]">
                   <button
                     type="button"
                     onClick={() => setShowAddConsultationModal(false)}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                    className="rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-slate-50 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#075e38] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#064e2e] shadow-2xs transition"
+                    className="rounded-lg bg-[#0B1F36] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#102943] shadow-xs hover:shadow-sm transition"
                   >
                     Save Consultation
                   </button>
@@ -1407,17 +1459,17 @@ export default function AdminOverview() {
       {/* MODAL 2: INQUIRY DETAILS */}
       {selectedInquiryDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="w-full max-w-lg rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
                   <Users className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-semibold text-[#0B1F36]">
                     {selectedInquiryDetail.name}
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-[#64748B]">
                     Received on {selectedInquiryDetail.created_at}
                   </p>
                 </div>
@@ -1425,42 +1477,42 @@ export default function AdminOverview() {
               <button
                 type="button"
                 onClick={() => setSelectedInquiryDetail(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 hover:text-slate-600 transition"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3 bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+              <div className="grid grid-cols-2 gap-3 bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
                 <div>
-                  <p className="text-[11px] font-semibold text-slate-400">Service Interest</p>
-                  <p className="text-xs font-bold text-slate-800 mt-0.5">
+                  <p className="text-[11px] font-semibold text-[#64748B]">Service Interest</p>
+                  <p className="text-xs font-semibold text-[#0B1F36] mt-0.5">
                     {selectedInquiryDetail.service_needed}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-slate-400">Status</p>
+                  <p className="text-[11px] font-semibold text-[#64748B]">Status</p>
                   <div className="mt-0.5">{getStatusBadge(selectedInquiryDetail.status)}</div>
                 </div>
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold text-slate-400">Client Phone</p>
-                <p className="text-xs font-bold text-slate-800 mt-0.5">
+                <p className="text-[11px] font-semibold text-[#64748B]">Client Phone</p>
+                <p className="text-xs font-semibold text-[#0B1F36] mt-0.5">
                   {selectedInquiryDetail.phone || "Not provided"}
                 </p>
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold text-slate-400">Message / Inquiry Details</p>
-                <div className="mt-1 p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 leading-relaxed">
+                <p className="text-[11px] font-semibold text-[#64748B]">Message / Inquiry Details</p>
+                <div className="mt-1 p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#334155] leading-relaxed">
                   {selectedInquiryDetail.message}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-[#F1F5F9]">
               {selectedInquiryDetail.phone ? (
                 <div className="flex items-center gap-2">
                   <a
@@ -1469,16 +1521,16 @@ export default function AdminOverview() {
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white px-3 py-1.5 font-bold shadow-2xs transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white px-3 py-1.5 font-semibold shadow-2xs transition"
                   >
                     <MessageCircle className="h-3.5 w-3.5" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:${selectedInquiryDetail.phone.replace(/[^0-9]/g, "")}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 font-bold shadow-2xs transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#334155] px-3 py-1.5 font-semibold shadow-2xs transition"
                   >
-                    <Phone className="h-3.5 w-3.5 text-slate-400" />
+                    <Phone className="h-3.5 w-3.5 text-[#64748B]" />
                     <span>Call</span>
                   </a>
                 </div>
@@ -1489,7 +1541,7 @@ export default function AdminOverview() {
               <button
                 type="button"
                 onClick={() => setSelectedInquiryDetail(null)}
-                className="rounded-lg bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 font-semibold shadow-2xs transition"
+                className="rounded-lg bg-[#0B1F36] hover:bg-[#102943] text-white px-4 py-1.5 font-semibold shadow-xs transition"
               >
                 Close
               </button>

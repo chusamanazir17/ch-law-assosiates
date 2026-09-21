@@ -224,28 +224,28 @@ export default function MediaManager() {
   return (
     <div className="space-y-6">
       {/* Top Breadcrumb */}
-      <div className="text-[13px] text-slate-500 font-normal">
+      <div className="text-xs text-[#52627A] font-medium">
         <span>Website</span>
-        <span className="mx-2 text-slate-400">/</span>
-        <span className="text-slate-700">Media</span>
+        <span className="mx-2 text-[#94A3B8]">/</span>
+        <span className="text-[#0B1F36]">Media</span>
       </div>
 
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Media & Image Assets
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
+          <p className="mt-0.5 text-xs text-[#52627A] leading-relaxed">
             Store, preview, and copy image links in 1-click for embedding into articles, tax guides, and landing pages.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-[13.5px] font-medium text-white shadow-2xs transition shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition shrink-0"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5 text-[#C8973D]" />
           <span>Add new image</span>
         </button>
       </div>
@@ -253,16 +253,16 @@ export default function MediaManager() {
       {/* Alert / Notification */}
       {message && (
         <div
-          className={`flex items-center justify-between rounded-xl p-3.5 text-xs font-medium border shadow-2xs ${
+          className={`flex items-center justify-between rounded-xl p-3.5 text-xs font-medium border shadow-xs ${
             message.type === "success"
-              ? "bg-[#eef7f2] text-[#075e38] border-emerald-200/80"
+              ? "bg-[#FDF8EE] text-[#96641E] border-[#C8973D]/40"
               : "bg-rose-50 text-rose-800 border-rose-200"
           }`}
         >
           <span>{message.text}</span>
           <button
             onClick={() => setMessage(null)}
-            className="text-slate-500 hover:text-slate-800 ml-2"
+            className="text-[#52627A] hover:text-[#0B1F36] ml-2 text-xs font-semibold"
           >
             Dismiss
           </button>
@@ -272,39 +272,39 @@ export default function MediaManager() {
       {/* Search & Info Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search images by title or alt description..."
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-[13.5px] text-slate-800 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-10 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-xs transition"
           />
         </div>
 
-        <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
-          <span>Click <strong className="text-slate-800 font-semibold">Copy Link</strong> on any image to paste it directly into posts.</span>
+        <div className="text-xs text-[#52627A] flex items-center gap-1.5">
+          <span>Click <strong className="text-[#0B1F36] font-semibold">Copy Link</strong> on any image to paste it directly into posts.</span>
         </div>
       </div>
 
       {/* Media Grid */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400 text-xs">
-          <Loader2 className="h-6 w-6 animate-spin text-[#075e38] mb-2" />
+        <div className="flex flex-col items-center justify-center py-20 text-[#52627A] text-xs">
+          <Loader2 className="h-6 w-6 animate-spin text-[#C8973D] mb-2" />
           <span>Loading image gallery...</span>
         </div>
       ) : filteredAssets.length === 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-xs text-slate-500 shadow-2xs">
-          <FileImage className="mx-auto h-10 w-10 text-slate-300 mb-2" />
-          <p className="font-semibold text-slate-800 text-sm">No images in your library yet.</p>
-          <p className="text-slate-400 mt-1 max-w-sm mx-auto">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-12 text-center text-xs text-[#52627A] shadow-xs">
+          <FileImage className="mx-auto h-10 w-10 text-[#C8973D]/60 mb-2" />
+          <p className="font-semibold text-[#0B1F36] text-sm">No images in your library yet.</p>
+          <p className="text-[#52627A] mt-1 max-w-sm mx-auto text-xs leading-relaxed">
             Upload pictures of Chamber 121, e-stamping certificates, official FBR circulars, or legal tax banners.
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 text-xs font-medium text-white shadow-2xs transition"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-3.5 w-3.5 text-[#C8973D]" />
             Add First Image
           </button>
         </div>
@@ -313,11 +313,11 @@ export default function MediaManager() {
           {filteredAssets.map((asset) => (
             <div
               key={asset.id}
-              className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs hover:border-slate-300 hover:shadow-xs transition flex flex-col justify-between"
+              className="group relative rounded-xl border border-[#E2E8F0] bg-white overflow-hidden shadow-xs hover:border-[#CBD5E1] hover:shadow-sm transition flex flex-col justify-between"
             >
               {/* Thumbnail Container */}
               <div
-                className="relative aspect-video bg-slate-100 overflow-hidden cursor-pointer"
+                className="relative aspect-video bg-[#F8FAFC] overflow-hidden cursor-pointer"
                 onClick={() => setPreviewAsset(asset)}
               >
                 <img
@@ -336,36 +336,36 @@ export default function MediaManager() {
               {/* Card Meta & Actions */}
               <div className="p-3.5 space-y-2.5">
                 <div>
-                  <h3 className="font-semibold text-xs text-slate-900 truncate" title={asset.name}>
+                  <h3 className="font-semibold text-xs text-[#0B1F36] truncate" title={asset.name}>
                     {asset.name}
                   </h3>
                   {asset.alt_text && (
-                    <p className="text-[11.5px] text-slate-500 truncate mt-0.5" title={asset.alt_text}>
+                    <p className="text-[11px] text-[#52627A] truncate mt-0.5" title={asset.alt_text}>
                       {asset.alt_text}
                     </p>
                   )}
                 </div>
 
                 {/* Bottom Action Buttons */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                <div className="flex items-center justify-between pt-2 border-t border-[#F1F5F9] text-xs">
                   {/* 1-Click Copy URL Button */}
                   <button
                     onClick={() => handleCopyUrl(asset.id, asset.url)}
                     className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                       copiedId === asset.id
-                        ? "bg-[#eef7f2] text-[#075e38] border border-emerald-200/80"
-                        : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-2xs"
+                        ? "bg-[#FDF8EE] text-[#96641E] border border-[#C8973D]/40"
+                        : "bg-white text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] border border-[#E2E8F0] shadow-xs"
                     }`}
                     title="Copy URL to clipboard"
                   >
                     {copiedId === asset.id ? (
                       <>
-                        <Check className="h-3 w-3" />
+                        <Check className="h-3 w-3 text-[#C8973D]" />
                         <span>Copied!</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="h-3 w-3 text-slate-400" />
+                        <Copy className="h-3 w-3 text-[#94A3B8]" />
                         <span>Copy Link</span>
                       </>
                     )}
@@ -374,7 +374,7 @@ export default function MediaManager() {
                   {/* Delete Button */}
                   <button
                     onClick={() => handleDelete(asset)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                    className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-rose-50 hover:text-rose-600 transition"
                     title="Delete Image Asset"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -389,33 +389,33 @@ export default function MediaManager() {
       {/* Add New Image Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="w-full max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eef7f2] text-[#075e38]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FDF8EE] text-[#C8973D]">
                   <ImageIcon className="h-4 w-4" />
                 </div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-sm font-bold text-[#0B1F36]">
                   Add Image to Library
                 </h2>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Input Mode Selector */}
-            <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs font-semibold">
+            <div className="flex rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-1 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setInputMode("url")}
                 className={`flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 transition ${
                   inputMode === "url"
-                    ? "bg-[#075e38] text-white shadow-xs font-bold"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-[#0B1F36] text-white shadow-xs font-bold"
+                    : "text-[#52627A] hover:text-[#0B1F36]"
                 }`}
               >
                 <Link2 className="h-3.5 w-3.5" />
@@ -426,8 +426,8 @@ export default function MediaManager() {
                 onClick={() => setInputMode("upload")}
                 className={`flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 transition ${
                   inputMode === "upload"
-                    ? "bg-[#075e38] text-white shadow-xs font-bold"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-[#0B1F36] text-white shadow-xs font-bold"
+                    : "text-[#52627A] hover:text-[#0B1F36]"
                 }`}
               >
                 <UploadCloud className="h-3.5 w-3.5" />
@@ -438,7 +438,7 @@ export default function MediaManager() {
             <form onSubmit={handleSaveAsset} className="space-y-4 text-xs">
               {/* Asset Title */}
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                   Image Title *
                 </label>
                 <input
@@ -447,13 +447,13 @@ export default function MediaManager() {
                   value={assetTitle}
                   onChange={(e) => setAssetTitle(e.target.value)}
                   placeholder="e.g. Chamber 121 Exterior Office Front"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                 />
               </div>
 
               {/* Alt Text */}
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                   Alt Description (Accessibility & SEO)
                 </label>
                 <input
@@ -461,14 +461,14 @@ export default function MediaManager() {
                   value={assetAlt}
                   onChange={(e) => setAssetAlt(e.target.value)}
                   placeholder="e.g. Ch Composing legal office in Sahiwal"
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                 />
               </div>
 
               {/* URL or File Picker */}
               {inputMode === "url" ? (
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
+                  <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                     Image URL *
                   </label>
                   <input
@@ -477,12 +477,12 @@ export default function MediaManager() {
                     value={assetUrl}
                     onChange={(e) => setAssetUrl(e.target.value)}
                     placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-slate-900 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38]"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                   />
                 </div>
               ) : (
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
+                  <label className="block text-xs font-semibold text-[#0B1F36] mb-1">
                     Select Image File *
                   </label>
                   <input
@@ -497,26 +497,26 @@ export default function MediaManager() {
                         }
                       }
                     }}
-                    className="w-full rounded-lg border border-slate-200 bg-white p-2 text-slate-800 file:mr-2 file:rounded-md file:border-0 file:bg-[#075e38] file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white cursor-pointer"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-2 text-xs text-[#0B1F36] file:mr-2 file:rounded-md file:border-0 file:bg-[#0B1F36] file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-white cursor-pointer"
                   />
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded-lg border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 transition"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-4 py-2 font-medium text-white shadow-2xs transition disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition disabled:opacity-50"
                 >
-                  {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C8973D]" />}
                   <span>Save Asset</span>
                 </button>
               </div>
@@ -532,19 +532,19 @@ export default function MediaManager() {
           onClick={() => setPreviewAsset(null)}
         >
           <div
-            className="max-w-3xl w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-3"
+            className="max-w-3xl w-full rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-2xl space-y-3"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="font-bold text-sm text-slate-900">{previewAsset.name}</h3>
+            <div className="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
+              <h3 className="font-semibold text-sm text-[#0B1F36]">{previewAsset.name}</h3>
               <button
                 onClick={() => setPreviewAsset(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-[#F8FAFC] hover:text-[#0B1F36] transition"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="max-h-[70vh] overflow-hidden rounded-xl bg-slate-100 flex items-center justify-center">
+            <div className="max-h-[70vh] overflow-hidden rounded-xl bg-[#F8FAFC] flex items-center justify-center border border-[#E2E8F0]">
               <img
                 src={previewAsset.url}
                 alt={previewAsset.alt_text || previewAsset.name}
@@ -552,12 +552,12 @@ export default function MediaManager() {
               />
             </div>
             <div className="flex items-center justify-between pt-2 text-xs">
-              <span className="font-mono text-slate-500 text-[11px] truncate max-w-md">
+              <span className="font-mono text-[#52627A] text-[11px] truncate max-w-md">
                 {previewAsset.url}
               </span>
               <button
                 onClick={() => handleCopyUrl(previewAsset.id, previewAsset.url)}
-                className="rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-3.5 py-1.5 text-white font-medium shadow-2xs transition"
+                className="rounded-lg bg-[#0B1F36] hover:bg-[#102943] px-3.5 py-1.5 text-white font-semibold text-xs shadow-xs transition"
               >
                 {copiedId === previewAsset.id ? "Copied!" : "Copy URL"}
               </button>

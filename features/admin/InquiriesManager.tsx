@@ -152,30 +152,30 @@ export default function InquiriesManager() {
   return (
     <div className="space-y-6">
       {/* Top Breadcrumb */}
-      <div className="text-[13px] text-slate-500 font-normal">
+      <div className="text-xs text-[#64748B] font-medium flex items-center gap-1.5">
         <span>Website</span>
-        <span className="mx-2 text-slate-400">/</span>
-        <span className="text-slate-700">Client Inquiries</span>
+        <span className="text-[#94A3B8]">/</span>
+        <span className="text-[#0B1F36] font-semibold">Client Inquiries</span>
       </div>
 
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
             Consultation Requests Inbox
           </h1>
-          <p className="text-[14.5px] text-slate-500 mt-1">
-            Real-time leads submitted by visitors from website contact forms. Reply directly via WhatsApp or phone.
+          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">
+            Real-time client leads submitted from website contact forms. Reply directly via WhatsApp or phone.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs text-slate-600 shadow-2xs">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white px-3.5 py-1.5 text-xs text-[#52627A] shadow-2xs">
             <span>Total Leads: </span>
-            <strong className="text-slate-900 font-bold">{inquiries.length}</strong>
-            <span className="mx-2 text-slate-300">•</span>
+            <strong className="text-[#0B1F36] font-bold">{inquiries.length}</strong>
+            <span className="mx-2 text-[#CBD5E1]">•</span>
             <span>New: </span>
-            <strong className="text-[#075e38] font-bold">
+            <strong className="text-[#B8832A] font-bold">
               {inquiries.filter((i) => i.status === "new").length}
             </strong>
           </div>
@@ -187,12 +187,12 @@ export default function InquiriesManager() {
         <div
           className={`flex items-center justify-between rounded-xl p-3.5 text-xs font-medium border shadow-2xs ${
             message.type === "success"
-              ? "bg-[#eef7f2] text-[#075e38] border-emerald-200/80"
+              ? "bg-[#FDF8EE] text-[#96641E] border-[#C8973D]/40"
               : "bg-rose-50 text-rose-800 border-rose-200"
           }`}
         >
           <span>{message.text}</span>
-          <button onClick={() => setMessage(null)} className="text-slate-500 hover:text-slate-800 ml-2">
+          <button onClick={() => setMessage(null)} className="text-[#64748B] hover:text-[#0B1F36] ml-2 font-medium">
             Dismiss
           </button>
         </div>
@@ -201,22 +201,22 @@ export default function InquiriesManager() {
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search leads by client name, phone number, service, or message..."
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-[13.5px] text-slate-800 placeholder-slate-400 focus:border-[#075e38] focus:outline-none focus:ring-1 focus:ring-[#075e38] shadow-2xs"
+            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-10 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400 shrink-0" />
+          <Filter className="h-4 w-4 text-[#94A3B8] shrink-0" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "all" | InquiryStatus)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs"
+            className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-medium text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           >
             <option value="all">All Statuses</option>
             <option value="new">New</option>
@@ -228,22 +228,22 @@ export default function InquiriesManager() {
       </div>
 
       {/* Leads List */}
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden shadow-2xs">
         {isLoading ? (
-          <div className="py-16 text-center text-xs text-slate-400">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#075e38] mb-2" />
+          <div className="py-16 text-center text-xs text-[#64748B]">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#C8973D] mb-2" />
             Loading inquiries...
           </div>
         ) : filteredInquiries.length === 0 ? (
-          <div className="py-16 text-center text-xs text-slate-500">
-            <MessageSquareText className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-            <p className="font-semibold text-slate-800 text-sm">No consultation inquiries found.</p>
-            <p className="text-slate-400 mt-1 max-w-sm mx-auto">
+          <div className="py-16 text-center text-xs text-[#64748B]">
+            <MessageSquareText className="mx-auto h-8 w-8 text-[#CBD5E1] mb-2" />
+            <p className="font-semibold text-[#0B1F36] text-sm">No consultation inquiries found.</p>
+            <p className="text-[#64748B] mt-1 max-w-sm mx-auto">
               When clients fill out the contact form on your website requesting tax filing or e-stamping assistance, their inquiries appear here.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 text-xs">
+          <div className="divide-y divide-[#E2E8F0] text-xs">
             {filteredInquiries.map((inq) => {
               // Clean phone number for WhatsApp
               const cleanPhone = inq.phone.replace(/[^0-9]/g, "");
@@ -258,38 +258,40 @@ export default function InquiriesManager() {
               return (
                 <div
                   key={inq.id}
-                  className="p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 hover:bg-slate-50/75 transition"
+                  className="p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 hover:bg-[#F8FAFC] transition"
                 >
                   {/* Left Column: Client info and message */}
                   <div className="space-y-2 max-w-2xl">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-sm text-slate-900">{inq.name}</span>
-                      <span className="rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                      <span className="font-bold text-sm text-[#0B1F36]">{inq.name}</span>
+                      <span className="rounded-md bg-[#F1F5F9] border border-[#E2E8F0] px-2 py-0.5 text-[11px] font-medium text-[#334155]">
                         {inq.service_needed || "Tax Consultation"}
                       </span>
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase ${
+                        className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide ${
                           inq.status === "new"
-                            ? "bg-[#eef7f2] text-[#075e38] border border-emerald-200/80"
+                            ? "bg-[#FDF8EE] text-[#96641E] border border-[#C8973D]/40"
                             : inq.status === "in_progress"
-                            ? "bg-sky-50 text-sky-700 border border-sky-200"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                            ? "bg-sky-50 text-sky-800 border border-sky-200"
+                            : inq.status === "completed"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            : "bg-slate-100 text-[#64748B] border border-[#E2E8F0]"
                         }`}
                       >
                         {inq.status}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-slate-500 text-[11.5px]">
-                      <span className="flex items-center gap-1 text-slate-700 font-mono">
-                        <Phone className="h-3 w-3 text-slate-400" />
+                    <div className="flex flex-wrap items-center gap-4 text-[#64748B] text-[11.5px]">
+                      <span className="flex items-center gap-1 text-[#0B1F36] font-mono">
+                        <Phone className="h-3 w-3 text-[#94A3B8]" />
                         {inq.phone}
                       </span>
                       {inq.email && (
                         <span>Email: {inq.email}</span>
                       )}
-                      <span className="flex items-center gap-1 text-slate-400">
-                        <Clock className="h-3 w-3" />
+                      <span className="flex items-center gap-1 text-[#64748B]">
+                        <Clock className="h-3 w-3 text-[#94A3B8]" />
                         {new Date(inq.created_at).toLocaleString("en-PK", {
                           dateStyle: "medium",
                           timeStyle: "short",
@@ -298,7 +300,7 @@ export default function InquiriesManager() {
                     </div>
 
                     {inq.message && (
-                      <p className="rounded-lg bg-slate-50 p-3 border border-slate-200/80 text-slate-700 text-xs leading-relaxed italic">
+                      <p className="rounded-lg bg-[#F8FAFC] p-3 border border-[#E2E8F0] text-[#334155] text-xs leading-relaxed italic">
                         "{inq.message}"
                       </p>
                     )}
@@ -311,7 +313,7 @@ export default function InquiriesManager() {
                       href={`https://wa.me/${waNumber}?text=${waMessage}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#075e38] hover:bg-[#064e2e] px-3.5 py-1.5 text-xs font-medium text-white transition shadow-2xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#128C7E] hover:bg-[#075E54] px-3 py-1.5 text-xs font-semibold text-white transition shadow-xs"
                     >
                       <MessageCircle className="h-3.5 w-3.5" />
                       <span>WhatsApp Reply</span>
@@ -320,9 +322,9 @@ export default function InquiriesManager() {
                     {/* Phone Call Button */}
                     <a
                       href={`tel:${inq.phone}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 shadow-2xs transition"
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0B1F36] hover:bg-[#F8FAFC] shadow-2xs transition"
                     >
-                      <Phone className="h-3.5 w-3.5 text-slate-400" />
+                      <Phone className="h-3.5 w-3.5 text-[#64748B]" />
                       <span>Call</span>
                     </a>
 
@@ -336,7 +338,7 @@ export default function InquiriesManager() {
                           e.target.value as InquiryStatus
                         )
                       }
-                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 focus:border-[#075e38] focus:outline-none shadow-2xs"
+                      className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-medium text-[#0B1F36] focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
                     >
                       <option value="new">Mark: New</option>
                       <option value="in_progress">Mark: In Progress</option>
@@ -348,7 +350,7 @@ export default function InquiriesManager() {
                     <button
                       onClick={() => handleDelete(inq.id, inq.name)}
                       disabled={actionLoading === inq.id}
-                      className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                      className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-rose-50 hover:text-rose-600 transition"
                       title="Delete Inquiry"
                     >
                       <Trash2 className="h-4 w-4" />
