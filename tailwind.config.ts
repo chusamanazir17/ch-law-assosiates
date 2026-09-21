@@ -56,6 +56,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        admin: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Roboto", '"Helvetica Neue"', "Arial", "sans-serif"],
         serif: ["var(--font-dm-serif)", "Georgia", "serif"],
         script: ["var(--font-script)", "cursive"],
         urdu: ["var(--font-urdu)", "system-ui", "sans-serif"],

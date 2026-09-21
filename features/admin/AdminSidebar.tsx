@@ -137,7 +137,7 @@ export default function AdminSidebar({
                   <span className="text-[15px] font-bold tracking-tight text-[#0B1F36] block leading-tight truncate">
                     Chamber 121
                   </span>
-                  <span className="text-[11px] text-[#64748B] font-medium block leading-tight mt-0.5 truncate tracking-wide">
+                  <span className="text-[11.5px] text-[#64748B] font-medium block leading-tight mt-0.5 truncate">
                     Legal & Tax Management
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export default function AdminSidebar({
             target="_blank"
             rel="noreferrer"
             className={`group relative flex items-center rounded-lg border border-[#E2E8F0] bg-white font-medium text-[#334155] shadow-2xs transition-all hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36] ${
-              isCollapsed ? "justify-center h-10 w-full" : "justify-between px-3 py-2 text-xs"
+              isCollapsed ? "justify-center h-10 w-full" : "justify-between px-3 py-2 text-[12.5px]"
             }`}
             title="Open Live Website in New Tab"
           >
@@ -183,10 +183,10 @@ export default function AdminSidebar({
               {!isCollapsed && <span>View Public Site</span>}
             </div>
             {!isCollapsed && (
-              <span className="text-[11px] text-[#94A3B8] group-hover:text-[#0B1F36]">↗</span>
+              <span className="text-xs text-[#94A3B8] group-hover:text-[#0B1F36]">↗</span>
             )}
             {isCollapsed && (
-              <div className="pointer-events-none absolute left-full ml-3 hidden items-center rounded-md bg-[#0B1F36] px-2.5 py-1 text-[12px] font-medium text-white shadow-lg z-50 group-hover:flex">
+              <div className="pointer-events-none absolute left-full ml-3 hidden items-center rounded-md bg-[#0B1F36] px-2.5 py-1 text-xs font-medium text-white shadow-lg z-50 group-hover:flex">
                 View Public Site
               </div>
             )}
@@ -201,7 +201,7 @@ export default function AdminSidebar({
                 isCollapsed ? (
                   <div className="my-2 border-t border-slate-100" />
                 ) : (
-                  <p className="px-3 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#64748B]">
+                  <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
                     {section.group}
                   </p>
                 )
@@ -222,7 +222,7 @@ export default function AdminSidebar({
                       className={`group relative flex items-center rounded-lg transition-all duration-150 ${
                         isCollapsed
                           ? "justify-center h-10 w-full"
-                          : "gap-3 px-3 py-2 text-[13px]"
+                          : "gap-3 px-3 py-2 text-[13.5px]"
                       } ${
                         isActive
                           ? "bg-[#0B1F36] text-white font-semibold shadow-xs"
@@ -239,7 +239,7 @@ export default function AdminSidebar({
 
                       {/* Floating tooltip on hover when collapsed */}
                       {isCollapsed && (
-                        <div className="pointer-events-none absolute left-full ml-3 hidden items-center rounded-md bg-[#0B1F36] px-2.5 py-1 text-[12px] font-medium text-white shadow-lg z-50 group-hover:flex">
+                        <div className="pointer-events-none absolute left-full ml-3 hidden items-center rounded-md bg-[#0B1F36] px-2.5 py-1 text-xs font-medium text-white shadow-lg z-50 group-hover:flex">
                           {item.label}
                         </div>
                       )}
@@ -260,13 +260,13 @@ export default function AdminSidebar({
               <Headphones className="h-4 w-4" />
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-[#0B1F36]">Need Support?</h4>
-              <p className="text-[11px] text-[#64748B]">Chamber tech & compliance desk.</p>
+              <h4 className="text-[13px] font-semibold text-[#0B1F36]">Need Support?</h4>
+              <p className="text-xs text-[#64748B] mt-0.5">Chamber tech & compliance desk.</p>
             </div>
           </div>
           <Link
             href="/admin/settings"
-            className="mt-2.5 flex w-full items-center justify-center rounded-lg border border-[#E2E8F0] bg-white py-1.5 text-xs font-medium text-[#334155] shadow-2xs hover:bg-slate-50 hover:text-[#0B1F36] hover:border-[#CBD5E1] transition"
+            className="mt-2.5 flex w-full items-center justify-center rounded-lg border border-[#E2E8F0] bg-white py-1.5 text-xs font-semibold text-[#334155] shadow-2xs hover:bg-slate-50 hover:text-[#0B1F36] hover:border-[#CBD5E1] transition"
           >
             Firm Settings
           </Link>
@@ -285,8 +285,8 @@ export default function AdminSidebar({
             </div>
             {/* Tooltip with Sign Out */}
             <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-44 rounded-lg bg-white p-2 text-[#334155] shadow-xl border border-[#E2E8F0] z-50 group-hover:pointer-events-auto group-hover:block">
-              <div className="text-[13px] font-semibold text-[#0B1F36]">Chaudhry Admin</div>
-              <div className="text-[11px] text-[#64748B] mb-2 font-medium">Principal Practitioner</div>
+              <div className="text-[13.5px] font-semibold text-[#0B1F36]">Chaudhry Admin</div>
+              <div className="text-xs text-[#64748B] mb-2 font-medium">Principal Practitioner</div>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -304,10 +304,10 @@ export default function AdminSidebar({
                 C
               </div>
               <div className="min-w-0">
-                <span className="text-[13px] font-semibold text-[#0B1F36] block leading-tight truncate">
+                <span className="text-[13.5px] font-semibold text-[#0B1F36] block leading-tight truncate">
                   Chaudhry Admin
                 </span>
-                <span className="text-[11px] text-[#64748B] font-medium block leading-tight mt-0.5 truncate">
+                <span className="text-xs text-[#64748B] font-medium block leading-tight mt-0.5 truncate">
                   Principal Practitioner
                 </span>
               </div>

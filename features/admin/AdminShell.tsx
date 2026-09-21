@@ -105,7 +105,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="admin-shell flex min-h-screen bg-slate-50 font-sans text-slate-900 antialiased"
+      className="admin-shell flex min-h-screen bg-slate-50 font-admin text-slate-900 antialiased"
       style={{ colorScheme: "light" }}
     >
       <AdminSidebar />
@@ -137,7 +137,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search subscribers, posts, media, or inquiries..."
-                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-1.5 pl-9 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-1.5 pl-9 pr-4 text-sm text-[#0B1F36] placeholder:text-[#94A3B8] placeholder:text-sm focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
             </form>
           </div>
@@ -170,21 +170,21 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-xl z-50">
                   <div className="flex items-center justify-between pb-2.5 border-b border-[#F1F5F9]">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-[#0B1F36]">Notifications</span>
-                      <span className="rounded-full bg-[#0B1F36]/8 px-2 py-0.5 text-[10px] font-semibold text-[#0B1F36]">
+                      <span className="text-sm font-semibold text-[#0B1F36]">Notifications</span>
+                      <span className="rounded-full bg-[#0B1F36]/8 px-2 py-0.5 text-xs font-semibold text-[#0B1F36]">
                         3 new
                       </span>
                     </div>
                     <Link
                       href="/admin/inquiries"
                       onClick={() => setShowNotifications(false)}
-                      className="text-[11px] font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
+                      className="text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
                     >
                       View all
                     </Link>
                   </div>
 
-                  <div className="mt-2 divide-y divide-[#F1F5F9] text-xs">
+                  <div className="mt-2 divide-y divide-[#F1F5F9]">
                     {/* Item 1 */}
                     <Link
                       href="/admin/inquiries"
@@ -195,13 +195,13 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                         <MessageSquare className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-[#0B1F36] truncate">
+                        <p className="text-[13.5px] font-semibold text-[#0B1F36] truncate">
                           New consultation inquiry
                         </p>
-                        <p className="text-[11px] text-[#52627A] line-clamp-1">
+                        <p className="text-xs text-[#52627A] line-clamp-1 mt-0.5">
                           Ali Khan: Income Tax Filing guidance
                         </p>
-                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">9 hours ago</span>
+                        <span className="text-[11.5px] text-[#94A3B8] mt-0.5 block">9 hours ago</span>
                       </div>
                     </Link>
 
@@ -215,13 +215,13 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                         <Users className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-[#0B1F36] truncate">
+                        <p className="text-[13.5px] font-semibold text-[#0B1F36] truncate">
                           New subscriber opted-in
                         </p>
-                        <p className="text-[11px] text-[#52627A] line-clamp-1">
+                        <p className="text-xs text-[#52627A] line-clamp-1 mt-0.5">
                           Chaudhry Usama: Property & Capital Tax
                         </p>
-                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">2 hours ago</span>
+                        <span className="text-[11.5px] text-[#94A3B8] mt-0.5 block">2 hours ago</span>
                       </div>
                     </Link>
 
@@ -235,13 +235,13 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                         <CheckCircle2 className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-[#0B1F36] truncate">
+                        <p className="text-[13.5px] font-semibold text-[#0B1F36] truncate">
                           System Status: Operational
                         </p>
-                        <p className="text-[11px] text-[#52627A] line-clamp-1">
+                        <p className="text-xs text-[#52627A] line-clamp-1 mt-0.5">
                           Tax reminders and dispatches synchronized
                         </p>
-                        <span className="text-[10px] text-[#94A3B8] mt-0.5 block">1 day ago</span>
+                        <span className="text-[11.5px] text-[#94A3B8] mt-0.5 block">1 day ago</span>
                       </div>
                     </Link>
                   </div>
@@ -266,21 +266,21 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="flex items-center gap-1">
-                    <p className="text-xs font-semibold text-[#0B1F36] leading-tight">Chaudhry Admin</p>
+                    <p className="text-[13px] font-semibold text-[#0B1F36] leading-tight">Chaudhry Admin</p>
                     <ChevronDown className="h-3 w-3 text-[#94A3B8]" />
                   </div>
-                  <p className="text-[11px] text-[#64748B] font-medium leading-tight mt-0.5">Principal Practitioner</p>
+                  <p className="text-[11.5px] text-[#64748B] font-medium leading-tight mt-0.5">Principal Practitioner</p>
                 </div>
               </button>
 
               {/* Admin Profile Dropdown Panel */}
               {showAdminMenu && (
-                <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl z-50 text-xs">
+                <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#E2E8F0] bg-white p-2 shadow-xl z-50 text-[13px]">
                   {/* User info banner */}
                   <div className="p-2.5 border-b border-[#F1F5F9] mb-1">
-                    <p className="font-semibold text-[#0B1F36]">Chamber Admin</p>
-                    <p className="text-[11px] text-[#64748B] mt-0.5 font-medium">admin@ch-law.pk</p>
-                    <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 border border-[#0B1F36]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0B1F36]">
+                    <p className="font-semibold text-sm text-[#0B1F36]">Chamber Admin</p>
+                    <p className="text-xs text-[#64748B] mt-0.5 font-medium">admin@ch-law.pk</p>
+                    <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 border border-[#0B1F36]/10 px-2 py-0.5 text-xs font-semibold text-[#0B1F36]">
                       Authorized Administrator
                     </span>
                   </div>

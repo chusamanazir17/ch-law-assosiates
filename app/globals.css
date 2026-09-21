@@ -299,3 +299,110 @@ html[lang="ur"] textarea {
   background-color: transparent !important;
   color: #0f172a !important;
 }
+
+/* ==========================================================================
+   Admin Dashboard Typography & Font System (Inter / Enterprise SaaS)
+   Replaces bubbly/geometric display fonts with crisp, human, high-legibility
+   enterprise SaaS typography (Inter / modern UI stack) across ALL tabs.
+   ========================================================================== */
+
+.admin-shell,
+.admin-shell * {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.admin-shell {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" 1;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 1. Page Title & Headers */
+.admin-shell h1 {
+  font-size: 1.5rem !important; /* 24px */
+  line-height: 2rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+  color: #0f172a !important; /* slate-900 */
+}
+
+.admin-shell h2 {
+  font-size: 1.125rem !important; /* 18px */
+  line-height: 1.625rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+  color: #0f172a !important;
+}
+
+.admin-shell h3 {
+  font-size: 0.9375rem !important; /* 15px */
+  line-height: 1.375rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: #0f172a !important;
+}
+
+/* 2. Subtitles & Explanatory copy under headings */
+.admin-shell p.text-xs,
+.admin-shell .admin-subtitle {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.35rem !important;
+  color: #64748b !important; /* slate-500 */
+  font-weight: 400 !important;
+}
+
+/* 3. Form Labels */
+.admin-shell label,
+.admin-shell .form-label {
+  font-size: 0.8125rem !important; /* 13px */
+  font-weight: 600 !important;
+  color: #334155 !important; /* slate-700 */
+  letter-spacing: -0.005em !important;
+}
+
+/* 4. Form Controls (Inputs, Selects, Textareas) */
+.admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.admin-shell select,
+.admin-shell textarea {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.25rem !important;
+  letter-spacing: -0.005em !important;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  font-size: 0.875rem !important;
+  color: #94a3b8 !important;
+}
+
+/* 5. Tables: Headers & Data Cells */
+.admin-shell table th {
+  font-size: 0.75rem !important; /* 12px */
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #475569 !important; /* slate-600 */
+}
+
+.admin-shell table td {
+  font-size: 0.84375rem !important; /* 13.5px */
+  line-height: 1.35rem !important;
+  color: #1e293b !important; /* slate-800 */
+}
+
+/* 6. Badges & Tags */
+.admin-shell .badge,
+.admin-shell span[class*="text-[10px]"],
+.admin-shell span[class*="text-[10.5px]"] {
+  font-size: 0.75rem !important; /* 12px min readable size */
+  line-height: 1rem !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* 7. Numbers and Stat Cards */
+.admin-shell .text-2xl,
+.admin-shell .text-3xl {
+  font-feature-settings: "tnum" on, "lnum" on !important;
+  letter-spacing: -0.025em !important;
+}

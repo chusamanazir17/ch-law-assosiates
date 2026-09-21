@@ -561,7 +561,7 @@ export default function AdminOverview() {
   };
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto font-sans pb-10">
+    <div className="space-y-5 max-w-7xl mx-auto font-admin pb-10">
       {/* 1. Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748B]">
         <span>Chamber 121</span>

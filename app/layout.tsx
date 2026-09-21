@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Poppins, DM_Serif_Display, Alex_Brush, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Poppins, DM_Serif_Display, Alex_Brush, Noto_Nastaliq_Urdu, Inter } from "next/font/google";
 import AppProviders from "@/providers/AppProviders";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -15,6 +15,13 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -91,7 +98,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
-      <body className={`${poppins.variable} ${dmSerif.variable} ${alexBrush.variable} ${notoNastaliq.variable} font-sans`} suppressHydrationWarning>
+      <body className={`${poppins.variable} ${inter.variable} ${dmSerif.variable} ${alexBrush.variable} ${notoNastaliq.variable} font-sans`} suppressHydrationWarning>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded-md focus:bg-gold-400 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg">Skip to content</a>
         <Script id="theme-init" strategy="beforeInteractive">{`(function(){try{var t=localStorage.getItem('ch_composing_theme');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}})();`}</Script>
         <JsonLd />

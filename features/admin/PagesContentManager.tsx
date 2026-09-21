@@ -373,7 +373,7 @@ export default function PagesContentManager() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans">
+    <div className="space-y-6 max-w-7xl mx-auto font-admin">
       {/* Breadcrumb Navigation */}
       <div className="flex items-center text-xs text-[#52627A] font-medium">
         <Link href="/admin" className="hover:text-[#0B1F36] transition">
