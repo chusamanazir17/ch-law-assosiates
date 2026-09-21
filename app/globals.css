@@ -240,64 +240,355 @@ html[lang="ur"] textarea {
 }
 
 /* ==========================================================================
-   Admin Dashboard Theme Enforcement (Bright / Light Theme)
-   Guarantees that all inputs, textareas, selects, and form controls inside
-   the admin portal strictly adhere to the bright theme with clean white
-   backgrounds, dark slate legible text, clear placeholders, and crisp focus rings.
+   Admin Dashboard Theme System (Light & Dark Mode)
+   Enforces consistent, accessible, high-contrast styles across ALL inputs,
+   textareas, selects, buttons, forms, tables, cards, and pictures in both
+   Light Mode and Dark Mode.
    ========================================================================== */
 
+/* 1. LIGHT THEME (Default when .dark is NOT present) */
 .admin-shell {
-  color-scheme: light !important;
+  color-scheme: light;
 }
 
 .admin-shell input:not([type="checkbox"]):not([type="radio"]),
 .admin-shell textarea,
 .admin-shell select {
-  background-color: #ffffff !important;
-  color: #0f172a !important; /* slate-900 */
-  border-color: #cbd5e1 !important; /* slate-300 */
-  color-scheme: light !important;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
 .admin-shell input:not([type="checkbox"]):not([type="radio"])::placeholder,
 .admin-shell textarea::placeholder {
-  color: #94a3b8 !important; /* slate-400 */
+  color: #94a3b8;
 }
 
 .admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
 .admin-shell textarea:focus,
 .admin-shell select:focus {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #059669 !important; /* emerald-600 */
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
-  outline: none !important;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #d39d3d;
+  box-shadow: 0 0 0 2px rgba(211, 157, 61, 0.25);
+  outline: none;
 }
 
 .admin-shell select option {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
 .admin-shell input[type="checkbox"],
 .admin-shell input[type="radio"] {
-  accent-color: #059669 !important;
+  accent-color: #d39d3d;
 }
 
 .admin-shell input:disabled,
 .admin-shell textarea:disabled,
 .admin-shell select:disabled {
-  background-color: #f8fafc !important; /* slate-50 */
-  color: #64748b !important; /* slate-500 */
-  border-color: #e2e8f0 !important;
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* 2. DARK THEME ENFORCEMENT (.dark .admin-shell) */
+.dark .admin-shell {
+  color-scheme: dark !important;
+  background-color: #060b17 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Dark Mode Inputs, Selects, Textareas */
+.dark .admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.dark .admin-shell textarea,
+.dark .admin-shell select {
+  background-color: #0d1527 !important;
+  color: #f8fafc !important;
+  border-color: #1e2d4a !important;
+  color-scheme: dark !important;
+}
+
+.dark .admin-shell input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.dark .admin-shell textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark .admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark .admin-shell textarea:focus,
+.dark .admin-shell select:focus {
+  background-color: #111c34 !important;
+  color: #ffffff !important;
+  border-color: #d39d3d !important;
+  box-shadow: 0 0 0 2px rgba(211, 157, 61, 0.3) !important;
+  outline: none !important;
+}
+
+.dark .admin-shell select option {
+  background-color: #0d1527 !important;
+  color: #f8fafc !important;
+}
+
+.dark .admin-shell input[type="checkbox"],
+.dark .admin-shell input[type="radio"] {
+  accent-color: #d39d3d !important;
+}
+
+.dark .admin-shell input:disabled,
+.dark .admin-shell textarea:disabled,
+.dark .admin-shell select:disabled {
+  background-color: #090e1a !important;
+  color: #475569 !important;
+  border-color: #19253c !important;
   cursor: not-allowed !important;
+}
+
+/* Dark Mode Cards, Sections, Modals & Dropdown Containers */
+.dark .admin-shell .bg-white {
+  background-color: #0b1329 !important;
+  border-color: #1e2d4a !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .admin-shell .bg-\[\#F8FAFC\],
+.dark .admin-shell .bg-slate-50 {
+  background-color: #070d1a !important;
+}
+
+.dark .admin-shell .bg-\[\#F1F5F9\],
+.dark .admin-shell .bg-slate-100 {
+  background-color: #131f38 !important;
+}
+
+.dark .admin-shell .border-\[\#E2E8F0\],
+.dark .admin-shell .border-\[\#F1F5F9\],
+.dark .admin-shell .border-slate-200,
+.dark .admin-shell .border-slate-200\/80,
+.dark .admin-shell .border-slate-100 {
+  border-color: #1e2d4a !important;
+}
+
+.dark .admin-shell .divide-\[\#E2E8F0\] > :not([hidden]) ~ :not([hidden]),
+.dark .admin-shell .divide-\[\#F1F5F9\] > :not([hidden]) ~ :not([hidden]),
+.dark .admin-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e2d4a !important;
+}
+
+/* Dark Mode Headings & Typography */
+.dark .admin-shell h1,
+.dark .admin-shell h2,
+.dark .admin-shell h3,
+.dark .admin-shell h4 {
+  color: #f8fafc !important;
+}
+
+.dark .admin-shell label,
+.dark .admin-shell .form-label {
+  color: #cbd5e1 !important;
+}
+
+.dark .admin-shell p.text-xs,
+.dark .admin-shell .admin-subtitle {
+  color: #94a3b8 !important;
+}
+
+.dark .admin-shell .text-\[\#0B1F36\],
+.dark .admin-shell .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+.dark .admin-shell .text-\[\#334155\],
+.dark .admin-shell .text-slate-800,
+.dark .admin-shell .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .admin-shell .text-\[\#52627A\],
+.dark .admin-shell .text-\[\#64748B\],
+.dark .admin-shell .text-slate-500,
+.dark .admin-shell .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.dark .admin-shell .text-\[\#94A3B8\] {
+  color: #64748b !important;
+}
+
+/* Dark Mode Table Headers & Cells */
+.dark .admin-shell table th {
+  background-color: #070d1a !important;
+  color: #94a3b8 !important;
+  border-color: #1e2d4a !important;
+}
+
+.dark .admin-shell table td {
+  color: #f1f5f9 !important;
+  border-color: #1e2d4a !important;
+}
+
+.dark .admin-shell table tbody tr:hover,
+.dark .admin-shell .hover\:bg-\[\#F8FAFC\]:hover,
+.dark .admin-shell .hover\:bg-slate-50:hover {
+  background-color: #101c34 !important;
+}
+
+/* Dark Mode Badges, Tags & Icon Accent Containers */
+.dark .admin-shell .bg-\[\#0B1F36\]\/8,
+.dark .admin-shell .bg-\[\#0B1F36\]\/6,
+.dark .admin-shell .bg-\[\#0B1F36\]\/4,
+.dark .admin-shell .bg-\[\#0B1F36\]\/10,
+.dark .admin-shell .bg-\[\#0B1F36\]\/15 {
+  background-color: rgba(211, 157, 61, 0.15) !important;
+  border-color: rgba(211, 157, 61, 0.3) !important;
+  color: #dcaa4a !important;
+}
+
+.dark .admin-shell .border-\[\#0B1F36\]\/15,
+.dark .admin-shell .border-\[\#0B1F36\]\/10 {
+  border-color: rgba(211, 157, 61, 0.3) !important;
+}
+
+.dark .admin-shell .bg-\[\#FDF8EE\],
+.dark .admin-shell .bg-amber-50 {
+  background-color: rgba(211, 157, 61, 0.15) !important;
+  border-color: rgba(211, 157, 61, 0.35) !important;
+  color: #dcaa4a !important;
+}
+
+.dark .admin-shell .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+
+.dark .admin-shell .bg-sky-50 {
+  background-color: rgba(14, 165, 233, 0.15) !important;
+  border-color: rgba(14, 165, 233, 0.35) !important;
+  color: #38bdf8 !important;
+}
+
+.dark .admin-shell .bg-rose-50 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  color: #fb7185 !important;
+}
+
+.dark .admin-shell .bg-slate-100 {
+  background-color: #1e2d4a !important;
+  border-color: #2a3c60 !important;
+  color: #94a3b8 !important;
+}
+
+/* Dark Mode Tab Navigation & Active State */
+.dark .admin-shell .border-\[\#0B1F36\] {
+  border-color: #d39d3d !important;
+}
+
+.dark .admin-shell button.border-\[\#0B1F36\],
+.dark .admin-shell a.border-\[\#0B1F36\] {
+  border-color: #d39d3d !important;
+  color: #dcaa4a !important;
+}
+
+.dark .admin-shell button.border-transparent:hover,
+.dark .admin-shell a.border-transparent:hover {
+  color: #f8fafc !important;
+}
+
+/* Dark Mode Images & Visual Media */
+.dark .admin-shell img {
+  border-color: #1e2d4a !important;
+  filter: brightness(0.92) contrast(1.04);
+  transition: filter 0.2s ease, transform 0.3s ease;
+}
+
+.dark .admin-shell img:hover {
+  filter: brightness(1) contrast(1);
+}
+
+.dark .admin-shell .border-dashed {
+  border-color: #2a3c60 !important;
+  background-color: #080f20 !important;
+}
+
+/* Dark Mode Primary Elements & Action Buttons */
+.dark .admin-shell .bg-\[\#0B1F36\],
+.dark .admin-shell button.bg-\[\#0B1F36\],
+.dark .admin-shell a.bg-\[\#0B1F36\] {
+  background: linear-gradient(135deg, #102943, #183a60) !important;
+  border: 1px solid rgba(211, 157, 61, 0.35) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .admin-shell .bg-\[\#0B1F36\]:hover,
+.dark .admin-shell button.bg-\[\#0B1F36\]:hover,
+.dark .admin-shell a.bg-\[\#0B1F36\]:hover {
+  background: linear-gradient(135deg, #163659, #204c7d) !important;
+  border-color: #d39d3d !important;
+}
+
+/* Dark Mode File Input Buttons */
+.dark .admin-shell input[type="file"]::file-selector-button,
+.dark .admin-shell input[type="file"]::-webkit-file-upload-button {
+  background: linear-gradient(135deg, #102943, #183a60) !important;
+  border: 1px solid rgba(211, 157, 61, 0.35) !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+}
+
+/* Dark Mode Secondary / Outline Buttons */
+.dark .admin-shell button.bg-white,
+.dark .admin-shell a.bg-white {
+  background-color: #0b1329 !important;
+  border-color: #1e2d4a !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .admin-shell button.bg-white:hover,
+.dark .admin-shell a.bg-white:hover {
+  background-color: #131f38 !important;
+  border-color: #2a3c60 !important;
+  color: #ffffff !important;
+}
+
+/* Dark Mode SVG Chart Elements (Analytics & Visualizations) */
+.dark .admin-shell svg line {
+  stroke: #1e2d4a !important;
+}
+
+.dark .admin-shell svg text {
+  fill: #94a3b8 !important;
+}
+
+.dark .admin-shell svg circle[fill="#ffffff"] {
+  fill: #0b1329 !important;
+  stroke: #d39d3d !important;
+}
+
+/* Dark Mode Modal Windows & Backdrop */
+.dark .admin-shell .fixed.inset-0,
+.dark .admin-shell .fixed.inset-0.bg-slate-900\/60,
+.dark .admin-shell [class*="bg-slate-900\/"] {
+  background-color: rgba(2, 6, 17, 0.85) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.dark .admin-shell .fixed .bg-white {
+  background-color: #0b1329 !important;
+  border: 1px solid #1e2d4a !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* Prefix containers (e.g. /services/ or /updates/ slug inputs) */
 .admin-shell .bg-slate-50 input.bg-transparent,
-.admin-shell .bg-slate-50 input[class*="bg-transparent"] {
+.admin-shell .bg-slate-50 input[class*="bg-transparent"],
+.dark .admin-shell .bg-\[\#F8FAFC\] input.bg-transparent,
+.dark .admin-shell input.bg-transparent {
   background-color: transparent !important;
-  color: #0f172a !important;
+  color: inherit !important;
 }
 
 /* ==========================================================================
@@ -324,7 +615,6 @@ html[lang="ur"] textarea {
   line-height: 2rem !important;
   font-weight: 700 !important;
   letter-spacing: -0.025em !important;
-  color: #0f172a !important; /* slate-900 */
 }
 
 .admin-shell h2 {
@@ -332,7 +622,6 @@ html[lang="ur"] textarea {
   line-height: 1.625rem !important;
   font-weight: 600 !important;
   letter-spacing: -0.015em !important;
-  color: #0f172a !important;
 }
 
 .admin-shell h3 {
@@ -340,7 +629,6 @@ html[lang="ur"] textarea {
   line-height: 1.375rem !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em !important;
-  color: #0f172a !important;
 }
 
 /* 2. Subtitles & Explanatory copy under headings */
@@ -348,7 +636,6 @@ html[lang="ur"] textarea {
 .admin-shell .admin-subtitle {
   font-size: 0.8125rem !important; /* 13px */
   line-height: 1.35rem !important;
-  color: #64748b !important; /* slate-500 */
   font-weight: 400 !important;
 }
 
@@ -357,7 +644,6 @@ html[lang="ur"] textarea {
 .admin-shell .form-label {
   font-size: 0.8125rem !important; /* 13px */
   font-weight: 600 !important;
-  color: #334155 !important; /* slate-700 */
   letter-spacing: -0.005em !important;
 }
 
@@ -373,7 +659,6 @@ html[lang="ur"] textarea {
 .admin-shell input::placeholder,
 .admin-shell textarea::placeholder {
   font-size: 0.875rem !important;
-  color: #94a3b8 !important;
 }
 
 /* 5. Tables: Headers & Data Cells */
@@ -382,13 +667,11 @@ html[lang="ur"] textarea {
   font-weight: 600 !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
-  color: #475569 !important; /* slate-600 */
 }
 
 .admin-shell table td {
   font-size: 0.84375rem !important; /* 13.5px */
   line-height: 1.35rem !important;
-  color: #1e293b !important; /* slate-800 */
 }
 
 /* 6. Badges & Tags */
