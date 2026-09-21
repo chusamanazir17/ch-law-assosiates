@@ -24,17 +24,18 @@ import {
   useAdminSidebar,
 } from "@/features/admin/AdminSidebarContext";
 import { createClient } from "@/lib/supabase/client";
+import { useAppTheme } from "@/providers/ThemeProvider";
 
 function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
   const router = useRouter();
   const { isCollapsed, setMobileOpen, isReady } = useAdminSidebar();
+  const { isDark, toggleTheme, mode, setMode } = useAppTheme();
 
   // Dropdown States
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const notifRef = useRef<HTMLDivElement>(null);
   const adminMenuRef = useRef<HTMLDivElement>(null);
@@ -65,33 +66,15 @@ function AdminShellInner({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Initialize and persist dark mode preference for Admin Dashboard
+  // Sync secondary office_cms_theme key with AppThemeProvider
   useEffect(() => {
-    const saved = localStorage.getItem("office_cms_theme") as "light" | "dark" | null;
-    const initialTheme =
-      saved || (document.documentElement.classList.contains("dark") ? "dark" : "light");
-    setTheme(initialTheme);
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      document.documentElement.style.colorScheme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.style.colorScheme = "light";
+    try {
+      localStorage.setItem("office_cms_theme", isDark ? "dark" : "light");
+      document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+    } catch {
+      // Ignore storage errors
     }
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    setTheme(nextTheme);
-    localStorage.setItem("office_cms_theme", nextTheme);
-    if (nextTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      document.documentElement.style.colorScheme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.style.colorScheme = "light";
-    }
-  };
+  }, [isDark]);
 
   const handleSignOut = async () => {
     try {
@@ -120,8 +103,9 @@ function AdminShellInner({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="admin-shell flex min-h-screen bg-slate-50 dark:bg-[#060b17] font-admin text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200"
-      style={{ colorScheme: theme }}
+      className={`admin-shell ${isDark ? "dark" : ""} flex min-h-screen bg-slate-50 dark:bg-[#060b17] font-admin text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200`}
+      data-theme={isDark ? "dark" : "light"}
+      style={{ colorScheme: isDark ? "dark" : "light" }}
     >
       <AdminSidebar />
 
@@ -164,10 +148,10 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               type="button"
               onClick={toggleTheme}
               className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0B1F36] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-gold-400 transition focus:outline-none"
-              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              aria-label={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
-              {theme === "dark" ? (
+              {isDark ? (
                 <Sun className="h-5 w-5 text-gold-400 transition-transform duration-300 hover:rotate-45" />
               ) : (
                 <Moon className="h-5 w-5 text-slate-600 transition-transform duration-300 hover:-rotate-12" />

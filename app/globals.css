@@ -293,245 +293,406 @@ html[lang="ur"] textarea {
   cursor: not-allowed;
 }
 
-/* 2. DARK THEME ENFORCEMENT (.dark .admin-shell) */
-.dark .admin-shell {
+/* 2. DARK THEME ENFORCEMENT (.dark .admin-shell, .dark.admin-shell, [data-theme="dark"]) */
+.dark .admin-shell,
+.dark.admin-shell,
+.admin-shell.dark,
+[data-theme="dark"] .admin-shell,
+[data-theme="dark"].admin-shell {
   color-scheme: dark !important;
   background-color: #060b17 !important;
   color: #f1f5f9 !important;
 }
 
-/* Dark Mode Inputs, Selects, Textareas */
+/* Dark Mode Inputs, Selects, Textareas - Background, Border & Crisp Text Color */
 .dark .admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.dark.admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.admin-shell.dark input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] .admin-shell input:not([type="checkbox"]):not([type="radio"]),
 .dark .admin-shell textarea,
-.dark .admin-shell select {
-  background-color: #0d1527 !important;
+.dark.admin-shell textarea,
+.admin-shell.dark textarea,
+[data-theme="dark"] .admin-shell textarea,
+.dark .admin-shell select,
+.dark.admin-shell select,
+.admin-shell.dark select,
+[data-theme="dark"] .admin-shell select {
+  background-color: #070d1a !important;
   color: #f8fafc !important;
   border-color: #1e2d4a !important;
   color-scheme: dark !important;
 }
 
+/* Explicit text color override for inputs with utility classes (e.g. text-[#0B1F36], text-slate-900) */
+.dark .admin-shell input,
+.dark.admin-shell input,
+.admin-shell.dark input,
+.dark .admin-shell textarea,
+.dark.admin-shell textarea,
+.admin-shell.dark textarea,
+.dark .admin-shell select,
+.dark.admin-shell select,
+.admin-shell.dark select,
+.dark .admin-shell input[class*="text-"],
+.dark.admin-shell input[class*="text-"],
+.admin-shell.dark input[class*="text-"],
+.dark .admin-shell textarea[class*="text-"],
+.dark.admin-shell textarea[class*="text-"],
+.admin-shell.dark textarea[class*="text-"],
+.dark .admin-shell select[class*="text-"],
+.dark.admin-shell select[class*="text-"],
+.admin-shell.dark select[class*="text-"] {
+  color: #f8fafc !important;
+}
+
 .dark .admin-shell input:not([type="checkbox"]):not([type="radio"])::placeholder,
-.dark .admin-shell textarea::placeholder {
+.dark.admin-shell input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.admin-shell.dark input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.dark .admin-shell textarea::placeholder,
+.dark.admin-shell textarea::placeholder,
+.admin-shell.dark textarea::placeholder {
   color: #64748b !important;
+  opacity: 1 !important;
 }
 
 .dark .admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark.admin-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.admin-shell.dark input:not([type="checkbox"]):not([type="radio"]):focus,
 .dark .admin-shell textarea:focus,
-.dark .admin-shell select:focus {
-  background-color: #111c34 !important;
+.dark.admin-shell textarea:focus,
+.admin-shell.dark textarea:focus,
+.dark .admin-shell select:focus,
+.dark.admin-shell select:focus,
+.admin-shell.dark select:focus {
+  background-color: #0d1527 !important;
   color: #ffffff !important;
   border-color: #d39d3d !important;
   box-shadow: 0 0 0 2px rgba(211, 157, 61, 0.3) !important;
   outline: none !important;
 }
 
-.dark .admin-shell select option {
-  background-color: #0d1527 !important;
+.dark .admin-shell select option,
+.dark.admin-shell select option,
+.admin-shell.dark select option {
+  background-color: #070d1a !important;
   color: #f8fafc !important;
 }
 
 .dark .admin-shell input[type="checkbox"],
-.dark .admin-shell input[type="radio"] {
+.dark.admin-shell input[type="checkbox"],
+.admin-shell.dark input[type="checkbox"],
+.dark .admin-shell input[type="radio"],
+.dark.admin-shell input[type="radio"],
+.admin-shell.dark input[type="radio"] {
   accent-color: #d39d3d !important;
 }
 
 .dark .admin-shell input:disabled,
 .dark .admin-shell textarea:disabled,
-.dark .admin-shell select:disabled {
+.dark .admin-shell select:disabled,
+.dark.admin-shell input:disabled,
+.admin-shell.dark input:disabled {
   background-color: #090e1a !important;
   color: #475569 !important;
   border-color: #19253c !important;
   cursor: not-allowed !important;
 }
 
-/* Dark Mode Cards, Sections, Modals & Dropdown Containers */
-.dark .admin-shell .bg-white {
+/* Dark Mode Cards, Sections, Modals & Dropdown Containers (including opacity variants like /80, /50, /60) */
+.dark .admin-shell .bg-white,
+.dark.admin-shell .bg-white,
+.admin-shell.dark .bg-white,
+.dark .admin-shell [class*="bg-white"],
+.dark.admin-shell [class*="bg-white"],
+.admin-shell.dark [class*="bg-white"],
+.dark .admin-shell .bg-\[\#F8FAFC\],
+.dark.admin-shell .bg-\[\#F8FAFC\],
+.admin-shell.dark .bg-\[\#F8FAFC\],
+.dark .admin-shell [class*="bg-[#F8FAFC]"],
+.dark.admin-shell [class*="bg-[#F8FAFC]"],
+.admin-shell.dark [class*="bg-[#F8FAFC]"],
+.dark .admin-shell .bg-slate-50,
+.dark.admin-shell .bg-slate-50,
+.admin-shell.dark .bg-slate-50,
+.dark .admin-shell [class*="bg-slate-50"],
+.dark.admin-shell [class*="bg-slate-50"],
+.admin-shell.dark [class*="bg-slate-50"] {
   background-color: #0b1329 !important;
   border-color: #1e2d4a !important;
   color: #f1f5f9 !important;
 }
 
-.dark .admin-shell .bg-\[\#F8FAFC\],
-.dark .admin-shell .bg-slate-50 {
-  background-color: #070d1a !important;
-}
-
+/* Secondary Elevated Containers (inner blocks, filters, table headers) */
 .dark .admin-shell .bg-\[\#F1F5F9\],
-.dark .admin-shell .bg-slate-100 {
-  background-color: #131f38 !important;
+.dark.admin-shell .bg-\[\#F1F5F9\],
+.admin-shell.dark .bg-\[\#F1F5F9\],
+.dark .admin-shell [class*="bg-[#F1F5F9]"],
+.dark.admin-shell [class*="bg-[#F1F5F9]"],
+.admin-shell.dark [class*="bg-[#F1F5F9]"],
+.dark .admin-shell .bg-slate-100,
+.dark.admin-shell .bg-slate-100,
+.admin-shell.dark .bg-slate-100,
+.dark .admin-shell [class*="bg-slate-100"],
+.dark.admin-shell [class*="bg-slate-100"],
+.admin-shell.dark [class*="bg-slate-100"] {
+  background-color: #101c34 !important;
+  border-color: #1e2d4a !important;
+  color: #f1f5f9 !important;
 }
 
-.dark .admin-shell .border-\[\#E2E8F0\],
-.dark .admin-shell .border-\[\#F1F5F9\],
-.dark .admin-shell .border-slate-200,
-.dark .admin-shell .border-slate-200\/80,
-.dark .admin-shell .border-slate-100 {
+/* Card Hover States in Dark Mode */
+.dark .admin-shell [class*="hover:bg-white"]:hover,
+.dark.admin-shell [class*="hover:bg-white"]:hover,
+.admin-shell.dark [class*="hover:bg-white"]:hover,
+.dark .admin-shell [class*="hover:bg-slate-50"]:hover,
+.dark.admin-shell [class*="hover:bg-slate-50"]:hover,
+.admin-shell.dark [class*="hover:bg-slate-50"]:hover,
+.dark .admin-shell [class*="hover:bg-[#F8FAFC]"]:hover,
+.dark.admin-shell [class*="hover:bg-[#F8FAFC]"]:hover,
+.admin-shell.dark [class*="hover:bg-[#F8FAFC]"]:hover,
+.dark .admin-shell [class*="hover:bg-[#F1F5F9]"]:hover,
+.dark.admin-shell [class*="hover:bg-[#F1F5F9]"]:hover,
+.admin-shell.dark [class*="hover:bg-[#F1F5F9]"]:hover,
+.dark .admin-shell [class*="hover:bg-slate-100"]:hover,
+.dark.admin-shell [class*="hover:bg-slate-100"]:hover,
+.admin-shell.dark [class*="hover:bg-slate-100"]:hover {
+  background-color: #132240 !important;
+  border-color: #24385e !important;
+  color: #ffffff !important;
+}
+
+/* Borders & Dividers */
+.dark .admin-shell [class*="border-[#E2E8F0]"],
+.dark.admin-shell [class*="border-[#E2E8F0]"],
+.admin-shell.dark [class*="border-[#E2E8F0]"],
+.dark .admin-shell [class*="border-[#F1F5F9]"],
+.dark.admin-shell [class*="border-[#F1F5F9]"],
+.admin-shell.dark [class*="border-[#F1F5F9]"],
+.dark .admin-shell [class*="border-slate-200"],
+.dark.admin-shell [class*="border-slate-200"],
+.admin-shell.dark [class*="border-slate-200"],
+.dark .admin-shell [class*="border-slate-100"],
+.dark.admin-shell [class*="border-slate-100"],
+.admin-shell.dark [class*="border-slate-100"] {
   border-color: #1e2d4a !important;
 }
 
-.dark .admin-shell .divide-\[\#E2E8F0\] > :not([hidden]) ~ :not([hidden]),
-.dark .admin-shell .divide-\[\#F1F5F9\] > :not([hidden]) ~ :not([hidden]),
-.dark .admin-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+.dark .admin-shell [class*="divide-[#E2E8F0]"] > :not([hidden]) ~ :not([hidden]),
+.dark .admin-shell [class*="divide-[#F1F5F9]"] > :not([hidden]) ~ :not([hidden]),
+.dark .admin-shell [class*="divide-slate-200"] > :not([hidden]) ~ :not([hidden]),
+.dark .admin-shell [class*="divide-slate-100"] > :not([hidden]) ~ :not([hidden]) {
   border-color: #1e2d4a !important;
 }
 
-/* Dark Mode Headings & Typography */
+/* Dark Mode Headings & Typography across All Cards */
 .dark .admin-shell h1,
 .dark .admin-shell h2,
 .dark .admin-shell h3,
-.dark .admin-shell h4 {
+.dark .admin-shell h4,
+.dark.admin-shell h1,
+.dark.admin-shell h2,
+.dark.admin-shell h3,
+.dark.admin-shell h4,
+.admin-shell.dark h1,
+.admin-shell.dark h2,
+.admin-shell.dark h3,
+.admin-shell.dark h4 {
   color: #f8fafc !important;
 }
 
 .dark .admin-shell label,
-.dark .admin-shell .form-label {
+.dark .admin-shell .form-label,
+.dark.admin-shell label,
+.admin-shell.dark label {
   color: #cbd5e1 !important;
 }
 
 .dark .admin-shell p.text-xs,
-.dark .admin-shell .admin-subtitle {
+.dark .admin-shell .admin-subtitle,
+.dark.admin-shell p.text-xs,
+.admin-shell.dark p.text-xs {
   color: #94a3b8 !important;
 }
 
-.dark .admin-shell .text-\[\#0B1F36\],
-.dark .admin-shell .text-slate-900 {
+.dark .admin-shell [class*="text-[#0B1F36]"],
+.dark.admin-shell [class*="text-[#0B1F36]"],
+.admin-shell.dark [class*="text-[#0B1F36]"],
+.dark .admin-shell [class*="text-slate-900"],
+.dark.admin-shell [class*="text-slate-900"],
+.admin-shell.dark [class*="text-slate-900"] {
   color: #f8fafc !important;
 }
 
-.dark .admin-shell .text-\[\#334155\],
-.dark .admin-shell .text-slate-800,
-.dark .admin-shell .text-slate-700 {
+.dark .admin-shell [class*="text-[#334155]"],
+.dark.admin-shell [class*="text-[#334155]"],
+.admin-shell.dark [class*="text-[#334155]"],
+.dark .admin-shell [class*="text-slate-800"],
+.dark.admin-shell [class*="text-slate-800"],
+.admin-shell.dark [class*="text-slate-800"],
+.dark .admin-shell [class*="text-slate-700"],
+.dark.admin-shell [class*="text-slate-700"],
+.admin-shell.dark [class*="text-slate-700"] {
   color: #e2e8f0 !important;
 }
 
-.dark .admin-shell .text-\[\#52627A\],
-.dark .admin-shell .text-\[\#64748B\],
-.dark .admin-shell .text-slate-500,
-.dark .admin-shell .text-slate-600 {
+.dark .admin-shell [class*="text-[#52627A]"],
+.dark.admin-shell [class*="text-[#52627A]"],
+.admin-shell.dark [class*="text-[#52627A]"],
+.dark .admin-shell [class*="text-[#64748B]"],
+.dark.admin-shell [class*="text-[#64748B]"],
+.admin-shell.dark [class*="text-[#64748B]"],
+.dark .admin-shell [class*="text-slate-600"],
+.dark.admin-shell [class*="text-slate-600"],
+.admin-shell.dark [class*="text-slate-600"],
+.dark .admin-shell [class*="text-slate-500"],
+.dark.admin-shell [class*="text-slate-500"],
+.admin-shell.dark [class*="text-slate-500"] {
   color: #94a3b8 !important;
 }
 
-.dark .admin-shell .text-\[\#94A3B8\] {
+.dark .admin-shell [class*="text-[#94A3B8]"],
+.dark.admin-shell [class*="text-[#94A3B8]"],
+.admin-shell.dark [class*="text-[#94A3B8]"] {
   color: #64748b !important;
 }
 
 /* Dark Mode Table Headers & Cells */
-.dark .admin-shell table th {
+.dark .admin-shell table th,
+.dark.admin-shell table th,
+.admin-shell.dark table th {
   background-color: #070d1a !important;
   color: #94a3b8 !important;
   border-color: #1e2d4a !important;
 }
 
-.dark .admin-shell table td {
+.dark .admin-shell table td,
+.dark.admin-shell table td,
+.admin-shell.dark table td {
   color: #f1f5f9 !important;
   border-color: #1e2d4a !important;
 }
 
 .dark .admin-shell table tbody tr:hover,
-.dark .admin-shell .hover\:bg-\[\#F8FAFC\]:hover,
-.dark .admin-shell .hover\:bg-slate-50:hover {
+.dark.admin-shell table tbody tr:hover,
+.admin-shell.dark table tbody tr:hover {
   background-color: #101c34 !important;
 }
 
 /* Dark Mode Badges, Tags & Icon Accent Containers */
-.dark .admin-shell .bg-\[\#0B1F36\]\/8,
-.dark .admin-shell .bg-\[\#0B1F36\]\/6,
-.dark .admin-shell .bg-\[\#0B1F36\]\/4,
-.dark .admin-shell .bg-\[\#0B1F36\]\/10,
-.dark .admin-shell .bg-\[\#0B1F36\]\/15 {
+.dark .admin-shell [class*="bg-[#0B1F36]/"],
+.dark.admin-shell [class*="bg-[#0B1F36]/"],
+.admin-shell.dark [class*="bg-[#0B1F36]/"] {
   background-color: rgba(211, 157, 61, 0.15) !important;
   border-color: rgba(211, 157, 61, 0.3) !important;
   color: #dcaa4a !important;
 }
 
-.dark .admin-shell .border-\[\#0B1F36\]\/15,
-.dark .admin-shell .border-\[\#0B1F36\]\/10 {
+.dark .admin-shell [class*="border-[#0B1F36]/"],
+.dark.admin-shell [class*="border-[#0B1F36]/"],
+.admin-shell.dark [class*="border-[#0B1F36]/"] {
   border-color: rgba(211, 157, 61, 0.3) !important;
 }
 
-.dark .admin-shell .bg-\[\#FDF8EE\],
-.dark .admin-shell .bg-amber-50 {
+.dark .admin-shell [class*="bg-[#FDF8EE]"],
+.dark.admin-shell [class*="bg-[#FDF8EE]"],
+.admin-shell.dark [class*="bg-[#FDF8EE]"],
+.dark .admin-shell [class*="bg-amber-50"],
+.dark.admin-shell [class*="bg-amber-50"],
+.admin-shell.dark [class*="bg-amber-50"] {
   background-color: rgba(211, 157, 61, 0.15) !important;
   border-color: rgba(211, 157, 61, 0.35) !important;
   color: #dcaa4a !important;
 }
 
-.dark .admin-shell .bg-emerald-50 {
+.dark .admin-shell [class*="bg-emerald-50"],
+.dark.admin-shell [class*="bg-emerald-50"],
+.admin-shell.dark [class*="bg-emerald-50"] {
   background-color: rgba(16, 185, 129, 0.15) !important;
   border-color: rgba(16, 185, 129, 0.35) !important;
   color: #34d399 !important;
 }
 
-.dark .admin-shell .bg-sky-50 {
+.dark .admin-shell [class*="bg-sky-50"],
+.dark.admin-shell [class*="bg-sky-50"],
+.admin-shell.dark [class*="bg-sky-50"] {
   background-color: rgba(14, 165, 233, 0.15) !important;
   border-color: rgba(14, 165, 233, 0.35) !important;
   color: #38bdf8 !important;
 }
 
-.dark .admin-shell .bg-rose-50 {
+.dark .admin-shell [class*="bg-rose-50"],
+.dark.admin-shell [class*="bg-rose-50"],
+.admin-shell.dark [class*="bg-rose-50"] {
   background-color: rgba(244, 63, 94, 0.15) !important;
   border-color: rgba(244, 63, 94, 0.35) !important;
   color: #fb7185 !important;
 }
 
-.dark .admin-shell .bg-slate-100 {
-  background-color: #1e2d4a !important;
-  border-color: #2a3c60 !important;
-  color: #94a3b8 !important;
-}
-
 /* Dark Mode Tab Navigation & Active State */
-.dark .admin-shell .border-\[\#0B1F36\] {
+.dark .admin-shell [class*="border-[#0B1F36]"],
+.dark.admin-shell [class*="border-[#0B1F36]"],
+.admin-shell.dark [class*="border-[#0B1F36]"] {
   border-color: #d39d3d !important;
 }
 
-.dark .admin-shell button.border-\[\#0B1F36\],
-.dark .admin-shell a.border-\[\#0B1F36\] {
+.dark .admin-shell button[class*="border-[#0B1F36]"],
+.dark .admin-shell a[class*="border-[#0B1F36]"],
+.dark.admin-shell button[class*="border-[#0B1F36]"],
+.admin-shell.dark button[class*="border-[#0B1F36]"] {
   border-color: #d39d3d !important;
   color: #dcaa4a !important;
 }
 
 .dark .admin-shell button.border-transparent:hover,
-.dark .admin-shell a.border-transparent:hover {
+.dark .admin-shell a.border-transparent:hover,
+.dark.admin-shell button.border-transparent:hover {
   color: #f8fafc !important;
 }
 
 /* Dark Mode Images & Visual Media */
-.dark .admin-shell img {
+.dark .admin-shell img,
+.dark.admin-shell img,
+.admin-shell.dark img {
   border-color: #1e2d4a !important;
   filter: brightness(0.92) contrast(1.04);
   transition: filter 0.2s ease, transform 0.3s ease;
 }
 
-.dark .admin-shell img:hover {
+.dark .admin-shell img:hover,
+.dark.admin-shell img:hover,
+.admin-shell.dark img:hover {
   filter: brightness(1) contrast(1);
 }
 
-.dark .admin-shell .border-dashed {
+.dark .admin-shell .border-dashed,
+.dark.admin-shell .border-dashed,
+.admin-shell.dark .border-dashed {
   border-color: #2a3c60 !important;
   background-color: #080f20 !important;
 }
 
 /* Dark Mode Primary Elements & Action Buttons */
-.dark .admin-shell .bg-\[\#0B1F36\],
 .dark .admin-shell button.bg-\[\#0B1F36\],
-.dark .admin-shell a.bg-\[\#0B1F36\] {
+.dark .admin-shell a.bg-\[\#0B1F36\],
+.dark.admin-shell button.bg-\[\#0B1F36\],
+.admin-shell.dark button.bg-\[\#0B1F36\] {
   background: linear-gradient(135deg, #102943, #183a60) !important;
   border: 1px solid rgba(211, 157, 61, 0.35) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
-.dark .admin-shell .bg-\[\#0B1F36\]:hover,
 .dark .admin-shell button.bg-\[\#0B1F36\]:hover,
-.dark .admin-shell a.bg-\[\#0B1F36\]:hover {
+.dark .admin-shell a.bg-\[\#0B1F36\]:hover,
+.dark.admin-shell button.bg-\[\#0B1F36\]:hover {
   background: linear-gradient(135deg, #163659, #204c7d) !important;
   border-color: #d39d3d !important;
 }
 
 /* Dark Mode File Input Buttons */
 .dark .admin-shell input[type="file"]::file-selector-button,
-.dark .admin-shell input[type="file"]::-webkit-file-upload-button {
+.dark .admin-shell input[type="file"]::-webkit-file-upload-button,
+.dark.admin-shell input[type="file"]::file-selector-button {
   background: linear-gradient(135deg, #102943, #183a60) !important;
   border: 1px solid rgba(211, 157, 61, 0.35) !important;
   color: #ffffff !important;
