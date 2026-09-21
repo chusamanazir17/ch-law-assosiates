@@ -723,9 +723,9 @@ export default function AdminOverview() {
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
-              Good morning, Principal Practitioner!
+              Good morning, Muhammad Usama!
             </h1>
-            <p className="text-xs sm:text-sm text-[#52627A] dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-sm text-[#52627A] dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
               Here is your chamber&apos;s real-time executive overview across client consultation requests, statutory tax reminder subscriptions, and legal content publications.
             </p>
           </div>

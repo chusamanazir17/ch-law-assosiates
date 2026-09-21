@@ -314,28 +314,28 @@ export default function SubscribersManager() {
     switch (status) {
       case "active":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Active
           </span>
         );
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
             Pending
           </span>
         );
       case "unsubscribed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-[#64748B] dark:text-slate-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
             <UserX className="h-3 w-3" />
             Unsubscribed
           </span>
         );
       case "suppressed":
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-300">
             <Ban className="h-3 w-3 text-rose-500" />
             Suppressed
           </span>
@@ -407,16 +407,16 @@ export default function SubscribersManager() {
         {/* Card 1: Total Subscribers */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Subscribers</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Total Subscribers</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {totalCount}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ +18%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Opted-in clients</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Opted-in clients</p>
           </div>
           <MiniSparkline points={[2, 3, 3, 4, 4, totalCount || 4]} color="#0284c7" />
         </div>
@@ -424,16 +424,16 @@ export default function SubscribersManager() {
         {/* Card 2: Active Subscribers */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Active Recipients</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Active Recipients</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {activeCount}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 100% active
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Receiving reminders</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Receiving reminders</p>
           </div>
           <MiniSparkline points={[2, 2, 3, 3, 4, activeCount || 4]} color="#059669" />
         </div>
@@ -441,16 +441,16 @@ export default function SubscribersManager() {
         {/* Card 3: Avg. Open Rate */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Avg. Open Rate</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Avg. Open Rate</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 42.8%
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ +4.2%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Audience engagement</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Audience engagement</p>
           </div>
           <MiniSparkline points={[35, 38, 40, 39, 41, 43]} color="#d97706" />
         </div>
@@ -458,16 +458,16 @@ export default function SubscribersManager() {
         {/* Card 4: Unsubscribed */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Unsubscribed</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Unsubscribed</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {unsubscribedCount}
               </span>
-              <span className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-[#64748B] dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                 0% churn
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Clean opt-out rate</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Clean opt-out rate</p>
           </div>
           <MiniSparkline points={[0, 0, 0, 0, 0, unsubscribedCount]} color="#94a3b8" />
         </div>
@@ -598,10 +598,10 @@ export default function SubscribersManager() {
             >
               <span>{tab.label}</span>
               <span
-                className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                   activeTab === tab.key
                     ? "bg-[#0B1F36]/8 dark:bg-slate-700 text-[#0B1F36] dark:text-slate-100 font-bold"
-                    : "bg-slate-200/80 dark:bg-slate-700/60 text-[#64748B] dark:text-slate-400"
+                    : "bg-slate-200/80 dark:bg-slate-700/60 text-[#64748B] dark:text-slate-400 font-medium"
                 }`}
               >
                 {tab.count}
@@ -620,7 +620,7 @@ export default function SubscribersManager() {
               setCurrentPage(1);
             }}
             placeholder="Search subscribers by name or email..."
-            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
+            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
         </div>
 
@@ -630,7 +630,7 @@ export default function SubscribersManager() {
             setCategoryFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
+          className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-sm font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
         >
           <option value="all">All Tax Categories</option>
           {categories.map((c) => (
@@ -660,9 +660,9 @@ export default function SubscribersManager() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-slate-400">
+                <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
                   <th className="py-3.5 px-4 font-semibold">Subscriber</th>
                   <th className="py-3.5 px-4 font-semibold">Subscribed Categories</th>
                   <th className="py-3.5 px-4 font-semibold">Consent Date</th>
@@ -679,14 +679,14 @@ export default function SubscribersManager() {
                     {/* Subscriber Name & Email */}
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[11px] font-bold text-[#0B1F36] dark:text-slate-200">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-xs font-bold text-[#0B1F36] dark:text-slate-200">
                           {getInitials(sub.name || sub.email)}
                         </div>
                         <div>
                           <p className="font-semibold text-[#0B1F36] dark:text-slate-100">
                             {sub.name || "Client Subscriber"}
                           </p>
-                          <p className="text-[11px] text-[#64748B] dark:text-slate-400">
+                          <p className="text-xs text-[#64748B] dark:text-slate-400">
                             {sub.email}
                           </p>
                         </div>
@@ -700,13 +700,13 @@ export default function SubscribersManager() {
                           sub.categories.map((c) => (
                             <span
                               key={c.id}
-                              className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10.5px] font-medium text-[#334155] dark:text-slate-300"
+                              className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-[#334155] dark:text-slate-300"
                             >
                               {c.name}
                             </span>
                           ))
                         ) : (
-                          <span className="text-[11px] text-[#94A3B8] dark:text-slate-500">
+                          <span className="text-xs text-[#94A3B8] dark:text-slate-500">
                             All statutory notices
                           </span>
                         )}
@@ -714,7 +714,7 @@ export default function SubscribersManager() {
                     </td>
 
                     {/* Consent Date */}
-                    <td className="py-3.5 px-4 text-[#64748B] dark:text-slate-400 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-[#64748B] dark:text-slate-400 whitespace-nowrap text-xs">
                       {new Date(sub.consent_at).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -732,13 +732,13 @@ export default function SubscribersManager() {
                       {sub.status === "active" ? (
                         <button
                           onClick={() => handleUnsubscribeClient(sub.id, sub.email)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 text-[#64748B] dark:text-slate-400 px-2.5 py-1 text-[11px] font-medium transition"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 text-[#64748B] dark:text-slate-400 px-2.5 py-1 text-xs font-medium transition"
                         >
                           <UserX className="h-3 w-3" />
                           <span>Unsubscribe</span>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-[#94A3B8] dark:text-slate-500">
+                        <span className="text-xs text-[#94A3B8] dark:text-slate-500">
                           Opted out
                         </span>
                       )}
@@ -850,7 +850,7 @@ export default function SubscribersManager() {
                     {categories.map((cat) => (
                       <label
                         key={cat.id}
-                        className="flex items-center gap-2 text-[11px] text-[#334155] dark:text-slate-300 cursor-pointer"
+                        className="flex items-center gap-2 text-xs text-[#334155] dark:text-slate-300 cursor-pointer"
                       >
                         <input
                           type="checkbox"

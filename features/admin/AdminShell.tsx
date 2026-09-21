@@ -115,7 +115,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
         } ${isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}
       >
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 sm:px-6 lg:px-8 transition-colors">
-          {/* Left: Mobile hamburger & Search input with ⌘K badge */}
+          {/* Left: Mobile hamburger & Search input */}
           <div className="flex items-center gap-3 flex-1 max-w-xl">
             <button
               type="button"
@@ -126,7 +126,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Search Input with ⌘ K shortcut */}
+            {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#94A3B8] dark:text-slate-500">
                 <Search className="h-4 w-4" />
@@ -136,13 +136,8 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search anything... (posts, subscribers, inquiries)"
-                className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] py-2 pl-10 pr-12 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] py-2 pl-10 pr-4 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-400 shadow-2xs">
-                  ⌘ K
-                </kbd>
-              </div>
             </form>
           </div>
 
@@ -303,26 +298,26 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 title="Admin Account Menu"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30 shadow-2xs">
-                  C
+                  MU
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="flex items-center gap-1">
-                    <p className="text-[13px] font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">Chaudhry Admin</p>
+                    <p className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">Muhammad Usama</p>
                     <ChevronDown className="h-3 w-3 text-[#94A3B8] dark:text-slate-500" />
                   </div>
-                  <p className="text-[11.5px] text-[#64748B] dark:text-slate-400 font-medium leading-tight mt-0.5">Principal Practitioner</p>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium leading-tight mt-0.5">Principal Advocate & Tax Consultant</p>
                 </div>
               </button>
 
               {/* Admin Profile Dropdown Panel */}
               {showAdminMenu && (
-                <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-2 shadow-xl z-50 text-[13px]">
+                <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-2 shadow-xl z-50 text-sm">
                   {/* User info banner */}
                   <div className="p-2.5 border-b border-[#F1F5F9] dark:border-slate-800 mb-1">
-                    <p className="font-semibold text-sm text-[#0B1F36] dark:text-slate-100">Chamber Admin</p>
-                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 font-medium">admin@ch-law.pk</p>
+                    <p className="font-semibold text-sm text-[#0B1F36] dark:text-slate-100">Muhammad Usama</p>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 font-medium">usama@ch-law.pk</p>
                     <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 dark:bg-gold-500/15 border border-[#0B1F36]/10 dark:border-gold-500/30 px-2 py-0.5 text-xs font-semibold text-[#0B1F36] dark:text-gold-300">
-                      Authorized Administrator
+                      Principal Practitioner
                     </span>
                   </div>
 

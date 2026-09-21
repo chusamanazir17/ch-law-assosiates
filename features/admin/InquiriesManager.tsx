@@ -584,13 +584,13 @@ export default function InquiriesManager() {
             {/* Live Clock & Greeting */}
             <div className="hidden md:flex items-center gap-3 pr-4 border-r border-[#E2E8F0] dark:border-slate-800 text-right">
               <div>
-                <p className="text-[11px] text-[#64748B] dark:text-slate-400 font-medium">
+                <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium">
                   {currentTime || "Mon, Sep 21, 2026 09:14 AM"}
                 </p>
                 <div className="flex items-center justify-end gap-1.5 mt-0.5">
                   <Sun className="h-4 w-4 text-amber-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-[#0B1F36] dark:text-slate-200">
-                    Good morning!
+                  <span className="text-sm font-semibold text-[#0B1F36] dark:text-slate-200">
+                    Good morning, Muhammad Usama!
                   </span>
                 </div>
               </div>
@@ -613,16 +613,16 @@ export default function InquiriesManager() {
         {/* Card 1: Total Inquiries */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Inquiries</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Total Inquiries</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {totalCount}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ 12%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">+26 this week</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">+26 this week</p>
           </div>
           <MiniSparkline points={[8, 12, 14, 18, 22, 26]} color="#2563EB" />
         </div>
@@ -630,16 +630,16 @@ export default function InquiriesManager() {
         {/* Card 2: Unresolved */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Unresolved</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Unresolved</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {newCount}
               </span>
-              <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
                 ↑ 8%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">25% of total</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">25% of total</p>
           </div>
           <MiniSparkline points={[12, 14, 13, 16, 15, 18]} color="#EA580C" />
         </div>
@@ -647,16 +647,16 @@ export default function InquiriesManager() {
         {/* Card 3: Responded */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Responded</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Responded</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {completedCount}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ 18%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">75% response rate</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">75% response rate</p>
           </div>
           <MiniSparkline points={[14, 18, 22, 25, 29, 34]} color="#10B981" />
         </div>
@@ -664,16 +664,16 @@ export default function InquiriesManager() {
         {/* Card 4: High Priority */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">High Priority</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">High Priority</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {highPriorityCount}
               </span>
-              <span className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
                 ↓ 27%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">11% of total</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">11% of total</p>
           </div>
           <MiniSparkline points={[6, 8, 7, 5, 4, 3]} color="#F43F5E" />
         </div>
@@ -739,17 +739,17 @@ export default function InquiriesManager() {
               </svg>
               {/* Donut Center Label */}
               <div className="absolute text-center">
-                <span className="text-xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 block leading-tight">
+                <span className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100 block leading-tight">
                   {totalCount}
                 </span>
-                <span className="text-[11px] font-medium text-[#64748B] dark:text-slate-400 block">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400 block mt-0.5">
                   Total
                 </span>
               </div>
             </div>
 
             {/* Legend List */}
-            <div className="flex-1 space-y-2 w-full text-xs">
+            <div className="flex-1 space-y-2.5 w-full text-xs">
               {categoryChartData.map((item) => (
                 <div key={item.label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
@@ -765,7 +765,7 @@ export default function InquiriesManager() {
                     <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
                       {item.pct}%
                     </span>
-                    <span className="text-[#64748B] dark:text-slate-400 text-[11px]">
+                    <span className="text-[#64748B] dark:text-slate-400 text-xs font-medium">
                       ({item.count})
                     </span>
                   </div>
@@ -899,7 +899,7 @@ export default function InquiriesManager() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search inquiries by name, email or keyword..."
-            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
+            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
         </div>
 
@@ -999,8 +999,8 @@ export default function InquiriesManager() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748B] dark:text-slate-400">
-                    <th className="py-3 px-3 w-8">
+                  <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                    <th className="py-3.5 px-3.5 w-8">
                       <input
                         type="checkbox"
                         checked={selectedRowIds.length === filteredInquiries.length && filteredInquiries.length > 0}
@@ -1008,14 +1008,14 @@ export default function InquiriesManager() {
                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                       />
                     </th>
-                    <th className="py-3 px-3 font-semibold">Name</th>
-                    <th className="py-3 px-3 font-semibold">Category</th>
-                    <th className="py-3 px-3 font-semibold">Message Preview</th>
-                    <th className="py-3 px-3 font-semibold">Priority</th>
-                    <th className="py-3 px-3 font-semibold">Assigned To</th>
-                    <th className="py-3 px-3 font-semibold">Date</th>
-                    <th className="py-3 px-3 font-semibold">Status</th>
-                    <th className="py-3 px-3 text-right font-semibold">Actions</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Name</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Category</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Message Preview</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Priority</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Assigned To</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Date</th>
+                    <th className="py-3.5 px-3.5 font-semibold">Status</th>
+                    <th className="py-3.5 px-3.5 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800/60">
@@ -1041,7 +1041,7 @@ export default function InquiriesManager() {
                         }`}
                       >
                         {/* Checkbox */}
-                        <td className="py-3.5 px-3" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-3.5 px-3.5" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={selectedRowIds.includes(inq.id)}
@@ -1051,16 +1051,16 @@ export default function InquiriesManager() {
                         </td>
 
                         {/* Name + Avatar */}
-                        <td className="py-3.5 px-3 font-semibold text-[#0B1F36] dark:text-slate-100 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[11px] font-bold">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                               {getInitials(inq.name)}
                             </div>
                             <div className="min-w-0">
-                              <span className="block font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">
+                              <span className="block text-sm font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">
                                 {inq.name}
                               </span>
-                              <span className="block text-[11px] text-[#64748B] dark:text-slate-400 font-normal leading-tight mt-0.5 truncate">
+                              <span className="block text-xs text-[#64748B] dark:text-slate-400 font-normal leading-tight mt-0.5 truncate">
                                 {inq.email || inq.phone}
                               </span>
                             </div>
@@ -1068,36 +1068,36 @@ export default function InquiriesManager() {
                         </td>
 
                         {/* Category */}
-                        <td className="py-3.5 px-3 whitespace-nowrap">
-                          <span className="inline-flex rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-[#334155] dark:text-slate-300">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
+                          <span className="inline-flex rounded-md bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-[#334155] dark:text-slate-300">
                             {inq.service_needed || "Consultation"}
                           </span>
                         </td>
 
                         {/* Message Preview */}
-                        <td className="py-3.5 px-3 max-w-[200px] truncate text-[#64748B] dark:text-slate-400 text-[11.5px]">
+                        <td className="py-3.5 px-3.5 max-w-[200px] truncate text-sm text-[#475569] dark:text-slate-300">
                           {inq.message}
                         </td>
 
                         {/* Priority */}
-                        <td className="py-3.5 px-3 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
                           {getPriorityBadge(inq.priority)}
                         </td>
 
                         {/* Assigned To */}
-                        <td className="py-3.5 px-3 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-1.5">
-                            <div className="flex h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center text-[9px] font-bold text-slate-700 dark:text-slate-300">
+                            <div className="flex h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                               {getInitials(inq.assignedTo?.name || "Zain")}
                             </div>
-                            <span className="text-xs text-[#334155] dark:text-slate-300">
+                            <span className="text-xs font-medium text-[#334155] dark:text-slate-300">
                               {inq.assignedTo?.name || "Zain Ahmed"}
                             </span>
                           </div>
                         </td>
 
                         {/* Date */}
-                        <td className="py-3.5 px-3 whitespace-nowrap text-[#64748B] dark:text-slate-400 text-[11px]">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap text-xs text-[#64748B] dark:text-slate-400">
                           {new Date(inq.created_at).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -1106,26 +1106,26 @@ export default function InquiriesManager() {
                         </td>
 
                         {/* Status */}
-                        <td className="py-3.5 px-3 whitespace-nowrap">
+                        <td className="py-3.5 px-3.5 whitespace-nowrap">
                           {getStatusBadge(inq.status)}
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 px-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-3.5 px-3.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
                             <a
                               href={`https://wa.me/${waNumber}?text=${waMessage}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-lg bg-[#25D366] hover:bg-[#20ba59] px-2 py-1 text-[11px] font-semibold text-white transition shadow-2xs"
+                              className="inline-flex items-center gap-1 rounded-lg bg-[#25D366] hover:bg-[#20ba59] px-2.5 py-1 text-xs font-semibold text-white transition shadow-2xs"
                               title="Reply via WhatsApp"
                             >
-                              <MessageCircle className="h-3 w-3" />
+                              <MessageCircle className="h-3.5 w-3.5" />
                             </a>
                             <button
                               type="button"
                               onClick={() => setSelectedInquiry(inq)}
-                              className="rounded-lg p-1 text-[#64748B] dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                              className="rounded-lg p-1.5 text-[#64748B] dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                               title="View Details"
                             >
                               <MoreHorizontal className="h-4 w-4" />
@@ -1183,12 +1183,12 @@ export default function InquiriesManager() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-[#0B1F36] dark:text-slate-100">
+                    <h3 className="text-base font-bold text-[#0B1F36] dark:text-slate-100">
                       {selectedInquiry.name}
                     </h3>
                     {getPriorityBadge(selectedInquiry.priority)}
                   </div>
-                  <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 font-normal">
                     {selectedInquiry.email || selectedInquiry.phone}
                   </p>
                 </div>
@@ -1256,25 +1256,25 @@ export default function InquiriesManager() {
             <div className="mt-4 space-y-4">
               {/* Card 1: Contact Information */}
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0B1F36] dark:text-slate-200">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
                   <Mail className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
                   <span>Contact Information</span>
                 </div>
-                <div className="space-y-1.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] p-3 border border-[#E2E8F0] dark:border-slate-800 text-[11.5px]">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-3 w-3 text-[#94A3B8]" />
+                <div className="space-y-2 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] p-3.5 border border-[#E2E8F0] dark:border-slate-800 text-sm">
+                  <div className="flex items-center gap-2.5">
+                    <Mail className="h-3.5 w-3.5 text-[#94A3B8]" />
                     <span className="text-[#334155] dark:text-slate-300 font-medium">
                       {selectedInquiry.email || "client@example.com"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3 w-3 text-[#94A3B8]" />
+                  <div className="flex items-center gap-2.5">
+                    <Phone className="h-3.5 w-3.5 text-[#94A3B8]" />
                     <span className="font-mono text-[#334155] dark:text-slate-300">
                       {selectedInquiry.phone}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3 w-3 text-[#94A3B8]" />
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="h-3.5 w-3.5 text-[#94A3B8]" />
                     <span className="text-[#334155] dark:text-slate-300">
                       {selectedInquiry.location || "Sahiwal, Punjab"}
                     </span>
@@ -1284,29 +1284,29 @@ export default function InquiriesManager() {
 
               {/* Card 2: Inquiry Details */}
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0B1F36] dark:text-slate-200">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
                   <FileText className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
                   <span>Inquiry Details</span>
                 </div>
-                <div className="space-y-2 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] p-3 border border-[#E2E8F0] dark:border-slate-800 text-[11.5px]">
+                <div className="space-y-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] p-3.5 border border-[#E2E8F0] dark:border-slate-800 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Category</span>
-                    <span className="font-semibold text-[#0B1F36] dark:text-slate-200 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Category</span>
+                    <span className="font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">
                       {selectedInquiry.service_needed || "General Consultation"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Priority</span>
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Priority</span>
                     <div>{getPriorityBadge(selectedInquiry.priority)}</div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Status</span>
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Status</span>
                     <div>{getStatusBadge(selectedInquiry.status)}</div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Assigned To</span>
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Assigned To</span>
                     <div className="flex items-center gap-1.5">
-                      <div className="flex h-4 w-4 rounded-full bg-slate-300 dark:bg-slate-700 items-center justify-center text-[8px] font-bold">
+                      <div className="flex h-5 w-5 rounded-full bg-slate-300 dark:bg-slate-700 items-center justify-center text-[9px] font-bold">
                         {getInitials(selectedInquiry.assignedTo?.name || "Zain")}
                       </div>
                       <span className="font-semibold text-[#0B1F36] dark:text-slate-200">
@@ -1315,7 +1315,7 @@ export default function InquiriesManager() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Date Received</span>
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Date Received</span>
                     <span className="text-[#334155] dark:text-slate-300">
                       {new Date(selectedInquiry.created_at).toLocaleString("en-US", {
                         month: "short",
@@ -1327,8 +1327,8 @@ export default function InquiriesManager() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400">Source</span>
-                    <span className="text-[#334155] dark:text-slate-300">
+                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Source</span>
+                    <span className="text-[#334155] dark:text-slate-300 font-medium">
                       {selectedInquiry.source || "Website Contact Form"}
                     </span>
                   </div>
@@ -1337,11 +1337,11 @@ export default function InquiriesManager() {
 
               {/* Card 3: Message */}
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0B1F36] dark:text-slate-200">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
                   <MessageSquareText className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
                   <span>Message</span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] border border-[#E2E8F0] dark:border-slate-800 text-[#334155] dark:text-slate-300 text-xs leading-relaxed">
+                <div className="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] border border-[#E2E8F0] dark:border-slate-800 text-[#334155] dark:text-slate-200 text-sm leading-relaxed">
                   &ldquo;{selectedInquiry.message}&rdquo;
                 </div>
               </div>
@@ -1355,7 +1355,7 @@ export default function InquiriesManager() {
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1d4ed8] text-white py-2.5 px-3 font-semibold shadow-sm transition"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1d4ed8] text-white py-2.5 px-3 text-sm font-semibold shadow-sm transition"
                 >
                   <Send className="h-3.5 w-3.5" />
                   <span>Reply</span>
@@ -1365,7 +1365,7 @@ export default function InquiriesManager() {
                 <button
                   type="button"
                   onClick={() => handleStatusChange(selectedInquiry.id, "completed")}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 text-[#334155] dark:text-slate-200 py-2.5 px-3 font-semibold shadow-2xs transition"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 text-[#334155] dark:text-slate-200 py-2.5 px-3 text-sm font-semibold shadow-2xs transition"
                 >
                   <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Mark as Resolved</span>

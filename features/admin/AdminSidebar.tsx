@@ -279,14 +279,14 @@ export default function AdminSidebar({
           <div className="group relative flex flex-col items-center">
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30 shadow-2xs cursor-pointer"
-              title="Chaudhry Admin (Principal Practitioner)"
+              title="Muhammad Usama (Principal Advocate & Tax Consultant)"
             >
-              C
+              MU
             </div>
             {/* Tooltip with Sign Out */}
-            <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-44 rounded-lg bg-white dark:bg-[#0b1329] p-2 text-[#334155] dark:text-slate-200 shadow-xl border border-[#E2E8F0] dark:border-slate-800 z-50 group-hover:pointer-events-auto group-hover:block">
-              <div className="text-[13.5px] font-semibold text-[#0B1F36] dark:text-slate-100">Chaudhry Admin</div>
-              <div className="text-xs text-[#64748B] dark:text-slate-400 mb-2 font-medium">Principal Practitioner</div>
+            <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-48 rounded-lg bg-white dark:bg-[#0b1329] p-2 text-[#334155] dark:text-slate-200 shadow-xl border border-[#E2E8F0] dark:border-slate-800 z-50 group-hover:pointer-events-auto group-hover:block">
+              <div className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">Muhammad Usama</div>
+              <div className="text-xs text-[#64748B] dark:text-slate-400 mb-2 font-medium">Principal Advocate & Tax Consultant</div>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -301,14 +301,14 @@ export default function AdminSidebar({
           <div className="flex items-center justify-between rounded-lg p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30">
-                C
+                MU
               </div>
               <div className="min-w-0">
-                <span className="text-[13.5px] font-semibold text-[#0B1F36] dark:text-slate-100 block leading-tight truncate">
-                  Chaudhry Admin
+                <span className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100 block leading-tight truncate">
+                  Muhammad Usama
                 </span>
                 <span className="text-xs text-[#64748B] dark:text-slate-400 font-medium block leading-tight mt-0.5 truncate">
-                  Principal Practitioner
+                  Principal Advocate & Tax Consultant
                 </span>
               </div>
             </div>

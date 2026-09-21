@@ -287,16 +287,16 @@ export default function PostsManager() {
         {/* Card 1: Total Posts */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Posts</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Total Posts</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {counts.all}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ +12%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Articles & circulars</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Articles & circulars</p>
           </div>
           <MiniSparkline points={[2, 3, 3, 4, 4, counts.all || 5]} color="#0284c7" />
         </div>
@@ -304,16 +304,16 @@ export default function PostsManager() {
         {/* Card 2: Published */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Published</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Published</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {counts.published}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 Live on site
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Publicly readable</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Publicly readable</p>
           </div>
           <MiniSparkline points={[2, 3, 3, 4, 4, counts.published || 5]} color="#059669" />
         </div>
@@ -321,16 +321,16 @@ export default function PostsManager() {
         {/* Card 3: Drafts */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Drafts</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Drafts</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {counts.draft}
               </span>
-              <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md">
                 In review
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Unpublished work</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Unpublished work</p>
           </div>
           <MiniSparkline points={[0, 1, 0, 0, 0, counts.draft]} color="#d97706" />
         </div>
@@ -338,16 +338,16 @@ export default function PostsManager() {
         {/* Card 4: Total Views */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Readership</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Total Readership</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {counts.totalViews > 1000 ? `${(counts.totalViews / 1000).toFixed(1)}k` : counts.totalViews || "1.2k"}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
                 ↑ +28%
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Article views</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Article views</p>
           </div>
           <MiniSparkline points={[350, 480, 620, 810, 950, 1200]} color="#9333ea" />
         </div>
@@ -461,7 +461,7 @@ export default function PostsManager() {
                 <div key={art.id} className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] border border-[#E2E8F0] dark:border-slate-800">
                   <div className="min-w-0">
                     <p className="font-semibold text-[#0B1F36] dark:text-slate-100 truncate">{art.title}</p>
-                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-0.5">{art.category || "Tax Advisory"}</p>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">{art.category || "Tax Advisory"}</p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 font-medium text-[#0B1F36] dark:text-slate-200 text-xs">
                     <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
@@ -514,10 +514,10 @@ export default function PostsManager() {
             >
               <span>{label}</span>
               <span
-                className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                   activeTab === tab
                     ? "bg-[#0B1F36]/8 dark:bg-slate-700 text-[#0B1F36] dark:text-slate-100 font-bold"
-                    : "bg-slate-200/80 dark:bg-slate-700/60 text-[#64748B] dark:text-slate-400"
+                    : "bg-slate-200/80 dark:bg-slate-700/60 text-[#64748B] dark:text-slate-400 font-medium"
                 }`}
               >
                 {count}
@@ -533,7 +533,7 @@ export default function PostsManager() {
             placeholder="Search posts by title, category or author..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
+            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
         </div>
 
@@ -541,7 +541,7 @@ export default function PostsManager() {
           <select
             value={categoryFilter}
             onChange={(event) => setCategoryFilter(event.target.value)}
-            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
+            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-sm font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
           >
             <option value="all">All categories</option>
             {categories.map((category) => (
@@ -554,7 +554,7 @@ export default function PostsManager() {
           <select
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as SortOption)}
-            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
+            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-sm font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
           >
             <option value="updated">Last updated</option>
             <option value="alphabetical">Alphabetical</option>
@@ -566,9 +566,9 @@ export default function PostsManager() {
       {/* 5. Posts Table (Screen 1) */}
       <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] shadow-sm transition-colors">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs">
+          <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-slate-400">
+              <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
                 <th className="w-12 px-4 py-3.5 text-center">
                   <input
                     type="checkbox"
@@ -639,11 +639,11 @@ export default function PostsManager() {
                             {post.title}
                           </Link>
                           {post.excerpt && (
-                            <p className="mt-0.5 line-clamp-1 text-[11px] text-[#64748B] dark:text-slate-400">
+                            <p className="mt-0.5 line-clamp-1 text-xs text-[#64748B] dark:text-slate-400">
                               {post.excerpt}
                             </p>
                           )}
-                          <p className="mt-0.5 text-[10.5px] text-[#94A3B8] dark:text-slate-500">
+                          <p className="mt-0.5 text-xs text-[#94A3B8] dark:text-slate-500">
                             By {post.author_name || "Advocate"}
                           </p>
                         </div>
