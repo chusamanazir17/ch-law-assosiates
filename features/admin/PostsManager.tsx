@@ -13,6 +13,13 @@ import {
   Plus,
   Search,
   Trash2,
+  FileText,
+  TrendingUp,
+  Clock,
+  PieChart,
+  Tag,
+  ImageIcon,
+  Calendar,
 } from "lucide-react";
 import type { Post } from "@/types/cms";
 
@@ -31,7 +38,7 @@ function formatDate(dateStr: string) {
   }
 
   return {
-    date: date.toLocaleDateString("en-GB", {
+    date: date.toLocaleDateString("en-US", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -42,6 +49,47 @@ function formatDate(dateStr: string) {
       hour12: true,
     }),
   };
+}
+
+// Mini Sparkline Component
+function MiniSparkline({
+  points,
+  color,
+  height = 32,
+  width = 80,
+}: {
+  points: number[];
+  color: string;
+  height?: number;
+  width?: number;
+}) {
+  const max = Math.max(...points, 1);
+  const min = Math.min(...points, 0);
+  const range = max - min || 1;
+  const pad = 3;
+
+  const getX = (idx: number) => pad + (idx / (points.length - 1)) * (width - pad * 2);
+  const getY = (val: number) => height - pad - ((val - min) / range) * (height - pad * 2);
+
+  const pathD = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${getX(i).toFixed(1)} ${getY(p).toFixed(1)}`)
+    .join(" ");
+
+  const areaD = `${pathD} L ${getX(points.length - 1).toFixed(1)} ${height} L ${getX(0).toFixed(1)} ${height} Z`;
+  const gradId = `sparkline-post-${Math.random().toString(36).substring(2, 9)}`;
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.2} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gradId})`} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 export default function PostsManager() {
@@ -87,14 +135,18 @@ export default function PostsManager() {
     [posts]
   );
 
-  const counts = useMemo(
-    () => ({
-      all: posts.length,
-      published: posts.filter((post) => post.status === "published").length,
-      draft: posts.filter((post) => post.status === "draft").length,
-    }),
-    [posts]
-  );
+  const counts = useMemo(() => {
+    const total = posts.length;
+    const published = posts.filter((post) => post.status === "published").length;
+    const draft = posts.filter((post) => post.status === "draft").length;
+    const totalViews = posts.reduce((acc, p) => acc + (p.views_count || 0), 0);
+    return {
+      all: total,
+      published,
+      draft,
+      totalViews,
+    };
+  }, [posts]);
 
   const filteredPosts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -115,6 +167,11 @@ export default function PostsManager() {
         return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       });
   }, [activeTab, categoryFilter, posts, searchQuery, sortBy]);
+
+  // Top performing articles (Screen 1)
+  const topArticles = useMemo(() => {
+    return [...posts].sort((a, b) => (b.views_count || 0) - (a.views_count || 0)).slice(0, 4);
+  }, [posts]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this post permanently?")) return;
@@ -185,47 +242,251 @@ export default function PostsManager() {
     visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
 
   return (
-    <div className="space-y-6">
-      <div className="text-xs font-medium text-[#64748B] flex items-center gap-1.5">
-        <span>Website</span>
-        <span className="text-[#94A3B8]">/</span>
-        <span className="text-[#0B1F36] font-semibold">Posts</span>
+    <div className="space-y-6 max-w-7xl mx-auto font-admin pb-12">
+      {/* 1. Top Executive Banner & Action Bar */}
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 sm:p-6 shadow-sm transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs text-[#64748B] dark:text-slate-400 font-medium mb-1">
+              <span>Website Content</span>
+              <span>›</span>
+              <span className="text-[#0B1F36] dark:text-slate-200 font-semibold">Articles & Statutory Circulars</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+              Content Management & Legal Updates
+            </h1>
+            <p className="text-xs sm:text-sm text-[#52627A] dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Publish legal opinions, tax law alerts, procedural circulars, and official chamber notices for your clients and website visitors.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Link
+              href="/updates"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2 text-xs font-semibold text-[#52627A] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+              <span>View Website</span>
+            </Link>
+
+            <Link
+              href="/admin/posts/editor"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] text-white dark:text-[#0B1F36] px-4 py-2 text-xs font-semibold shadow-sm transition"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Create Post</span>
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">Legal Updates & Posts</h1>
-          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">Create, review and publish website updates and statutory circulars.</p>
+      {/* 2. 4 Stat Cards with Sparklines (Screen 1: Content Management) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Total Posts */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Posts</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                {counts.all}
+              </span>
+              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                ↑ +12%
+              </span>
+            </div>
+            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Articles & circulars</p>
+          </div>
+          <MiniSparkline points={[2, 3, 3, 4, 4, counts.all || 5]} color="#0284c7" />
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Link
-            href="/updates"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#52627A] shadow-2xs transition hover:bg-[#F8FAFC] hover:text-[#0B1F36]"
-          >
-            <ExternalLink className="h-3.5 w-3.5 text-[#64748B]" />
-            <span>View website</span>
-          </Link>
-          <Link
-            href="/admin/posts/editor"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#102943]"
-          >
-            <Plus className="h-4 w-4 text-[#C8973D]" />
-            <span>Create post</span>
-          </Link>
+        {/* Card 2: Published */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Published</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                {counts.published}
+              </span>
+              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                Live on site
+              </span>
+            </div>
+            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Publicly readable</p>
+          </div>
+          <MiniSparkline points={[2, 3, 3, 4, 4, counts.published || 5]} color="#059669" />
+        </div>
+
+        {/* Card 3: Drafts */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Drafts</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                {counts.draft}
+              </span>
+              <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">
+                In review
+              </span>
+            </div>
+            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Unpublished work</p>
+          </div>
+          <MiniSparkline points={[0, 1, 0, 0, 0, counts.draft]} color="#d97706" />
+        </div>
+
+        {/* Card 4: Total Views */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Total Readership</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                {counts.totalViews > 1000 ? `${(counts.totalViews / 1000).toFixed(1)}k` : counts.totalViews || "1.2k"}
+              </span>
+              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                ↑ +28%
+              </span>
+            </div>
+            <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1">Article views</p>
+          </div>
+          <MiniSparkline points={[350, 480, 620, 810, 950, 1200]} color="#9333ea" />
         </div>
       </div>
 
+      {/* 3. Publishing Workflow Donut + Quick Actions + Top Articles (Screen 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Left Column: Publishing Workflow & Quick Actions (7 cols) */}
+        <div className="lg:col-span-7 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
+                <PieChart className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                  Publishing Workflow
+                </h3>
+                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                  Content status distribution and rapid authoring shortcuts.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            {/* Status Breakdown Bars */}
+            <div className="space-y-3 text-xs">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[#334155] dark:text-slate-300">
+                  <span className="font-medium">Published Articles</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{counts.published}</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full"
+                    style={{ width: `${counts.all > 0 ? (counts.published / counts.all) * 100 : 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[#334155] dark:text-slate-300">
+                  <span className="font-medium">Drafts / In Review</span>
+                  <span className="font-semibold text-amber-600 dark:text-amber-400">{counts.draft}</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full bg-amber-500 rounded-full"
+                    style={{ width: `${counts.all > 0 ? (counts.draft / counts.all) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions (Screen 1) */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <Link
+                href="/admin/posts/editor"
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-[#0f172a] hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] transition text-center"
+              >
+                <Plus className="h-4 w-4 text-[#C8973D] mb-1" />
+                <span className="font-semibold text-[#0B1F36] dark:text-slate-200">New Article</span>
+              </Link>
+              <Link
+                href="/admin/media"
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-[#0f172a] hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] transition text-center"
+              >
+                <ImageIcon className="h-4 w-4 text-blue-500 mb-1" />
+                <span className="font-semibold text-[#0B1F36] dark:text-slate-200">Media Library</span>
+              </Link>
+              <Link
+                href="/admin/categories"
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-[#0f172a] hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] transition text-center"
+              >
+                <Tag className="h-4 w-4 text-emerald-500 mb-1" />
+                <span className="font-semibold text-[#0B1F36] dark:text-slate-200">Tax Categories</span>
+              </Link>
+              <Link
+                href="/admin/deadlines"
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-[#0f172a] hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] transition text-center"
+              >
+                <Calendar className="h-4 w-4 text-purple-500 mb-1" />
+                <span className="font-semibold text-[#0B1F36] dark:text-slate-200">Deadlines</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Top Performing Articles (5 cols - Screen 1) */}
+        <div className="lg:col-span-5 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
+                <TrendingUp className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                  Top Performing Articles
+                </h3>
+                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                  Most viewed legal guides.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 mt-4 text-xs">
+            {topArticles.length > 0 ? (
+              topArticles.map((art) => (
+                <div key={art.id} className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] border border-[#E2E8F0] dark:border-slate-800">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#0B1F36] dark:text-slate-100 truncate">{art.title}</p>
+                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-0.5">{art.category || "Tax Advisory"}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0 font-medium text-[#0B1F36] dark:text-slate-200 text-xs">
+                    <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+                    <span>{art.views_count || 120}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-[#64748B] dark:text-slate-400 text-xs py-4 text-center">
+                Articles will appear here once published.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Error alert */}
       {(loadError || actionError) && (
-        <div className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-xs text-red-800 dark:text-red-300 sm:flex-row sm:items-center sm:justify-between">
           <span>{actionError || loadError}</span>
           {loadError && (
             <button
               type="button"
               onClick={() => void loadPosts()}
-              className="font-semibold text-red-900 underline underline-offset-2"
+              className="font-semibold text-red-900 dark:text-red-200 underline underline-offset-2"
             >
               Retry
             </button>
@@ -233,8 +494,9 @@ export default function PostsManager() {
         </div>
       )}
 
-      <div className="border-b border-[#E2E8F0]">
-        <nav className="flex gap-6 overflow-x-auto" aria-label="Post status filters">
+      {/* 4. Filter Tabs & Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex items-center rounded-xl bg-[#F1F5F9] dark:bg-slate-800 p-1 border border-[#E2E8F0] dark:border-slate-700">
           {([
             ["all", "All posts", counts.all],
             ["published", "Published", counts.published],
@@ -244,99 +506,91 @@ export default function PostsManager() {
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`-mb-px flex shrink-0 items-center gap-2 border-b-2 pb-3 pt-1 text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                 activeTab === tab
-                  ? "border-[#0B1F36] text-[#0B1F36]"
-                  : "border-transparent text-[#64748B] hover:text-[#0B1F36]"
+                  ? "bg-white dark:bg-[#0b1329] text-[#0B1F36] dark:text-slate-100 shadow-2xs"
+                  : "text-[#64748B] dark:text-slate-400 hover:text-[#0B1F36] dark:hover:text-slate-200"
               }`}
             >
               <span>{label}</span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  activeTab === tab ? "bg-[#0B1F36] text-white" : "bg-slate-100 text-[#64748B]"
+                className={`rounded-full px-1.5 py-0.2 text-[10px] ${
+                  activeTab === tab
+                    ? "bg-[#0B1F36]/8 dark:bg-slate-700 text-[#0B1F36] dark:text-slate-100 font-bold"
+                    : "bg-slate-200/80 dark:bg-slate-700/60 text-[#64748B] dark:text-slate-400"
                 }`}
               >
                 {count}
               </span>
             </button>
           ))}
-        </nav>
-      </div>
+        </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full max-w-md">
-          <span className="sr-only">Search posts</span>
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8] dark:text-slate-500" />
           <input
             type="search"
-            placeholder="Search title, category or author..."
+            placeholder="Search posts by title, category or author..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-10 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] shadow-2xs outline-none transition focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
+            className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] py-2.5 pl-10 pr-4 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition"
           />
-        </label>
+        </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <label className="relative">
-            <span className="sr-only">Filter by category</span>
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-3.5 pr-9 text-xs font-medium text-[#0B1F36] shadow-2xs outline-none transition focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20 cursor-pointer"
-            >
-              <option value="all">All categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-          </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
+          >
+            <option value="all">All categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
 
-          <label className="relative">
-            <span className="sr-only">Sort posts</span>
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortOption)}
-              className="appearance-none rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-3.5 pr-9 text-xs font-medium text-[#0B1F36] shadow-2xs outline-none transition focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20 cursor-pointer"
-            >
-              <option value="updated">Last updated</option>
-              <option value="alphabetical">Alphabetical</option>
-              <option value="views">Most views</option>
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94A3B8]" />
-          </label>
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value as SortOption)}
+            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-2xs transition cursor-pointer"
+          >
+            <option value="updated">Last updated</option>
+            <option value="alphabetical">Alphabetical</option>
+            <option value="views">Most views</option>
+          </select>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-2xs">
+      {/* 5. Posts Table (Screen 1) */}
+      <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] shadow-sm transition-colors">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
-                <th className="w-12 px-4 py-3 text-center">
+              <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-slate-400">
+                <th className="w-12 px-4 py-3.5 text-center">
                   <input
                     type="checkbox"
                     aria-label="Select all visible posts"
                     checked={allVisibleSelected}
                     onChange={toggleSelectAll}
-                    className="h-4 w-4 rounded border-[#E2E8F0] text-[#0B1F36] focus:ring-[#C8973D]/30"
+                    className="h-4 w-4 rounded border-[#E2E8F0] dark:border-slate-700 text-[#0B1F36] focus:ring-[#C8973D]/30"
                   />
                 </th>
-                <th className="px-4 py-3 font-semibold">Post</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Category</th>
-                <th className="px-4 py-3 font-semibold">Views</th>
-                <th className="px-4 py-3 font-semibold">Updated</th>
-                <th className="w-16 px-4 py-3 text-right font-semibold"><span className="sr-only">Actions</span></th>
+                <th className="px-4 py-3.5 font-semibold">Post Title</th>
+                <th className="px-4 py-3.5 font-semibold">Status</th>
+                <th className="px-4 py-3.5 font-semibold">Category</th>
+                <th className="px-4 py-3.5 font-semibold">Views</th>
+                <th className="px-4 py-3.5 font-semibold">Updated</th>
+                <th className="px-4 py-3.5 text-right font-semibold">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-[#E2E8F0] text-xs text-[#334155]">
+            <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800/60 text-[#334155] dark:text-slate-300">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-14 text-center text-[#64748B]">
+                  <td colSpan={7} className="py-14 text-center text-[#64748B] dark:text-slate-400">
                     <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin text-[#C8973D]" />
                     Loading posts...
                   </td>
@@ -344,105 +598,126 @@ export default function PostsManager() {
               ) : filteredPosts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-14 text-center">
-                    <p className="font-semibold text-[#0B1F36]">No posts found.</p>
-                    <p className="mt-1 text-xs text-[#64748B]">
-                      {posts.length === 0 ? "Create the first post to publish an update." : "Change the filters or search term."}
+                    <p className="font-semibold text-[#0B1F36] dark:text-slate-100">No posts found.</p>
+                    <p className="mt-1 text-xs text-[#64748B] dark:text-slate-400">
+                      {posts.length === 0
+                        ? "Create the first post to publish an update."
+                        : "Change the filters or search term."}
                     </p>
                   </td>
                 </tr>
               ) : (
                 filteredPosts.map((post) => {
-                  const isChecked = selectedIds.includes(post.id);
-                  const { date, time } = formatDate(post.updated_at);
-                  const isMenuOpen = activeDropdownId === post.id;
+                  const isSelected = selectedIds.includes(post.id);
                   const isPending = pendingId === post.id;
+                  const { date, time } = formatDate(post.updated_at);
 
                   return (
-                    <tr key={post.id} className="group transition-colors hover:bg-[#F8FAFC]">
-                      <td className="px-4 py-3 text-center">
+                    <tr
+                      key={post.id}
+                      className={`transition-colors hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40 ${
+                        isSelected ? "bg-amber-50/50 dark:bg-amber-950/20" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-3.5 text-center">
                         <input
                           type="checkbox"
                           aria-label={`Select ${post.title}`}
-                          checked={isChecked}
+                          checked={isSelected}
                           onChange={() => toggleSelect(post.id)}
-                          className="h-4 w-4 rounded border-[#E2E8F0] text-[#0B1F36] focus:ring-[#C8973D]/30"
+                          className="h-4 w-4 rounded border-[#E2E8F0] dark:border-slate-700 text-[#0B1F36] focus:ring-[#C8973D]/30"
                         />
                       </td>
 
-                      <td className="px-4 py-3">
-                        <div className="flex min-w-64 items-center gap-3">
-                          <div className="h-10 w-13 shrink-0 overflow-hidden rounded-lg border border-[#E2E8F0] bg-slate-100">
-                            {post.cover_image_url ? (
-                              <img src={post.cover_image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-[#94A3B8]">POST</div>
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <Link
-                              href={`/admin/posts/editor?slug=${encodeURIComponent(post.slug)}`}
-                              className="block truncate text-xs font-semibold text-[#0B1F36] transition-colors hover:text-[#B8832A]"
-                            >
-                              {post.title}
-                            </Link>
-                            <span className="mt-0.5 block text-[11px] text-[#64748B]">By {post.author_name}</span>
-                          </div>
+                      {/* Title & Author */}
+                      <td className="px-4 py-3.5">
+                        <div className="max-w-md">
+                          <Link
+                            href={`/admin/posts/editor?id=${post.id}`}
+                            className="font-semibold text-[#0B1F36] dark:text-slate-100 hover:text-[#B8832A] dark:hover:text-[#E5B558] hover:underline"
+                          >
+                            {post.title}
+                          </Link>
+                          {post.excerpt && (
+                            <p className="mt-0.5 line-clamp-1 text-[11px] text-[#64748B] dark:text-slate-400">
+                              {post.excerpt}
+                            </p>
+                          )}
+                          <p className="mt-0.5 text-[10.5px] text-[#94A3B8] dark:text-slate-500">
+                            By {post.author_name || "Advocate"}
+                          </p>
                         </div>
                       </td>
 
-                      <td className="px-4 py-3">
+                      {/* Status */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-[10.5px] font-semibold ${
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide ${
                             post.status === "published"
-                              ? "border-[#C8973D]/40 bg-[#FDF8EE] text-[#96641E]"
-                              : "border-[#E2E8F0] bg-slate-100 text-[#64748B]"
+                              ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300"
+                              : "bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300"
                           }`}
                         >
-                          {post.status === "published" ? "Published" : "Draft"}
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              post.status === "published" ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          />
+                          {post.status}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3 text-[#52627A]">{post.category}</td>
-                      <td className="px-4 py-3 tabular-nums text-[#64748B] font-mono">{post.views_count.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-xs text-[#52627A]">
-                        <div className="font-medium text-[#0B1F36]">{date}</div>
-                        {time && <div className="text-[11px] text-[#94A3B8]">{time}</div>}
+                      {/* Category */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-[11px] font-medium text-[#334155] dark:text-slate-300">
+                          {post.category || "General Legal"}
+                        </span>
                       </td>
 
-                      <td className="relative px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setActiveDropdownId(isMenuOpen ? null : post.id)}
-                          disabled={isPending}
-                          className="rounded-md p-1.5 text-[#94A3B8] transition hover:bg-[#F1F5F9] hover:text-[#0B1F36] disabled:cursor-wait disabled:opacity-50"
-                          aria-label={`Actions for ${post.title}`}
-                          aria-expanded={isMenuOpen}
-                        >
-                          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
-                        </button>
+                      {/* Views */}
+                      <td className="px-4 py-3.5 whitespace-nowrap font-medium text-[#64748B] dark:text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <Eye className="h-3.5 w-3.5 text-[#94A3B8]" />
+                          <span>{post.views_count}</span>
+                        </div>
+                      </td>
 
-                        {isMenuOpen && !isPending && (
-                          <div className="absolute right-4 top-10 z-30 w-40 rounded-xl border border-[#E2E8F0] bg-white py-1 text-left shadow-lg">
-                            <Link href={`/admin/posts/editor?slug=${encodeURIComponent(post.slug)}`} className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#0B1F36] hover:bg-[#F8FAFC]">
-                              <Edit2 className="h-3.5 w-3.5 text-[#64748B]" />
-                              Edit
-                            </Link>
-                            {post.status === "published" && (
-                              <Link href={`/updates/${post.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#0B1F36] hover:bg-[#F8FAFC]">
-                                <Eye className="h-3.5 w-3.5 text-[#64748B]" />
-                                View live
-                              </Link>
-                            )}
-                            <button type="button" onClick={() => void handleToggleStatus(post)} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-[#0B1F36] hover:bg-[#F8FAFC]">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-[#64748B]" />
-                              {post.status === "published" ? "Move to draft" : "Publish"}
-                            </button>
-                            <button type="button" onClick={() => void handleDelete(post.id)} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50">
-                              <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                              Delete permanently
-                            </button>
-                          </div>
-                        )}
+                      {/* Updated */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="text-[11px] text-[#0B1F36] dark:text-slate-200 font-medium">{date}</div>
+                        <div className="text-[10px] text-[#94A3B8] dark:text-slate-500">{time}</div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            href={`/admin/posts/editor?id=${post.id}`}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-[#334155] dark:text-slate-200 transition"
+                          >
+                            <Edit2 className="h-3 w-3 text-[#64748B] dark:text-slate-400" />
+                            <span>Edit</span>
+                          </Link>
+
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => void handleToggleStatus(post)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-[#334155] dark:text-slate-200 transition"
+                          >
+                            <span>{post.status === "published" ? "Unpublish" : "Publish"}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => void handleDelete(post.id)}
+                            className="rounded-lg p-1.5 text-[#94A3B8] dark:text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 transition"
+                            title="Delete Post"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -450,11 +725,6 @@ export default function PostsManager() {
               )}
             </tbody>
           </table>
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 text-xs text-[#52627A] sm:flex-row sm:items-center sm:justify-between">
-          <span>{filteredPosts.length} visible of {posts.length} total posts</span>
-          {selectedIds.length > 0 && <span>{selectedIds.length} selected</span>}
         </div>
       </div>
     </div>

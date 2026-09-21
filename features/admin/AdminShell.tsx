@@ -114,8 +114,8 @@ function AdminShellInner({ children }: { children: ReactNode }) {
           isReady ? "transition-[padding] duration-300 ease-out" : ""
         } ${isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"}`}
       >
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 sm:px-6 lg:px-8 transition-colors">
-          {/* Left: Mobile hamburger & Search input */}
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 sm:px-6 lg:px-8 transition-colors">
+          {/* Left: Mobile hamburger & Search input with ⌘K badge */}
           <div className="flex items-center gap-3 flex-1 max-w-xl">
             <button
               type="button"
@@ -126,39 +126,64 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Search Input */}
+            {/* Search Input with ⌘ K shortcut */}
             <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#94A3B8] dark:text-slate-500">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#94A3B8] dark:text-slate-500">
                 <Search className="h-4 w-4" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search subscribers, posts, media, or inquiries..."
-                className="w-full rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] py-1.5 pl-9 pr-4 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 placeholder:text-sm focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                placeholder="Search anything... (posts, subscribers, inquiries)"
+                className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] py-2 pl-10 pr-12 text-xs text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
               />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-400 shadow-2xs">
+                  ⌘ K
+                </kbd>
+              </div>
             </form>
           </div>
 
-          {/* Right: Theme Toggle, Notifications & Admin Profile */}
+          {/* Right: Quick Date, View Website, Create Post, Notifications, Theme Toggle, Admin Profile */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0 pl-3">
+            {/* View Website Button (as seen in all 8 mockups) */}
+            <Link
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2 text-xs font-semibold text-[#334155] dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-2xs"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+              <span>View Website</span>
+            </Link>
+
+            {/* Create Post Action Button (as seen in all 8 mockups) */}
+            <Link
+              href="/admin/posts/editor"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1d4ed8] text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition"
+            >
+              <span className="text-sm font-bold leading-none">+</span>
+              <span>Create Post</span>
+            </Link>
+
             {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0B1F36] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-gold-400 transition focus:outline-none"
+              className="rounded-xl p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0B1F36] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-gold-400 transition focus:outline-none"
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
               aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {isDark ? (
-                <Sun className="h-5 w-5 text-gold-400 transition-transform duration-300 hover:rotate-45" />
+                <Sun className="h-4.5 w-4.5 text-gold-400 transition-transform duration-300 hover:rotate-45" />
               ) : (
-                <Moon className="h-5 w-5 text-slate-600 transition-transform duration-300 hover:-rotate-12" />
+                <Moon className="h-4.5 w-4.5 text-slate-600 transition-transform duration-300 hover:-rotate-12" />
               )}
             </button>
 
-            {/* Notification Bell with interactive dropdown */}
+            {/* Notification Bell with interactive dropdown & count badge */}
             <div ref={notifRef} className="relative">
               <button
                 type="button"
@@ -166,7 +191,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                   setShowNotifications((prev) => !prev);
                   setShowAdminMenu(false);
                 }}
-                className={`relative rounded-lg p-2 transition focus:outline-none ${
+                className={`relative rounded-xl p-2 transition focus:outline-none ${
                   showNotifications
                     ? "bg-[#F1F5F9] dark:bg-slate-800 text-[#0B1F36] dark:text-slate-100"
                     : "text-[#64748B] dark:text-slate-400 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 hover:text-[#0B1F36] dark:hover:text-slate-100"
@@ -175,8 +200,10 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 aria-label="Notifications"
                 aria-expanded={showNotifications}
               >
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#C8973D] ring-2 ring-white dark:ring-slate-900" />
+                <Bell className="h-4.5 w-4.5" />
+                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#0b1329]">
+                  1
+                </span>
               </button>
 
               {/* Notification Dropdown Panel */}

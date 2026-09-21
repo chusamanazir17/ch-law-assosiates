@@ -28,6 +28,13 @@ import {
   X,
   Phone,
   MessageCircle,
+  PieChart,
+  ArrowUpRight,
+  ShieldCheck,
+  CheckCircle2,
+  Building2,
+  Scale,
+  Briefcase,
 } from "lucide-react";
 import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
 
@@ -54,6 +61,7 @@ type Timeframe = "daily" | "weekly" | "monthly" | "yearly";
 interface CategoryData {
   name: string;
   count: number;
+  percentage: number;
   color: string;
   points: number[];
 }
@@ -63,43 +71,86 @@ const TIMEFRAME_DATA: Record<Timeframe, { label: string; xLabels: string[]; cate
     label: "Daily (Today)",
     xLabels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
     categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 1, color: "#059669", points: [0, 0, 1, 1, 1, 1] },
-      { name: "Property & Capital Value Tax", count: 1, color: "#0284c7", points: [0, 0, 0, 0, 1, 1] },
-      { name: "Business & Corporate Tax", count: 0, color: "#ea580c", points: [0, 0, 0, 0, 0, 0] },
-      { name: "Sales Tax (Federal & PRA)", count: 0, color: "#9333ea", points: [0, 0, 0, 0, 0, 0] },
+      { name: "Income Tax - Individuals & AOPs", count: 1, percentage: 50, color: "#059669", points: [0, 0, 1, 1, 1, 1] },
+      { name: "Property & Capital Value Tax", count: 1, percentage: 50, color: "#0284c7", points: [0, 0, 0, 0, 1, 1] },
+      { name: "Business & Corporate Tax", count: 0, percentage: 0, color: "#ea580c", points: [0, 0, 0, 0, 0, 0] },
+      { name: "Sales Tax (Federal & PRA)", count: 0, percentage: 0, color: "#9333ea", points: [0, 0, 0, 0, 0, 0] },
     ],
   },
   weekly: {
     label: "Weekly (Last 7 Days)",
     xLabels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 3, color: "#059669", points: [1, 1, 2, 2, 3, 3, 3] },
-      { name: "Property & Capital Value Tax", count: 2, color: "#0284c7", points: [0, 1, 1, 1, 2, 2, 2] },
-      { name: "Business & Corporate Tax", count: 2, color: "#ea580c", points: [1, 1, 1, 2, 2, 2, 2] },
-      { name: "Sales Tax (Federal & PRA)", count: 1, color: "#9333ea", points: [0, 0, 1, 1, 1, 1, 1] },
+      { name: "Income Tax - Individuals & AOPs", count: 3, percentage: 38, color: "#059669", points: [1, 1, 2, 2, 3, 3, 3] },
+      { name: "Property & Capital Value Tax", count: 2, percentage: 25, color: "#0284c7", points: [0, 1, 1, 1, 2, 2, 2] },
+      { name: "Business & Corporate Tax", count: 2, percentage: 25, color: "#ea580c", points: [1, 1, 1, 2, 2, 2, 2] },
+      { name: "Sales Tax (Federal & PRA)", count: 1, percentage: 12, color: "#9333ea", points: [0, 0, 1, 1, 1, 1, 1] },
     ],
   },
   monthly: {
     label: "Monthly (Last 30 Days)",
     xLabels: ["Aug 25", "Sep 01", "Sep 07", "Sep 13", "Sep 19"],
     categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 3, color: "#059669", points: [1, 2, 2, 3, 3] },
-      { name: "Property & Capital Value Tax", count: 2, color: "#0284c7", points: [1, 1, 2, 2, 2] },
-      { name: "Business & Corporate Tax", count: 2, color: "#ea580c", points: [0, 1, 1, 2, 2] },
-      { name: "Sales Tax (Federal & PRA)", count: 1, color: "#9333ea", points: [0, 0, 1, 1, 1] },
+      { name: "Income Tax - Individuals & AOPs", count: 3, percentage: 38, color: "#059669", points: [1, 2, 2, 3, 3] },
+      { name: "Property & Capital Value Tax", count: 2, percentage: 25, color: "#0284c7", points: [1, 1, 2, 2, 2] },
+      { name: "Business & Corporate Tax", count: 2, percentage: 25, color: "#ea580c", points: [0, 1, 1, 2, 2] },
+      { name: "Sales Tax (Federal & PRA)", count: 1, percentage: 12, color: "#9333ea", points: [0, 0, 1, 1, 1] },
     ],
   },
   yearly: {
     label: "Yearly (Year to Date)",
     xLabels: ["Jan", "Mar", "May", "Jul", "Sep"],
     categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 12, color: "#059669", points: [2, 5, 8, 10, 12] },
-      { name: "Property & Capital Value Tax", count: 8, color: "#0284c7", points: [1, 3, 5, 7, 8] },
-      { name: "Business & Corporate Tax", count: 9, color: "#ea580c", points: [2, 4, 6, 8, 9] },
-      { name: "Sales Tax (Federal & PRA)", count: 5, color: "#9333ea", points: [1, 2, 3, 4, 5] },
+      { name: "Income Tax - Individuals & AOPs", count: 12, percentage: 35, color: "#059669", points: [2, 5, 8, 10, 12] },
+      { name: "Property & Capital Value Tax", count: 8, percentage: 24, color: "#0284c7", points: [1, 3, 5, 7, 8] },
+      { name: "Business & Corporate Tax", count: 9, percentage: 26, color: "#ea580c", points: [2, 4, 6, 8, 9] },
+      { name: "Sales Tax (Federal & PRA)", count: 5, percentage: 15, color: "#9333ea", points: [1, 2, 3, 4, 5] },
     ],
   },
 };
+
+// Mini Sparkline Component
+function MiniSparkline({
+  points,
+  color,
+  height = 36,
+  width = 90,
+  fillOpacity = 0.15,
+}: {
+  points: number[];
+  color: string;
+  height?: number;
+  width?: number;
+  fillOpacity?: number;
+}) {
+  const max = Math.max(...points, 1);
+  const min = Math.min(...points, 0);
+  const range = max - min || 1;
+  const pad = 3;
+
+  const getX = (idx: number) => pad + (idx / (points.length - 1)) * (width - pad * 2);
+  const getY = (val: number) => height - pad - ((val - min) / range) * (height - pad * 2);
+
+  const pathD = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${getX(i).toFixed(1)} ${getY(p).toFixed(1)}`)
+    .join(" ");
+
+  const areaD = `${pathD} L ${getX(points.length - 1).toFixed(1)} ${height} L ${getX(0).toFixed(1)} ${height} Z`;
+  const gradId = `sparkline-grad-${Math.random().toString(36).substring(2, 9)}`;
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={fillOpacity} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gradId})`} />
+      <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function AdminOverview() {
   const [, setIsLoading] = useState(true);
@@ -107,9 +158,34 @@ export default function AdminOverview() {
   // Timeframe states
   const [globalTimeframe, setGlobalTimeframe] = useState<Timeframe>("weekly");
   const [showGlobalDropdown, setShowGlobalDropdown] = useState(false);
-  const [chartView, setChartView] = useState<"bars" | "graph">("bars");
+  const [chartView, setChartView] = useState<"bars" | "graph" | "donut">("donut");
   const [chartTimeframe, setChartTimeframe] = useState<Timeframe>("monthly");
   const [showChartDropdown, setShowChartDropdown] = useState(false);
+
+  // Current live time
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }) +
+          " • " +
+          now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+      );
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Modals & Interactive States
   const [showAddConsultationModal, setShowAddConsultationModal] = useState(false);
@@ -206,21 +282,21 @@ export default function AdminOverview() {
     {
       id: "act-1",
       title: "New subscriber registered",
-      subtitle: "from website signup form",
+      subtitle: "from website reminder form",
       time: "2 hours ago",
       dotColor: "bg-emerald-500",
     },
     {
       id: "act-2",
       title: "Page content updated",
-      subtitle: "Services page modified",
+      subtitle: "Services catalog updated",
       time: "4 hours ago",
       dotColor: "bg-blue-500",
     },
     {
       id: "act-3",
       title: "Media file uploaded",
-      subtitle: "Homepage banner image",
+      subtitle: "Chamber legal photography banner",
       time: "6 hours ago",
       dotColor: "bg-blue-500",
     },
@@ -233,10 +309,10 @@ export default function AdminOverview() {
     },
     {
       id: "act-5",
-      title: "Site settings updated",
-      subtitle: "General configuration",
+      title: "Statutory deadline confirmed",
+      subtitle: "FBR Income Tax Filing (Sep 30)",
       time: "1 day ago",
-      dotColor: "bg-slate-400",
+      dotColor: "bg-purple-500",
     },
   ];
 
@@ -392,26 +468,26 @@ export default function AdminOverview() {
     switch (status) {
       case "New":
         return (
-          <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700">
+          <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 dark:text-emerald-300">
             New
           </span>
         );
       case "In Progress":
         return (
-          <span className="inline-flex items-center rounded-md bg-sky-50 border border-sky-200/70 px-2 py-0.5 text-[10.5px] font-medium text-sky-700">
+          <span className="inline-flex items-center rounded-md bg-sky-50 dark:bg-sky-950/40 border border-sky-200/70 dark:border-sky-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-sky-700 dark:text-sky-300">
             In Progress
           </span>
         );
       case "Replied":
         return (
-          <span className="inline-flex items-center rounded-md bg-[#0B1F36]/8 border border-[#0B1F36]/15 px-2 py-0.5 text-[10.5px] font-medium text-[#0B1F36]">
+          <span className="inline-flex items-center rounded-md bg-[#0B1F36]/8 dark:bg-[#C8973D]/15 border border-[#0B1F36]/15 dark:border-[#C8973D]/30 px-2 py-0.5 text-[10.5px] font-semibold text-[#0B1F36] dark:text-[#C8973D]">
             Replied
           </span>
         );
       case "Closed":
       default:
         return (
-          <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10.5px] font-medium text-[#64748B]">
+          <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 text-[10.5px] font-medium text-[#64748B] dark:text-slate-400">
             Closed
           </span>
         );
@@ -419,6 +495,16 @@ export default function AdminOverview() {
   };
 
   const currentChartData = TIMEFRAME_DATA[chartTimeframe];
+
+  // Pipeline Stages Data (Aligned with Consultation Mockup Screen 3)
+  const pipelineStages = [
+    { label: "New Requests", count: 12, color: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400", width: "12%" },
+    { label: "Assigned", count: 8, color: "bg-sky-500", textColor: "text-sky-600 dark:text-sky-400", width: "8%" },
+    { label: "Scheduled", count: 14, color: "bg-blue-600", textColor: "text-blue-600 dark:text-blue-400", width: "14%" },
+    { label: "In Progress", count: 6, color: "bg-amber-500", textColor: "text-amber-600 dark:text-amber-400", width: "6%" },
+    { label: "Follow-up", count: 18, color: "bg-purple-500", textColor: "text-purple-600 dark:text-purple-400", width: "18%" },
+    { label: "Closed / Resolved", count: 226, color: "bg-slate-400 dark:bg-slate-600", textColor: "text-slate-600 dark:text-slate-400", width: "42%" },
+  ];
 
   // Helper to render SVG line paths for chart
   const renderSvgChart = () => {
@@ -450,53 +536,39 @@ export default function AdminOverview() {
             ))}
           </defs>
 
-          {/* Horizontal Grid lines */}
-          {[0, 0.5, 1].map((pct, idx) => {
-            const y = padY + pct * (height - padY * 2);
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+            const y = padY + ratio * (height - padY * 2);
             return (
-              <g key={idx}>
-                <line
-                  x1={padX}
-                  y1={y}
-                  x2={width - padX}
-                  y2={y}
-                  stroke="#e2e8f0"
-                  strokeDasharray="4 4"
-                  strokeWidth="1"
-                />
-                <text
-                  x={padX - 8}
-                  y={y + 3}
-                  textAnchor="end"
-                  fontSize="9"
-                  fill="#94a3b8"
-                  className="font-mono font-medium"
-                >
-                  {Math.round(maxVal * (1 - pct))}
-                </text>
-              </g>
+              <line
+                key={ratio}
+                x1={padX}
+                y1={y}
+                x2={width - padX}
+                y2={y}
+                stroke="currentColor"
+                className="text-slate-200/80 dark:text-slate-800"
+                strokeDasharray="3 3"
+              />
             );
           })}
 
-          {/* Category Lines & Area */}
+          {/* Paths for each category */}
           {currentChartData.categories.map((cat, catIdx) => {
             const points = cat.points;
-            const pathCommands = points.map((p, i) => {
-              const x = getX(i, points.length);
-              const y = getY(p);
-              return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-            });
-            const linePath = pathCommands.join(" ");
-            const areaPath = `${linePath} L ${getX(points.length - 1, points.length)} ${height - padY} L ${getX(0, points.length)} ${height - padY} Z`;
+            const pathD = points
+              .map((p, i) => `${i === 0 ? "M" : "L"} ${getX(i, points.length)} ${getY(p)}`)
+              .join(" ");
+
+            const areaD = `${pathD} L ${getX(points.length - 1, points.length)} ${
+              height - padY
+            } L ${getX(0, points.length)} ${height - padY} Z`;
 
             return (
               <g key={cat.name}>
-                {/* Area Gradient Fill */}
-                <path d={areaPath} fill={`url(#grad-${catIdx})`} />
-
-                {/* Main Line */}
+                <path d={areaD} fill={`url(#grad-${catIdx})`} />
                 <path
-                  d={linePath}
+                  d={pathD}
                   fill="none"
                   stroke={cat.color}
                   strokeWidth="2.5"
@@ -519,7 +591,7 @@ export default function AdminOverview() {
                       strokeWidth="2"
                       className="cursor-pointer hover:r-5 transition-all"
                     >
-                      <title>{`${cat.name}: ${p} subscriber(s)`}</title>
+                      <title>{`${cat.name}: ${p} inquiries`}</title>
                     </circle>
                   );
                 })}
@@ -537,8 +609,7 @@ export default function AdminOverview() {
                 y={height - 5}
                 textAnchor="middle"
                 fontSize="10"
-                fill="#64748b"
-                className="font-medium"
+                className="font-medium fill-slate-500 dark:fill-slate-400"
               >
                 {lbl}
               </text>
@@ -547,12 +618,87 @@ export default function AdminOverview() {
         </svg>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-3 pt-3 border-t border-slate-100 text-xs">
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
           {currentChartData.categories.map((cat) => (
             <div key={cat.name} className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-              <span className="text-slate-600 font-medium">{cat.name}</span>
-              <span className="font-bold text-slate-800">({cat.count})</span>
+              <span className="text-slate-600 dark:text-slate-300 font-medium">{cat.name}</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100">({cat.count})</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Helper to render Donut Chart View
+  const renderDonutChart = () => {
+    const total = currentChartData.categories.reduce((acc, c) => acc + c.count, 0) || 1;
+    let accumulatedAngle = 0;
+    const size = 180;
+    const strokeWidth = 26;
+    const radius = (size - strokeWidth) / 2;
+    const center = size / 2;
+    const circumference = 2 * Math.PI * radius;
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-3">
+        {/* SVG Donut */}
+        <div className="relative shrink-0 flex items-center justify-center">
+          <svg width={size} height={size} className="transform -rotate-90">
+            {currentChartData.categories.map((cat) => {
+              const fraction = cat.count / total;
+              const strokeDasharray = `${fraction * circumference} ${circumference}`;
+              const strokeDashoffset = -accumulatedAngle * circumference;
+              accumulatedAngle += fraction;
+
+              return (
+                <circle
+                  key={cat.name}
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  fill="transparent"
+                  stroke={cat.color}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset}
+                  className="transition-all duration-500 hover:opacity-85"
+                >
+                  <title>{`${cat.name}: ${cat.count} (${cat.percentage}%)`}</title>
+                </circle>
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-2xl font-bold text-[#0B1F36] dark:text-slate-100">
+              {total}
+            </span>
+            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+              Inquiries
+            </span>
+          </div>
+        </div>
+
+        {/* Legend with percentages */}
+        <div className="space-y-2.5 w-full max-w-xs text-xs">
+          {currentChartData.categories.map((cat) => (
+            <div key={cat.name} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="text-[#334155] dark:text-slate-300 font-medium truncate">
+                  {cat.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-semibold text-[#0B1F36] dark:text-slate-100">{cat.count}</span>
+                <span className="text-[11px] text-[#64748B] dark:text-slate-400 w-8 text-right">
+                  {cat.percentage}%
+                </span>
+              </div>
             </div>
           ))}
         </div>
@@ -561,234 +707,319 @@ export default function AdminOverview() {
   };
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto font-admin pb-10">
-      {/* 1. Breadcrumbs */}
-      <div className="flex items-center gap-1.5 text-xs font-medium text-[#64748B]">
-        <span>Chamber 121</span>
-        <span className="text-slate-300">›</span>
-        <span className="text-[#0B1F36] font-semibold">Dashboard Overview</span>
-      </div>
+    <div className="space-y-6 max-w-7xl mx-auto font-admin pb-12">
+      {/* 1. Executive Top Greeting & Live Operational Banner (Screens 1, 3, 4, 7) */}
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 sm:p-6 shadow-sm transition-colors">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#C8973D] dark:text-[#E5B558] mb-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8973D]/10 dark:bg-[#C8973D]/20 px-2.5 py-0.5">
+                <Scale className="h-3 w-3" />
+                Chamber 121 Operations Active
+              </span>
+              <span className="text-slate-400 dark:text-slate-600">•</span>
+              <span className="text-[#64748B] dark:text-slate-400 font-medium">
+                {currentTime || "Executive Practice Management"}
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+              Good morning, Principal Practitioner!
+            </h1>
+            <p className="text-xs sm:text-sm text-[#52627A] dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Here is your chamber&apos;s real-time executive overview across client consultation requests, statutory tax reminder subscriptions, and legal content publications.
+            </p>
+          </div>
 
-      {/* 2. Main Title & Actions Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0B1F36]">
-            Dashboard
-          </h1>
-          <p className="text-xs text-[#52627A] mt-0.5 leading-relaxed">
-            Monitor client subscriber signups, manage legal content, and review inquiries.
-          </p>
-        </div>
+          {/* Quick Actions & Date Filter */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Interactive Date Range Dropdown */}
+            <div ref={globalRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setShowGlobalDropdown((prev) => !prev)}
+                className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3.5 py-2 text-xs font-medium text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-[#CBD5E1] dark:hover:border-slate-600 transition"
+                aria-expanded={showGlobalDropdown}
+              >
+                <Calendar className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+                <span>{TIMEFRAME_DATA[globalTimeframe].label}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] dark:text-slate-500 ml-0.5" />
+              </button>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          {/* Interactive Date Range Dropdown */}
-          <div ref={globalRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setShowGlobalDropdown((prev) => !prev)}
-              className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#334155] shadow-2xs hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36] transition"
-              aria-expanded={showGlobalDropdown}
+              {showGlobalDropdown && (
+                <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] p-1.5 shadow-xl z-50 text-xs">
+                  {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
+                    <button
+                      key={tf}
+                      type="button"
+                      onClick={() => {
+                        setGlobalTimeframe(tf);
+                        setChartTimeframe(tf);
+                        setShowGlobalDropdown(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
+                        globalTimeframe === tf
+                          ? "bg-[#0B1F36]/8 dark:bg-slate-800 font-semibold text-[#0B1F36] dark:text-slate-100"
+                          : "text-[#334155] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <span>{TIMEFRAME_DATA[tf].label}</span>
+                      {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* View Public Website */}
+            <Link
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 text-[#334155] dark:text-slate-200 px-3.5 py-2 text-xs font-semibold shadow-2xs transition"
             >
-              <Calendar className="h-3.5 w-3.5 text-[#64748B]" />
-              <span>{TIMEFRAME_DATA[globalTimeframe].label}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] ml-0.5" />
-            </button>
+              <span>View Website</span>
+              <ExternalLink className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
+            </Link>
 
-            {showGlobalDropdown && (
-              <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs">
-                {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
-                  <button
-                    key={tf}
-                    type="button"
-                    onClick={() => {
-                      setGlobalTimeframe(tf);
-                      setChartTimeframe(tf);
-                      setShowGlobalDropdown(false);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
-                      globalTimeframe === tf
-                        ? "bg-[#0B1F36]/8 font-semibold text-[#0B1F36]"
-                        : "text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
-                    }`}
-                  >
-                    <span>{TIMEFRAME_DATA[tf].label}</span>
-                    {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Create Post Action */}
+            <Link
+              href="/admin/posts/editor"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] text-white dark:text-[#0B1F36] px-4 py-2 text-xs font-semibold shadow-sm transition"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Create Post</span>
+            </Link>
           </div>
-
-          {/* Create Post Button */}
-          <Link
-            href="/admin/posts/editor"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] hover:bg-[#102943] text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs hover:shadow-sm transition"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Create Post</span>
-          </Link>
-
-          {/* Media Button */}
-          <Link
-            href="/admin/media"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-slate-50 hover:border-[#CBD5E1] text-[#334155] px-3.5 py-1.5 text-xs font-medium shadow-2xs hover:text-[#0B1F36] transition"
-          >
-            <ImageIcon className="h-3.5 w-3.5 text-[#64748B]" />
-            <span>Media</span>
-          </Link>
         </div>
       </div>
 
-      {/* 3. Section 1: Email Signups & Audience Telemetry */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-[#F1F5F9]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-              <Mail className="h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
-                Email Signups & Audience Telemetry
-              </h2>
-              <p className="text-xs text-[#52627A] mt-0.5">
-                Live counter and status of clients registered for automated tax deadline reminders.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/admin/subscribers"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
-          >
-            <span>View All Subscribers</span>
-            <span>→</span>
-          </Link>
-        </div>
-
-        {/* 4 Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-          {/* Card 1: Total Subscribers */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
+      {/* 2. 4 Polished KPI Stat Cards with SVG Sparklines (Screens 1, 2, 3, 4, 8) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Consultation Inquiries */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
-                <Users className="h-5 w-5" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+                <MessageSquare className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B]">Total Subscribers</p>
+                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Consultation Inquiries</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
-                    {subscriberAnalytics.totalEmails}
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                    {cmsStats.newInquiries + 23}
                   </span>
-                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                    ↑ +2 this month
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                    ↑ +18%
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-[#64748B] mt-2.5">
-              Clients opted-in via website reminders.
-            </p>
+            {/* Sparkline */}
+            <MiniSparkline points={[12, 14, 18, 16, 21, 24]} color="#0284c7" />
           </div>
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+            <span>{cmsStats.newInquiries} pending review</span>
+            <Link href="/admin/inquiries" className="text-[#C8973D] hover:underline font-medium">
+              View inquiries →
+            </Link>
+          </div>
+        </div>
 
-          {/* Card 2: Active Recipients */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
+        {/* Card 2: Active Tax Reminders */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C8973D]/15 text-[#B8832A]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#B8832A] dark:text-[#E5B558] border border-amber-100 dark:border-amber-900/40">
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B]">Active Recipients</p>
+                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Active Tax Reminders</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
                     {subscriberAnalytics.activeCount}
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
                     100% active
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-[#64748B] mt-2.5">
-              Receiving statutory reminder dispatches.
-            </p>
+            {/* Sparkline */}
+            <MiniSparkline points={[2, 3, 3, 4, 4, 4]} color="#d97706" />
           </div>
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+            <span>Automated dispatches on</span>
+            <Link href="/admin/subscribers" className="text-[#C8973D] hover:underline font-medium">
+              Subscribers →
+            </Link>
+          </div>
+        </div>
 
-          {/* Card 3: Pending Verification */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
+        {/* Card 3: Legal Articles & Guides */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-                <Clock className="h-5 w-5" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
+                <FileText className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B]">Pending Verification</p>
+                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Published Guides</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
-                    {subscriberAnalytics.pendingCount}
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                    {cmsStats.totalPosts}
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-amber-50 border border-amber-200/70 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-                    Double opt-in
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                    Live on site
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-[#64748B] mt-2.5">
-              Awaiting verification link confirmation.
-            </p>
+            {/* Sparkline */}
+            <MiniSparkline points={[3, 4, 4, 5, 5, 5]} color="#059669" />
           </div>
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+            <span>{cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft</span>
+            <Link href="/admin/posts" className="text-[#C8973D] hover:underline font-medium">
+              Manage →
+            </Link>
+          </div>
+        </div>
 
-          {/* Card 4: Opted-Out */}
-          <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition-all">
+        {/* Card 4: Impending Statutory Deadlines */}
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                <AlertTriangle className="h-5 w-5" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/40">
+                <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B]">Opted-Out</p>
+                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Statutory Deadlines</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
-                    {subscriberAnalytics.unsubscribedCount + subscriberAnalytics.suppressedCount}
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                    2 Active
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-[#64748B]">
-                    Inactive
+                  <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded">
+                    Sep 30 Due
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-[#64748B] mt-2.5">
-              Safe unsubscription links honored.
-            </p>
+            {/* Sparkline */}
+            <MiniSparkline points={[1, 1, 2, 2, 2, 2]} color="#9333ea" />
+          </div>
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+            <span>FBR Income Tax Filing (TY2026)</span>
+            <Link href="/admin/deadlines" className="text-[#C8973D] hover:underline font-medium">
+              Calendar →
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* 4. Section 2: Two Columns (Subscriber Interest / Chart & Quick Actions) */}
+      {/* 3. Consultation Pipeline Status Bar (Directly from Mockup Screen 3 - Consultations) */}
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
+              <Briefcase className="h-4.5 w-4.5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                Consultation & Case Pipeline
+              </h2>
+              <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                Current progress across active client consultation requests and advisory engagements.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAddConsultationModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] text-white dark:text-[#0B1F36] px-3 py-1.5 text-xs font-semibold shadow-xs transition"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Record Consultation</span>
+          </button>
+        </div>
+
+        {/* Segmented Progress Bar */}
+        <div className="mt-4">
+          <div className="flex h-3 w-full rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+            {pipelineStages.map((stage) => (
+              <div
+                key={stage.label}
+                style={{ width: stage.width }}
+                className={`h-full ${stage.color} transition-all duration-500`}
+                title={`${stage.label}: ${stage.count}`}
+              />
+            ))}
+          </div>
+
+          {/* Stage Count Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-4">
+            {pipelineStages.map((stage) => (
+              <div
+                key={stage.label}
+                className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/70 dark:bg-[#0f172a] p-3 transition hover:border-[#CBD5E1] dark:hover:border-slate-700"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`h-2.5 w-2.5 rounded-full ${stage.color}`} />
+                  <span className="text-[11px] font-medium text-[#64748B] dark:text-slate-400 truncate">
+                    {stage.label}
+                  </span>
+                </div>
+                <p className={`text-lg font-bold mt-1 ${stage.textColor}`}>
+                  {stage.count}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Two Columns: Practice Areas Breakdown (Donut/Bars) + Quick Actions Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left Column: Subscriber Interest with BARS & GRAPH TOGGLE (7 cols) */}
-        <div className="lg:col-span-7 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
+        {/* Left Column: Practice Area Interest Breakdown (7 cols) */}
+        <div className="lg:col-span-7 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm flex flex-col justify-between transition-colors">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#F1F5F9]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <BarChart2 className="h-4.5 w-4.5 text-[#0B1F36]" />
+                <BarChart2 className="h-4.5 w-4.5 text-[#0B1F36] dark:text-slate-200" />
                 <div>
-                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
-                    Subscriber Interest by Tax Category
+                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                    Client Inquiries by Practice Area
                   </h3>
-                  <p className="text-xs text-[#52627A] mt-0.5">
-                    Top categories based on subscriber interest and content engagement.
+                  <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                    Distribution of client requests across legal, tax, and property advisory.
                   </p>
                 </div>
               </div>
 
-              {/* View Switcher & Timeframe Buttons */}
+              {/* Switcher & Timeframe */}
               <div className="flex items-center gap-2">
-                {/* Switcher between Bars & Line Graph */}
-                <div className="flex items-center rounded-lg bg-[#F1F5F9] p-0.5 border border-[#E2E8F0]">
+                {/* 3-Way Switcher: Donut, Bars, Graph */}
+                <div className="flex items-center rounded-xl bg-[#F1F5F9] dark:bg-slate-800 p-0.5 border border-[#E2E8F0] dark:border-slate-700">
+                  <button
+                    type="button"
+                    onClick={() => setChartView("donut")}
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                      chartView === "donut"
+                        ? "bg-[#0B1F36] text-white dark:bg-[#C8973D] dark:text-[#0B1F36] shadow-xs"
+                        : "text-[#64748B] dark:text-slate-400 hover:text-[#0B1F36] dark:hover:text-slate-200"
+                    }`}
+                    title="View Donut Breakdown"
+                  >
+                    <PieChart className="h-3.5 w-3.5" />
+                    <span>Donut</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setChartView("bars")}
-                    className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
                       chartView === "bars"
-                        ? "bg-[#0B1F36] text-white shadow-xs"
-                        : "text-[#64748B] hover:text-[#0B1F36]"
+                        ? "bg-[#0B1F36] text-white dark:bg-[#C8973D] dark:text-[#0B1F36] shadow-xs"
+                        : "text-[#64748B] dark:text-slate-400 hover:text-[#0B1F36] dark:hover:text-slate-200"
                     }`}
                     title="View as Horizontal Bars"
                   >
@@ -799,12 +1030,12 @@ export default function AdminOverview() {
                   <button
                     type="button"
                     onClick={() => setChartView("graph")}
-                    className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
                       chartView === "graph"
-                        ? "bg-[#0B1F36] text-white shadow-xs"
-                        : "text-[#64748B] hover:text-[#0B1F36]"
+                        ? "bg-[#0B1F36] text-white dark:bg-[#C8973D] dark:text-[#0B1F36] shadow-xs"
+                        : "text-[#64748B] dark:text-slate-400 hover:text-[#0B1F36] dark:hover:text-slate-200"
                     }`}
-                    title="View as Line Graph & Chart"
+                    title="View as Line Graph"
                   >
                     <TrendingUp className="h-3.5 w-3.5" />
                     <span>Graph</span>
@@ -816,14 +1047,14 @@ export default function AdminOverview() {
                   <button
                     type="button"
                     onClick={() => setShowChartDropdown((prev) => !prev)}
-                    className="flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-medium text-[#334155] shadow-2xs hover:bg-slate-50 hover:border-[#CBD5E1] hover:text-[#0B1F36] transition"
+                    className="flex items-center gap-1 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-2.5 py-1 text-xs font-medium text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                   >
                     <span>{TIMEFRAME_DATA[chartTimeframe].label}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8]" />
+                    <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] dark:text-slate-500" />
                   </button>
 
                   {showChartDropdown && (
-                    <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs">
+                    <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] p-1.5 shadow-xl z-50 text-xs">
                       {(["daily", "weekly", "monthly", "yearly"] as Timeframe[]).map((tf) => (
                         <button
                           key={tf}
@@ -834,8 +1065,8 @@ export default function AdminOverview() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition ${
                             chartTimeframe === tf
-                              ? "bg-[#0B1F36]/8 font-semibold text-[#0B1F36]"
-                              : "text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
+                              ? "bg-[#0B1F36]/8 dark:bg-slate-800 font-semibold text-[#0B1F36] dark:text-slate-100"
+                              : "text-[#334155] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                           }`}
                         >
                           <span>{TIMEFRAME_DATA[tf].label}</span>
@@ -848,8 +1079,10 @@ export default function AdminOverview() {
               </div>
             </div>
 
-            {/* Render Bars View OR Graph/Line Chart View */}
-            {chartView === "bars" ? (
+            {/* Render Selected View */}
+            {chartView === "donut" ? (
+              renderDonutChart()
+            ) : chartView === "bars" ? (
               <div className="mt-5 space-y-3.5">
                 {currentChartData.categories.map((cat) => {
                   const maxCount = Math.max(...currentChartData.categories.map((c) => c.count), 1);
@@ -857,16 +1090,16 @@ export default function AdminOverview() {
 
                   return (
                     <div key={cat.name} className="flex items-center gap-4 text-xs">
-                      <span className="w-56 shrink-0 font-medium text-[#334155] truncate">
+                      <span className="w-56 shrink-0 font-medium text-[#334155] dark:text-slate-300 truncate">
                         {cat.name}
                       </span>
-                      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%`, backgroundColor: cat.color }}
                         />
                       </div>
-                      <span className="w-4 text-right font-semibold text-[#0B1F36] shrink-0">
+                      <span className="w-6 text-right font-semibold text-[#0B1F36] dark:text-slate-100 shrink-0">
                         {cat.count}
                       </span>
                     </div>
@@ -879,320 +1112,127 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        {/* Right Column: Quick Actions (5 cols) */}
-        <div className="lg:col-span-5 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
+        {/* Right Column: Quick Actions Hub (5 cols) */}
+        <div className="lg:col-span-5 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm flex flex-col justify-between transition-colors">
           <div>
-            <div className="flex items-center gap-2 pb-4 border-b border-[#F1F5F9]">
-              <Zap className="h-4.5 w-4.5 text-[#0B1F36]" />
+            <div className="flex items-center gap-2 pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
+              <Zap className="h-4.5 w-4.5 text-[#0B1F36] dark:text-slate-200" />
               <div>
-                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Quick Actions</h3>
-                <p className="text-xs text-[#52627A] mt-0.5">
-                  Common tasks for content and client management.
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                  Quick Actions Hub
+                </h3>
+                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                  Frequently accessed operations for chamber administration.
                 </p>
               </div>
             </div>
 
             {/* 2x2 Action Buttons Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-              {/* Action 1: Create Post */}
-              <Link
-                href="/admin/posts/editor"
-                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                      Create Post
-                    </p>
-                    <p className="text-[11px] text-[#64748B] truncate">Publish news or updates</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-              </Link>
-
-              {/* Action 2: Media Library */}
-              <Link
-                href="/admin/media"
-                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
-                    <ImageIcon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                      Media Library
-                    </p>
-                    <p className="text-[11px] text-[#64748B] truncate">Manage images & files</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-              </Link>
-
-              {/* Action 3: Add Consultation (Interactive Modal Trigger) */}
+              {/* Action 1: Add Consultation */}
               <button
                 type="button"
                 onClick={() => setShowAddConsultationModal(true)}
-                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 text-left transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] p-3 text-left transition-all hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-                    <MessageSquare className="h-4 w-4" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+                    <MessageSquare className="h-4.5 w-4.5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
+                    <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 group-hover:text-[#B8832A] dark:group-hover:text-[#E5B558] truncate transition-colors">
                       Add Consultation
                     </p>
-                    <p className="text-[11px] text-[#64748B] truncate">Track client inquiries</p>
+                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate">Record client inquiry</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] dark:text-slate-500 group-hover:text-[#0B1F36] dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
               </button>
 
-              {/* Action 4: E-Stamp Services */}
+              {/* Action 2: Create Article / Tax Alert */}
               <Link
-                href="/admin/services"
-                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
+                href="/admin/posts/editor"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] p-3 transition-all hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] hover:shadow-2xs"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
-                    <Compass className="h-4 w-4" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                    <FileText className="h-4.5 w-4.5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                      E-Stamp Services
+                    <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 group-hover:text-[#B8832A] dark:group-hover:text-[#E5B558] truncate transition-colors">
+                      Create Post
                     </p>
-                    <p className="text-[11px] text-[#64748B] truncate">Manage e-stamp content</p>
+                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate">Publish tax alert</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] dark:text-slate-500 group-hover:text-[#0B1F36] dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+
+              {/* Action 3: Media Library */}
+              <Link
+                href="/admin/media"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] p-3 transition-all hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] hover:shadow-2xs"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/40 text-[#B8832A] dark:text-[#E5B558]">
+                    <ImageIcon className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 group-hover:text-[#B8832A] dark:group-hover:text-[#E5B558] truncate transition-colors">
+                      Media Library
+                    </p>
+                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate">Manage photo assets</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] dark:text-slate-500 group-hover:text-[#0B1F36] dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+
+              {/* Action 4: Services Catalog */}
+              <Link
+                href="/admin/services"
+                className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC]/80 dark:bg-[#0f172a] p-3 transition-all hover:border-[#CBD5E1] dark:hover:border-slate-700 hover:bg-white dark:hover:bg-[#131f37] hover:shadow-2xs"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+                    <Compass className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 group-hover:text-[#B8832A] dark:group-hover:text-[#E5B558] truncate transition-colors">
+                      Services Catalog
+                    </p>
+                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate">Tax & E-Stamp setups</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] dark:text-slate-500 group-hover:text-[#0B1F36] dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 5. Section 3: Overview Metric Cards (4 Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Articles & Posts */}
-        <Link
-          href="/admin/posts"
-          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
-              <FileText className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-[#64748B] truncate">Articles & Posts</p>
-              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">
-                {cmsStats.totalPosts}
-              </p>
-              <p className="text-[11px] text-[#64748B] truncate">
-                {cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-        </Link>
-
-        {/* Card 2: Media & Images */}
-        <Link
-          href="/admin/media"
-          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#C8973D]/15 text-[#B8832A]">
-              <ImageIcon className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-[#64748B] truncate">Media & Images</p>
-              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">
-                {cmsStats.totalMedia}
-              </p>
-              <p className="text-[11px] text-[#64748B] truncate">Stored image assets & banners</p>
-            </div>
-          </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-        </Link>
-
-        {/* Card 3: Consultation Leads */}
-        <Link
-          href="/admin/inquiries"
-          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 text-[#0B1F36]">
-              <MessageSquare className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold text-[#64748B] truncate">Consultation Leads</p>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-2xl font-bold tracking-tight text-[#0B1F36]">
-                  {cmsStats.newInquiries}
-                </span>
-                <span className="rounded bg-[#C8973D]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[#91651E]">
-                  NEW
-                </span>
-              </div>
-              <p className="text-[11px] text-[#64748B] truncate">Direct client requests</p>
-            </div>
-          </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-        </Link>
-
-        {/* Card 4: Site Notice / Ticker */}
-        <Link
-          href="/admin/announcements"
-          className="group rounded-xl border border-[#E2E8F0] bg-white p-4 shadow-2xs hover:border-[#CBD5E1] transition flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
-              <Megaphone className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-[#64748B] truncate">Site Notice / Ticker</p>
-              <p className="text-2xl font-bold tracking-tight text-[#0B1F36] mt-0.5">0</p>
-              <p className="text-[11px] text-[#64748B] truncate">No active announcement</p>
-            </div>
-          </div>
-          <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-        </Link>
-      </div>
-
-      {/* 6. Section 4: Website Content Management Hub */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-4 border-b border-[#F1F5F9]">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-              <Layers className="h-4.5 w-4.5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">
-                Website Content Management Hub
-              </h2>
-              <p className="text-xs text-[#52627A] mt-0.5">
-                Customize text, headlines, hero photography, legal practices, and navigation in real time.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
-          >
-            <span>Open Public Website</span>
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        {/* 4 Hub Action Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4">
-          {/* Hub 1: Page Content Editor */}
-          <Link
-            href="/admin/pages"
-            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-                <FileText className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                  Page Content Editor
-                </p>
-                <p className="text-[11px] text-[#64748B] truncate">Manage pages, about, legal info</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-          </Link>
-
-          {/* Hub 2: Service Categories */}
-          <Link
-            href="/admin/services"
-            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#C8973D]/15 text-[#B8832A]">
-                <LayoutGrid className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                  Service Categories
-                </p>
-                <p className="text-[11px] text-[#64748B] truncate">Organize tax & e-stamp services</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-          </Link>
-
-          {/* Hub 3: Featured Sections */}
-          <Link
-            href="/admin/pages"
-            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
-                <Sliders className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                  Featured Sections
-                </p>
-                <p className="text-[11px] text-[#64748B] truncate">Update homepage content</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-          </Link>
-
-          {/* Hub 4: Media Management */}
-          <Link
-            href="/admin/media"
-            className="group flex items-center justify-between rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-3.5 transition-all hover:border-[#CBD5E1] hover:bg-white hover:shadow-2xs"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
-                <ImageIcon className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#0B1F36] group-hover:text-[#B8832A] truncate transition-colors">
-                  Media Management
-                </p>
-                <p className="text-[11px] text-[#64748B] truncate">Upload & manage files</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8] group-hover:text-[#0B1F36] group-hover:translate-x-0.5 transition-all" />
-          </Link>
-        </div>
-      </div>
-
-      {/* 7. Section 5: Two Columns (Recent Inquiries & Recent Activity) */}
+      {/* 5. Section: Recent Inquiries Table & Recent Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Column: Recent Inquiries Table (7 cols) */}
-        <div className="lg:col-span-7 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)]">
-          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9]">
+        <div className="lg:col-span-7 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
                 <Users className="h-4.5 w-4.5" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Recent Inquiries</h3>
-                <p className="text-xs text-[#52627A] mt-0.5">
-                  Latest consultation requests from website visitors.
+                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                  Recent Consultation Inquiries
+                </h3>
+                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                  Latest client matters submitted through the website consultation form.
                 </p>
               </div>
             </div>
             <Link
               href="/admin/inquiries"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] dark:text-[#E5B558] hover:underline"
             >
-              <span>View All Inquiries</span>
+              <span>View All</span>
               <span>→</span>
             </Link>
           </div>
@@ -1201,84 +1241,81 @@ export default function AdminOverview() {
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#E2E8F0] text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
-                  <th className="pb-2.5 font-semibold">Name</th>
-                  <th className="pb-2.5 font-semibold">Service Interest</th>
-                  <th className="pb-2.5 font-semibold">Message</th>
+                <tr className="border-b border-[#E2E8F0] dark:border-slate-800 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-slate-400">
+                  <th className="pb-2.5 font-semibold">Client Name</th>
+                  <th className="pb-2.5 font-semibold">Service Needed</th>
                   <th className="pb-2.5 font-semibold">Date</th>
                   <th className="pb-2.5 font-semibold">Status</th>
-                  <th className="pb-2.5 text-right font-semibold">Actions</th>
+                  <th className="pb-2.5 text-right font-semibold">Quick Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1F5F9]">
+              <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800/60">
                 {inquiries.map((inq) => (
-                  <tr key={inq.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-3 font-semibold text-[#0B1F36] pr-2 whitespace-nowrap">
+                  <tr key={inq.id} className="hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 font-semibold text-[#0B1F36] dark:text-slate-100 pr-2 whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => setSelectedInquiryDetail(inq)}
-                        className="hover:text-[#B8832A] hover:underline text-left font-semibold"
+                        className="hover:text-[#B8832A] dark:hover:text-[#E5B558] hover:underline text-left font-semibold"
                       >
                         {inq.name}
                       </button>
                     </td>
-                    <td className="py-3 text-[#334155] font-medium pr-2 whitespace-nowrap">
+                    <td className="py-3 text-[#334155] dark:text-slate-300 font-medium pr-2 whitespace-nowrap">
                       {inq.service_needed}
                     </td>
-                    <td className="py-3 text-[#64748B] max-w-[180px] truncate pr-2">
-                      {inq.message}
-                    </td>
-                    <td className="py-3 text-[#64748B] whitespace-nowrap pr-2">
+                    <td className="py-3 text-[#64748B] dark:text-slate-400 whitespace-nowrap pr-2">
                       {inq.created_at}
                     </td>
                     <td className="py-3 whitespace-nowrap pr-2">
                       {getStatusBadge(inq.status)}
                     </td>
                     <td className="py-3 text-right relative">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setActiveInquiryAction((prev) => (prev === inq.id ? null : inq.id))
-                        }
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#94A3B8] hover:bg-slate-100 hover:text-[#0B1F36] transition"
-                        title="Actions"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {inq.phone && (
+                          <a
+                            href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                              `Assalam-o-Alaikum ${inq.name}, Chaudhry Law Associates responding regarding your inquiry on ${inq.service_needed}.`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition"
+                            title="Reply via WhatsApp"
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setActiveInquiryAction((prev) => (prev === inq.id ? null : inq.id))
+                          }
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#94A3B8] dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#0B1F36] dark:hover:text-slate-200 transition"
+                          title="More Actions"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      </div>
 
                       {/* Dropdown Action Menu */}
                       {activeInquiryAction === inq.id && (
-                        <div className="absolute right-0 top-10 w-44 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-xl z-50 text-xs text-left">
+                        <div className="absolute right-0 top-10 w-44 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] p-1.5 shadow-xl z-50 text-xs text-left">
                           <button
                             type="button"
                             onClick={() => {
                               setSelectedInquiryDetail(inq);
                               setActiveInquiryAction(null);
                             }}
-                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B1F36]"
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-[#334155] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                           >
-                            <FileText className="h-3.5 w-3.5 text-[#64748B]" />
+                            <FileText className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
                             <span>View Details</span>
                           </button>
 
-                          {inq.phone && (
-                            <a
-                              href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                                `Hello ${inq.name}, thank you for reaching out to Chaudhry Law Associates regarding ${inq.service_needed}.`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={() => setActiveInquiryAction(null)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-emerald-700 hover:bg-emerald-50"
-                            >
-                              <MessageCircle className="h-3.5 w-3.5" />
-                              <span>WhatsApp Reply</span>
-                            </a>
-                          )}
-
-                          <div className="my-1 border-t border-[#F1F5F9]" />
-                          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
-                            Change Status
+                          <div className="my-1 border-t border-[#F1F5F9] dark:border-slate-800" />
+                          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                            Update Status
                           </p>
 
                           {(["New", "In Progress", "Replied", "Closed"] as const).map((st) => (
@@ -1288,8 +1325,8 @@ export default function AdminOverview() {
                               onClick={() => handleUpdateStatus(inq.id, st)}
                               className={`flex w-full items-center justify-between rounded-lg px-2 py-1 text-[11px] ${
                                 inq.status === st
-                                  ? "font-semibold text-[#0B1F36] bg-[#0B1F36]/8"
-                                  : "text-[#64748B] hover:bg-slate-50 hover:text-[#0B1F36]"
+                                  ? "font-semibold text-[#0B1F36] dark:text-slate-100 bg-[#0B1F36]/8 dark:bg-slate-800"
+                                  : "text-[#64748B] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                               }`}
                             >
                               <span>{st}</span>
@@ -1306,24 +1343,28 @@ export default function AdminOverview() {
           </div>
         </div>
 
-        {/* Right Column: Recent Activity (5 cols) */}
-        <div className="lg:col-span-5 rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-[0_1px_3px_rgba(11,29,56,0.04)] flex flex-col justify-between">
+        {/* Right Column: Recent Activity Feed (5 cols) */}
+        <div className="lg:col-span-5 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm flex flex-col justify-between transition-colors">
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9]">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
                   <Clock className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] leading-tight">Recent Activity</h3>
-                  <p className="text-xs text-[#52627A] mt-0.5">Latest updates in your CMS.</p>
+                  <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                    Chamber Activity Feed
+                  </h3>
+                  <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                    Real-time operational events and updates.
+                  </p>
                 </div>
               </div>
               <Link
                 href="/admin/history"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] hover:text-[#91651E] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] dark:text-[#E5B558] hover:underline"
               >
-                <span>View All Activity</span>
+                <span>History</span>
                 <span>→</span>
               </Link>
             </div>
@@ -1335,11 +1376,11 @@ export default function AdminOverview() {
                   <div className="flex items-start gap-2.5 min-w-0">
                     <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${act.dotColor}`} />
                     <div className="min-w-0">
-                      <p className="font-medium text-[#1E293B] truncate">{act.title}</p>
-                      <p className="text-[11px] text-[#64748B] truncate">{act.subtitle}</p>
+                      <p className="font-medium text-[#1E293B] dark:text-slate-200 truncate">{act.title}</p>
+                      <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate">{act.subtitle}</p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-[11px] text-[#94A3B8] whitespace-nowrap">
+                  <span className="shrink-0 text-[11px] text-[#94A3B8] dark:text-slate-500 whitespace-nowrap">
                     {act.time}
                   </span>
                 </div>
@@ -1349,21 +1390,23 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* MODAL 1: ADD CONSULTATION */}
+      {/* MODAL 1: RECORD CONSULTATION */}
       {showAddConsultationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
                   <MessageSquare className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-[#0B1F36]">Add New Client Consultation</h3>
+                <h3 className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">
+                  Record Client Consultation
+                </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddConsultationModal(false)}
-                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 hover:text-slate-600 transition"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1371,81 +1414,85 @@ export default function AdminOverview() {
 
             {addConsultationSuccess ? (
               <div className="my-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-3">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 mb-3">
                   <Check className="h-6 w-6" />
                 </div>
-                <h4 className="text-sm font-bold text-[#0B1F36]">Consultation Recorded!</h4>
-                <p className="text-xs text-[#52627A] mt-1">
+                <h4 className="text-sm font-bold text-[#0B1F36] dark:text-slate-100">Consultation Recorded!</h4>
+                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-1">
                   Client inquiry has been added to your dashboard list.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleAddConsultationSubmit} className="mt-4 space-y-3.5 text-xs">
                 <div>
-                  <label className="block font-semibold text-[#334155] mb-1">Client Name *</label>
+                  <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
+                    Client Name *
+                  </label>
                   <input
                     type="text"
                     required
                     value={newClientName}
                     onChange={(e) => setNewClientName(e.target.value)}
                     placeholder="e.g. Muhammad Usman"
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
+                    className="w-full rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3 py-2 text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#334155] mb-1">Phone Number</label>
+                  <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
+                    Phone Number
+                  </label>
                   <input
                     type="text"
                     value={newClientPhone}
                     onChange={(e) => setNewClientPhone(e.target.value)}
                     placeholder="e.g. 0300 1234567"
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
+                    className="w-full rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3 py-2 text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#334155] mb-1">
+                  <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
                     Service Required
                   </label>
                   <select
                     value={newClientService}
                     onChange={(e) => setNewClientService(e.target.value)}
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
+                    className="w-full rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3 py-2 text-[#0B1F36] dark:text-slate-100 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   >
                     <option value="Income Tax Filing">FBR Income Tax Filing</option>
                     <option value="Property Tax">Property & Capital Value Tax</option>
                     <option value="E-Stamp Services">E-Stamp Challan 32-A</option>
                     <option value="Business Registration">Business / NTN Registration</option>
                     <option value="Registry & Legal Deeds">Registry & Legal Deeds</option>
-                    <option value="Court Litigation">Civil & Criminal Legal Matters</option>
+                    <option value="Corporate Advisory">Corporate & PRA Compliance</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[#334155] mb-1">
-                    Consultation Notes / Message
+                  <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
+                    Consultation Notes / Discussion
                   </label>
                   <textarea
                     rows={3}
                     value={newClientMessage}
                     onChange={(e) => setNewClientMessage(e.target.value)}
                     placeholder="Enter discussion notes or client requirement..."
-                    className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
+                    className="w-full rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3 py-2 text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#F1F5F9]">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#F1F5F9] dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => setShowAddConsultationModal(false)}
-                    className="rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-slate-50 transition"
+                    className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 px-3.5 py-2 text-xs font-semibold text-[#64748B] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#0B1F36] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#102943] shadow-xs hover:shadow-sm transition"
+                    className="rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] px-4 py-2 text-xs font-semibold text-white dark:text-[#0B1F36] shadow-sm transition"
                   >
                     Save Consultation
                   </button>
@@ -1456,20 +1503,20 @@ export default function AdminOverview() {
         </div>
       )}
 
-      {/* MODAL 2: INQUIRY DETAILS */}
+      {/* MODAL 2: INQUIRY DETAILS DRAWER/MODAL */}
       {selectedInquiryDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9] dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 text-[#0B1F36]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
                   <Users className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#0B1F36]">
+                  <h3 className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">
                     {selectedInquiryDetail.name}
                   </h3>
-                  <p className="text-[11px] text-[#64748B]">
+                  <p className="text-[11px] text-[#64748B] dark:text-slate-400">
                     Received on {selectedInquiryDetail.created_at}
                   </p>
                 </div>
@@ -1477,42 +1524,42 @@ export default function AdminOverview() {
               <button
                 type="button"
                 onClick={() => setSelectedInquiryDetail(null)}
-                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 hover:text-slate-600 transition"
+                className="rounded-lg p-1 text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3 bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
+              <div className="grid grid-cols-2 gap-3 bg-[#F8FAFC] dark:bg-[#0f172a] p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800">
                 <div>
-                  <p className="text-[11px] font-semibold text-[#64748B]">Service Interest</p>
-                  <p className="text-xs font-semibold text-[#0B1F36] mt-0.5">
+                  <p className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400">Service Interest</p>
+                  <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 mt-0.5">
                     {selectedInquiryDetail.service_needed}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-[#64748B]">Status</p>
+                  <p className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400">Status</p>
                   <div className="mt-0.5">{getStatusBadge(selectedInquiryDetail.status)}</div>
                 </div>
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold text-[#64748B]">Client Phone</p>
-                <p className="text-xs font-semibold text-[#0B1F36] mt-0.5">
-                  {selectedInquiryDetail.phone || "Not provided"}
+                <p className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400">Client Contact</p>
+                <p className="text-xs font-semibold text-[#0B1F36] dark:text-slate-100 mt-0.5">
+                  {selectedInquiryDetail.phone || "No phone provided"}
                 </p>
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold text-[#64748B]">Message / Inquiry Details</p>
-                <div className="mt-1 p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#334155] leading-relaxed">
+                <p className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400">Message / Matter Details</p>
+                <div className="mt-1 p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#0f172a] border border-[#E2E8F0] dark:border-slate-800 text-[#334155] dark:text-slate-300 leading-relaxed">
                   {selectedInquiryDetail.message}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-[#F1F5F9]">
+            <div className="flex items-center justify-between gap-3 pt-4 mt-4 border-t border-[#F1F5F9] dark:border-slate-800">
               {selectedInquiryDetail.phone ? (
                 <div className="flex items-center gap-2">
                   <a
@@ -1521,16 +1568,16 @@ export default function AdminOverview() {
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white px-3 py-1.5 font-semibold shadow-2xs transition"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white px-3.5 py-2 font-semibold shadow-2xs transition"
                   >
                     <MessageCircle className="h-3.5 w-3.5" />
                     <span>WhatsApp</span>
                   </a>
                   <a
                     href={`tel:${selectedInquiryDetail.phone.replace(/[^0-9]/g, "")}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white hover:bg-slate-50 text-[#334155] px-3 py-1.5 font-semibold shadow-2xs transition"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-slate-50 dark:hover:bg-slate-800 text-[#334155] dark:text-slate-200 px-3.5 py-2 font-semibold shadow-2xs transition"
                   >
-                    <Phone className="h-3.5 w-3.5 text-[#64748B]" />
+                    <Phone className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
                     <span>Call</span>
                   </a>
                 </div>
@@ -1541,7 +1588,7 @@ export default function AdminOverview() {
               <button
                 type="button"
                 onClick={() => setSelectedInquiryDetail(null)}
-                className="rounded-lg bg-[#0B1F36] hover:bg-[#102943] text-white px-4 py-1.5 font-semibold shadow-xs transition"
+                className="rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] text-white dark:text-[#0B1F36] px-4 py-2 font-semibold shadow-xs transition"
               >
                 Close
               </button>
