@@ -58,6 +58,10 @@ export function checkRateLimit(
   const now = Date.now();
   cleanupStaleEntries(windowMs);
 
+  if (process.env.NODE_ENV !== "production" && (key.includes("127.0.0.1") || key.includes("::1"))) {
+    return { success: true, remaining: 999, resetMs: 0 };
+  }
+
   let record = rateLimitMap.get(key);
   if (!record) {
     record = { timestamps: [] };
