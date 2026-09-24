@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+@layer base {
+  html {
+    font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0F172A;
+    background-color: #F8FAFC;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    color: #F1F5F9;
+    background-color: #070D18;
+  }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #0F172A;
+    background-color: #F8FAFC;
+    line-height: 1.625;
+    letter-spacing: -0.005em;
+  }
+
+  html.dark body {
+    color: #F1F5F9;
+    background-color: #070D18;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  /* Refined Mono for Figures, Currency, CNIC, and Codes */
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-feature-settings: 'tnum' on, 'zero' on;
+    letter-spacing: -0.015em;
+  }
+
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* Improved table and form baseline text */
+  table {
+    line-height: 1.5;
+  }
+
+  table th {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+
+  table td {
+    letter-spacing: -0.005em;
+    line-height: 1.55;
+  }
+
+  input, textarea, select {
+    letter-spacing: -0.005em;
+    line-height: 1.5;
+  }
+}
+
+/* Comprehensive Dark Mode Rules for Seamless Theme Alignment */
+.dark .bg-white:not([data-theme-keep="light"]) {
+  background-color: #0D1829 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/90,
+.dark .bg-slate-50\/80 {
+  background-color: #0A1322 !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #142236 !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-200\/90,
+.dark .border-slate-200\/80,
+.dark .border-slate-200\/60,
+.dark .border-\[\#DCE6F1\] {
+  border-color: #1A2E4B !important;
+}
+
+.dark .border-slate-100 {
+  border-color: #16263E !important;
+}
+
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #16263E !important;
+}
+
+.dark .text-slate-900,
+.dark .text-\[\#0F172A\],
+.dark .text-\[\#0D2344\] {
+  color: #F8FAFC !important;
+}
+
+.dark .text-slate-800 {
+  color: #E2E8F0 !important;
+}
+
+.dark .text-slate-700 {
+  color: #CBD5E1 !important;
+}
+
+.dark .text-slate-600 {
+  color: #94A3B8 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #64748B !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: #091322 !important;
+  border-color: #1B2F4C !important;
+  color: #F1F5F9 !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #38BDF8 !important;
+  outline-color: #38BDF8 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748B !important;
+}
+
+.dark table thead th,
+.dark table thead tr {
+  background-color: #0A1424 !important;
+  color: #94A3B8 !important;
+  border-color: #1A2E4B !important;
+}
+
+.dark table tbody tr {
+  border-color: #16263E !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: #122137 !important;
+}
+
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-50:hover {
+  background-color: #14243B !important;
+}
+
+.dark .hover\:text-slate-900:hover {
+  color: #FFFFFF !important;
+}
+
+/* Printable receipt paper must remain paper-white with dark text */
+#printable-receipt,
+#printable-receipt * {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Modern Minimalist Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Dark variant for sidebar */
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #1E3A5F;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #2A4E7A;
+}
+
+/* Print utility */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt, #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

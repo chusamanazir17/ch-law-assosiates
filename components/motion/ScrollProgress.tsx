@@ -8,7 +8,8 @@ export default function ScrollProgress() {
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
+    if (pathname.startsWith("/admin") || pathname.startsWith("/office")) return;
+
 
     const el = barRef.current;
     if (!el) return;
@@ -36,9 +37,10 @@ export default function ScrollProgress() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname]);
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/office")) {
     return null;
   }
+
 
   return (
     <div

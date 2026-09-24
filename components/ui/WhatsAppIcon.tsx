@@ -73,9 +73,10 @@ export function FloatingWhatsApp() {
   const { isUrdu } = useLanguage();
   const { settings } = useCms();
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/office")) {
     return null;
   }
+
 
   const ws = settings?.whatsappSettings;
   const isEnabled = ws?.floatingButtonEnabled !== false;

@@ -232,7 +232,7 @@ export default function Header() {
   const legalGroupActive =
     legalGroupCategories.some((category) => pathname.startsWith(category.href)) || activeDropdown === "legal-group";
 
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/office")) return null;
 
   return (
     <>

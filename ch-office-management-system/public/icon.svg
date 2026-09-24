@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1B2C" />
+      <stop offset="100%" stop-color="#142639" />
+    </linearGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FCD34D" />
+    </linearGradient>
+    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1473E6" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)" />
+
+  <!-- Outer Decorative Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#gold-grad)" stroke-width="4" stroke-opacity="0.35" stroke-dasharray="8 6" />
+  <circle cx="256" cy="256" r="198" fill="none" stroke="url(#blue-grad)" stroke-width="2.5" stroke-opacity="0.5" />
+
+  <!-- Shield / Emblem Container -->
+  <path d="M256 95 L375 145 C375 270 256 360 256 360 C256 360 137 270 137 145 Z" fill="#0E2238" stroke="url(#gold-grad)" stroke-width="5" />
+
+  <!-- Scales of Justice / Stamp Emblem -->
+  <!-- Central Beam -->
+  <line x1="256" y1="135" x2="256" y2="295" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" />
+  <!-- Horizontal Balance Bar -->
+  <line x1="180" y1="175" x2="332" y2="175" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" />
+  <circle cx="256" cy="175" r="7" fill="#38BDF8" />
+
+  <!-- Left Scale Pan -->
+  <line x1="180" y1="175" x2="160" y2="225" stroke="#94A3B8" stroke-width="2" />
+  <line x1="180" y1="175" x2="200" y2="225" stroke="#94A3B8" stroke-width="2" />
+  <path d="M152 225 Q180 240 208 225 Z" fill="#F59E0B" />
+
+  <!-- Right Scale Pan -->
+  <line x1="332" y1="175" x2="312" y2="225" stroke="#94A3B8" stroke-width="2" />
+  <line x1="332" y1="175" x2="352" y2="225" stroke="#94A3B8" stroke-width="2" />
+  <path d="M304 225 Q332 240 360 225 Z" fill="#F59E0B" />
+
+  <!-- Base of Central Stand -->
+  <path d="M226 295 L286 295 L276 308 L236 308 Z" fill="#F59E0B" />
+
+  <!-- Typography: CH -->
+  <text x="256" y="270" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">CH</text>
+
+  <!-- Bottom Banner Ribbon -->
+  <rect x="110" y="390" width="292" height="46" rx="10" fill="#1473E6" />
+  <text x="256" y="420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="3">CHAMBER 121</text>
+</svg>

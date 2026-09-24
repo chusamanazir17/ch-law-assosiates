@@ -64,7 +64,8 @@ export default function AdminSidebar({
     {
       group: null,
       items: [
-        { label: "Dashboard", href: "/admin", icon: Home },
+        { label: "Dashboard", href: "/admin/dashboard", icon: Home },
+        { label: "Office System", href: "/office/dashboard", icon: Scale },
       ],
     },
     {

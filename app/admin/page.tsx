@@ -1,11 +1,16 @@
 import React from "react";
 import type { Metadata } from "next";
-import AdminOverview from "@/features/admin/AdminOverview";
+import AdminPortalSelector from "@/components/admin/AdminPortalSelector";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | Tax Compliance & Reminders",
+  title: "Admin Portal Gateway | CH Law Associates",
+  description: "Select between Website Administration CMS and Office Management System.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
-export default function AdminPage() {
-  return <AdminOverview />;
+export default function AdminPortalGatewayPage() {
+  return <AdminPortalSelector />;
 }

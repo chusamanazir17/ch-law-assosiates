@@ -36,6 +36,7 @@
   ],
   "exclude": [
     "node_modules",
-    "supabase"
+    "supabase",
+    "ch-office-management-system"
   ]
 }

@@ -1,12 +1,11 @@
-import { revalidatePath } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { getAdminSession } from "@/lib/auth/admin";
 import {
-  findPostBySlug,
-  listPosts,
-  removePost,
+  listAllPosts,
+  getAdminPostBySlugOrId,
   savePost,
-} from "@/lib/repositories/postsRepository";
+  deletePost,
+} from "@/lib/services/posts.service";
 import { validatePostInput } from "@/lib/validation/post";
 
 export const dynamic = "force-dynamic";
@@ -26,14 +25,14 @@ export async function GET(request: NextRequest) {
   try {
     const slug = request.nextUrl.searchParams.get("slug")?.trim();
     if (slug) {
-      const post = await findPostBySlug(session.supabase, slug);
+      const post = await getAdminPostBySlugOrId(slug);
       if (!post) {
         return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
       }
       return NextResponse.json({ success: true, post });
     }
 
-    const posts = await listPosts(session.supabase);
+    const posts = await listAllPosts();
     return NextResponse.json({ success: true, posts });
   } catch (error) {
     return NextResponse.json(
@@ -49,11 +48,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const input = validatePostInput(await request.json());
-    const post = await savePost(session.supabase, input);
-
-    revalidatePath("/updates");
-    revalidatePath(`/updates/${post.slug}`);
-    revalidatePath("/");
+    const post = await savePost(input);
 
     return NextResponse.json({ success: true, post });
   } catch (error) {
@@ -82,12 +77,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await removePost(session.supabase, target);
-    revalidatePath("/updates");
-    if (slug) revalidatePath(`/updates/${slug}`);
-    revalidatePath("/");
-
-    return NextResponse.json({ success: true });
+    await deletePost(target);
+    return NextResponse.json({ success: true, deleted: true });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: errorMessage(error, "Failed to delete post") },
@@ -95,3 +86,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+

@@ -36,9 +36,10 @@ export default function Footer() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [policyType]);
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/office")) {
     return null;
   }
+
 
   const quickLinks = [
     { label: t.common.home, href: "/" },

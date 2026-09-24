@@ -16,10 +16,11 @@ export default function TaxReturnPopupModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Don't show in admin panel
-    if (pathname.startsWith("/admin")) {
+    // Don't show in admin panel or office management system
+    if (pathname.startsWith("/admin") || pathname.startsWith("/office")) {
       return;
     }
+
 
     // Check if dismissed in this session
     try {
@@ -64,9 +65,10 @@ export default function TaxReturnPopupModal() {
     }
   };
 
-  if (!isOpen || pathname.startsWith("/admin")) {
+  if (!isOpen || pathname.startsWith("/admin") || pathname.startsWith("/office")) {
     return null;
   }
+
 
   const whatsappUrl = buildWhatsAppUrl(WHATSAPP_NUMBER, WHATSAPP_MESSAGE);
 

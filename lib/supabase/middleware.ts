@@ -6,8 +6,9 @@ import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/auth/adminAuth";
 
 function loginRedirect(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
-  url.pathname = "/admin/login";
+  url.pathname = "/admin";
   if (reason) url.searchParams.set("error", reason);
+  url.searchParams.set("redirectedFrom", request.nextUrl.pathname);
   return NextResponse.redirect(url);
 }
 
@@ -15,43 +16,40 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
 
-  // 1. Check verified local admin cookie session
+  // Allow the /admin portal selection page and /admin/login public access
+  if (pathname === "/admin" || pathname === "/admin/login" || pathname === "/api/admin/login") {
+    return response;
+  }
+
+  // Check if target is a protected CMS or Office route
+  const isCmsRoute = pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
+  const isOfficeRoute = pathname.startsWith("/office") || pathname.startsWith("/api/office");
+
+  if (!isCmsRoute && !isOfficeRoute) {
+    return response;
+  }
+
+  // 1. Check verified local admin cookie session (grants super_admin privileges)
   const adminCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
   const isLocalAdmin = await verifyAdminToken(adminCookie);
 
   if (isLocalAdmin) {
-    // If authenticated admin visits login page, redirect to dashboard
-    if (pathname === "/admin/login") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin";
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-
-    // Authenticated admin accessing /admin or /api/admin routes
-    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
-      return response;
-    }
-  }
-
-  // 2. Check Supabase credentials if configured
-  const config = getSupabasePublicConfig();
-
-  if (!config) {
-    // If Supabase is not configured and not logged in as admin:
-    if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login") {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Admin authentication required." },
-        { status: 401 }
-      );
-    }
-    if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-      return loginRedirect(request);
-    }
+    // Local admin is super_admin and can access both portals
     return response;
   }
 
-  // Supabase session handling
+  // 2. Check Supabase credentials
+  const config = getSupabasePublicConfig();
+  if (!config) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Authentication required." },
+        { status: 401 }
+      );
+    }
+    return loginRedirect(request, "unauthorized");
+  }
+
   const supabase = createServerClient<Database>(config.url, config.anonKey, {
     cookies: {
       getAll() {
@@ -59,7 +57,6 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);
@@ -72,41 +69,69 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let isSupabaseAdmin = false;
-  if (user) {
-    const { data: isAdmin } = await supabase.rpc("is_admin", {
-      p_user_id: user.id,
-    });
-    isSupabaseAdmin = !!isAdmin;
-  }
-
-  const isAuthenticatedAdmin = isLocalAdmin || isSupabaseAdmin;
-
-  // Guard /api/admin/* endpoints
-  if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login") {
-    if (!isAuthenticatedAdmin) {
+  if (!user) {
+    if (pathname.startsWith("/api/")) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized: Admin authentication required." },
+        { success: false, error: "Unauthorized: Authentication required." },
         { status: 401 }
       );
     }
+    return loginRedirect(request, "unauthorized");
+  }
+
+  // Fetch role for user
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, status")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  let userRole = (profile?.role as string) || "staff";
+
+  // Fallback check on legacy is_admin RPC
+  if (!profile?.role) {
+    const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: user.id });
+    if (isAdmin) userRole = "super_admin";
+  }
+
+  // Super Admin can access everything
+  if (userRole === "super_admin") {
     return response;
   }
 
-  // Guard /admin UI routes
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (!isAuthenticatedAdmin) {
-      return loginRedirect(request);
+  // Guard CMS routes
+  if (isCmsRoute) {
+    const canAccessCms = userRole === "website_admin" || userRole === "office_admin";
+    if (!canAccessCms) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden: Website Admin access required." },
+          { status: 403 }
+        );
+      }
+      return loginRedirect(request, "cms_forbidden");
     }
   }
 
-  if (pathname === "/admin/login" && isAuthenticatedAdmin) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin";
-    url.search = "";
-    const redirectResponse = NextResponse.redirect(url);
-    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
-    return redirectResponse;
+  // Guard Office routes
+  if (isOfficeRoute) {
+    const canAccessOffice = [
+      "office_admin",
+      "lawyer",
+      "staff",
+      "accountant",
+      "receptionist",
+    ].includes(userRole);
+
+    if (!canAccessOffice) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden: Office Management access required." },
+          { status: 403 }
+        );
+      }
+      return loginRedirect(request, "office_forbidden");
+    }
   }
 
   return response;

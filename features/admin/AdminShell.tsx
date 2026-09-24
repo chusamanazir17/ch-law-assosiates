@@ -99,7 +99,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
     }
   };
 
-  if (pathname.startsWith("/admin/login")) return <>{children}</>;
+  if (pathname === "/admin" || pathname.startsWith("/admin/login")) return <>{children}</>;
 
   return (
     <div

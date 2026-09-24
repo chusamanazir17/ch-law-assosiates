@@ -56,10 +56,11 @@ export default function AnnouncementBanner({ onHeightChange }: AnnouncementBanne
 
   // Report height changes to parent layout (e.g. Header)
   useEffect(() => {
-    if (!announcement || dismissed || pathname.startsWith("/admin")) {
+    if (!announcement || dismissed || pathname.startsWith("/admin") || pathname.startsWith("/office")) {
       onHeightChange?.(0);
       return;
     }
+
 
     const updateHeight = () => {
       if (containerRef.current) {
@@ -87,9 +88,10 @@ export default function AnnouncementBanner({ onHeightChange }: AnnouncementBanne
     onHeightChange?.(0);
   };
 
-  if (pathname.startsWith("/admin") || !announcement || dismissed) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/office") || !announcement || dismissed) {
     return null;
   }
+
 
   // Tone styling configurations
   const toneConfigs: Record<
