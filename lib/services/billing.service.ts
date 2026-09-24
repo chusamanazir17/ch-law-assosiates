@@ -157,6 +157,8 @@ export async function recordPaymentRecord(data: {
   return payment as Payment;
 }
 
+export const recordInvoicePayment = recordPaymentRecord;
+
 export async function listPayments(): Promise<Payment[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

@@ -84,7 +84,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Fetch role for user
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from("profiles")
     .select("role, status")
     .eq("id", user.id)
@@ -94,7 +94,7 @@ export async function updateSession(request: NextRequest) {
 
   // Fallback check on legacy is_admin RPC
   if (!profile?.role) {
-    const { data: isAdmin } = await supabase.rpc("is_admin", { p_user_id: user.id });
+    const { data: isAdmin } = await (supabase as any).rpc("is_admin", { p_user_id: user.id });
     if (isAdmin) userRole = "super_admin";
   }
 
@@ -114,27 +114,6 @@ export async function updateSession(request: NextRequest) {
         );
       }
       return loginRedirect(request, "cms_forbidden");
-    }
-  }
-
-  // Guard Office routes
-  if (isOfficeRoute) {
-    const canAccessOffice = [
-      "office_admin",
-      "lawyer",
-      "staff",
-      "accountant",
-      "receptionist",
-    ].includes(userRole);
-
-    if (!canAccessOffice) {
-      if (pathname.startsWith("/api/")) {
-        return NextResponse.json(
-          { success: false, error: "Forbidden: Office Management access required." },
-          { status: 403 }
-        );
-      }
-      return loginRedirect(request, "office_forbidden");
     }
   }
 

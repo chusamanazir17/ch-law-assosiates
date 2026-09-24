@@ -190,6 +190,24 @@ interface OfficeContextType {
   updateBusinessSettings: (settings: Partial<BusinessSettings>) => void;
 }
 
+const safeGetItem = (key: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSetItem = (key: string, value: string): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+};
+
 const OfficeContext = createContext<OfficeContextType | undefined>(undefined);
 
 export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -203,12 +221,12 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Ledger & Balances
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(() => {
-    const saved = localStorage.getItem('ch_transactions');
+    const saved = safeGetItem('ch_transactions');
     return saved ? JSON.parse(saved) : initialTransactions;
   });
 
   const [accountBalances, setAccountBalances] = useState<AccountBalances>(() => {
-    const saved = localStorage.getItem('ch_account_balances');
+    const saved = safeGetItem('ch_account_balances');
     return saved ? JSON.parse(saved) : {
       cashOffice: 72800,
       bankAccount: 286500,
@@ -219,42 +237,42 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Entities
   const [clients, setClients] = useState<Client[]>(() => {
-    const saved = localStorage.getItem('ch_clients');
+    const saved = safeGetItem('ch_clients');
     return saved ? JSON.parse(saved) : initialClients;
   });
 
   const [stampStock, setStampStock] = useState<StampStockItem[]>(() => {
-    const saved = localStorage.getItem('ch_stamp_stock');
+    const saved = safeGetItem('ch_stamp_stock');
     return saved ? JSON.parse(saved) : initialStampStock;
   });
 
   const [stampMovements, setStampMovements] = useState<StampMovement[]>(() => {
-    const saved = localStorage.getItem('ch_stamp_movements');
+    const saved = safeGetItem('ch_stamp_movements');
     return saved ? JSON.parse(saved) : initialStampMovements;
   });
 
   const [stampAdjustments, setStampAdjustments] = useState<StampAdjustment[]>(() => {
-    const saved = localStorage.getItem('ch_stamp_adjustments');
+    const saved = safeGetItem('ch_stamp_adjustments');
     return saved ? JSON.parse(saved) : initialStampAdjustments;
   });
 
   const [taxCases, setTaxCases] = useState<TaxCase[]>(() => {
-    const saved = localStorage.getItem('ch_tax_cases');
+    const saved = safeGetItem('ch_tax_cases');
     return saved ? JSON.parse(saved) : initialTaxCases;
   });
 
   const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>(() => {
-    const saved = localStorage.getItem('ch_service_orders');
+    const saved = safeGetItem('ch_service_orders');
     return saved ? JSON.parse(saved) : initialServiceOrders;
   });
 
   const [receipts, setReceipts] = useState<Receipt[]>(() => {
-    const saved = localStorage.getItem('ch_receipts');
+    const saved = safeGetItem('ch_receipts');
     return saved ? JSON.parse(saved) : initialReceipts;
   });
 
   const [expenses, setExpenses] = useState<Expense[]>(() => {
-    const saved = localStorage.getItem('ch_expenses');
+    const saved = safeGetItem('ch_expenses');
     return saved ? JSON.parse(saved) : initialExpenses;
   });
 
@@ -262,12 +280,12 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [utilityBills, setUtilityBills] = useState<UtilityBill[]>(initialUtilityBills);
 
   const [tasks, setTasks] = useState<OfficeTask[]>(() => {
-    const saved = localStorage.getItem('ch_tasks');
+    const saved = safeGetItem('ch_tasks');
     return saved ? JSON.parse(saved) : initialTasks;
   });
 
   const [dailyClosing, setDailyClosing] = useState<DailyClosing>(() => {
-    const saved = localStorage.getItem('ch_daily_closing');
+    const saved = safeGetItem('ch_daily_closing');
     return saved ? JSON.parse(saved) : initialDailyClosing;
   });
 
@@ -275,7 +293,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(initialSystemUsers);
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
-    const saved = localStorage.getItem('ch_audit_logs');
+    const saved = safeGetItem('ch_audit_logs');
     return saved ? JSON.parse(saved) : initialAuditLogs;
   });
 
@@ -283,18 +301,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Dark Mode Theme State
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('ch_theme');
+    const saved = safeGetItem('ch_theme');
     if (saved) return saved === 'dark';
-    return window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
   });
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('ch_theme', 'dark');
+      safeSetItem('ch_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('ch_theme', 'light');
+      safeSetItem('ch_theme', 'light');
     }
   }, [isDarkMode]);
 
