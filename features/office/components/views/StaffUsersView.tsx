@@ -73,6 +73,35 @@ export const StaffUsersView: React.FC = () => {
     }
   ]);
 
+  React.useEffect(() => {
+    async function fetchEmployees() {
+      try {
+        const res = await fetch('/api/office/employees');
+        const json = await res.json();
+        if (json.success && json.employees && json.employees.length > 0) {
+          const mapped: StaffUser[] = json.employees.map((emp: any) => ({
+            id: emp.id,
+            name: emp.full_name || emp.name || 'Staff Member',
+            role: emp.role || 'Staff',
+            email: emp.email || 'staff@chchamber.com',
+            phone: emp.phone || 'N/A',
+            permissions: emp.role === 'admin' 
+              ? ['All Modules', 'Ledger', 'Reversals', 'System Settings', 'Audit Logs']
+              : emp.role === 'lawyer'
+              ? ['Legal Cases', 'Hearings', 'Client CRM', 'Documents']
+              : ['Counter Cash', 'Receipts', 'Tasks'],
+            status: emp.is_active === false ? 'Inactive' : 'Active',
+            lastActive: emp.last_active || 'Recent'
+          }));
+          setStaffList(mapped);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch live employees, using defaults:', err);
+      }
+    }
+    fetchEmployees();
+  }, []);
+
   const filteredStaff = staffList.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.role.toLowerCase().includes(searchQuery.toLowerCase()) ||

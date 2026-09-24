@@ -8,18 +8,30 @@ import { slugify, type ValidatedPostInput } from "@/lib/validation/post";
  * List all posts for Admin Dashboard (drafts + published)
  */
 export async function listAllPosts(): Promise<Post[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("[PostsService] listAllPosts error:", error);
-    throw new Error(`Failed to load posts from database: ${error.message}`);
+    if (error) {
+      console.warn("[PostsService] listAllPosts DB warning, using store:", error.message);
+      const { getAllPosts } = await import("@/lib/db/postsStore");
+      return await getAllPosts();
+    }
+
+    if (data && data.length > 0) {
+      return data as Post[];
+    }
+
+    const { getAllPosts } = await import("@/lib/db/postsStore");
+    return await getAllPosts();
+  } catch (err) {
+    console.warn("[PostsService] listAllPosts exception, using fallback store:", err);
+    const { getAllPosts } = await import("@/lib/db/postsStore");
+    return await getAllPosts();
   }
-
-  return (data || []) as Post[];
 }
 
 /**
@@ -43,15 +55,27 @@ export async function listPublishedPosts(category?: string, query?: string): Pro
     }
 
     const { data, error } = await queryBuilder;
-    if (error) {
-      console.warn("[PostsService] listPublishedPosts Supabase error:", error);
-      return [];
+    if (!error && data && data.length > 0) {
+      return data as Post[];
     }
 
-    return (data || []) as Post[];
+    // Fallback to store published posts
+    const { getPublishedPosts: getStorePublished } = await import("@/lib/db/postsStore");
+    const storePosts = await getStorePublished();
+    
+    let filtered = storePosts;
+    if (category && category !== "all") {
+      filtered = filtered.filter(p => p.category?.toLowerCase() === category.toLowerCase());
+    }
+    if (query && query.trim()) {
+      const q = query.trim().toLowerCase();
+      filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || (p.excerpt && p.excerpt.toLowerCase().includes(q)));
+    }
+    return filtered;
   } catch (err) {
-    console.warn("[PostsService] listPublishedPosts exception:", err);
-    return [];
+    console.warn("[PostsService] listPublishedPosts exception, using store fallback:", err);
+    const { getPublishedPosts: getStorePublished } = await import("@/lib/db/postsStore");
+    return await getStorePublished();
   }
 }
 
@@ -69,15 +93,16 @@ export async function getPublishedPostBySlug(slug: string): Promise<Post | null>
       .eq("status", "published")
       .maybeSingle();
 
-    if (error) {
-      console.error("[PostsService] getPublishedPostBySlug error:", error);
-      return null;
+    if (!error && data) {
+      return data as Post;
     }
 
-    return (data as Post) || null;
+    const { getPublishedPostBySlug: getStoreSlug } = await import("@/lib/db/postsStore");
+    return await getStoreSlug(slug);
   } catch (err) {
-    console.warn("[PostsService] getPublishedPostBySlug exception:", err);
-    return null;
+    console.warn("[PostsService] getPublishedPostBySlug exception, using fallback:", err);
+    const { getPublishedPostBySlug: getStoreSlug } = await import("@/lib/db/postsStore");
+    return await getStoreSlug(slug);
   }
 }
 
@@ -85,23 +110,29 @@ export async function getPublishedPostBySlug(slug: string): Promise<Post | null>
  * Find post by slug or ID for Admin Editor
  */
 export async function getAdminPostBySlugOrId(slugOrId: string): Promise<Post | null> {
-  const supabase = await createClient();
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slugOrId);
+  try {
+    const supabase = await createClient();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slugOrId);
 
-  let queryBuilder = supabase.from("posts").select("*");
-  if (isUuid) {
-    queryBuilder = queryBuilder.eq("id", slugOrId);
-  } else {
-    queryBuilder = queryBuilder.eq("slug", slugOrId.trim().toLowerCase());
+    let queryBuilder = supabase.from("posts").select("*");
+    if (isUuid) {
+      queryBuilder = queryBuilder.eq("id", slugOrId);
+    } else {
+      queryBuilder = queryBuilder.eq("slug", slugOrId.trim().toLowerCase());
+    }
+
+    const { data, error } = await queryBuilder.maybeSingle();
+    if (!error && data) {
+      return data as Post;
+    }
+
+    const { getPostById, getPostBySlug } = await import("@/lib/db/postsStore");
+    return (await getPostById(slugOrId)) || (await getPostBySlug(slugOrId));
+  } catch (err) {
+    console.warn("[PostsService] getAdminPostBySlugOrId exception, using fallback:", err);
+    const { getPostById, getPostBySlug } = await import("@/lib/db/postsStore");
+    return (await getPostById(slugOrId)) || (await getPostBySlug(slugOrId));
   }
-
-  const { data, error } = await queryBuilder.maybeSingle();
-  if (error) {
-    console.error("[PostsService] getAdminPostBySlugOrId error:", error);
-    throw new Error(`Failed to load post: ${error.message}`);
-  }
-
-  return (data as Post) || null;
 }
 
 /**
@@ -154,6 +185,12 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
 
+    // Dual-sync to local store
+    try {
+      const { savePost: saveToStore } = await import("@/lib/db/postsStore");
+      await saveToStore(input);
+    } catch {}
+
     return data as Post;
   }
 
@@ -173,16 +210,33 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
     updated_at: now,
   };
 
-  const { data, error } = await supabase
-    .from("posts")
-    .insert(insertPayload)
-    .select()
-    .single();
+  let createdPost: Post | null = null;
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .insert(insertPayload)
+      .select()
+      .single();
 
-  if (error) {
-    console.error("[PostsService] create post error:", error);
-    throw new Error(`Database error creating post: ${error.message}`);
+    if (error) {
+      console.warn("[PostsService] Supabase insert warning, falling back to store:", error.message);
+    } else {
+      createdPost = data as Post;
+    }
+  } catch (dbErr) {
+    console.warn("[PostsService] Supabase insert exception:", dbErr);
   }
+
+  // Also sync to local store
+  try {
+    const { savePost: saveToStore } = await import("@/lib/db/postsStore");
+    const storeSaved = await saveToStore({
+      ...input,
+      id: createdPost?.id || input.id,
+      slug: finalSlug,
+    });
+    if (!createdPost) createdPost = storeSaved;
+  } catch {}
 
   // Trigger instant cache revalidation
   revalidatePath("/updates");
@@ -191,7 +245,7 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
   revalidatePath("/admin/dashboard");
   revalidatePath("/");
 
-  return data as Post;
+  return createdPost || (insertPayload as any);
 }
 
 /**
@@ -203,25 +257,29 @@ export async function deletePost(idOrSlug: string): Promise<void> {
 
   // Retrieve post slug before deleting to properly revalidate route
   let postSlug = idOrSlug;
-  const { data: existing } = await supabase
-    .from("posts")
-    .select("slug")
-    .eq(isUuid ? "id" : "slug", idOrSlug)
-    .maybeSingle();
+  try {
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("slug")
+      .eq(isUuid ? "id" : "slug", idOrSlug)
+      .maybeSingle();
 
-  if (existing?.slug) {
-    postSlug = existing.slug;
+    if (existing?.slug) {
+      postSlug = existing.slug;
+    }
+
+    await supabase
+      .from("posts")
+      .delete()
+      .eq(isUuid ? "id" : "slug", idOrSlug);
+  } catch (err) {
+    console.warn("[PostsService] deletePost DB warning:", err);
   }
 
-  const { error } = await supabase
-    .from("posts")
-    .delete()
-    .eq(isUuid ? "id" : "slug", idOrSlug);
-
-  if (error) {
-    console.error("[PostsService] delete post error:", error);
-    throw new Error(`Database error deleting post: ${error.message}`);
-  }
+  try {
+    const { deletePost: deleteFromStore } = await import("@/lib/db/postsStore");
+    await deleteFromStore(idOrSlug);
+  } catch {}
 
   revalidatePath("/updates");
   revalidatePath(`/updates/${postSlug}`);

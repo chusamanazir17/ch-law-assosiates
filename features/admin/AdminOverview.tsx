@@ -35,8 +35,10 @@ import {
   Building2,
   Scale,
   Briefcase,
+  Wallet,
+  FileSpreadsheet,
 } from "lucide-react";
-import type { SubscriberAnalytics, SiteAnnouncement } from "@/types/cms";
+import type { SubscriberAnalytics, SiteAnnouncement, Post } from "@/types/cms";
 
 interface InquiryItem {
   id: string;
@@ -237,6 +239,87 @@ export default function AdminOverview() {
     activeNotice: null as SiteAnnouncement | null,
   });
 
+  // Default Initial Posts
+  const INITIAL_POSTS: Post[] = [
+    {
+      id: "post-e-stamp-guide",
+      title: "E-Stamping & 32-A Challan Procedure in Punjab: Complete Step-by-Step Guide",
+      slug: "e-stamp-punjab-procedure-guide",
+      excerpt: "Comprehensive guide to generating 32-A Challans, verifying e-stamp paper authenticity, and calculating DC valuation rates across Punjab districts.",
+      content: "",
+      cover_image_url: null,
+      category: "E-Stamping & Property",
+      author_name: "Chaudhry Muhammad Asghar",
+      status: "published",
+      views_count: 1420,
+      published_at: "2026-02-15T09:00:00Z",
+      created_at: "2026-02-15T09:00:00Z",
+      updated_at: "2026-02-15T09:00:00Z",
+    },
+    {
+      id: "post-fbr-atl-guide",
+      title: "FBR Active Taxpayer List (ATL) Benefits & Return Filing Deadlines 2026",
+      slug: "fbr-active-taxpayer-list-atl-guide",
+      excerpt: "Why maintaining ATL status is crucial for businesses and individuals: 100% withholding tax reduction, banking transaction benefits, and late filing surcharges.",
+      content: "",
+      cover_image_url: null,
+      category: "Income Tax",
+      author_name: "Muhammad Usama Nazir",
+      status: "published",
+      views_count: 980,
+      published_at: "2026-03-01T10:00:00Z",
+      created_at: "2026-03-01T10:00:00Z",
+      updated_at: "2026-03-01T10:00:00Z",
+    },
+    {
+      id: "post-property-registry-transfer",
+      title: "Property Registry & Inteqal Transfer Checklist at District Court Sahiwal",
+      slug: "punjab-property-registry-inteqal-transfer",
+      excerpt: "Essential documents, Fard-e-Malkiat verification, biometric verification, and Sub-Registrar endorsement procedures for residential and commercial land transfers.",
+      content: "",
+      cover_image_url: null,
+      category: "E-Stamping & Property",
+      author_name: "Chaudhry Muhammad Asghar",
+      status: "published",
+      views_count: 1150,
+      published_at: "2026-03-08T11:00:00Z",
+      created_at: "2026-03-08T11:00:00Z",
+      updated_at: "2026-03-08T11:00:00Z",
+    },
+    {
+      id: "post-secp-company-incorporation",
+      title: "SECP Company Registration: Step-by-Step Incorporation Guide for 2026",
+      slug: "secp-company-registration-pakistan-guide",
+      excerpt: "How to register a Private Limited Company or Single Member Company with SECP eZpay portal: name reservation, digital signatures, and Form II/A compliance.",
+      content: "",
+      cover_image_url: null,
+      category: "Corporate & NTN",
+      author_name: "Muhammad Usama Nazir",
+      status: "published",
+      views_count: 730,
+      published_at: "2026-03-12T14:30:00Z",
+      created_at: "2026-03-12T14:30:00Z",
+      updated_at: "2026-03-12T14:30:00Z",
+    },
+    {
+      id: "post-pra-sales-tax-services",
+      title: "Punjab Revenue Authority (PRA) Sales Tax on Services: Filing Guide & Withholding",
+      slug: "pra-punjab-sales-tax-services-compliance",
+      excerpt: "Obligations for service providers under Punjab Sales Tax on Services Act: e-filing returns, withholding agent obligations, and monthly compliance deadlines.",
+      content: "",
+      cover_image_url: null,
+      category: "Sales Tax (Federal & PRA)",
+      author_name: "Muhammad Usama Nazir",
+      status: "published",
+      views_count: 610,
+      published_at: "2026-03-15T08:00:00Z",
+      created_at: "2026-03-15T08:00:00Z",
+      updated_at: "2026-03-15T08:00:00Z",
+    },
+  ];
+
+  const [recentPosts, setRecentPosts] = useState<Post[]>(INITIAL_POSTS);
+
   // Recent Inquiries State
   const [inquiries, setInquiries] = useState<InquiryItem[]>([
     {
@@ -364,6 +447,9 @@ export default function AdminOverview() {
                   : "Closed",
             }));
             setInquiries(mapped);
+          }
+          if (json.recentPosts && Array.isArray(json.recentPosts) && json.recentPosts.length > 0) {
+            setRecentPosts(json.recentPosts);
           }
         }
       }
@@ -781,6 +867,16 @@ export default function AdminOverview() {
               <ExternalLink className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
             </Link>
 
+            {/* Launch Office Management System */}
+            <Link
+              href="/office"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-4 py-2 text-xs shadow-sm transition border border-amber-400/40"
+              title="Launch Chamber 121 Office & Accounts Management System"
+            >
+              <Building2 className="h-3.5 w-3.5 text-slate-950" />
+              <span>Office Management</span>
+            </Link>
+
             {/* Create Post Action */}
             <Link
               href="/admin/posts/editor"
@@ -788,6 +884,64 @@ export default function AdminOverview() {
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Create Post</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* High-Profile Office Management Hub Banner / Executive Gateway */}
+      <div className="rounded-2xl border-2 border-amber-400/40 dark:border-amber-500/30 bg-gradient-to-br from-[#0B1F36] via-[#0F294A] to-[#08182D] text-white p-5 sm:p-6 shadow-lg relative overflow-hidden">
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+          <div className="max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 px-3 py-1 text-xs font-bold tracking-wide uppercase">
+                <Building2 className="h-3.5 w-3.5" />
+                Chamber 121 Core Operational Suite
+              </span>
+              <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live Database Connected
+              </span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+              Office Management & Practice Accounts System
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+              Complete chamber operations: E-Stamp & 32-A Challan, Cash In / Cash Out & ledger accounting, case diary & court hearings, client directory, and instant receipt generation.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Link
+              href="/office?tab=cash"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3.5 py-2 text-xs font-semibold backdrop-blur-xs transition"
+            >
+              <Wallet className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Cash In / Out</span>
+            </Link>
+
+            <Link
+              href="/office?tab=stamps"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3.5 py-2 text-xs font-semibold backdrop-blur-xs transition"
+            >
+              <FileText className="h-3.5 w-3.5 text-blue-400" />
+              <span>E-Stamp & 32-A</span>
+            </Link>
+
+            <Link
+              href="/office?tab=cases"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3.5 py-2 text-xs font-semibold backdrop-blur-xs transition"
+            >
+              <Scale className="h-3.5 w-3.5 text-amber-400" />
+              <span>Case Diary</span>
+            </Link>
+
+            <Link
+              href="/office"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-bold px-5 py-2 text-xs shadow-md transition transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <span>Open Office Suite</span>
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -1387,6 +1541,116 @@ export default function AdminOverview() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 6. Section: Legal Articles & Website Posts CMS Feed */}
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
+              <FileSpreadsheet className="h-4.5 w-4.5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
+                Website Legal Articles & Practice Guides ({recentPosts.length})
+              </h3>
+              <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+                Every published post and procedural tax guide is synchronized with the website and database.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/posts/editor"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0B1F36] hover:bg-[#102943] dark:bg-[#C8973D] dark:hover:bg-[#d8a74e] text-white dark:text-[#0B1F36] px-3 py-1.5 text-xs font-semibold shadow-xs transition"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>New Article</span>
+            </Link>
+            <Link
+              href="/admin/posts"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#B8832A] dark:text-[#E5B558] hover:underline"
+            >
+              <span>Manage All</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Posts Table */}
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-[#E2E8F0] dark:border-slate-800 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B] dark:text-slate-400">
+                <th className="pb-2.5 font-semibold">Article Title</th>
+                <th className="pb-2.5 font-semibold">Category</th>
+                <th className="pb-2.5 font-semibold">Status</th>
+                <th className="pb-2.5 font-semibold">Author</th>
+                <th className="pb-2.5 text-right font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800/60">
+              {recentPosts.map((post) => (
+                <tr key={post.id} className="hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="py-3 font-semibold text-[#0B1F36] dark:text-slate-100 pr-3">
+                    <div className="max-w-md">
+                      <Link
+                        href={`/admin/posts/editor?id=${post.id}`}
+                        className="hover:text-[#B8832A] dark:hover:text-[#E5B558] hover:underline font-semibold block truncate"
+                        title={post.title}
+                      >
+                        {post.title}
+                      </Link>
+                      {post.excerpt && (
+                        <p className="text-[11px] text-[#64748B] dark:text-slate-400 truncate mt-0.5 font-normal">
+                          {post.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-3 text-[#334155] dark:text-slate-300 font-medium pr-3 whitespace-nowrap">
+                    <span className="inline-block rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                      {post.category}
+                    </span>
+                  </td>
+                  <td className="py-3 whitespace-nowrap pr-3">
+                    {post.status === "published" ? (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 dark:text-emerald-300">
+                        Published
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-amber-700 dark:text-amber-300">
+                        Draft
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-3 text-[#64748B] dark:text-slate-400 whitespace-nowrap pr-3">
+                    {post.author_name}
+                  </td>
+                  <td className="py-3 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/updates/${post.slug}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 px-2.5 py-1 text-[11px] font-medium text-[#334155] dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                        title="View Live on Website"
+                      >
+                        <span>View</span>
+                        <ExternalLink className="h-3 w-3 text-[#64748B]" />
+                      </Link>
+                      <Link
+                        href={`/admin/posts/editor?id=${post.id}`}
+                        className="inline-flex items-center gap-1 rounded-lg bg-[#0B1F36]/8 dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-[#0B1F36] dark:text-slate-100 hover:bg-[#0B1F36]/15 dark:hover:bg-slate-700 transition"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

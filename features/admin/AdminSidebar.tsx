@@ -65,7 +65,7 @@ export default function AdminSidebar({
       group: null,
       items: [
         { label: "Dashboard", href: "/admin/dashboard", icon: Home },
-        { label: "Office System", href: "/office/dashboard", icon: Scale },
+        { label: "Office System", href: "/office", icon: Scale, badge: "Live Suite" },
       ],
     },
     {
@@ -237,6 +237,11 @@ export default function AdminSidebar({
                         }`}
                       />
                       {!isCollapsed && <span className="truncate">{item.label}</span>}
+                      {!isCollapsed && (item as any).badge && (
+                        <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-400/30 shrink-0">
+                          {(item as any).badge}
+                        </span>
+                      )}
 
                       {/* Floating tooltip on hover when collapsed */}
                       {isCollapsed && (

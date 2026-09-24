@@ -28,7 +28,7 @@ export async function listInvoices(filter?: { status?: string; clientId?: string
     .order("created_at", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
-    query = query.eq("status", filter.status);
+    query = query.eq("status", filter.status as any);
   }
 
   if (filter?.clientId) {
@@ -126,20 +126,37 @@ export async function createInvoiceRecord(dto: CreateInvoiceDTO): Promise<Invoic
 
 export async function recordPaymentRecord(data: {
   invoice_id?: string | null;
-  client_id: string;
+  client_id?: string;
   amount: number;
   payment_method?: string;
   payment_account_id?: string | null;
+  reference_number?: string | null;
   notes?: string | null;
 }): Promise<Payment> {
   const supabase = await createClient();
-  const receiptNo = `REC-${Date.now().toString().slice(-6)}`;
+  const receiptNo = data.reference_number || `REC-${Date.now().toString().slice(-6)}`;
+
+  let clientId = data.client_id;
+  if (!clientId && data.invoice_id) {
+    const { data: inv } = await supabase
+      .from("invoices")
+      .select("client_id")
+      .eq("id", data.invoice_id)
+      .single();
+    if (inv?.client_id) {
+      clientId = inv.client_id;
+    }
+  }
+
+  if (!clientId) {
+    throw new Error("Client ID is required to record payment");
+  }
 
   const { data: payment, error } = await supabase
     .from("payments")
     .insert({
       invoice_id: data.invoice_id || null,
-      client_id: data.client_id,
+      client_id: clientId,
       amount: data.amount,
       payment_method: data.payment_method || "cash",
       payment_account_id: data.payment_account_id || null,

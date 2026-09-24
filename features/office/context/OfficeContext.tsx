@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 import {
   Client,
@@ -83,6 +83,10 @@ interface OfficeContextType {
   systemUsers: SystemUser[];
   auditLogs: AuditLog[];
   businessSettings: BusinessSettings;
+
+  // Supabase State
+  isLoading: boolean;
+  refreshData: () => Promise<void>;
   
   // UI & Modals
   isDarkMode: boolean;
@@ -144,7 +148,7 @@ interface OfficeContextType {
     quantity: number;
     clientName: string;
     clientId?: string;
-    paymentAccount: AccountType | string;
+    paymentAccount?: AccountType | string;
     notes?: string;
     staff?: string;
   }) => void;
@@ -154,7 +158,7 @@ interface OfficeContextType {
     quantity: number;
     supplier: string;
     purchasePricePerUnit: number;
-    paymentAccount: AccountType | string;
+    paymentAccount?: AccountType | string;
     notes?: string;
     staff?: string;
   }) => void;
@@ -218,6 +222,9 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>('so-1');
   const [selectedTaxCaseId, setSelectedTaxCaseId] = useState<string | null>('tc-1');
+
+  // Loading State
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Ledger & Balances
   const [transactions, setTransactions] = useState<LedgerTransaction[]>(() => {
@@ -322,103 +329,6 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
-  // Live Database Client Sync
-  useEffect(() => {
-    async function loadLiveClients() {
-      try {
-        const res = await fetch('/api/office/clients');
-        const data = await res.json();
-        if (data.success && Array.isArray(data.clients) && data.clients.length > 0) {
-          const mappedClients: Client[] = data.clients.map((dbClient: any) => ({
-            id: dbClient.id,
-            name: dbClient.full_name || dbClient.name || 'Unnamed Client',
-            businessName: dbClient.business_name || dbClient.businessName || '',
-            cnic: dbClient.cnic || '',
-            ntn: dbClient.ntn || '',
-            mobile: dbClient.mobile || dbClient.phone || '',
-            phone: dbClient.phone || '',
-            email: dbClient.email || '',
-            address: dbClient.address || '',
-            category: dbClient.client_type || 'Tax & Corporate',
-            status: dbClient.status === 'inactive' ? 'Inactive' : 'Active',
-            memberSince: dbClient.created_at ? dbClient.created_at.split('T')[0] : '2026-01-01',
-            totalBilling: 0,
-            paidAmount: 0,
-            lifetimeRevenue: 0,
-            outstanding: 0,
-            lastService: 'Active',
-            documents: []
-          }));
-          setClients(prev => {
-            const existingIds = new Set(mappedClients.map(c => c.id));
-            const retained = prev.filter(p => !existingIds.has(p.id));
-            return [...mappedClients, ...retained];
-          });
-        }
-      } catch (err) {
-        console.warn('[OfficeContext] Client sync using local cache:', err);
-      }
-    }
-    loadLiveClients();
-  }, []);
-
-  // Modals state
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isQuickCashInOpen, setIsQuickCashInOpen] = useState(false);
-  const [isQuickCashOutOpen, setIsQuickCashOutOpen] = useState(false);
-  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-  const [isCloseDayModalOpen, setIsCloseDayModalOpen] = useState(false);
-  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
-  const [isStampSaleModalOpen, setIsStampSaleModalOpen] = useState(false);
-  const [isNewServiceOrderModalOpen, setIsNewServiceOrderModalOpen] = useState(false);
-  const [isNewTaxReturnModalOpen, setIsNewTaxReturnModalOpen] = useState(false);
-  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-
-  // Persistence side-effects
-  useEffect(() => {
-    localStorage.setItem('ch_transactions', JSON.stringify(transactions));
-  }, [transactions]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_account_balances', JSON.stringify(accountBalances));
-  }, [accountBalances]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_clients', JSON.stringify(clients));
-  }, [clients]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_stamp_stock', JSON.stringify(stampStock));
-  }, [stampStock]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_stamp_movements', JSON.stringify(stampMovements));
-  }, [stampMovements]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_tax_cases', JSON.stringify(taxCases));
-  }, [taxCases]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_service_orders', JSON.stringify(serviceOrders));
-  }, [serviceOrders]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_receipts', JSON.stringify(receipts));
-  }, [receipts]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_audit_logs', JSON.stringify(auditLogs));
-  }, [auditLogs]);
-
-  useEffect(() => {
-    localStorage.setItem('ch_daily_closing', JSON.stringify(dailyClosing));
-  }, [dailyClosing]);
-
   // Helper date formatter: DD-MM-YYYY HH:MM AM/PM
   const formatDateTime = (d = new Date()) => {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -432,6 +342,345 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return `${day}-${month}-${year} ${pad(hours)}:${minutes} ${ampm}`;
   };
 
+  // Full Refresh from Supabase Database
+  const refreshData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      const [
+        clientsRes,
+        financeRes,
+        stampsRes,
+        taxRes,
+        servicesRes,
+        receiptsRes,
+        tasksRes,
+        dailyRes,
+        auditRes,
+        settingsRes,
+        employeesRes
+      ] = await Promise.allSettled([
+        fetch('/api/office/clients').then(r => r.json()),
+        fetch('/api/office/finance').then(r => r.json()),
+        fetch('/api/office/stamps').then(r => r.json()),
+        fetch('/api/office/tax').then(r => r.json()),
+        fetch('/api/office/services').then(r => r.json()),
+        fetch('/api/office/receipts').then(r => r.json()),
+        fetch('/api/office/tasks').then(r => r.json()),
+        fetch('/api/office/daily-closing').then(r => r.json()),
+        fetch('/api/office/audit').then(r => r.json()),
+        fetch('/api/office/settings').then(r => r.json()),
+        fetch('/api/office/employees').then(r => r.json())
+      ]);
+
+      // 1. Sync Clients
+      if (clientsRes.status === 'fulfilled' && clientsRes.value?.success && Array.isArray(clientsRes.value.clients)) {
+        if (clientsRes.value.clients.length > 0) {
+          const mappedClients: Client[] = clientsRes.value.clients.map((dbClient: any) => ({
+            id: dbClient.id,
+            name: dbClient.full_name || dbClient.name || 'Unnamed Client',
+            businessName: dbClient.business_name || dbClient.businessName || '',
+            cnic: dbClient.cnic || '',
+            ntn: dbClient.ntn || '',
+            mobile: dbClient.mobile || dbClient.phone || '',
+            phone: dbClient.phone || '',
+            email: dbClient.email || '',
+            address: dbClient.address || '',
+            businessType: dbClient.client_type === 'individual' ? 'Individual' : 'Sole Proprietorship',
+            type: dbClient.client_type || 'Tax & Corporate',
+            taxStatus: 'Filer',
+            status: dbClient.status === 'inactive' ? 'Inactive' : 'Active',
+            memberSince: dbClient.created_at ? dbClient.created_at.split('T')[0] : '2026-01-01',
+            totalBilling: 0,
+            paidAmount: 0,
+            lifetimeRevenue: 0,
+            outstanding: 0,
+            lastService: 'Active',
+            documents: []
+          }));
+          setClients(mappedClients);
+        }
+      }
+
+      // 2. Sync Finance (Accounts, Transactions, Expenses)
+      if (financeRes.status === 'fulfilled' && financeRes.value?.success) {
+        const { accounts, transactions: txs, expenses: exps } = financeRes.value;
+        if (Array.isArray(accounts) && accounts.length > 0) {
+          const balances: AccountBalances = {
+            cashOffice: 0,
+            bankAccount: 0,
+            jazzCash: 0,
+            easyPaisa: 0
+          };
+          for (const acc of accounts) {
+            const name = (acc.name || '').toLowerCase();
+            const bal = Number(acc.current_balance || 0);
+            if (name.includes('cash') && !name.includes('jazz')) balances.cashOffice += bal;
+            else if (name.includes('bank') || name.includes('hbl') || name.includes('meezan')) balances.bankAccount += bal;
+            else if (name.includes('jazz')) balances.jazzCash += bal;
+            else if (name.includes('easy')) balances.easyPaisa += bal;
+            else balances.cashOffice += bal;
+          }
+          setAccountBalances(balances);
+        }
+
+        if (Array.isArray(txs) && txs.length > 0) {
+          setTransactions(txs.map((t: any) => ({
+            id: t.id,
+            dateTime: t.created_at ? formatDateTime(new Date(t.created_at)) : formatDateTime(),
+            type: t.entry_type === 'credit' ? 'IN' : 'OUT',
+            description: t.description || 'Transaction',
+            clientOrPayee: t.client_name || 'Walk-in',
+            serviceOrCategory: t.category || 'General',
+            account: t.account_name || 'Cash in Hand',
+            amount: Number(t.amount || 0),
+            staff: 'Usama (Admin)',
+            status: 'Completed',
+            referenceNo: t.transaction_number
+          })));
+        }
+
+        if (Array.isArray(exps) && exps.length > 0) {
+          setExpenses(exps.map((e: any) => ({
+            id: e.id,
+            date: e.expense_date || new Date().toISOString().split('T')[0],
+            category: e.category,
+            description: e.description || e.category,
+            vendorPayee: e.payee,
+            account: e.account_name || 'Cash Office',
+            amount: Number(e.amount || 0),
+            staff: 'Usama',
+            status: 'Paid',
+            receiptUrl: e.receipt_url
+          })));
+        }
+      }
+
+      // 3. Sync Stamps
+      if (stampsRes.status === 'fulfilled' && stampsRes.value?.success) {
+        const { products, movements } = stampsRes.value;
+        if (Array.isArray(products) && products.length > 0) {
+          setStampStock(products.map((p: any) => ({
+            id: p.id,
+            denomination: Number(p.denomination),
+            openingStock: Number(p.current_stock || 0),
+            purchased: 0,
+            sold: 0,
+            remaining: Number(p.current_stock || 0),
+            purchasePrice: Number(p.purchase_price || 0),
+            salePrice: Number(p.sale_price || 0),
+            stockValue: Number(p.current_stock || 0) * Number(p.purchase_price || 0),
+            minimumLevel: Number(p.minimum_stock || 20),
+            status: Number(p.current_stock) <= Number(p.minimum_stock) / 2 ? 'Critical' : Number(p.current_stock) <= Number(p.minimum_stock) ? 'Low' : 'OK'
+          })));
+        }
+
+        if (Array.isArray(movements) && movements.length > 0) {
+          setStampMovements(movements.map((m: any) => ({
+            id: m.id,
+            dateTime: m.created_at ? formatDateTime(new Date(m.created_at)) : formatDateTime(),
+            type: m.movement_type === 'sale' ? 'Sale' : m.movement_type === 'purchase' ? 'Purchase' : 'Adjustment',
+            denomination: Number(m.denomination || 0),
+            qty: Number(m.quantity || 0),
+            balance: 0,
+            clientOrSupplier: m.client_name || 'Counter Sale',
+            amount: Math.abs(Number(m.quantity || 0) * Number(m.denomination || 0)),
+            user: m.user || 'Usama',
+            notes: m.notes
+          })));
+        }
+      }
+
+      // 4. Sync Tax Cases
+      if (taxRes.status === 'fulfilled' && taxRes.value?.success && Array.isArray(taxRes.value.cases)) {
+        if (taxRes.value.cases.length > 0) {
+          setTaxCases(taxRes.value.cases.map((tc: any) => ({
+            id: tc.id,
+            clientName: tc.client_name || 'Walk-in Client',
+            clientId: tc.client_id,
+            taxYear: tc.tax_year || '2024',
+            returnType: tc.return_type || 'Income Tax Return',
+            assignedStaff: tc.assigned_staff_name || 'Usama (Admin)',
+            fee: Number(tc.fee || 0),
+            amountFee: Number(tc.fee || 0),
+            amountPaid: Number(tc.fee || 0),
+            outstanding: 0,
+            dueDate: tc.due_date || '30-09-2025',
+            filedDate: tc.filing_date,
+            status: tc.status || 'In Progress',
+            notes: tc.notes || '',
+            cprNumber: tc.cpr_number
+          })));
+        }
+      }
+
+      // 5. Sync Service Orders
+      if (servicesRes.status === 'fulfilled' && servicesRes.value?.success && Array.isArray(servicesRes.value.orders)) {
+        if (servicesRes.value.orders.length > 0) {
+          setServiceOrders(servicesRes.value.orders.map((so: any) => ({
+            id: so.id,
+            orderNo: so.order_number,
+            dateTime: so.created_at ? formatDateTime(new Date(so.created_at)) : formatDateTime(),
+            serviceName: so.service_name,
+            customer: so.customer_name,
+            clientId: so.client_id,
+            fileReference: so.file_reference || so.order_number,
+            pages: Number(so.pages || 1),
+            amount: Number(so.amount || 0),
+            payment: so.payment_status || 'Unpaid',
+            status: so.status || 'In Progress',
+            deliveryDate: so.delivery_date,
+            specialInstructions: so.notes
+          })));
+        }
+      }
+
+      // 6. Sync Receipts
+      if (receiptsRes.status === 'fulfilled' && receiptsRes.value?.success && Array.isArray(receiptsRes.value.receipts)) {
+        if (receiptsRes.value.receipts.length > 0) {
+          setReceipts(receiptsRes.value.receipts.map((r: any) => ({
+            id: r.id,
+            receiptNo: r.receipt_number,
+            dateTime: r.created_at ? formatDateTime(new Date(r.created_at)) : formatDateTime(),
+            clientName: r.client_name,
+            clientId: r.client_id,
+            service: r.service_type,
+            amount: Number(r.amount_paid || 0) + Number(r.balance_due || 0),
+            paidAmount: Number(r.amount_paid || 0),
+            balance: Number(r.balance_due || 0),
+            paymentMethod: r.payment_method,
+            remarks: r.notes || '',
+            status: r.status === 'paid' ? 'PAID' : r.status === 'cancelled' ? 'CANCELLED' : 'PARTIAL',
+            authorizedBy: 'CH Law Associates'
+          })));
+        }
+      }
+
+      // 7. Sync Tasks
+      if (tasksRes.status === 'fulfilled' && tasksRes.value?.success && Array.isArray(tasksRes.value.tasks)) {
+        if (tasksRes.value.tasks.length > 0) {
+          setTasks(tasksRes.value.tasks.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            client: t.client_name,
+            relatedService: t.case_number ? `Case ${t.case_number}` : undefined,
+            assignedStaff: t.assigned_to_name || 'Staff',
+            dueDate: t.due_date,
+            priority: t.priority === 'urgent' ? 'Urgent' : t.priority === 'high' ? 'High' : 'Medium',
+            status: t.status === 'completed' ? 'Completed' : t.status === 'in_progress' ? 'In Progress' : 'Pending',
+            description: t.description
+          })));
+        }
+      }
+
+      // 8. Sync Daily Closing
+      if (dailyRes.status === 'fulfilled' && dailyRes.value?.success && dailyRes.value.closing) {
+        const dc = dailyRes.value.closing;
+        setDailyClosing({
+          date: dc.closing_date,
+          openingBalance: Number(dc.opening_cash || 0),
+          openingCash: Number(dc.opening_cash || 0),
+          cashIn: Number(dc.cash_in || 0),
+          cashOut: Number(dc.cash_out || 0),
+          expectedCash: Number(dc.system_cash || 0),
+          actualCash: Number(dc.actual_cash || 0),
+          difference: Number(dc.difference || 0),
+          isClosed: dc.status === 'closed',
+          closedAt: dc.closed_at,
+          discrepancyReason: dc.notes
+        });
+      }
+
+      // 9. Sync Audit Logs
+      if (auditRes.status === 'fulfilled' && auditRes.value?.success && Array.isArray(auditRes.value.logs)) {
+        if (auditRes.value.logs.length > 0) {
+          setAuditLogs(auditRes.value.logs.map((al: any) => ({
+            id: al.id,
+            dateTime: al.created_at ? formatDateTime(new Date(al.created_at)) : formatDateTime(),
+            user: al.user_name || 'Admin',
+            action: al.action,
+            module: al.entity_type,
+            record: al.entity_id || '',
+            details: al.details ? JSON.stringify(al.details) : undefined,
+            ipAddress: al.ip_address || '127.0.0.1',
+            sessionStatus: 'Success'
+          })));
+        }
+      }
+
+      // 10. Sync Settings
+      if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.value) {
+        setBusinessSettings(prev => ({ ...prev, ...settingsRes.value.value }));
+      }
+    } catch (err) {
+      console.warn('[OfficeContext] Data sync encountered an error; fallback cache retained:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Hydrate on mount
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
+
+  // Modals state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isQuickCashInOpen, setIsQuickCashInOpen] = useState(false);
+  const [isQuickCashOutOpen, setIsQuickCashOutOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isCloseDayModalOpen, setIsCloseDayModalOpen] = useState(false);
+  const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+  const [isStampSaleModalOpen, setIsStampSaleModalOpen] = useState(false);
+  const [isNewServiceOrderModalOpen, setIsNewServiceOrderModalOpen] = useState(false);
+  const [isNewTaxReturnModalOpen, setIsNewTaxReturnModalOpen] = useState(false);
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+
+  // Persistence local cache side-effects
+  useEffect(() => {
+    safeSetItem('ch_transactions', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    safeSetItem('ch_account_balances', JSON.stringify(accountBalances));
+  }, [accountBalances]);
+
+  useEffect(() => {
+    safeSetItem('ch_clients', JSON.stringify(clients));
+  }, [clients]);
+
+  useEffect(() => {
+    safeSetItem('ch_stamp_stock', JSON.stringify(stampStock));
+  }, [stampStock]);
+
+  useEffect(() => {
+    safeSetItem('ch_stamp_movements', JSON.stringify(stampMovements));
+  }, [stampMovements]);
+
+  useEffect(() => {
+    safeSetItem('ch_tax_cases', JSON.stringify(taxCases));
+  }, [taxCases]);
+
+  useEffect(() => {
+    safeSetItem('ch_service_orders', JSON.stringify(serviceOrders));
+  }, [serviceOrders]);
+
+  useEffect(() => {
+    safeSetItem('ch_receipts', JSON.stringify(receipts));
+  }, [receipts]);
+
+  useEffect(() => {
+    safeSetItem('ch_expenses', JSON.stringify(expenses));
+  }, [expenses]);
+
+  useEffect(() => {
+    safeSetItem('ch_audit_logs', JSON.stringify(auditLogs));
+  }, [auditLogs]);
+
+  useEffect(() => {
+    safeSetItem('ch_daily_closing', JSON.stringify(dailyClosing));
+  }, [dailyClosing]);
+
   const addAuditLog = (entry: Omit<AuditLog, 'id' | 'dateTime'>) => {
     const newLog: AuditLog = {
       id: `al-${Date.now()}`,
@@ -439,6 +688,18 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...entry
     };
     setAuditLogs(prev => [newLog, ...prev]);
+
+    // Async persist to Supabase
+    fetch('/api/office/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: entry.action,
+        module: entry.module,
+        recordId: entry.record,
+        details: entry.afterNew ? { after: entry.afterNew, before: entry.beforePrevious } : undefined
+      })
+    }).catch(e => console.warn('[OfficeContext] Could not record audit log to DB:', e));
   };
 
   // Internal helper to adjust account balance
@@ -503,6 +764,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         authorizedBy: 'CH Composing & Tax Advisor'
       };
       setReceipts(prev => [newRec, ...prev]);
+
+      // Persist receipt to Supabase
+      fetch('/api/office/receipts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiptNo,
+          clientName,
+          clientId,
+          service: serviceName,
+          amount_paid: amount,
+          balance_due: 0,
+          paymentMethod: newRec.paymentMethod,
+          notes: newRec.remarks
+        })
+      }).catch(err => console.warn('[OfficeContext] Receipt DB persist error:', err));
     }
 
     const newTx: LedgerTransaction = {
@@ -561,6 +838,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    // Persist ledger transaction to Supabase
+    fetch('/api/office/finance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'record_transaction',
+        entry_type: 'credit',
+        account_id: account,
+        amount,
+        category: serviceName,
+        description: `Received Rs. ${amount} from ${clientName} for ${serviceName}`,
+        client_id: clientId,
+        reference_no: receiptNo
+      })
+    }).catch(err => console.warn('[OfficeContext] Cash In DB persist error:', err));
 
     return receiptNo;
   };
@@ -636,9 +929,23 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    // Persist expense to Supabase
+    fetch('/api/office/finance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'record_expense',
+        account_id: account,
+        category,
+        payee: payeeDescription,
+        amount,
+        description: notes || payeeDescription
+      })
+    }).catch(err => console.warn('[OfficeContext] Cash Out DB persist error:', err));
   };
 
-  // Central Account Transfer (Does NOT count as Income/Expense)
+  // Central Account Transfer
   const recordTransfer = ({
     fromAccount,
     toAccount,
@@ -681,9 +988,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    // Persist transfer to Supabase
+    fetch('/api/office/finance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'record_transfer',
+        fromAccountId: fromAccount,
+        toAccountId: toAccount,
+        amount,
+        description: notes || `Transfer from ${fromAccount} to ${toAccount}`
+      })
+    }).catch(err => console.warn('[OfficeContext] Transfer DB persist error:', err));
   };
 
-  // Stamp Sale: reduces stamp inventory, adds IN transaction, updates cash, generates receipt
+  // Stamp Sale
   const recordStampSale = ({
     denomination,
     quantity,
@@ -755,9 +1075,26 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    // 4. Persist stamp sale movement to Supabase
+    const stampItem = stampStock.find(s => s.denomination === denomination);
+    if (stampItem?.id) {
+      fetch('/api/office/stamps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'record_movement',
+          movement_type: 'sale',
+          stamp_product_id: stampItem.id,
+          quantity,
+          client_name: clientName,
+          notes
+        })
+      }).catch(err => console.warn('[OfficeContext] Stamp sale DB error:', err));
+    }
   };
 
-  // Stamp Purchase from Treasury / State Bank
+  // Stamp Purchase
   const recordStampPurchase = ({
     denomination,
     quantity,
@@ -813,6 +1150,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       notes,
       staff
     });
+
+    const stampItem = stampStock.find(s => s.denomination === denomination);
+    if (stampItem?.id) {
+      fetch('/api/office/stamps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'record_movement',
+          movement_type: 'purchase',
+          stamp_product_id: stampItem.id,
+          quantity,
+          unit_price: purchasePricePerUnit,
+          notes: `Purchased from ${supplier}`
+        })
+      }).catch(err => console.warn('[OfficeContext] Stamp purchase DB error:', err));
+    }
   };
 
   // Stamp Adjustment
@@ -905,7 +1258,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    // Sync to database API
+    // Persist to database API
     fetch('/api/office/clients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -918,10 +1271,18 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         phone: newClient.phone,
         email: newClient.email,
         address: newClient.address,
-        client_type: newClient.category || 'individual',
+        client_type: newClient.type || 'individual',
         status: newClient.status?.toLowerCase() || 'active'
       })
-    }).catch(err => console.warn('[OfficeContext] Could not sync new client to DB:', err));
+    })
+      .then(res => res.json())
+      .then(resData => {
+        if (resData.success && resData.client?.id) {
+          // Reconcile client id with Supabase UUID
+          setClients(prev => prev.map(c => c.id === newClient.id ? { ...c, id: resData.client.id } : c));
+        }
+      })
+      .catch(err => console.warn('[OfficeContext] Could not sync new client to DB:', err));
   };
 
   const updateClient = (id: string, clientData: Partial<Client>) => {
@@ -936,6 +1297,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/clients', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        full_name: clientData.name,
+        business_name: clientData.businessName,
+        mobile: clientData.mobile || clientData.phone,
+        phone: clientData.phone,
+        email: clientData.email,
+        address: clientData.address,
+        cnic: clientData.cnic,
+        ntn: clientData.ntn
+      })
+    }).catch(err => console.warn('[OfficeContext] Update client DB error:', err));
   };
 
   // Receipts
@@ -963,17 +1340,31 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
+    fetch('/api/office/receipts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        receiptNo,
+        clientName: receiptData.clientName,
+        clientId: receiptData.clientId,
+        service: receiptData.service,
+        amount_paid: receiptData.paidAmount,
+        balance_due: receiptData.balance,
+        paymentMethod: receiptData.paymentMethod,
+        notes: receiptData.remarks
+      })
+    }).catch(err => console.warn('[OfficeContext] Create receipt DB error:', err));
+
     return receiptNo;
   };
 
-  // Cancel Receipt (Never silently delete!)
+  // Cancel Receipt
   const cancelReceipt = (id: string, reason: string) => {
     const rec = receipts.find(r => r.id === id);
     if (!rec) return;
 
     setReceipts(prev => prev.map(r => r.id === id ? { ...r, status: 'CANCELLED', cancellationReason: reason } : r));
 
-    // Also mark related transaction as cancelled/reversed
     setTransactions(prev => prev.map(t => {
       if (t.receiptNo === rec.receiptNo) {
         return {
@@ -987,7 +1378,6 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return t;
     }));
 
-    // Adjust balance back if it was paid
     if (rec.paidAmount > 0) {
       adjustBalance(rec.paymentMethod || 'cash', -rec.paidAmount);
     }
@@ -1002,6 +1392,16 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/receipts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        status: 'cancelled',
+        notes: reason
+      })
+    }).catch(err => console.warn('[OfficeContext] Cancel receipt DB error:', err));
   };
 
   // Expenses
@@ -1035,6 +1435,15 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/tax', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        status: newStatus
+      })
+    }).catch(err => console.warn('[OfficeContext] Update tax case DB error:', err));
   };
 
   const addTaxCase = (caseData: Omit<TaxCase, 'id'>) => {
@@ -1054,6 +1463,28 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/tax', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: caseData.clientId,
+        taxYear: caseData.taxYear,
+        returnType: caseData.returnType,
+        fee: caseData.fee || caseData.amountFee || 0,
+        dueDate: caseData.dueDate,
+        cprNumber: caseData.cprNumber,
+        status: caseData.status || 'In Progress',
+        notes: caseData.notes
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.case?.id) {
+          setTaxCases(prev => prev.map(tc => tc.id === newCase.id ? { ...tc, id: data.case.id } : tc));
+        }
+      })
+      .catch(err => console.warn('[OfficeContext] Add tax case DB error:', err));
   };
 
   // Service Orders
@@ -1089,6 +1520,29 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/services', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer: orderData.customer,
+        serviceName: orderData.serviceName,
+        clientId: orderData.clientId,
+        fileReference: orderData.fileReference,
+        pages: orderData.pages,
+        amount: orderData.amount,
+        payment: orderData.payment,
+        deliveryDate: orderData.deliveryDate,
+        specialInstructions: orderData.specialInstructions
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.order?.id) {
+          setServiceOrders(prev => prev.map(o => o.id === newOrder.id ? { ...o, id: data.order.id } : o));
+        }
+      })
+      .catch(err => console.warn('[OfficeContext] Add service order DB error:', err));
   };
 
   const updateServiceOrderStatus = (id: string, newStatus: ServiceOrder['status']) => {
@@ -1103,6 +1557,15 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/services', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        status: newStatus
+      })
+    }).catch(err => console.warn('[OfficeContext] Update service order DB error:', err));
   };
 
   // Daily Closing
@@ -1131,6 +1594,22 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/daily-closing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: closedClosing.date,
+        openingCash: closedClosing.openingCash || closedClosing.openingBalance,
+        cashIn: closedClosing.cashIn,
+        cashOut: closedClosing.cashOut,
+        expectedCash: closedClosing.expectedCash,
+        actualCash,
+        difference: diff,
+        status: 'closed',
+        notes: discrepancyReason
+      })
+    }).catch(err => console.warn('[OfficeContext] Close day DB error:', err));
   };
 
   const reopenDay = (reason: string) => {
@@ -1161,18 +1640,48 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...taskData
     };
     setTasks(prev => [newTask, ...prev]);
+
+    fetch('/api/office/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: taskData.title,
+        description: taskData.description,
+        dueDate: taskData.dueDate,
+        priority: taskData.priority,
+        status: taskData.status
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.task?.id) {
+          setTasks(prev => prev.map(t => t.id === newTask.id ? { ...t, id: data.task.id } : t));
+        }
+      })
+      .catch(err => console.warn('[OfficeContext] Add task DB error:', err));
   };
 
   const toggleTaskStatus = (id: string) => {
+    let nextStatus = 'Completed';
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
+        nextStatus = t.status === 'Completed' ? 'In Progress' : 'Completed';
         return {
           ...t,
-          status: t.status === 'Completed' ? 'In Progress' : 'Completed'
+          status: nextStatus as any
         };
       }
       return t;
     }));
+
+    fetch('/api/office/tasks', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        status: nextStatus
+      })
+    }).catch(err => console.warn('[OfficeContext] Toggle task DB error:', err));
   };
 
   // Business settings
@@ -1188,6 +1697,15 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ipAddress: '192.168.1.10',
       sessionStatus: 'Success'
     });
+
+    fetch('/api/office/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'office_business_profile',
+        value: settings
+      })
+    }).catch(err => console.warn('[OfficeContext] Update settings DB error:', err));
   };
 
   return (
@@ -1223,6 +1741,8 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         systemUsers,
         auditLogs,
         businessSettings,
+        isLoading,
+        refreshData,
         isDarkMode,
         toggleDarkMode,
         isSearchModalOpen,

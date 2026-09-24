@@ -13,7 +13,7 @@ export interface CreateHearingDTO {
   status?: Hearing["status"];
 }
 
-export async function listHearings(filter?: { caseId?: string; upcomingOnly?: boolean }): Promise<Hearing[]> {
+export async function listHearings(filter?: { caseId?: string; upcomingOnly?: boolean; date?: string }): Promise<Hearing[]> {
   const supabase = await createClient();
   let query = supabase
     .from("hearings")
@@ -25,6 +25,10 @@ export async function listHearings(filter?: { caseId?: string; upcomingOnly?: bo
 
   if (filter?.caseId) {
     query = query.eq("case_id", filter.caseId);
+  }
+
+  if (filter?.date) {
+    query = query.eq("hearing_date", filter.date);
   }
 
   if (filter?.upcomingOnly) {

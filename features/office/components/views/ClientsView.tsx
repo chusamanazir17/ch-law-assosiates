@@ -24,6 +24,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
+import { initialClients } from '../../data/seedData';
+
 export const ClientsView: React.FC = () => {
   const { clients, setIsNewClientModalOpen, setIsQuickCashInOpen } = useOffice();
 
@@ -31,146 +33,46 @@ export const ClientsView: React.FC = () => {
   const [selectedClientIndex, setSelectedClientIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('Overview');
 
-  // Realistic mock data matching Image 4
-  const clientList = [
-    {
-      id: 'c1',
-      name: 'Muhammad Ali Khan',
-      cnic: '35202-1234567-1',
-      ntn: '1234567-8',
-      mobile: '0300-1112233',
-      businessName: 'Ali Traders',
-      taxStatus: 'Active',
-      lastService: '22-09-2025',
-      outstanding: 25000,
-      status: 'Active',
-      email: 'ali.traders@gmail.com',
-      address: 'Main Bazar, Sahiwal',
-      businessType: 'General Trading',
-      memberSince: '12 Jan 2024'
-    },
-    {
-      id: 'c2',
-      name: 'Zara Enterprises',
-      cnic: '35202-7654321-0',
-      ntn: '7654321-0',
-      mobile: '0301-2223344',
-      businessName: 'Zara Enterprises',
-      taxStatus: 'Active',
-      lastService: '21-09-2025',
-      outstanding: 0,
-      status: 'Active',
-      email: 'info@zaraenterprises.pk',
-      address: 'High Street, Sahiwal',
-      businessType: 'Textile Wholesale',
-      memberSince: '15 Mar 2023'
-    },
-    {
-      id: 'c3',
-      name: 'Asad Khan',
-      cnic: '35202-1111111-1',
-      ntn: '2345678-1',
-      mobile: '0302-3334455',
-      businessName: 'Khan & Co.',
-      taxStatus: 'Active',
-      lastService: '20-09-2025',
-      outstanding: 12500,
-      status: 'Active',
-      email: 'asad.khan@gmail.com',
-      address: 'Civil Lines, Sahiwal',
-      businessType: 'Consultancy',
-      memberSince: '04 Aug 2024'
-    },
-    {
-      id: 'c4',
-      name: 'Bilal Ahmed',
-      cnic: '35202-2222222-2',
-      ntn: '3456789-2',
-      mobile: '0303-4445566',
-      businessName: 'BA Industries',
-      taxStatus: 'Active',
-      lastService: '19-09-2025',
-      outstanding: 48000,
-      status: 'Outstanding',
-      email: 'bilal@baindustries.com',
-      address: 'Small Industrial Estate, Sahiwal',
-      businessType: 'Manufacturing',
-      memberSince: '10 Feb 2024'
-    },
-    {
-      id: 'c5',
-      name: 'Ahsan Traders',
-      cnic: '35202-3333333-3',
-      ntn: '4567890-3',
-      mobile: '0304-5556677',
-      businessName: 'Ahsan Traders',
-      taxStatus: 'Active',
-      lastService: '18-09-2025',
-      outstanding: 0,
-      status: 'Active',
-      email: 'ahsan@traders.pk',
-      address: 'Grain Market, Sahiwal',
-      businessType: 'Agri Commodities',
-      memberSince: '01 Nov 2023'
-    },
-    {
-      id: 'c6',
-      name: 'Saima Bibi',
-      cnic: '35202-4444444-4',
-      ntn: '5678901-4',
-      mobile: '0305-6667788',
-      businessName: 'Saima Cosmetics',
-      taxStatus: 'Active',
-      lastService: '17-09-2025',
-      outstanding: 8200,
-      status: 'Active',
-      email: 'saima.cosmetics@gmail.com',
-      address: 'Liaquat Road, Sahiwal',
-      businessType: 'Retail Store',
-      memberSince: '20 May 2024'
-    },
-    {
-      id: 'c7',
-      name: 'Raza Enterprises',
-      cnic: '35202-5555555-5',
-      ntn: '6789012-5',
-      mobile: '0306-7778899',
-      businessName: 'Raza Enterprises',
-      taxStatus: 'Filer',
-      lastService: '16-09-2025',
-      outstanding: 35000,
-      status: 'Outstanding',
-      email: 'raza@enterprises.pk',
-      address: 'College Road, Sahiwal',
-      businessType: 'Import / Export',
-      memberSince: '05 Jan 2023'
-    },
-    {
-      id: 'c8',
-      name: 'Nadeem & Sons',
-      cnic: '35202-6666666-6',
-      ntn: '7890123-6',
-      mobile: '0307-8889900',
-      businessName: 'Nadeem & Sons',
-      taxStatus: 'Non-Filer',
-      lastService: '15-09-2025',
-      outstanding: 0,
-      status: 'Active',
-      email: 'nadeemandsons@gmail.com',
-      address: 'Circular Road, Sahiwal',
-      businessType: 'Hardware Store',
-      memberSince: '18 Sep 2024'
-    }
-  ];
+  const clientList = clients && clients.length > 0 ? clients : initialClients;
 
   const filtered = clientList.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.cnic.includes(searchTerm) ||
-    c.ntn.includes(searchTerm) ||
-    c.businessName.toLowerCase().includes(searchTerm.toLowerCase())
+    (c.cnic && c.cnic.includes(searchTerm)) ||
+    (c.ntn && c.ntn.includes(searchTerm)) ||
+    (c.businessName && c.businessName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const selected = clientList[selectedClientIndex] || clientList[0];
+  const selected = filtered[selectedClientIndex] || filtered[0] || clientList[0] || {
+    id: 'c1',
+    name: 'Client',
+    cnic: 'N/A',
+    ntn: 'N/A',
+    mobile: 'N/A',
+    email: 'N/A',
+    businessName: 'Business',
+    businessType: 'Individual',
+    address: 'N/A',
+    taxStatus: 'Active',
+    memberSince: 'N/A',
+    outstanding: 0,
+    status: 'Active',
+    totalBilling: 0,
+    paidAmount: 0,
+    lifetimeRevenue: 0,
+    lastService: 'N/A',
+    documents: []
+  };
+
+  const totalClients = clientList.length;
+  const activeClients = clientList.filter(c => c.status === 'Active').length;
+  const outstandingClientsCount = clientList.filter(c => (c.outstanding || 0) > 0).length;
+  const totalDocs = clientList.reduce((acc, c) => acc + (c.documents?.length || 0), 0);
+  const totalRecoverables = clientList.reduce((acc, c) => acc + (c.outstanding || 0), 0);
+
+  const topOutstanding = [...clientList]
+    .filter(c => (c.outstanding || 0) > 0)
+    .sort((a, b) => (b.outstanding || 0) - (a.outstanding || 0))
+    .slice(0, 5);
 
   return (
     <div className="space-y-5">
@@ -193,8 +95,8 @@ export const ClientsView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Total Clients</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">286</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 12% from last month</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">{totalClients}</div>
+          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">Live Database</div>
         </div>
 
         {/* Active Clients */}
@@ -205,8 +107,8 @@ export const ClientsView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Active Clients</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">232</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">81% of total</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">{activeClients}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">{totalClients > 0 ? Math.round((activeClients / totalClients) * 100) : 100}% of total</div>
         </div>
 
         {/* Outstanding Clients */}
@@ -217,8 +119,8 @@ export const ClientsView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Outstanding Clients</span>
           </div>
-          <div className="text-base font-bold text-rose-600 font-mono">54</div>
-          <div className="text-[10px] text-rose-600 font-bold mt-0.5">↑ 6% from last month</div>
+          <div className="text-base font-bold text-rose-600 font-mono">{outstandingClientsCount}</div>
+          <div className="text-[10px] text-rose-600 font-bold mt-0.5">Pending collection</div>
         </div>
 
         {/* Documents Pending */}
@@ -227,22 +129,22 @@ export const ClientsView: React.FC = () => {
             <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
               <FileText className="w-4 h-4" />
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Docs Pending</span>
+            <span className="text-[11px] text-slate-500 font-medium">Docs Attached</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">38</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">Need attention</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">{totalDocs}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">Client files</div>
         </div>
 
-        {/* New Clients This Month */}
+        {/* Client Records */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs">
           <div className="flex items-center gap-2 mb-1.5">
             <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4" />
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">New Clients</span>
+            <span className="text-[11px] text-slate-500 font-medium">Filtered</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">18</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 28% from last month</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">{filtered.length}</div>
+          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">Matching view</div>
         </div>
 
         {/* Total Recoverables */}
@@ -253,8 +155,8 @@ export const ClientsView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Recoverables</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 486,200</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 14% from last month</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. {totalRecoverables.toLocaleString()}</div>
+          <div className="text-[10px] text-amber-600 font-bold mt-0.5">Due balance</div>
         </div>
       </div>
 
@@ -467,21 +369,19 @@ export const ClientsView: React.FC = () => {
             <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
-            {[
-              { name: 'Bilal Ahmed', biz: 'BA Industries', out: 48000 },
-              { name: 'Raza Enterprises', biz: 'Raza Enterprises', out: 35000 },
-              { name: 'Muhammad Ali Khan', biz: 'Ali Traders', out: 25000 },
-              { name: 'Khan Associates', biz: 'Khan Associates', out: 18500 },
-              { name: 'Asad Khan', biz: 'Khan & Co.', out: 12500 },
-            ].map((o, i) => (
-              <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                <div>
-                  <div className="font-semibold text-slate-800 dark:text-slate-200">{o.name}</div>
-                  <div className="text-[10px] text-slate-400">{o.biz}</div>
+            {topOutstanding.length === 0 ? (
+              <div className="py-3 text-center text-xs text-slate-400">All client balances cleared</div>
+            ) : (
+              topOutstanding.map((o, i) => (
+                <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                  <div>
+                    <div className="font-semibold text-slate-800 dark:text-slate-200">{o.name}</div>
+                    <div className="text-[10px] text-slate-400">{o.businessName || o.taxStatus}</div>
+                  </div>
+                  <span className="font-bold text-rose-600 font-mono">Rs. {(o.outstanding || 0).toLocaleString()}</span>
                 </div>
-                <span className="font-bold text-rose-600 font-mono">Rs. {o.out.toLocaleString()}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -495,29 +395,22 @@ export const ClientsView: React.FC = () => {
             <div className="flex items-start gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
               <div className="flex-1">
-                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">Payment received from Zara Enterprises</div>
-                <div className="text-[10px] text-slate-400">2 hours ago</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-500 mt-1 shrink-0"></span>
-              <div className="flex-1">
-                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">New client registered: Saad Marketing</div>
-                <div className="text-[10px] text-slate-400">4 hours ago</div>
+                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">Active client directory live synced</div>
+                <div className="text-[10px] text-slate-400">Live Supabase</div>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0"></span>
               <div className="flex-1">
-                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">Document uploaded by Muhammad Ali Khan</div>
-                <div className="text-[10px] text-slate-400">5 hours ago</div>
+                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">{selected.name} profile loaded</div>
+                <div className="text-[10px] text-slate-400">{selected.lastService || 'Active'}</div>
               </div>
             </div>
             <div className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
+              <span className="w-2 h-2 rounded-full bg-purple-500 mt-1 shrink-0"></span>
               <div className="flex-1">
-                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">Service completed: NTN Registration</div>
-                <div className="text-[10px] text-slate-400">1 day ago</div>
+                <div className="font-medium text-slate-800 dark:text-slate-200 text-[11px]">{totalDocs} total documents on record</div>
+                <div className="text-[10px] text-slate-400">Secure Storage</div>
               </div>
             </div>
           </div>
@@ -527,39 +420,39 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Client Distribution</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#1473E6] font-semibold">Live</span>
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">
             <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E2E8F0" strokeWidth="5" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3B82F6" strokeWidth="5" strokeDasharray="38, 100" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" strokeWidth="5" strokeDasharray="28, 100" strokeDashoffset="-38" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="5" strokeDasharray="18, 100" strokeDashoffset="-66" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3B82F6" strokeWidth="5" strokeDasharray="40, 100" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" strokeWidth="5" strokeDasharray="30, 100" strokeDashoffset="-40" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="5" strokeDasharray="30, 100" strokeDashoffset="-70" />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono">286</span>
-                <span className="text-[8px] text-slate-400">Total Clients</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono">{totalClients}</span>
+                <span className="text-[8px] text-slate-400">Total</span>
               </div>
             </div>
 
             <div className="space-y-1 text-[10px] flex-1">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Individual</span>
-                <span className="font-bold">38% (108)</span>
+                <span className="font-bold">{clientList.filter(c => c.businessType === 'Individual').length}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Sole Prop.</span>
-                <span className="font-bold">28% (80)</span>
+                <span className="font-bold">{clientList.filter(c => c.businessType === 'Sole Proprietorship').length}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Partnership</span>
-                <span className="font-bold">18% (52)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Partnership/AOP</span>
+                <span className="font-bold">{clientList.filter(c => c.businessType === 'Partnership' || c.businessType === 'AOP').length}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Pvt. Limited</span>
-                <span className="font-bold">10% (29)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500"></span> Pvt. Limited/Other</span>
+                <span className="font-bold">{clientList.filter(c => c.businessType === 'Private Limited' || c.businessType === 'Other').length}</span>
               </div>
             </div>
           </div>

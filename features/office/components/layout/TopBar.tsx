@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle2,
-  FileText
+  FileText,
+  Globe
 } from 'lucide-react';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 
@@ -117,6 +118,16 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           </span>
           <span className="truncate">Chamber 121 • Active</span>
         </div>
+
+        {/* Website Admin CMS Direct Jump Link */}
+        <a
+          href="/admin/dashboard"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-700 dark:text-amber-300 border border-amber-400/40 text-xs font-bold transition shadow-2xs shrink-0"
+          title="Open Website Admin Dashboard & CMS"
+        >
+          <Globe className="w-3.5 h-3.5 text-amber-500" />
+          <span className="hidden sm:inline">Website CMS</span>
+        </a>
 
         {/* Date Display Pill - Hidden on mobile */}
         <div className={`items-center gap-2 bg-slate-50 dark:bg-[#0A1424] border border-slate-200 dark:border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs shrink-0 whitespace-nowrap ${
@@ -282,6 +293,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                   <Sliders className="w-4 h-4" />
                   <span>System Settings</span>
                 </button>
+
+                <a
+                  href="/admin/dashboard"
+                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 cursor-pointer font-semibold transition-colors"
+                >
+                  <Globe className="w-4 h-4 text-amber-500" />
+                  <span>Website Admin CMS</span>
+                </a>
               </div>
 
               <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">

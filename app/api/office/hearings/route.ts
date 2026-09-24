@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getAdminSession } from "@/lib/auth/admin";
-import { listHearings, createHearingRecord } from "@/lib/services/hearings.service";
+import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
+import { listHearings, createHearingRecord, updateHearingRecord, deleteHearingRecord } from "@/lib/services/hearings.service";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getAdminSession();
-    if (!session) {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getAdminSession();
-    if (!session) {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -36,5 +36,45 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("[API Office Hearings POST]", error);
     return NextResponse.json({ success: false, error: error.message || "Failed to create hearing" }, { status: 400 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    if (!body.id) {
+      return NextResponse.json({ success: false, error: "Hearing ID is required" }, { status: 400 });
+    }
+
+    const hearing = await updateHearingRecord(body.id, body);
+    return NextResponse.json({ success: true, hearing });
+  } catch (error: any) {
+    console.error("[API Office Hearings PATCH]", error);
+    return NextResponse.json({ success: false, error: error.message || "Failed to update hearing" }, { status: 400 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const id = request.nextUrl.searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Hearing ID is required" }, { status: 400 });
+    }
+
+    await deleteHearingRecord(id);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("[API Office Hearings DELETE]", error);
+    return NextResponse.json({ success: false, error: error.message || "Failed to delete hearing" }, { status: 400 });
   }
 }

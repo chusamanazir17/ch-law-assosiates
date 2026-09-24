@@ -142,6 +142,28 @@ async function runTests() {
     logFail(`POST /api/inquiries validation`, err.message);
   }
 
+  // Test 8: Office Endpoints Role-Based Auth (Unauthenticated must return 401)
+  const officeEndpoints = [
+    "/api/office/cases",
+    "/api/office/finance",
+    "/api/office/tax",
+    "/api/office/stamps",
+    "/api/office/dashboard"
+  ];
+
+  for (const endpoint of officeEndpoints) {
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}`);
+      if (res.status === 401) {
+        logPass(`GET ${endpoint} (unauthenticated) returns HTTP 401 Unauthorized`);
+      } else {
+        logFail(`GET ${endpoint} (unauthenticated) returns HTTP 401 Unauthorized`, `Received status ${res.status}`);
+      }
+    } catch (err) {
+      logFail(`GET ${endpoint} auth check`, err.message);
+    }
+  }
+
   // Summary
   console.log(`\n========================================`);
   console.log(`Smoke Test Results: ${passed} passed, ${failed} failed`);

@@ -313,7 +313,7 @@ export const ReceiptsView: React.FC = () => {
                     <tr className="bg-slate-50 font-semibold text-slate-600 border-t border-slate-200">
                       <td className="py-1 px-2.5 text-right text-[10px]">Balance Remaining:</td>
                       <td className="py-1 px-2.5 text-right text-[10px] text-rose-600 font-bold">
-                        Rs. {(selectedReceipt.balanceAmount || 0).toLocaleString()}
+                        Rs. {(selectedReceipt.balance || 0).toLocaleString()}
                       </td>
                     </tr>
                   </tbody>

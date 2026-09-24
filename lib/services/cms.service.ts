@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { TeamMember, Testimonial } from "@/types/office";
 import type { SiteAnnouncement, ConsultationInquiry, MediaAsset } from "@/types/cms";
-import { SITE, OWNERS } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 // ==============================================================================
 // 1. SITE SETTINGS SERVICE
@@ -31,7 +31,7 @@ export async function saveSiteSettings(key: string, value: Record<string, unknow
     .from("site_settings")
     .upsert({
       key,
-      value,
+      value: value as any,
       updated_at: new Date().toISOString(),
     }, { onConflict: "key" });
 
@@ -56,20 +56,20 @@ export async function listTeamMembers(): Promise<TeamMember[]> {
       .order("sort_order", { ascending: true });
 
     if (error || !data || data.length === 0) {
-      // Fallback to static OWNERS if table is not yet seeded
-      return OWNERS.map((o, idx) => ({
-        id: o.id,
-        name: o.name,
-        name_urdu: o.nameUrdu,
-        role: o.role,
-        role_urdu: o.roleUrdu,
-        status: o.status,
-        badge: o.badge,
-        image_url: o.image,
-        bio: o.bio,
-        bio_urdu: o.bioUrdu,
-        phone: o.phone || null,
-        whatsapp: o.whatsapp || null,
+      // Fallback to static SITE.contacts if table is not yet seeded
+      return (SITE.contacts || []).map((c, idx) => ({
+        id: `contact-${idx + 1}`,
+        name: c.name,
+        name_urdu: c.nameUrdu,
+        role: c.role,
+        role_urdu: c.roleUrdu,
+        status: "current" as const,
+        badge: idx === 0 ? "Senior Consultant" : "Associate",
+        image_url: null,
+        bio: `${c.name} - ${c.role}`,
+        bio_urdu: `${c.nameUrdu} - ${c.roleUrdu}`,
+        phone: c.phone || null,
+        whatsapp: c.phone || null,
         sort_order: idx + 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -281,7 +281,7 @@ export async function saveAnnouncement(input: Partial<SiteAnnouncement>): Promis
 export async function listInquiries(status?: string): Promise<ConsultationInquiry[]> {
   const supabase = await createClient();
   let query = supabase.from("consultation_inquiries").select("*").order("created_at", { ascending: false });
-  if (status && status !== "all") query = query.eq("status", status);
+  if (status && status !== "all") query = query.eq("status", status as any);
 
   const { data, error } = await query;
   if (error) throw new Error(`Failed to load inquiries: ${error.message}`);

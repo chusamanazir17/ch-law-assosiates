@@ -363,3 +363,57 @@ export interface Testimonial {
   sort_order: number;
   created_at: string;
 }
+
+export interface TaxCaseRecord {
+  id: string;
+  case_number: string;
+  client_id: string;
+  client_name?: string;
+  tax_year: string;
+  return_type: string;
+  fee: number;
+  assigned_to?: string | null;
+  assigned_staff_name?: string | null;
+  due_date?: string | null;
+  filing_date?: string | null;
+  cpr_number?: string | null;
+  status: string;
+  documents?: unknown;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ServiceOrderRecord {
+  id: string;
+  order_number: string;
+  client_id?: string | null;
+  customer_name: string;
+  service_name: string;
+  category: string;
+  pages: number;
+  amount: number;
+  payment_status: string;
+  delivery_date?: string | null;
+  file_reference?: string | null;
+  status: string;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReceiptRecord {
+  id: string;
+  receipt_number: string;
+  client_id?: string | null;
+  client_name: string;
+  service_type: string;
+  amount_paid: number;
+  balance_due: number;
+  payment_method: string;
+  status: 'paid' | 'partial' | 'unpaid' | 'cancelled';
+  notes?: string | null;
+  issued_by?: string | null;
+  created_at: string;
+}
+

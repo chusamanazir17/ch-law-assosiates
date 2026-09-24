@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getAdminSession } from "@/lib/auth/admin";
+import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
 import { listInvoices, createInvoiceRecord, recordInvoicePayment } from "@/lib/services/billing.service";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getAdminSession();
-    if (!session) {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getAdminSession();
-    if (!session) {
+    const session = await getUnifiedSession();
+    if (!session || !canAccessOfficeSystem(session.role)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     if (body.action === "record_payment") {
       const payment = await recordInvoicePayment({
         invoice_id: body.invoice_id,
+        client_id: body.client_id,
         amount: body.amount,
         payment_method: body.payment_method,
         payment_account_id: body.payment_account_id,

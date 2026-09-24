@@ -44,11 +44,40 @@ const MainLayout: React.FC = () => {
   useEffect(() => {
     const syncFromUrl = () => {
       if (typeof window !== 'undefined') {
+        // 1. Check query parameters like ?tab=cash or ?section=cases
+        const params = new URLSearchParams(window.location.search);
+        const queryTab = params.get('tab') || params.get('section');
+        if (queryTab) {
+          const tabNorm = queryTab.toLowerCase();
+          const aliasMap: Record<string, string> = {
+            finance: 'cash',
+            inout: 'cash',
+            'in-out': 'cash',
+            money: 'cash',
+            estamp: 'stamps',
+            estamppaper: 'stamps',
+            'e-stamp': 'stamps',
+            users: 'staff',
+            services: 'composing',
+            register: 'cash',
+            'daily-register': 'cash',
+          };
+          const resolved = aliasMap[tabNorm] || tabNorm;
+          setActiveSection(resolved);
+          return;
+        }
+
+        // 2. Check path slug
         const match = window.location.pathname.match(/\/office\/?([a-zA-Z0-9_-]*)/);
         if (match && match[1]) {
           const section = match[1].toLowerCase();
           if (section && section !== 'dashboard') {
-            setActiveSection(section);
+            const aliasMap: Record<string, string> = {
+              finance: 'cash',
+              estamp: 'stamps',
+              services: 'composing',
+            };
+            setActiveSection(aliasMap[section] || section);
             return;
           }
         }

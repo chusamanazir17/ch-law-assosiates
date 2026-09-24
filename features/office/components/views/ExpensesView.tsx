@@ -25,7 +25,7 @@ import {
 export const ExpensesView: React.FC = () => {
   const {
     transactions,
-    addTransaction,
+    recordCashOut,
     setIsQuickCashOutOpen
   } = useOffice();
 
@@ -63,14 +63,13 @@ export const ExpensesView: React.FC = () => {
     e.preventDefault();
     if (!payee.trim() || !amount) return;
 
-    addTransaction({
-      type: 'OUT',
-      clientOrPayee: payee,
-      serviceOrCategory: category,
+    recordCashOut({
+      category,
+      payeeDescription: payee,
       amount: Number(amount),
       account,
       staff: 'Usama (Admin)',
-      description: description || `${category} paid to ${payee}`
+      notes: description || `${category} paid to ${payee}`
     });
 
     setPayee('');

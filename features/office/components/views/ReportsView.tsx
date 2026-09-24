@@ -519,10 +519,10 @@ export const ReportsView: React.FC = () => {
                 {clients.map(c => (
                   <tr key={c.id}>
                     <td className="py-2.5 px-3 font-bold text-[#0D2344]">{c.name}</td>
-                    <td className="py-2.5 px-3 text-slate-600 font-mono">{c.phone}</td>
-                    <td className="py-2.5 px-3">{c.category}</td>
-                    <td className="py-2.5 px-3 text-right">Rs. {(c.totalBilled || 0).toLocaleString()}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-rose-600">Rs. {(c.balance || 0).toLocaleString()}</td>
+                    <td className="py-2.5 px-3 text-slate-600 font-mono">{c.mobile || c.phone || 'N/A'}</td>
+                    <td className="py-2.5 px-3">{c.businessType || c.type || 'Individual'}</td>
+                    <td className="py-2.5 px-3 text-right">Rs. {(c.totalBilling || 0).toLocaleString()}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-rose-600">Rs. {(c.outstanding || 0).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

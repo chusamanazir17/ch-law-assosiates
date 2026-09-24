@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
-import { listAttendance, recordAttendance } from "@/lib/services/employees.service";
+import { getSiteSetting, updateSiteSetting } from "@/lib/services/settings.service";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +11,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const date = request.nextUrl.searchParams.get("date") || undefined;
-    const records = await listAttendance(date);
-    return NextResponse.json({ success: true, attendance: records });
+    const key = request.nextUrl.searchParams.get("key") || "office_business_profile";
+    const value = await getSiteSetting(key);
+    return NextResponse.json({ success: true, key, value });
   } catch (error: any) {
-    console.error("[API Office Attendance GET]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to load attendance" }, { status: 500 });
+    console.error("[API Office Settings GET]", error);
+    return NextResponse.json({ success: false, error: error.message || "Failed to load settings" }, { status: 500 });
   }
 }
 
@@ -28,10 +28,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const record = await recordAttendance(body);
-    return NextResponse.json({ success: true, record }, { status: 201 });
+    const key = body.key || "office_business_profile";
+    await updateSiteSetting(key, body.value);
+
+    return NextResponse.json({ success: true, key, value: body.value });
   } catch (error: any) {
-    console.error("[API Office Attendance POST]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to record attendance" }, { status: 400 });
+    console.error("[API Office Settings POST]", error);
+    return NextResponse.json({ success: false, error: error.message || "Failed to save settings" }, { status: 400 });
   }
 }

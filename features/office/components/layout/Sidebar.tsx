@@ -139,6 +139,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Navigation Items */}
           <nav className={`p-2.5 space-y-1 overflow-y-auto max-h-[calc(100vh-190px)] custom-scrollbar-dark text-sm font-medium ${isCollapsed ? 'px-2' : ''}`}>
+            {/* Direct Switch to Website Admin CMS */}
+            <div className="mb-2 pb-1.5 border-b border-[#142639]">
+              <a
+                href="/admin/dashboard"
+                title="Go to Website Admin Dashboard & CMS"
+                className={`w-full flex items-center ${
+                  isCollapsed ? 'justify-center py-2 px-0' : 'gap-2.5 px-3 py-2'
+                } rounded-lg text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 font-semibold transition-all shadow-2xs`}
+              >
+                <Globe className="w-4 h-4 shrink-0 text-amber-400" />
+                {!isCollapsed && <span className="text-xs font-bold tracking-wide">Website Admin CMS</span>}
+              </a>
+            </div>
+
             {/* Top Level: Office Management (Collapsible Group) */}
             <div>
               {!isCollapsed ? (

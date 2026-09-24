@@ -3,7 +3,7 @@ import { getAdminSession } from "@/lib/auth/admin";
 import { getAllSubscribers } from "@/lib/db/subscribersStore";
 import { getAllInquiries } from "@/lib/db/inquiriesStore";
 
-import { getAllPosts } from "@/lib/db/postsStore";
+import { listAllPosts } from "@/lib/services/posts.service";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function GET() {
   try {
     const subscribers = await getAllSubscribers();
     const inquiries = await getAllInquiries();
-    const posts = await getAllPosts();
+    const posts = await listAllPosts();
 
     const totalEmails = subscribers.length;
     const activeCount = subscribers.filter((s) => s.status === "active").length;
@@ -75,6 +75,7 @@ export async function GET() {
         activeNotice: null,
       },
       recentInquiries: inquiries.slice(0, 5),
+      recentPosts: posts.slice(0, 6),
     });
   } catch (error) {
     console.error("[Admin Overview] Load error:", error);

@@ -25,7 +25,7 @@ export async function listTasks(filter?: { status?: string; assignedTo?: string 
     .order("due_date", { ascending: true });
 
   if (filter?.status && filter.status !== "ALL") {
-    query = query.eq("status", filter.status);
+    query = query.eq("status", filter.status as any);
   }
 
   if (filter?.assignedTo) {

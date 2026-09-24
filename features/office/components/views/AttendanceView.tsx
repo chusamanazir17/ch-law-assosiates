@@ -57,6 +57,7 @@ export const AttendanceView: React.FC = () => {
             email: 'usama@chchamber.com',
             full_name: 'Usama Nazir Ch',
             phone: '0300-1234567',
+            role: 'office_admin',
             status: 'active',
             avatar_url: null,
             created_at: new Date().toISOString(),
@@ -67,6 +68,7 @@ export const AttendanceView: React.FC = () => {
             email: 'ch.hameed@chchamber.com',
             full_name: 'Chaudhry Hameed Advocate',
             phone: '0300-7654321',
+            role: 'lawyer',
             status: 'active',
             avatar_url: null,
             created_at: new Date().toISOString(),
@@ -77,6 +79,7 @@ export const AttendanceView: React.FC = () => {
             email: 'rashid@chchamber.com',
             full_name: 'Rashid Minhas',
             phone: '0302-8889991',
+            role: 'staff',
             status: 'active',
             avatar_url: null,
             created_at: new Date().toISOString(),
@@ -87,6 +90,7 @@ export const AttendanceView: React.FC = () => {
             email: 'kashif@chchamber.com',
             full_name: 'M. Kashif',
             phone: '0345-1122334',
+            role: 'staff',
             status: 'active',
             avatar_url: null,
             created_at: new Date().toISOString(),
@@ -211,9 +215,9 @@ export const AttendanceView: React.FC = () => {
 
   const filteredRows = employeeRows.filter(({ employee, attendance: att }) => {
     const matchesSearch =
-      employee.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (att?.notes && att.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+      (employee.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      ((employee.email || '').toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (Boolean(att?.notes && att.notes.toLowerCase().includes(searchQuery.toLowerCase())));
 
     const status = att ? att.status : 'unmarked';
     const matchesStatus =
@@ -452,7 +456,6 @@ export const AttendanceView: React.FC = () => {
                       <td className="py-3.5 px-4">
                         <StatusBadge
                           status={status.toUpperCase()}
-                          variant={getStatusBadgeVariant(status)}
                         />
                       </td>
                       <td className="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate">

@@ -17,7 +17,7 @@ export interface CreateCaseDTO {
   lawyer_id?: string;
 }
 
-export async function listCases(filter?: { status?: string; lawyerId?: string; clientId?: string }): Promise<LegalCase[]> {
+export async function listCases(filter?: { status?: string; lawyerId?: string; clientId?: string; search?: string }): Promise<LegalCase[]> {
   const supabase = await createClient();
   let query = supabase
     .from("cases")
@@ -29,10 +29,20 @@ export async function listCases(filter?: { status?: string; lawyerId?: string; c
     .order("filing_date", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
-    query = query.eq("status", filter.status);
+    query = query.eq("status", filter.status as any);
+  }
+
+  if (filter?.clientId) {
+    query = query.eq("case_clients.client_id", filter.clientId);
+  }
+
+  if (filter?.search && filter.search.trim()) {
+    const term = `%${filter.search.trim()}%`;
+    query = query.or(`case_number.ilike.${term},title.ilike.${term},court_name.ilike.${term}`);
   }
 
   const { data, error } = await query;
+
   if (error) {
     console.error("[CasesService] listCases error:", error);
     throw new Error(`Failed to load cases: ${error.message}`);
@@ -122,10 +132,12 @@ export async function createCaseRecord(dto: CreateCaseDTO): Promise<LegalCase> {
 
 export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDTO>): Promise<LegalCase> {
   const supabase = await createClient();
+  const { client_id, lawyer_id, client_role, ...caseFields } = updates;
+
   const { data, error } = await supabase
     .from("cases")
     .update({
-      ...updates,
+      ...caseFields,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -135,6 +147,14 @@ export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDT
   if (error) {
     console.error("[CasesService] updateCaseRecord error:", error);
     throw new Error(`Failed to update case: ${error.message}`);
+  }
+
+  if (client_id) {
+    await assignClientToCase(id, client_id, client_role || "petitioner");
+  }
+
+  if (lawyer_id) {
+    await assignLawyerToCase(id, lawyer_id, "lead");
   }
 
   return data as LegalCase;
