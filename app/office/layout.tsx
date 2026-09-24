@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "Office Management System | CH Law Associates & Chamber 121",
-  description: "Chamber 121 Sahiwal litigation diary, legal court cases, e-stamps, client dossiers, and treasury ledger.",
+  description: "Chamber 121 Sahiwal legal practice management, e-stamp register, client dossiers, tax advisory, and treasury accounting ledger.",
   robots: {
     index: false,
     follow: false,
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function OfficeLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-40 overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18]">
+    <div className="fixed inset-0 z-40 overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18] font-admin antialiased selection:bg-[#1473E6]/20">
       {children}
     </div>
   );

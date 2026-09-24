@@ -149,7 +149,7 @@ export default function AdminPortalSelector() {
   };
 
   return (
-    <div className="min-h-screen bg-[#040C18] text-white flex flex-col justify-between selection:bg-[#C8973D] selection:text-[#040C18] relative overflow-hidden">
+    <div className="min-h-screen bg-[#040C18] text-white flex flex-col justify-between selection:bg-[#C8973D] selection:text-[#040C18] relative overflow-hidden font-admin antialiased">
       {/* Background Ambience */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#C8973D]/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#2563EB]/10 rounded-full blur-[140px] pointer-events-none" />
@@ -163,7 +163,7 @@ export default function AdminPortalSelector() {
               <Scale className="h-5 w-5" />
             </span>
             <div>
-              <div className="font-serif font-bold text-base sm:text-lg text-white group-hover:text-[#D39D3D] transition">
+              <div className="font-heading font-bold text-base sm:text-lg text-white group-hover:text-[#D39D3D] transition">
                 {SITE.name}
               </div>
               <div className="text-[11px] text-white/50">Chamber 121 Sahiwal • Central Portal Hub</div>
@@ -205,11 +205,11 @@ export default function AdminPortalSelector() {
               <Sparkles className="h-3.5 w-3.5" />
               <span>Enterprise Management System</span>
             </div>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
               Select Your <span className="text-[#D39D3D]">Portal</span>
             </h1>
             <p className="mt-3 text-sm sm:text-base text-white/65 leading-relaxed">
-              Access website publishing and content administration, or launch the Chamber 121 litigation, cases, client directory and accounts system.
+              Access website publishing and content administration, or launch the Chamber 121 practice management, client CRM, e-stamp registers, and treasury accounts system.
             </p>
 
             {/* Error notice if redirected */}
@@ -299,23 +299,23 @@ export default function AdminPortalSelector() {
                   <Briefcase className="h-7 w-7" />
                 </div>
 
-                <h2 className="font-serif text-2xl font-bold text-white group-hover:text-[#D39D3D] transition">
+                <h2 className="text-2xl font-bold tracking-tight text-white group-hover:text-[#D39D3D] transition">
                   Office Management System
                 </h2>
-                <p className="mt-2 text-xs sm:text-sm text-white/60 leading-relaxed">
-                  Complete chamber ERP: Litigation cases, court hearings diary, advocate assignments, e-stamp inventory, cash ledger, invoices & tasks.
+                <p className="mt-2 text-xs sm:text-sm text-white/60 leading-relaxed font-admin">
+                  Complete chamber ERP: E-Stamps & 32-A Challan, Cash In / Out ledger, clients CRM, tax filing, composing services, invoices & staff attendance.
                 </p>
 
                 {/* Feature Tags */}
-                <div className="mt-6 flex flex-wrap gap-2 text-[11px] text-white/70">
-                  <span className="flex items-center gap-1 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
-                    <Scale className="h-3 w-3 text-[#D39D3D]" /> Court Cases & Hearings
+                <div className="mt-6 flex flex-wrap gap-2 text-[11px] text-white/70 font-admin">
+                  <span className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                    <FileText className="h-3 w-3 text-[#D39D3D]" /> E-Stamps & 32-A Challan
                   </span>
-                  <span className="flex items-center gap-1 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
-                    <Wallet className="h-3 w-3 text-[#D39D3D]" /> Double-Entry Ledger
+                  <span className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                    <Wallet className="h-3 w-3 text-[#D39D3D]" /> Cash In / Out Ledger
                   </span>
-                  <span className="flex items-center gap-1 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
-                    <Calendar className="h-3 w-3 text-[#D39D3D]" /> E-Stamps & Invoicing
+                  <span className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">
+                    <Users className="h-3 w-3 text-[#D39D3D]" /> Clients CRM & Tax
                   </span>
                 </div>
               </div>

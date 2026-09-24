@@ -15,8 +15,6 @@ import {
   UserCheck,
   ShieldCheck,
   Settings,
-  Scale,
-  CalendarDays,
   Globe,
   ChevronDown,
   ChevronLeft,
@@ -193,38 +191,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <LayoutGrid className="w-4 h-4 shrink-0" />
                     {!isCollapsed && <span>Dashboard</span>}
-                  </button>
-
-                  {/* Court Litigation Cases */}
-                  <button
-                    onClick={() => handleNav('cases')}
-                    title="Court Litigation Cases"
-                    className={`w-full flex items-center ${
-                      isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
-                    } rounded-lg text-left transition-colors cursor-pointer ${
-                      activeSection === 'cases'
-                        ? 'bg-[#1473E6] text-white font-semibold shadow-xs'
-                        : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
-                    }`}
-                  >
-                    <Scale className="w-4 h-4 shrink-0 text-amber-400" />
-                    {!isCollapsed && <span>Court Cases</span>}
-                  </button>
-
-                  {/* Hearings Diary & Cause List */}
-                  <button
-                    onClick={() => handleNav('hearings')}
-                    title="Hearings Diary & Cause List"
-                    className={`w-full flex items-center ${
-                      isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
-                    } rounded-lg text-left transition-colors cursor-pointer ${
-                      activeSection === 'hearings'
-                        ? 'bg-[#1473E6] text-white font-semibold shadow-xs'
-                        : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
-                    }`}
-                  >
-                    <CalendarDays className="w-4 h-4 shrink-0 text-sky-400" />
-                    {!isCollapsed && <span>Hearings Diary</span>}
                   </button>
 
                   {/* Fee Invoices & Billing */}

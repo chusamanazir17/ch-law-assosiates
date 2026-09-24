@@ -225,17 +225,18 @@ export const DashboardView: React.FC = () => {
       {/* 2. Top Row 1: 4 Large Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Today's Cash In */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shadow-2xs">
               <ArrowUp className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Today's Cash In</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight font-mono mt-0.5">
-                Rs. {todayCashIn.toLocaleString()}
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Today's Cash In</div>
+              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
+                {todayCashIn.toLocaleString()}
               </div>
-              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
+              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5 font-admin">
                 <span>↑ Live</span>
                 <span className="text-slate-400 font-normal">registered today</span>
               </div>
@@ -243,24 +244,25 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:underline font-semibold self-end"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
           >
-            View Details &rarr;
+            Details &rarr;
           </button>
         </div>
 
         {/* Today's Cash Out */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-2xs">
               <ArrowDown className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Today's Cash Out</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight font-mono mt-0.5">
-                Rs. {todayCashOut.toLocaleString()}
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Today's Cash Out</div>
+              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
+                {todayCashOut.toLocaleString()}
               </div>
-              <div className="text-[11px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 mt-0.5">
+              <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1 mt-0.5 font-admin">
                 <span>Expenses</span>
                 <span className="text-slate-400 font-normal">and outgoings</span>
               </div>
@@ -268,57 +270,58 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('expenses')}
-            className="text-xs text-[#1473E6] hover:underline font-semibold self-end"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
           >
-            View Details &rarr;
+            Details &rarr;
           </button>
         </div>
 
         {/* Current Cash Balance */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/60 text-[#1473E6] dark:text-[#38BDF8] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-[#1473E6] dark:text-[#38BDF8] flex items-center justify-center shadow-2xs">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Current Cash Balance</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight font-mono mt-0.5">
-                Rs. {(accountBalances.cashOffice || 0).toLocaleString()}
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Current Cash Balance</div>
+              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
+                {(accountBalances.cashOffice || 0).toLocaleString()}
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 font-admin">
                 In office hand ledger
               </div>
             </div>
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:underline font-semibold self-end"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
           >
-            View Details &rarr;
+            Details &rarr;
           </button>
         </div>
 
         {/* Total Transactions */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs">
               <Receipt className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Transactions</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight font-mono mt-0.5">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Total Transactions</div>
+              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5">
                 {transactions.length}
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                <span className="text-emerald-600 font-bold">{totalCashInCount} In</span> | <span className="text-rose-600 font-bold">{totalCashOutCount} Out</span>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 font-admin">
+                <span className="text-emerald-600 font-semibold">{totalCashInCount} In</span> | <span className="text-rose-600 font-semibold">{totalCashOutCount} Out</span>
               </div>
             </div>
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:underline font-semibold self-end"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
           >
-            View Details &rarr;
+            Details &rarr;
           </button>
         </div>
       </div>
@@ -326,118 +329,118 @@ export const DashboardView: React.FC = () => {
       {/* 3. Top Row 2: 6 Compact Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {/* Stamps Sold */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
               <FileCheck2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Stamps Sold</div>
-              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Stamps Sold</div>
+              <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
                 Rs. {metrics.stampsSoldAmount.toLocaleString()}
               </div>
-              <div className="text-[10px] text-slate-400">{metrics.stampsSoldQty} stamps</div>
+              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.stampsSoldQty} stamps</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('stamps')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
 
         {/* Composing Income */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
               <Monitor className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Composing Income</div>
-              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Composing</div>
+              <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
                 Rs. {metrics.composingTotal.toLocaleString()}
               </div>
-              <div className="text-[10px] text-slate-400">{metrics.composingCount} jobs</div>
+              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.composingCount} jobs</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('composing')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('composing')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
 
         {/* Tax Consultancy Income */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Tax Consultancy</div>
-              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Tax Advisory</div>
+              <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
                 Rs. {metrics.taxTotal.toLocaleString()}
               </div>
-              <div className="text-[10px] text-slate-400">{metrics.taxCount} cases</div>
+              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.taxCount} cases</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('tax')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
 
         {/* Outstanding Payments */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
               <Clock className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Outstanding</div>
-              <div className="text-sm font-bold text-rose-600 font-mono">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Outstanding</div>
+              <div className="text-sm sm:text-[15px] font-bold text-rose-600 font-admin tabular-nums tracking-tight">
                 Rs. {metrics.totalOutstanding.toLocaleString()}
               </div>
-              <div className="text-[10px] text-slate-400">{metrics.outstandingCount} clients</div>
+              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.outstandingCount} clients</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('clients')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
 
         {/* Today's Profit */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Today's Net</div>
-              <div className={`text-sm font-bold font-mono ${metrics.todayNet >= 0 ? 'text-slate-900 dark:text-slate-100' : 'text-rose-600'}`}>
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Today's Net</div>
+              <div className={`text-sm sm:text-[15px] font-bold font-admin tabular-nums tracking-tight ${metrics.todayNet >= 0 ? 'text-slate-900 dark:text-slate-100' : 'text-rose-600'}`}>
                 Rs. {metrics.todayNet.toLocaleString()}
               </div>
-              <div className="text-[10px] text-emerald-600 font-bold">
+              <div className="text-[11px] text-emerald-600 font-semibold font-admin">
                 {metrics.todayNet >= 0 ? 'Positive Flow' : 'Deficit'}
               </div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('reports')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
 
         {/* Total Liquidity / Combined Accounts */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
               <BarChart2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] text-slate-500 font-medium truncate">Total Liquidity</div>
-              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Total Liquidity</div>
+              <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
                 Rs. {metrics.combinedLiquidity.toLocaleString()}
               </div>
-              <div className="text-[10px] text-slate-400">All Accounts</div>
+              <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">All Accounts</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('reports')} className="text-[10px] text-[#1473E6] hover:underline font-semibold text-right mt-1.5">
-            View Details &rarr;
+          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+            Details &rarr;
           </button>
         </div>
       </div>
@@ -445,10 +448,10 @@ export const DashboardView: React.FC = () => {
       {/* 4. Middle Section: Charts & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Income vs Expenses Bar Chart */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Income vs Expenses</h3>
-            <div className="flex items-center gap-3 text-xs">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-admin tracking-tight">Income vs Expenses</h3>
+            <div className="flex items-center gap-3 text-xs font-admin">
               <span className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Income
               </span>
@@ -472,17 +475,17 @@ export const DashboardView: React.FC = () => {
                   <div style={{ height: `${b.inc}%` }} className="w-3 bg-emerald-500 rounded-t-sm transition-all duration-300"></div>
                   <div style={{ height: `${b.exp}%` }} className="w-3 bg-rose-500 rounded-t-sm transition-all duration-300"></div>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium truncate max-w-full">{b.day}</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-full font-admin">{b.day}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Service-wise Income Donut */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Service-wise Income</h3>
-            <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 font-medium">All Time</span>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-admin tracking-tight">Service-wise Income</h3>
+            <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 font-medium font-admin">All Time</span>
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">
@@ -495,36 +498,36 @@ export const DashboardView: React.FC = () => {
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="30, 100" strokeDashoffset="-70" />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
-                <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100 font-mono leading-tight truncate max-w-[80px]">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight truncate max-w-[80px]">
                   Rs. {totalRevenue.toLocaleString()}
                 </span>
-                <span className="text-[8px] text-slate-400">Total Income</span>
+                <span className="text-[9px] text-slate-400 font-medium font-admin">Total Income</span>
               </div>
             </div>
 
             {/* Legend */}
-            <div className="space-y-1 text-[11px] flex-1">
+            <div className="space-y-1.5 text-xs font-admin flex-1">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Stamp Sales</span>
-                <span className="font-bold">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Tax Advisory</span>
-                <span className="font-bold">Rs. {metrics.taxTotal.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.taxTotal.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Composing</span>
-                <span className="font-bold">Rs. {metrics.composingTotal.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.composingTotal.toLocaleString()}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Payment Methods Donut */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Payment Accounts</h3>
-            <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 font-medium">Balances</span>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-admin tracking-tight">Payment Accounts</h3>
+            <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 font-medium font-admin">Balances</span>
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">
@@ -537,43 +540,43 @@ export const DashboardView: React.FC = () => {
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="20, 100" strokeDashoffset="-80" />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
-                <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100 font-mono leading-tight truncate max-w-[80px]">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight truncate max-w-[80px]">
                   Rs. {metrics.combinedLiquidity.toLocaleString()}
                 </span>
-                <span className="text-[8px] text-slate-400">Total Liquid</span>
+                <span className="text-[9px] text-slate-400 font-medium font-admin">Total Liquid</span>
               </div>
             </div>
 
             {/* Legend */}
-            <div className="space-y-1 text-[11px] flex-1">
+            <div className="space-y-1.5 text-xs font-admin flex-1">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-600"></span> Cash Office</span>
-                <span className="font-bold">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Bank Account</span>
-                <span className="font-bold">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> JazzCash</span>
-                <span className="font-bold">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500"></span> EasyPaisa</span>
-                <span className="font-bold">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions (6 Colored Buttons) */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Quick Actions</h3>
-            <p className="text-[11px] text-slate-400">Create new entries in 1-click</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-admin tracking-tight">Quick Actions</h3>
+            <p className="text-[11px] text-slate-400 font-admin">Create new entries in 1-click</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="grid grid-cols-2 gap-2 mt-2 font-admin">
             <button
               onClick={() => setIsQuickCashInOpen(true)}
               className="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
@@ -619,19 +622,19 @@ export const DashboardView: React.FC = () => {
         {/* Column 1: Recent Transactions & Outstanding Clients */}
         <div className="space-y-4">
           {/* Recent Transactions */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Transactions</h3>
-              <button onClick={() => setActiveSection('cash')} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Recent Transactions</h3>
+              <button onClick={() => setActiveSection('cash')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
             <div className="space-y-2">
               {displayTransactions.length === 0 ? (
-                <div className="py-4 text-center text-xs text-slate-400">No transactions recorded yet</div>
+                <div className="py-4 text-center text-xs text-slate-400 font-admin">No transactions recorded yet</div>
               ) : (
                 displayTransactions.map(tx => (
-                  <div key={tx.id} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                  <div key={tx.id} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 dark:border-slate-800/80 last:border-0 font-admin">
                     <div className="min-w-0 pr-2">
                       <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">{tx.client}</div>
                       <div className="text-[10px] text-slate-400 truncate">{tx.service}</div>
@@ -640,7 +643,7 @@ export const DashboardView: React.FC = () => {
                       <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${tx.type === 'IN' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'}`}>
                         {tx.type}
                       </span>
-                      <div className="font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5">Rs. {Number(tx.amount || 0).toLocaleString()}</div>
+                      <div className="font-bold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">Rs. {Number(tx.amount || 0).toLocaleString()}</div>
                     </div>
                   </div>
                 ))
@@ -649,26 +652,26 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Outstanding Clients */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Outstanding Clients</h3>
-              <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Outstanding Clients</h3>
+              <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
             <div className="space-y-2">
               {outstandingClients.length === 0 ? (
-                <div className="py-4 text-center text-xs text-slate-400">All client balances are clear</div>
+                <div className="py-4 text-center text-xs text-slate-400 font-admin">All client balances are clear</div>
               ) : (
                 outstandingClients.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                  <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 dark:border-slate-800/80 last:border-0 font-admin">
                     <div className="min-w-0 pr-2">
                       <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">{c.client}</div>
                       <div className="text-[10px] text-slate-400 truncate">{c.service}</div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-[10px] text-slate-400">Paid: Rs. {Number(c.paid || 0).toLocaleString()}</div>
-                      <div className="font-bold text-rose-600 font-mono">Rs. {Number(c.balance || 0).toLocaleString()}</div>
+                      <div className="text-[10px] text-slate-400 tabular-nums">Paid: Rs. {Number(c.paid || 0).toLocaleString()}</div>
+                      <div className="font-bold text-rose-600 tabular-nums">Rs. {Number(c.balance || 0).toLocaleString()}</div>
                     </div>
                   </div>
                 ))
@@ -680,22 +683,22 @@ export const DashboardView: React.FC = () => {
         {/* Column 2: Low Stamp Stock & Recent Activities */}
         <div className="space-y-4">
           {/* Low Stamp Stock */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Low Stamp Stock</h3>
-              <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Low Stamp Stock</h3>
+              <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
             <div className="space-y-2">
               {stampStockDisplay.length === 0 ? (
-                <div className="py-4 text-center text-xs text-slate-400">No stamp denominations found</div>
+                <div className="py-4 text-center text-xs text-slate-400 font-admin">No stamp denominations found</div>
               ) : (
                 stampStockDisplay.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">{s.den}</span>
+                  <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 dark:border-slate-800/80 last:border-0 font-admin">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 tabular-nums">{s.den}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-600 dark:text-slate-400 font-mono">{s.stock} pcs</span>
+                      <span className="font-bold text-slate-600 dark:text-slate-400 tabular-nums">{s.stock} pcs</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.color}`}>
                         {s.status}
                       </span>
@@ -707,16 +710,16 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Today's Activity */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Live Activity Feed</h3>
-              <button onClick={() => setActiveSection('audit')} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Live Activity Feed</h3>
+              <button onClick={() => setActiveSection('audit')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
-            <div className="space-y-2.5 text-xs">
+            <div className="space-y-2.5 text-xs font-admin">
               {recentActivities.length === 0 ? (
-                <div className="py-4 text-center text-xs text-slate-400">All systems operational and active</div>
+                <div className="py-4 text-center text-xs text-slate-400 font-admin">All systems operational and active</div>
               ) : (
                 recentActivities.map(act => (
                   <div key={act.id} className="flex items-start gap-2">
@@ -737,24 +740,24 @@ export const DashboardView: React.FC = () => {
         {/* Column 3: Upcoming Deadlines & Daily Closing */}
         <div className="space-y-4">
           {/* Upcoming Deadlines */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Upcoming Deadlines</h3>
-              <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Upcoming Deadlines</h3>
+              <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
             <div className="space-y-2">
               {upcomingDeadlines.length === 0 ? (
-                <div className="py-4 text-center text-xs text-slate-400">No pending deadlines</div>
+                <div className="py-4 text-center text-xs text-slate-400 font-admin">No pending deadlines</div>
               ) : (
                 upcomingDeadlines.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
+                  <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100 dark:border-slate-800/80 last:border-0 font-admin">
                     <div className="min-w-0 pr-2">
                       <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">{d.client}</div>
                       <div className="text-[10px] text-slate-400 truncate">{d.task}</div>
                     </div>
-                    <span className={`text-[11px] ${d.color} font-mono shrink-0`}>
+                    <span className={`text-[11px] ${d.color} tabular-nums shrink-0 font-semibold`}>
                       {d.due}
                     </span>
                   </div>
@@ -764,37 +767,37 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Daily Closing Summary */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">
                 Daily Closing ({dailyClosing?.date || new Date().toLocaleDateString('en-GB')})
               </h3>
-              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
                 {dailyClosing?.isClosed ? 'Closed' : 'Close Day'}
               </button>
             </div>
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2 text-xs font-admin">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Opening Balance</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   Rs. {Number(dailyClosing?.openingBalance || dailyClosing?.openingCash || 0).toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash In</span>
-                <span className="font-bold text-emerald-600 font-mono">
+                <span className="font-bold text-emerald-600 tabular-nums">
                   Rs. {todayCashIn.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash Out</span>
-                <span className="font-bold text-rose-600 font-mono">
+                <span className="font-bold text-rose-600 tabular-nums">
                   Rs. {todayCashOut.toLocaleString()}
                 </span>
               </div>
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
-                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">Closing / Hand Cash</span>
-                <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm font-mono">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-emerald-50/80 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs font-admin">Closing / Hand Cash</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm tabular-nums">
                   Rs. {Number(accountBalances.cashOffice || 0).toLocaleString()}
                 </span>
               </div>
@@ -803,46 +806,46 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Column 4: Office Partner & Compliance Card */}
-        <div className="bg-gradient-to-br from-[#0B1B2C] to-[#132A44] text-white rounded-2xl p-5 shadow-xs flex flex-col justify-between overflow-hidden relative border border-slate-800">
+        <div className="bg-gradient-to-br from-[#0B1B2C] to-[#132A44] text-white rounded-2xl p-5 shadow-xs flex flex-col justify-between overflow-hidden relative border border-slate-800 font-admin">
           <div>
             <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3 border border-amber-500/30">
               <Building2 className="w-5 h-5" />
             </div>
-            <h3 className="font-extrabold text-base text-white tracking-tight leading-snug">
-              Trusted Office & Compliance Partner
+            <h3 className="font-bold text-base text-white tracking-tight leading-snug font-admin">
+              Chamber Practice Operations
             </h3>
-            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-              E-Stamp | Composing | Tax Advisory For Individuals & Businesses in Sahiwal
+            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed font-normal">
+              E-Stamp | Composing | FBR Tax Advisory For Individuals & Businesses
             </p>
 
-            <div className="space-y-2 mt-4 text-xs">
+            <div className="space-y-2 mt-4 text-xs font-admin">
               <div className="flex items-center gap-2 text-emerald-400 font-medium">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span className="text-white text-[11px]">Accurate & Compliant</span>
               </div>
               <div className="flex items-center gap-2 text-emerald-400 font-medium">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="text-white text-[11px]">Professional Support</span>
+                <span className="text-white text-[11px]">FBR & E-Stamp Treasury</span>
               </div>
               <div className="flex items-center gap-2 text-emerald-400 font-medium">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="text-white text-[11px]">Your Growth Our Priority</span>
+                <span className="text-white text-[11px]">Chamber No. 121 Sahiwal</span>
               </div>
             </div>
           </div>
 
           {/* Pakistan E-Stamp visual representation */}
-          <div className="mt-5 rounded-xl bg-white/10 p-3 border border-white/15 backdrop-blur-xs flex items-center justify-between">
+          <div className="mt-5 rounded-xl bg-white/10 p-3 border border-white/15 backdrop-blur-xs flex items-center justify-between font-admin">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
                 ₨
               </div>
               <div>
-                <div className="text-[11px] font-bold text-white tracking-wide uppercase">Pakistan E-Stamp</div>
-                <div className="text-[10px] text-slate-300">Chamber No. 121 Sahiwal</div>
+                <div className="text-[11px] font-bold text-white tracking-wide uppercase font-admin">Pakistan E-Stamp</div>
+                <div className="text-[10px] text-slate-300 font-admin">Chamber No. 121 Sahiwal</div>
               </div>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold">
+            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold font-admin">
               Verified
             </span>
           </div>

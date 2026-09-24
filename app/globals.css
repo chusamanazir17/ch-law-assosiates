@@ -46,6 +46,15 @@ body {
   color: #F4F6F8;
 }
 
+.font-admin {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum" !important;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums !important;
+}
+
 /* Direction stays LTR across all languages */
 html[dir="rtl"] {
   text-align: left;

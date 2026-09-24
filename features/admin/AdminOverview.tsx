@@ -798,9 +798,9 @@ export default function AdminOverview() {
       <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 sm:p-6 shadow-sm transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#C8973D] dark:text-[#E5B558] mb-1">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#C8973D] dark:text-[#E5B558] mb-1 font-admin">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#C8973D]/10 dark:bg-[#C8973D]/20 px-2.5 py-0.5">
-                <Scale className="h-3 w-3" />
+                <Building2 className="h-3 w-3" />
                 Chamber 121 Operations Active
               </span>
               <span className="text-slate-400 dark:text-slate-600">•</span>
@@ -907,7 +907,7 @@ export default function AdminOverview() {
               Office Management & Practice Accounts System
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-              Complete chamber operations: E-Stamp & 32-A Challan, Cash In / Cash Out & ledger accounting, case diary & court hearings, client directory, and instant receipt generation.
+              Complete chamber operations: E-Stamp & 32-A Challan, Cash In / Cash Out & treasury ledger accounting, client CRM dossiers, tax advisory, and instant receipt generation.
             </p>
           </div>
 
@@ -929,11 +929,11 @@ export default function AdminOverview() {
             </Link>
 
             <Link
-              href="/office?tab=cases"
+              href="/office?tab=clients"
               className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white px-3.5 py-2 text-xs font-semibold backdrop-blur-xs transition"
             >
-              <Scale className="h-3.5 w-3.5 text-amber-400" />
-              <span>Case Diary</span>
+              <Users className="h-3.5 w-3.5 text-amber-400" />
+              <span>Clients CRM</span>
             </Link>
 
             <Link
@@ -957,12 +957,12 @@ export default function AdminOverview() {
                 <MessageSquare className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Consultation Inquiries</p>
+                <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Consultation Inquiries</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
                     {cmsStats.newInquiries + 23}
                   </span>
-                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-admin">
                     ↑ +18%
                   </span>
                 </div>
@@ -971,9 +971,9 @@ export default function AdminOverview() {
             {/* Sparkline */}
             <MiniSparkline points={[12, 14, 18, 16, 21, 24]} color="#0284c7" />
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>{cmsStats.newInquiries} pending review</span>
-            <Link href="/admin/inquiries" className="text-[#C8973D] hover:underline font-medium">
+            <Link href="/admin/inquiries" className="text-[#C8973D] hover:underline font-semibold font-admin">
               View inquiries →
             </Link>
           </div>
@@ -987,12 +987,12 @@ export default function AdminOverview() {
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Active Tax Reminders</p>
+                <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Active Tax Reminders</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
                     {subscriberAnalytics.activeCount}
                   </span>
-                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-admin">
                     100% active
                   </span>
                 </div>
@@ -1001,9 +1001,9 @@ export default function AdminOverview() {
             {/* Sparkline */}
             <MiniSparkline points={[2, 3, 3, 4, 4, 4]} color="#d97706" />
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>Automated dispatches on</span>
-            <Link href="/admin/subscribers" className="text-[#C8973D] hover:underline font-medium">
+            <Link href="/admin/subscribers" className="text-[#C8973D] hover:underline font-semibold font-admin">
               Subscribers →
             </Link>
           </div>
@@ -1017,12 +1017,12 @@ export default function AdminOverview() {
                 <FileText className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Published Guides</p>
+                <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Published Guides</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
                     {cmsStats.totalPosts}
                   </span>
-                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                  <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-admin">
                     Live on site
                   </span>
                 </div>
@@ -1031,9 +1031,9 @@ export default function AdminOverview() {
             {/* Sparkline */}
             <MiniSparkline points={[3, 4, 4, 5, 5, 5]} color="#059669" />
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>{cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft</span>
-            <Link href="/admin/posts" className="text-[#C8973D] hover:underline font-medium">
+            <Link href="/admin/posts" className="text-[#C8973D] hover:underline font-semibold font-admin">
               Manage →
             </Link>
           </div>
@@ -1047,12 +1047,12 @@ export default function AdminOverview() {
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-medium text-[#64748B] dark:text-slate-400">Statutory Deadlines</p>
+                <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Statutory Deadlines</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
+                  <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
                     2 Active
                   </span>
-                  <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded">
+                  <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-admin">
                     Sep 30 Due
                   </span>
                 </div>

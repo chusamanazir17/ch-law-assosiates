@@ -19,8 +19,6 @@ import { ReportsView } from './components/views/ReportsView';
 import { StaffUsersView } from './components/views/StaffUsersView';
 import { AuditLogsView } from './components/views/AuditLogsView';
 import { SettingsView } from './components/views/SettingsView';
-import { CasesView } from './components/views/CasesView';
-import { HearingsView } from './components/views/HearingsView';
 import { InvoicesView } from './components/views/InvoicesView';
 import { AttendanceView } from './components/views/AttendanceView';
 
@@ -61,6 +59,9 @@ const MainLayout: React.FC = () => {
             services: 'composing',
             register: 'cash',
             'daily-register': 'cash',
+            cases: 'dashboard',
+            hearings: 'dashboard',
+            court: 'dashboard',
           };
           const resolved = aliasMap[tabNorm] || tabNorm;
           setActiveSection(resolved);
@@ -76,6 +77,9 @@ const MainLayout: React.FC = () => {
               finance: 'cash',
               estamp: 'stamps',
               services: 'composing',
+              cases: 'dashboard',
+              hearings: 'dashboard',
+              court: 'dashboard',
             };
             setActiveSection(aliasMap[section] || section);
             return;
@@ -122,11 +126,9 @@ const MainLayout: React.FC = () => {
   const renderActiveView = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <DashboardView />;
       case 'cases':
-        return <CasesView />;
       case 'hearings':
-        return <HearingsView />;
+        return <DashboardView />;
       case 'invoices':
         return <InvoicesView />;
       case 'attendance':
@@ -164,7 +166,7 @@ const MainLayout: React.FC = () => {
 
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18] text-[#0F172A] dark:text-[#F1F5F9] font-sans antialiased select-none transition-colors duration-150">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18] text-[#0F172A] dark:text-[#F1F5F9] font-admin antialiased select-none transition-colors duration-150">
       {/* Dark Navy Sidebar */}
       <Sidebar
         isOpen={isMobileSidebarOpen}
