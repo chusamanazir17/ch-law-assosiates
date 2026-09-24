@@ -16,16 +16,20 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
 
-  // Allow the /admin portal selection page and /admin/login public access
-  if (pathname === "/admin" || pathname === "/admin/login" || pathname === "/api/admin/login") {
+  // Allow the /admin portal selection page, /admin/login, and /office routes direct access
+  if (
+    pathname === "/admin" ||
+    pathname === "/admin/login" ||
+    pathname === "/api/admin/login" ||
+    pathname.startsWith("/office")
+  ) {
     return response;
   }
 
-  // Check if target is a protected CMS or Office route
+  // Check if target is a protected CMS route
   const isCmsRoute = pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
-  const isOfficeRoute = pathname.startsWith("/office") || pathname.startsWith("/api/office");
 
-  if (!isCmsRoute && !isOfficeRoute) {
+  if (!isCmsRoute) {
     return response;
   }
 

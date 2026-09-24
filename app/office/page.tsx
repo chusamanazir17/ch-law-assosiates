@@ -1,5 +1,8 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import React from "react";
+import { App } from "@/features/office/App";
 
 export default function OfficeRootPage() {
-  redirect("/office/dashboard");
+  return <App />;
 }
