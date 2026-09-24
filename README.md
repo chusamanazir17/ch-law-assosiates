@@ -94,9 +94,15 @@ npm run clean      # remove local Next.js/TypeScript build artifacts
 
 ## Admin routes
 
-The `/admin` area is protected by Supabase authentication plus the `is_admin` database authorization check. Admin pages are marked `noindex`.
+The `/admin` area is protected by admin authentication (env credentials or Supabase Auth) plus role checks. Admin pages are marked `noindex`.
 
-CMS capabilities include posts, announcements, deadlines, inquiries, subscribers, reminder history and media. Routes that are application-defined rather than database-managed are presented as route inventories instead of pretending to persist edits that the data model does not support.
+## Data layer
+
+Supabase is the single source of truth. All CMS content (services catalog, page content, homepage sections, site/header/footer/WhatsApp settings), blog posts, announcements, inquiries, subscribers, media, tax deadlines, reminder deliveries and the entire office management system (clients, cases, hearings, invoices, payments, stamps, receipts, attendance, audit) are persisted in Supabase. There are no local JSON-file stores or localStorage fallbacks for application data; empty tables fall back to built-in defaults for display only. Content auto-seeds into empty tables on first read.
+
+All admin write operations run through server API routes using the service-role key (`SUPABASE_SERVICE_ROLE_KEY`), so the admin panel works with either the credential-based admin session or a Supabase Auth session.
+
+See `docs/backend-setup.md` for the complete setup and verification guide.
 
 ## Production notes
 

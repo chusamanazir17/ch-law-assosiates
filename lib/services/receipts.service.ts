@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { ReceiptRecord } from "@/types/office";
+
+const isUuid = (val?: string | null): val is string =>
+  typeof val === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 export interface CreateReceiptDTO {
   receipt_number?: string;
@@ -19,7 +22,7 @@ export async function listReceipts(filter?: {
   clientId?: string;
   search?: string;
 }): Promise<ReceiptRecord[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("receipts")
     .select("*")
@@ -48,14 +51,24 @@ export async function listReceipts(filter?: {
 }
 
 export async function createReceiptRecord(dto: CreateReceiptDTO): Promise<ReceiptRecord> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const receiptNo = dto.receipt_number || `REC-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+  let validClientId: string | null = null;
+  if (isUuid(dto.client_id)) {
+    const { data: clientExists } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", dto.client_id)
+      .maybeSingle();
+    if (clientExists) validClientId = clientExists.id;
+  }
 
   const { data, error } = await supabase
     .from("receipts")
     .insert({
       receipt_number: receiptNo,
-      client_id: dto.client_id || null,
+      client_id: validClientId,
       client_name: dto.client_name.trim(),
       service_type: dto.service_type || "Legal Documentation",
       amount_paid: dto.amount_paid || 0,
@@ -77,7 +90,7 @@ export async function createReceiptRecord(dto: CreateReceiptDTO): Promise<Receip
 }
 
 export async function updateReceiptStatus(id: string, status: "paid" | "partial" | "unpaid" | "cancelled", notes?: string): Promise<ReceiptRecord> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("receipts")
     .update({
@@ -95,3 +108,4 @@ export async function updateReceiptStatus(id: string, status: "paid" | "partial"
 
   return data as ReceiptRecord;
 }
+

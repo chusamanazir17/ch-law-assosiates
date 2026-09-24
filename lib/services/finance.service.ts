@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { FinancialLedgerEntry, PaymentAccount, Expense, DailyClosing } from "@/types/office";
+
+const isUuid = (val?: string | null): val is string =>
+  typeof val === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 export interface RecordTransactionDTO {
   accountId: string;
@@ -22,7 +25,7 @@ export interface RecordTransferDTO {
 }
 
 export async function listPaymentAccounts(): Promise<PaymentAccount[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("payment_accounts")
     .select("*")
@@ -36,6 +39,7 @@ export async function listPaymentAccounts(): Promise<PaymentAccount[]> {
   return (data || []) as PaymentAccount[];
 }
 
+
 export async function createPaymentAccount(data: {
   name: string;
   account_type: "cash" | "bank" | "jazzcash" | "easypaisa" | "other";
@@ -43,7 +47,7 @@ export async function createPaymentAccount(data: {
   bank_name?: string | null;
   opening_balance?: number;
 }): Promise<PaymentAccount> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { data: acc, error } = await supabase
     .from("payment_accounts")
     .insert({
@@ -72,7 +76,7 @@ export async function listLedgerTransactions(filter?: {
   category?: string;
   limit?: number;
 }): Promise<FinancialLedgerEntry[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("financial_ledger")
     .select(`
@@ -115,8 +119,8 @@ export async function resolvePaymentAccount(
   supabase: any,
   accountIdentifier?: string | null
 ): Promise<{ id: string; current_balance: number; name: string }> {
-  const isUuid = typeof accountIdentifier === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(accountIdentifier);
-  if (isUuid) {
+  const isAccountUuid = isUuid(accountIdentifier);
+  if (isAccountUuid) {
     const { data: byId } = await supabase
       .from("payment_accounts")
       .select("id, current_balance, name")
@@ -175,7 +179,7 @@ export async function resolvePaymentAccount(
 }
 
 export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promise<FinancialLedgerEntry> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const txNo = `TXN-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
   const targetAccount = await resolvePaymentAccount(supabase, dto.accountId);
@@ -184,6 +188,31 @@ export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promis
   const newBalance = dto.entryType === "credit"
     ? targetAccount.current_balance + dto.amount
     : targetAccount.current_balance - dto.amount;
+
+  // Sanitize client_id: must be valid UUID and exist in database
+  let validClientId: string | null = null;
+  if (isUuid(dto.clientId)) {
+    const { data: clientExists } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("id", dto.clientId)
+      .maybeSingle();
+    if (clientExists) validClientId = clientExists.id;
+  }
+
+  // Sanitize created_by: must be valid UUID and exist in profiles
+  let validCreatedBy: string | null = null;
+  if (isUuid(dto.createdBy)) {
+    const { data: profExists } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", dto.createdBy)
+      .maybeSingle();
+    if (profExists) validCreatedBy = profExists.id;
+  }
+
+  // Sanitize reference_id: must be valid UUID
+  const validRefId = isUuid(dto.referenceId) ? dto.referenceId : null;
 
   const { data: entry, error: ledErr } = await supabase
     .from("financial_ledger")
@@ -196,9 +225,9 @@ export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promis
       category: dto.category.trim(),
       description: dto.description.trim(),
       reference_type: dto.referenceType || null,
-      reference_id: dto.referenceId || null,
-      client_id: dto.clientId || null,
-      created_by: dto.createdBy || null,
+      reference_id: validRefId,
+      client_id: validClientId,
+      created_by: validCreatedBy,
     })
     .select(`
       *,
@@ -250,7 +279,7 @@ export async function recordTransfer(dto: RecordTransferDTO): Promise<{ debit: F
 }
 
 export async function listExpenses(filter?: { accountId?: string; category?: string }): Promise<Expense[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("expenses")
     .select(`
@@ -288,7 +317,7 @@ export async function recordExpense(data: {
   description?: string | null;
   receipt_url?: string | null;
 }): Promise<Expense> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const targetAccount = await resolvePaymentAccount(supabase, data.account_id);
   const accountId = targetAccount.id;
 
@@ -348,7 +377,7 @@ export async function recordExpense(data: {
 }
 
 export async function getDailyClosingRecord(date?: string): Promise<DailyClosing | null> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const targetDate = date || new Date().toISOString().split("T")[0];
 
   const { data, error } = await supabase
@@ -362,7 +391,7 @@ export async function getDailyClosingRecord(date?: string): Promise<DailyClosing
 }
 
 export async function saveDailyClosingRecord(data: Partial<DailyClosing>): Promise<DailyClosing> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const today = new Date().toISOString().split("T")[0];
 
   const { data: closing, error } = await supabase
@@ -392,3 +421,4 @@ export async function saveDailyClosingRecord(data: Partial<DailyClosing>): Promi
 
   return closing as DailyClosing;
 }
+

@@ -3,19 +3,19 @@ import { getSiteUrl } from "@/config/env";
 import { getSiteSettings } from "@/lib/db/siteSettingsStore";
 import { getHomeSections } from "@/lib/db/homeSectionsStore";
 
-export default function JsonLd() {
+export default async function JsonLd() {
   const siteUrl = getSiteUrl();
   let settings;
   let homeSections;
 
   try {
-    settings = getSiteSettings();
+    settings = await getSiteSettings();
   } catch {
     settings = null;
   }
 
   try {
-    homeSections = getHomeSections();
+    homeSections = await getHomeSections();
   } catch {
     homeSections = null;
   }

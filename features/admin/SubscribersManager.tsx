@@ -29,7 +29,6 @@ import {
   PieChart,
   TrendingUp,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import type { SubscriberWithCategories, TaxCategory } from "@/types/reminders";
 
 const PAGE_SIZE = 12;
@@ -102,39 +101,7 @@ export default function SubscribersManager() {
   const [addLoading, setAddLoading] = useState(false);
   const [addSuccess, setAddSuccess] = useState(false);
 
-  // Load available categories
-  useEffect(() => {
-    async function fetchCats() {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("tax_categories")
-          .select("*")
-          .order("sort_order", { ascending: true });
-        if (error || !data || data.length === 0) {
-          setCategories([
-            { id: "income-tax-individuals", name: "Income Tax - Individuals & Salaried", slug: "income-tax-individuals", description: "Annual FBR returns", is_active: true, sort_order: 1, created_at: "", updated_at: "" },
-            { id: "business-corporate-tax", name: "Business & Corporate Tax", slug: "business-corporate-tax", description: "AOP, Sole Proprietor, Private Ltd", is_active: true, sort_order: 2, created_at: "", updated_at: "" },
-            { id: "sales-tax-pra", name: "Sales Tax (Federal & PRA)", slug: "sales-tax-pra", description: "Monthly sales tax returns", is_active: true, sort_order: 3, created_at: "", updated_at: "" },
-            { id: "withholding-tax", name: "Withholding Tax Statements", slug: "withholding-tax", description: "Periodic withholding statements", is_active: true, sort_order: 4, created_at: "", updated_at: "" },
-            { id: "property-tax-stamp-duty", name: "Property & Capital Value Tax", slug: "property-tax-stamp-duty", description: "E-Stamp duty and transfer deadlines", is_active: true, sort_order: 5, created_at: "", updated_at: "" },
-          ]);
-          return;
-        }
-        setCategories(data);
-      } catch {
-        setCategories([
-          { id: "income-tax-individuals", name: "Income Tax - Individuals & Salaried", slug: "income-tax-individuals", description: "Annual FBR returns", is_active: true, sort_order: 1, created_at: "", updated_at: "" },
-          { id: "business-corporate-tax", name: "Business & Corporate Tax", slug: "business-corporate-tax", description: "AOP, Sole Proprietor, Private Ltd", is_active: true, sort_order: 2, created_at: "", updated_at: "" },
-          { id: "sales-tax-pra", name: "Sales Tax (Federal & PRA)", slug: "sales-tax-pra", description: "Monthly sales tax returns", is_active: true, sort_order: 3, created_at: "", updated_at: "" },
-          { id: "withholding-tax", name: "Withholding Tax Statements", slug: "withholding-tax", description: "Periodic withholding statements", is_active: true, sort_order: 4, created_at: "", updated_at: "" },
-          { id: "property-tax-stamp-duty", name: "Property & Capital Value Tax", slug: "property-tax-stamp-duty", description: "E-Stamp duty and transfer deadlines", is_active: true, sort_order: 5, created_at: "", updated_at: "" },
-        ]);
-      }
-    }
-    fetchCats();
-  }, []);
-
+  // Categories are loaded together with subscribers from the admin API.
   const fetchSubscribers = useCallback(async () => {
     setIsLoading(true);
     setActionFeedback(null);
@@ -149,6 +116,10 @@ export default function SubscribersManager() {
 
       if (typeof data.emailConfigured === "boolean") {
         setEmailConfigured(data.emailConfigured);
+      }
+
+      if (Array.isArray(data.categories)) {
+        setCategories(data.categories);
       }
 
       setAllSubscribers(data.subscribers || []);

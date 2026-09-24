@@ -16,7 +16,6 @@ import {
   AlertCircle,
   FileImage,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import type { MediaAsset } from "@/types/cms";
 
 export default function MediaManager() {
@@ -39,17 +38,13 @@ export default function MediaManager() {
   const loadAssets = async () => {
     setIsLoading(true);
     try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("media_assets")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setAssets(data || []);
+      const res = await fetch("/api/admin/media");
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to load media assets.");
+      setAssets(json.assets || []);
     } catch (err: unknown) {
       console.error("[Media Load Error]", err);
-      setMessage({ type: "error", text: "Failed to load media assets from Supabase." });
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to load media assets from Supabase." });
     } finally {
       setIsLoading(false);
     }
@@ -73,22 +68,15 @@ export default function MediaManager() {
     if (!confirm(`Delete image asset "${asset.name}"?`)) return;
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("media_assets").delete().eq("id", asset.id);
-      if (error) throw error;
-
-      let storageCleanupWarning: string | null = null;
-      if (asset.storage_path) {
-        const { error: storageError } = await supabase.storage.from("media").remove([asset.storage_path]);
-        if (storageError) {
-          storageCleanupWarning = storageError.message;
-          console.warn("[Media Delete] Database record removed but storage cleanup failed:", storageError.message);
-        }
-      }
+      const params = new URLSearchParams({ id: asset.id });
+      if (asset.storage_path) params.set("storagePath", asset.storage_path);
+      const res = await fetch(`/api/admin/media?${params.toString()}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to delete image asset.");
 
       setAssets((prev) => prev.filter((item) => item.id !== asset.id));
       setMessage(
-        storageCleanupWarning
+        json.storageWarning
           ? { type: "error", text: "The media record was removed, but the stored file could not be deleted. Check Supabase Storage permissions." }
           : { type: "success", text: "Image asset removed successfully." }
       );
@@ -107,97 +95,40 @@ export default function MediaManager() {
     setActionLoading(true);
     setMessage(null);
     try {
-      const supabase = createClient();
-      let finalUrl = assetUrl.trim();
-      let mimeType: string | null = null;
-      let fileSize: number | null = null;
-      let storagePath: string | null = null;
+      let savedAsset: MediaAsset | null = null;
 
       if (inputMode === "upload") {
         if (!selectedFile) {
           throw new Error("Please select an image file to upload.");
         }
 
-        const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-        if (!allowedTypes.has(selectedFile.type)) {
-          throw new Error("Only JPG, PNG, WebP, or GIF images can be uploaded.");
-        }
-        if (selectedFile.size > 5 * 1024 * 1024) {
-          throw new Error("Image files must be 5 MB or smaller.");
-        }
+        const formData = new FormData();
+        formData.set("file", selectedFile);
+        formData.set("name", assetTitle.trim());
+        formData.set("altText", assetAlt.trim());
 
-        mimeType = selectedFile.type;
-        fileSize = selectedFile.size;
-
-        const extensionByType: Record<string, string> = {
-          "image/jpeg": "jpg",
-          "image/png": "png",
-          "image/webp": "webp",
-          "image/gif": "gif",
-        };
-        const fileName = `${crypto.randomUUID()}.${extensionByType[selectedFile.type]}`;
-        const filePath = `uploads/${fileName}`;
-        storagePath = filePath;
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("media")
-          .upload(filePath, selectedFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          throw new Error(`Image upload failed: ${uploadError.message}`);
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("media")
-          .getPublicUrl(filePath);
-        finalUrl = publicUrlData.publicUrl;
+        const res = await fetch("/api/admin/media", { method: "POST", body: formData });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error(json.error || "Image upload failed.");
+        savedAsset = json.asset as MediaAsset;
       } else {
+        const finalUrl = assetUrl.trim();
         if (!finalUrl) {
           throw new Error("Please enter a valid image URL.");
         }
 
-        let parsedUrl: URL;
-        try {
-          parsedUrl = new URL(finalUrl);
-        } catch {
-          throw new Error("Please enter a valid image URL.");
-        }
-        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-          throw new Error("Image URLs must use HTTP or HTTPS.");
-        }
-        finalUrl = parsedUrl.toString();
+        const res = await fetch("/api/admin/media", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: assetTitle.trim(), altText: assetAlt.trim(), url: finalUrl }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error(json.error || "Failed to save media asset.");
+        savedAsset = json.asset as MediaAsset;
       }
 
-      // Insert record into media_assets. If persistence fails after an upload,
-      // remove the new object so Storage does not accumulate orphaned files.
-      const { data, error } = await supabase
-        .from("media_assets")
-        .insert({
-          name: assetTitle.trim(),
-          alt_text: assetAlt.trim() || assetTitle.trim(),
-          url: finalUrl,
-          mime_type: mimeType,
-          size_bytes: fileSize,
-          storage_path: storagePath,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        if (storagePath) {
-          const { error: cleanupError } = await supabase.storage.from("media").remove([storagePath]);
-          if (cleanupError) {
-            console.warn("[Media Save] Failed to roll back uploaded object:", cleanupError.message);
-          }
-        }
-        throw error;
-      }
-
-      if (data) {
-        setAssets((prev) => [data, ...prev]);
+      if (savedAsset) {
+        setAssets((prev) => [savedAsset as MediaAsset, ...prev]);
       }
 
       setMessage({ type: "success", text: "Image asset saved successfully!" });

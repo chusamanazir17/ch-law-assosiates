@@ -24,3 +24,16 @@ export function createServiceClient() {
     },
   });
 }
+
+/**
+ * Returns a service-role client if SUPABASE_SERVICE_ROLE_KEY is configured,
+ * otherwise safely falls back to the standard server client.
+ */
+export async function getAdminDatabaseClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    return createServiceClient();
+  }
+  const { createClient } = await import("@/lib/supabase/server");
+  return await createClient();
+}
+

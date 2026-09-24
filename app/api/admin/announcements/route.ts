@@ -23,7 +23,7 @@ export async function GET() {
   if (!session) return unauthorized();
 
   try {
-    const announcements = await listAnnouncements(session.supabase);
+    const announcements = await listAnnouncements();
     return NextResponse.json({ success: true, announcements });
   } catch (error) {
     return NextResponse.json(
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const saved = await saveNotice(session.supabase, {
+    const saved = await saveNotice({
       id,
       title,
       message,
@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Announcement ID is required" }, { status: 400 });
     }
 
-    const updated = await toggleNotice(session.supabase, id);
+    const updated = await toggleNotice(id);
     if (!updated) {
       return NextResponse.json({ success: false, error: "Announcement not found" }, { status: 404 });
     }
@@ -106,7 +106,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Announcement ID is required" }, { status: 400 });
     }
 
-    const success = await deleteNotice(session.supabase, id);
+    const success = await deleteNotice(id);
     if (!success) {
       return NextResponse.json({ success: false, error: "Announcement not found" }, { status: 404 });
     }

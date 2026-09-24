@@ -1,6 +1,14 @@
-import fs from "fs";
-import path from "path";
-import { SERVICE_CATEGORIES, HERO_IMAGES } from "@/lib/site";
+import {
+  cmsCacheGet,
+  cmsCacheSet,
+  getCmsClient,
+  invalidateCmsCache,
+  isCmsBackendConfigured,
+} from "@/lib/db/cmsClient";
+import { HERO_IMAGES } from "@/lib/site";
+import type { Database } from "@/types/database.types";
+
+type CmsDbClient = import("@supabase/supabase-js").SupabaseClient<Database>;
 
 export interface SubService {
   id: string;
@@ -27,9 +35,6 @@ export interface CmsService {
   order: number;
   updatedAt: string;
 }
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const SERVICES_FILE = path.join(DATA_DIR, "services.json");
 
 const INITIAL_SERVICES: CmsService[] = [
   {
@@ -243,95 +248,173 @@ const INITIAL_SERVICES: CmsService[] = [
   },
 ];
 
-export function getAllServices(): CmsService[] {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+const CACHE_KEY = "cms:services";
 
-    if (!fs.existsSync(SERVICES_FILE)) {
-      fs.writeFileSync(SERVICES_FILE, JSON.stringify(INITIAL_SERVICES, null, 2), "utf-8");
+type ServiceRow = Database["public"]["Tables"]["cms_services"]["Row"];
+
+function rowToService(row: ServiceRow): CmsService {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    nameUrdu: row.name_urdu ?? "",
+    category: row.category ?? "General Legal Services",
+    description: row.description ?? "",
+    tagline: row.tagline ?? "",
+    heroImage: row.hero_image ?? "",
+    turnaroundTime: row.turnaround_time ?? "",
+    requiredDocuments: Array.isArray(row.required_documents) ? (row.required_documents as unknown as string[]) : [],
+    governmentFeeInfo: row.government_fee_info ?? "",
+    items: Array.isArray(row.items) ? (row.items as unknown as CmsService["items"]) : [],
+    active: row.active ?? true,
+    order: row.sort_order ?? 100,
+    updatedAt: row.updated_at,
+  };
+}
+
+function serviceToRow(service: CmsService) {
+  return {
+    id: service.id,
+    slug: service.slug,
+    name: service.name,
+    name_urdu: service.nameUrdu ?? "",
+    category: service.category ?? "General Legal Services",
+    description: service.description ?? "",
+    tagline: service.tagline ?? "",
+    hero_image: service.heroImage ?? "",
+    turnaround_time: service.turnaroundTime ?? "",
+    required_documents: JSON.parse(JSON.stringify(service.requiredDocuments ?? [])),
+    government_fee_info: service.governmentFeeInfo ?? "",
+    items: JSON.parse(JSON.stringify(service.items ?? [])),
+    active: service.active ?? true,
+    sort_order: service.order ?? 100,
+  };
+}
+
+async function seedServicesIfEmpty(client: CmsDbClient): Promise<boolean> {
+  const { count, error } = await client.from("cms_services").select("id", { count: "exact", head: true });
+  if (error) throw error;
+  if ((count ?? 0) > 0) return false;
+
+  const rows = INITIAL_SERVICES.map((service, index) => ({
+    ...serviceToRow(service),
+    sort_order: service.order ?? index + 1,
+  }));
+  const { error: insertError } = await client.from("cms_services").insert(rows);
+  if (insertError) throw insertError;
+  console.info(`[ServicesStore] Seeded ${rows.length} default services into Supabase.`);
+  return true;
+}
+
+export async function getAllServices(): Promise<CmsService[]> {
+  const cached = cmsCacheGet<CmsService[]>(CACHE_KEY);
+  if (cached) return cached;
+
+  if (!isCmsBackendConfigured()) return INITIAL_SERVICES;
+
+  try {
+    const client = await getCmsClient();
+    if (!client) return INITIAL_SERVICES;
+
+    const { data, error } = await client
+      .from("cms_services")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      // First run on a fresh database: seed the catalog defaults.
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+        await seedServicesIfEmpty(client as CmsDbClient);
+        invalidateCmsCache(CACHE_KEY);
+        return [...INITIAL_SERVICES].sort((a, b) => a.order - b.order);
+      }
+      console.warn("[ServicesStore] cms_services is empty; using built-in defaults.");
       return INITIAL_SERVICES;
     }
 
-    const content = fs.readFileSync(SERVICES_FILE, "utf-8");
-    const parsed = JSON.parse(content) as CmsService[];
-    return parsed.sort((a, b) => a.order - b.order);
+    const services = (data as ServiceRow[]).map(rowToService);
+    cmsCacheSet(CACHE_KEY, services);
+    return services;
   } catch (err) {
-    console.error("[ServicesStore] Failed to read services, using defaults:", err);
+    console.error("[ServicesStore] Failed to read services from Supabase, using defaults:", err);
     return INITIAL_SERVICES;
   }
 }
 
-export function getServiceBySlug(slug: string): CmsService | null {
-  const all = getAllServices();
+export async function getServiceBySlug(slug: string): Promise<CmsService | null> {
+  const all = await getAllServices();
   return all.find((s) => s.slug === slug || s.id === slug) || null;
 }
 
-export function saveService(serviceData: Partial<CmsService> & { name: string }): CmsService {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
-    const all = getAllServices();
-    const slug = serviceData.slug || serviceData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    const existingIndex = all.findIndex((s) => s.id === serviceData.id || s.slug === slug);
-
-    let updatedService: CmsService;
-
-    if (existingIndex >= 0) {
-      updatedService = {
-        ...all[existingIndex],
-        ...serviceData,
-        slug,
-        updatedAt: new Date().toISOString(),
-      };
-      all[existingIndex] = updatedService;
-    } else {
-      updatedService = {
-        id: serviceData.id || slug,
-        slug,
-        name: serviceData.name,
-        nameUrdu: serviceData.nameUrdu || "",
-        category: serviceData.category || "General Legal Services",
-        description: serviceData.description || "",
-        tagline: serviceData.tagline || "",
-        heroImage: serviceData.heroImage || HERO_IMAGES.home,
-        turnaroundTime: serviceData.turnaroundTime || "1 to 2 Business Days",
-        requiredDocuments: serviceData.requiredDocuments || ["CNIC copy"],
-        governmentFeeInfo: serviceData.governmentFeeInfo || "Per schedule",
-        items: serviceData.items || [],
-        active: serviceData.active !== undefined ? serviceData.active : true,
-        order: all.length + 1,
-        updatedAt: new Date().toISOString(),
-      };
-      all.push(updatedService);
-    }
-
-    const tempFile = `${SERVICES_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(all, null, 2), "utf-8");
-    fs.renameSync(tempFile, SERVICES_FILE);
-
-    return updatedService;
-  } catch (err) {
-    console.error("[ServicesStore] Failed to save service:", err);
-    throw err;
+export async function saveService(serviceData: Partial<CmsService> & { name: string }): Promise<CmsService> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
+  const db = client as CmsDbClient;
+
+  const all = await getAllServices();
+  const slug = serviceData.slug || serviceData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const existing = all.find((s) => s.id === serviceData.id || s.slug === slug) || null;
+
+  const nowIso = new Date().toISOString();
+
+  if (existing) {
+    const updatedService: CmsService = {
+      ...existing,
+      ...serviceData,
+      id: existing.id,
+      slug,
+      updatedAt: nowIso,
+    };
+    const { error } = await db.from("cms_services").update(serviceToRow(updatedService)).eq("id", existing.id);
+    if (error) throw error;
+
+    invalidateCmsCache(CACHE_KEY);
+    return updatedService;
+  }
+
+  const createdService: CmsService = {
+    id: serviceData.id || slug,
+    slug,
+    name: serviceData.name,
+    nameUrdu: serviceData.nameUrdu || "",
+    category: serviceData.category || "General Legal Services",
+    description: serviceData.description || "",
+    tagline: serviceData.tagline || "",
+    heroImage: serviceData.heroImage || HERO_IMAGES.home,
+    turnaroundTime: serviceData.turnaroundTime || "1 to 2 Business Days",
+    requiredDocuments: serviceData.requiredDocuments || ["CNIC copy"],
+    governmentFeeInfo: serviceData.governmentFeeInfo || "Per schedule",
+    items: serviceData.items || [],
+    active: serviceData.active !== undefined ? serviceData.active : true,
+    order: serviceData.order ?? all.length + 1,
+    updatedAt: nowIso,
+  };
+  const { error } = await db.from("cms_services").insert(serviceToRow(createdService));
+  if (error) throw error;
+
+  invalidateCmsCache(CACHE_KEY);
+  return createdService;
 }
 
-export function deleteService(idOrSlug: string): boolean {
-  try {
-    const all = getAllServices();
-    const filtered = all.filter((s) => s.id !== idOrSlug && s.slug !== idOrSlug);
-    if (filtered.length === all.length) return false;
-
-    const tempFile = `${SERVICES_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(filtered, null, 2), "utf-8");
-    fs.renameSync(tempFile, SERVICES_FILE);
-    return true;
-  } catch (err) {
-    console.error("[ServicesStore] Failed to delete service:", err);
-    throw err;
+export async function deleteService(idOrSlug: string): Promise<boolean> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
+  const db = client as CmsDbClient;
+
+  const { data, error } = await db
+    .from("cms_services")
+    .delete()
+    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .select("id");
+
+  if (error) throw error;
+  const deleted = (data ?? []).length > 0;
+  if (deleted) invalidateCmsCache(CACHE_KEY);
+  return deleted;
 }

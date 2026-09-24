@@ -12,12 +12,12 @@ export async function GET(request: Request) {
     const route = searchParams.get("route");
     const serviceSlug = searchParams.get("service");
 
-    const settings = getSiteSettings();
-    const services = getAllServices();
-    const homeSections = getHomeSections();
+    const settings = await getSiteSettings();
+    const services = await getAllServices();
+    const homeSections = await getHomeSections();
 
     if (route) {
-      const page = getPageContentByRoute(route);
+      const page = await getPageContentByRoute(route);
       return NextResponse.json({
         success: true,
         settings,
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     }
 
     if (serviceSlug) {
-      const service = getServiceBySlug(serviceSlug);
+      const service = await getServiceBySlug(serviceSlug);
       return NextResponse.json({
         success: true,
         settings,
@@ -36,12 +36,13 @@ export async function GET(request: Request) {
       });
     }
 
+    const pages = await getAllPagesContent();
     return NextResponse.json({
       success: true,
       settings,
       services,
       homeSections,
-      pages: getAllPagesContent(),
+      pages,
     });
   } catch (error) {
     console.error("[CmsContentAPI] Failed to fetch CMS content:", error);

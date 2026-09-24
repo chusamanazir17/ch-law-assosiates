@@ -4,8 +4,27 @@ import {
   getAllSubscribers,
   updateSubscriberStatus,
 } from "@/lib/db/subscribersStore";
+import { getCmsClient, isCmsBackendConfigured } from "@/lib/db/cmsClient";
+import type { Database } from "@/types/database.types";
 
 export const dynamic = "force-dynamic";
+
+type CmsDbClient = import("@supabase/supabase-js").SupabaseClient<Database>;
+
+async function listTaxCategories() {
+  if (!isCmsBackendConfigured()) return [];
+  const client = await getCmsClient();
+  if (!client) return [];
+  const { data, error } = await (client as CmsDbClient)
+    .from("tax_categories")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error) {
+    console.error("[Admin Subscribers] Failed to load tax categories:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
 
 function unauthorized() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -16,10 +35,14 @@ export async function GET() {
   if (!session) return unauthorized();
 
   try {
-    const subscribers = await getAllSubscribers();
+    const [subscribers, categories] = await Promise.all([
+      getAllSubscribers(),
+      listTaxCategories(),
+    ]);
     return NextResponse.json({
       success: true,
       subscribers,
+      categories,
       totalCount: subscribers.length,
       emailConfigured: Boolean(process.env.RESEND_API_KEY),
     });

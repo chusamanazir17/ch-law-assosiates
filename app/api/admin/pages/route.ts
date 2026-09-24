@@ -18,14 +18,14 @@ export async function GET(request: NextRequest) {
   try {
     const route = request.nextUrl.searchParams.get("route");
     if (route) {
-      const page = getPageContentByRoute(route);
+      const page = await getPageContentByRoute(route);
       if (!page) {
         return NextResponse.json({ success: false, error: "Page content not found" }, { status: 404 });
       }
       return NextResponse.json({ success: true, page });
     }
 
-    const pages = getAllPagesContent();
+    const pages = await getAllPagesContent();
     return NextResponse.json({ success: true, pages });
   } catch (error) {
     return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Page ID or route is required" }, { status: 400 });
     }
 
-    const updated = updatePageContent(body);
+    const updated = await updatePageContent(body);
 
     if (updated.route) {
       revalidatePath(updated.route);

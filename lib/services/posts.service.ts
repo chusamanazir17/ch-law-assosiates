@@ -1,82 +1,84 @@
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
+import { isCmsBackendConfigured } from "@/lib/db/cmsClient";
 import type { Post } from "@/types/cms";
 import { slugify, type ValidatedPostInput } from "@/lib/validation/post";
+
+/**
+ * Supabase-backed post service (`posts` table). This is the single source of
+ * truth for blog content — there is intentionally no local fallback store.
+ *
+ * Public reads use the stateless anon client (RLS restricts rows to
+ * published posts); admin reads and writes use the service-role client so
+ * they work for every admin session type.
+ */
+
+async function getAdminPostsClient() {
+  if (!isCmsBackendConfigured()) return null;
+  const { getCmsClient } = await import("@/lib/db/cmsClient");
+  return getCmsClient();
+}
+
+function publicClientOrNull() {
+  if (!isCmsBackendConfigured()) return null;
+  try {
+    return createPublicClient();
+  } catch {
+    return null;
+  }
+}
 
 /**
  * List all posts for Admin Dashboard (drafts + published)
  */
 export async function listAllPosts(): Promise<Post[]> {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.warn("[PostsService] listAllPosts DB warning, using store:", error.message);
-      const { getAllPosts } = await import("@/lib/db/postsStore");
-      return await getAllPosts();
-    }
-
-    if (data && data.length > 0) {
-      return data as Post[];
-    }
-
-    const { getAllPosts } = await import("@/lib/db/postsStore");
-    return await getAllPosts();
-  } catch (err) {
-    console.warn("[PostsService] listAllPosts exception, using fallback store:", err);
-    const { getAllPosts } = await import("@/lib/db/postsStore");
-    return await getAllPosts();
+  const client = await getAdminPostsClient();
+  if (!client) {
+    console.error("[PostsService] Supabase is not configured; cannot list posts.");
+    return [];
   }
+
+  const { data, error } = await client
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[PostsService] listAllPosts error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as Post[];
 }
 
 /**
  * List published posts for Public Website (/updates)
  */
 export async function listPublishedPosts(category?: string, query?: string): Promise<Post[]> {
-  try {
-    const supabase = createPublicClient();
-    let queryBuilder = supabase
-      .from("posts")
-      .select("*")
-      .eq("status", "published")
-      .order("published_at", { ascending: false });
+  const supabase = publicClientOrNull();
+  if (!supabase) return [];
 
-    if (category && category !== "all") {
-      queryBuilder = queryBuilder.ilike("category", category);
-    }
+  let queryBuilder = supabase
+    .from("posts")
+    .select("*")
+    .eq("status", "published")
+    .order("published_at", { ascending: false });
 
-    if (query && query.trim()) {
-      queryBuilder = queryBuilder.or(`title.ilike.%${query.trim()}%,excerpt.ilike.%${query.trim()}%`);
-    }
-
-    const { data, error } = await queryBuilder;
-    if (!error && data && data.length > 0) {
-      return data as Post[];
-    }
-
-    // Fallback to store published posts
-    const { getPublishedPosts: getStorePublished } = await import("@/lib/db/postsStore");
-    const storePosts = await getStorePublished();
-    
-    let filtered = storePosts;
-    if (category && category !== "all") {
-      filtered = filtered.filter(p => p.category?.toLowerCase() === category.toLowerCase());
-    }
-    if (query && query.trim()) {
-      const q = query.trim().toLowerCase();
-      filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || (p.excerpt && p.excerpt.toLowerCase().includes(q)));
-    }
-    return filtered;
-  } catch (err) {
-    console.warn("[PostsService] listPublishedPosts exception, using store fallback:", err);
-    const { getPublishedPosts: getStorePublished } = await import("@/lib/db/postsStore");
-    return await getStorePublished();
+  if (category && category !== "all") {
+    queryBuilder = queryBuilder.ilike("category", category);
   }
+
+  if (query && query.trim()) {
+    queryBuilder = queryBuilder.or(`title.ilike.%${query.trim()}%,excerpt.ilike.%${query.trim()}%`);
+  }
+
+  const { data, error } = await queryBuilder;
+  if (error) {
+    console.error("[PostsService] listPublishedPosts error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as Post[];
 }
 
 /**
@@ -84,62 +86,58 @@ export async function listPublishedPosts(category?: string, query?: string): Pro
  */
 export async function getPublishedPostBySlug(slug: string): Promise<Post | null> {
   if (!slug) return null;
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("slug", slug.trim().toLowerCase())
-      .eq("status", "published")
-      .maybeSingle();
 
-    if (!error && data) {
-      return data as Post;
-    }
+  const supabase = publicClientOrNull();
+  if (!supabase) return null;
 
-    const { getPublishedPostBySlug: getStoreSlug } = await import("@/lib/db/postsStore");
-    return await getStoreSlug(slug);
-  } catch (err) {
-    console.warn("[PostsService] getPublishedPostBySlug exception, using fallback:", err);
-    const { getPublishedPostBySlug: getStoreSlug } = await import("@/lib/db/postsStore");
-    return await getStoreSlug(slug);
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("slug", slug.trim().toLowerCase())
+    .eq("status", "published")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[PostsService] getPublishedPostBySlug error:", error.message);
+    return null;
   }
+
+  return (data as Post) ?? null;
 }
 
 /**
  * Find post by slug or ID for Admin Editor
  */
 export async function getAdminPostBySlugOrId(slugOrId: string): Promise<Post | null> {
-  try {
-    const supabase = await createClient();
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slugOrId);
+  const client = await getAdminPostsClient();
+  if (!client) return null;
 
-    let queryBuilder = supabase.from("posts").select("*");
-    if (isUuid) {
-      queryBuilder = queryBuilder.eq("id", slugOrId);
-    } else {
-      queryBuilder = queryBuilder.eq("slug", slugOrId.trim().toLowerCase());
-    }
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slugOrId);
 
-    const { data, error } = await queryBuilder.maybeSingle();
-    if (!error && data) {
-      return data as Post;
-    }
-
-    const { getPostById, getPostBySlug } = await import("@/lib/db/postsStore");
-    return (await getPostById(slugOrId)) || (await getPostBySlug(slugOrId));
-  } catch (err) {
-    console.warn("[PostsService] getAdminPostBySlugOrId exception, using fallback:", err);
-    const { getPostById, getPostBySlug } = await import("@/lib/db/postsStore");
-    return (await getPostById(slugOrId)) || (await getPostBySlug(slugOrId));
+  let queryBuilder = client.from("posts").select("*");
+  if (isUuid) {
+    queryBuilder = queryBuilder.eq("id", slugOrId);
+  } else {
+    queryBuilder = queryBuilder.eq("slug", slugOrId.trim().toLowerCase());
   }
+
+  const { data, error } = await queryBuilder.maybeSingle();
+  if (error) {
+    console.error("[PostsService] getAdminPostBySlugOrId error:", error.message);
+    return null;
+  }
+
+  return (data as Post) ?? null;
 }
 
 /**
  * Create or Update Post with complete validation, UUID generation, and Next.js revalidation
  */
 export async function savePost(input: ValidatedPostInput): Promise<Post> {
-  const supabase = await createClient();
+  const client = await getAdminPostsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
+  }
   const now = new Date().toISOString();
 
   // Validate or generate slug
@@ -166,7 +164,7 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
       updated_at: now,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from("posts")
       .update(updatePayload)
       .eq("id", input.id)
@@ -178,23 +176,16 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
       throw new Error(`Database error updating post: ${error.message}`);
     }
 
-    // Trigger instant cache revalidation
     revalidatePath("/updates");
     revalidatePath(`/updates/${finalSlug}`);
     revalidatePath("/admin/posts");
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
 
-    // Dual-sync to local store
-    try {
-      const { savePost: saveToStore } = await import("@/lib/db/postsStore");
-      await saveToStore(input);
-    } catch {}
-
     return data as Post;
   }
 
-  // Create new post
+  // Create new post — the database generates the UUID primary key.
   const insertPayload = {
     title: input.title.trim(),
     slug: finalSlug,
@@ -210,76 +201,56 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
     updated_at: now,
   };
 
-  let createdPost: Post | null = null;
-  try {
-    const { data, error } = await supabase
-      .from("posts")
-      .insert(insertPayload)
-      .select()
-      .single();
+  const { data, error } = await client
+    .from("posts")
+    .insert(insertPayload)
+    .select()
+    .single();
 
-    if (error) {
-      console.warn("[PostsService] Supabase insert warning, falling back to store:", error.message);
-    } else {
-      createdPost = data as Post;
-    }
-  } catch (dbErr) {
-    console.warn("[PostsService] Supabase insert exception:", dbErr);
+  if (error) {
+    console.error("[PostsService] insert post error:", error);
+    throw new Error(`Database error creating post: ${error.message}`);
   }
 
-  // Also sync to local store
-  try {
-    const { savePost: saveToStore } = await import("@/lib/db/postsStore");
-    const storeSaved = await saveToStore({
-      ...input,
-      id: createdPost?.id || input.id,
-      slug: finalSlug,
-    });
-    if (!createdPost) createdPost = storeSaved;
-  } catch {}
-
-  // Trigger instant cache revalidation
   revalidatePath("/updates");
   revalidatePath(`/updates/${finalSlug}`);
   revalidatePath("/admin/posts");
   revalidatePath("/admin/dashboard");
   revalidatePath("/");
 
-  return createdPost || (insertPayload as any);
+  return data as Post;
 }
 
 /**
  * Delete a post by ID or Slug
  */
 export async function deletePost(idOrSlug: string): Promise<void> {
-  const supabase = await createClient();
+  const client = await getAdminPostsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
+  }
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
 
   // Retrieve post slug before deleting to properly revalidate route
   let postSlug = idOrSlug;
-  try {
-    const { data: existing } = await supabase
-      .from("posts")
-      .select("slug")
-      .eq(isUuid ? "id" : "slug", idOrSlug)
-      .maybeSingle();
+  const { data: existing } = await client
+    .from("posts")
+    .select("slug")
+    .eq(isUuid ? "id" : "slug", idOrSlug)
+    .maybeSingle();
 
-    if (existing?.slug) {
-      postSlug = existing.slug;
-    }
-
-    await supabase
-      .from("posts")
-      .delete()
-      .eq(isUuid ? "id" : "slug", idOrSlug);
-  } catch (err) {
-    console.warn("[PostsService] deletePost DB warning:", err);
+  if (existing?.slug) {
+    postSlug = existing.slug;
   }
 
-  try {
-    const { deletePost: deleteFromStore } = await import("@/lib/db/postsStore");
-    await deleteFromStore(idOrSlug);
-  } catch {}
+  const { error } = await client
+    .from("posts")
+    .delete()
+    .eq(isUuid ? "id" : "slug", idOrSlug);
+
+  if (error) {
+    throw new Error(`Database error deleting post: ${error.message}`);
+  }
 
   revalidatePath("/updates");
   revalidatePath(`/updates/${postSlug}`);
@@ -292,10 +263,13 @@ export async function deletePost(idOrSlug: string): Promise<void> {
  * Toggle publish status of a post
  */
 export async function togglePostPublish(id: string, publish: boolean): Promise<Post> {
-  const supabase = await createClient();
+  const client = await getAdminPostsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
+  }
   const now = new Date().toISOString();
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("posts")
     .update({
       status: publish ? "published" : "draft",

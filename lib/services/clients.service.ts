@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { Client, ClientContact, ClientNote } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateClientDTO {
   full_name: string;
@@ -16,7 +19,7 @@ export interface CreateClientDTO {
 }
 
 export async function listClients(searchTerm?: string): Promise<Client[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase.from("clients").select("*").order("created_at", { ascending: false });
 
   if (searchTerm && searchTerm.trim()) {
@@ -34,7 +37,8 @@ export async function listClients(searchTerm?: string): Promise<Client[]> {
 }
 
 export async function getClientById(id: string): Promise<(Client & { contacts?: ClientContact[]; notes?: ClientNote[] }) | null> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data: client, error } = await supabase
     .from("clients")
     .select(`
@@ -54,7 +58,7 @@ export async function getClientById(id: string): Promise<(Client & { contacts?: 
 }
 
 export async function createClientRecord(dto: CreateClientDTO): Promise<Client> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("clients")
     .insert({
@@ -81,8 +85,9 @@ export async function createClientRecord(dto: CreateClientDTO): Promise<Client> 
   return data as Client;
 }
 
-export async function updateClientRecord(id: string, updates: Partial<CreateClientDTO>): Promise<Client> {
-  const supabase = await createClient();
+export async function updateClientRecord(id: string, updates: Partial<CreateClientDTO>): Promise<Client | null> {
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("clients")
     .update({
@@ -102,7 +107,8 @@ export async function updateClientRecord(id: string, updates: Partial<CreateClie
 }
 
 export async function deleteClientRecord(id: string): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase.from("clients").delete().eq("id", id);
   if (error) {
     throw new Error(`Failed to delete client: ${error.message}`);

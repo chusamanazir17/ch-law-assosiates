@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 
 export async function getSiteSetting<T = unknown>(key: string): Promise<T | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await getAdminDatabaseClient();
     const { data, error } = await supabase
       .from("site_settings")
       .select("value")
@@ -18,7 +18,7 @@ export async function getSiteSetting<T = unknown>(key: string): Promise<T | null
 }
 
 export async function updateSiteSetting(key: string, value: unknown): Promise<void> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase
     .from("site_settings")
     .upsert({

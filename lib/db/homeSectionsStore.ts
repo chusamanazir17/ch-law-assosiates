@@ -1,6 +1,18 @@
-import fs from "fs";
-import path from "path";
+import {
+  cmsCacheGet,
+  cmsCacheSet,
+  getCmsClient,
+  invalidateCmsCache,
+  isCmsBackendConfigured,
+} from "@/lib/db/cmsClient";
 import { SITE } from "@/lib/site";
+import type { Database } from "@/types/database.types";
+
+type CmsDbClient = import("@supabase/supabase-js").SupabaseClient<Database>;
+
+// The whole HomeSectionsData document is persisted as a single JSONB row.
+const SECTIONS_KEY = "home_sections";
+const CACHE_KEY = "cms:home-sections";
 
 export interface TestimonialItem {
   id: string;
@@ -113,9 +125,6 @@ export interface HomeSectionsData {
   sectionOrder: string[];
   updatedAt: string;
 }
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const HOME_SECTIONS_FILE = path.join(DATA_DIR, "homeSections.json");
 
 export function getDefaultHomeSections(): HomeSectionsData {
   return {
@@ -337,47 +346,66 @@ export function getDefaultHomeSections(): HomeSectionsData {
   };
 }
 
-export function getHomeSections(): HomeSectionsData {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+export async function getHomeSections(): Promise<HomeSectionsData> {
+  const cached = cmsCacheGet<HomeSectionsData>(CACHE_KEY);
+  if (cached) return cached;
 
-    if (!fs.existsSync(HOME_SECTIONS_FILE)) {
-      const defaults = getDefaultHomeSections();
-      fs.writeFileSync(HOME_SECTIONS_FILE, JSON.stringify(defaults, null, 2), "utf-8");
+  const defaults = getDefaultHomeSections();
+
+  if (!isCmsBackendConfigured()) return defaults;
+
+  try {
+    const client = await getCmsClient();
+    if (!client) return defaults;
+    const db = client as CmsDbClient;
+
+    const { data, error } = await db
+      .from("site_settings")
+      .select("value")
+      .eq("key", SECTIONS_KEY)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data?.value) {
+      // First run on a fresh database: persist the defaults.
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+        const { error: insertError } = await db
+          .from("site_settings")
+          .upsert({ key: SECTIONS_KEY, value: JSON.parse(JSON.stringify(defaults)) }, { onConflict: "key" });
+        if (insertError) throw insertError;
+        console.info("[HomeSectionsStore] Seeded default home sections into Supabase.");
+      }
       return defaults;
     }
 
-    const content = fs.readFileSync(HOME_SECTIONS_FILE, "utf-8");
-    const parsed = JSON.parse(content);
-    return { ...getDefaultHomeSections(), ...parsed };
+    const sections: HomeSectionsData = { ...defaults, ...(data.value as Partial<HomeSectionsData>) };
+    cmsCacheSet(CACHE_KEY, sections);
+    return sections;
   } catch (err) {
-    console.error("[HomeSectionsStore] Failed to read home sections, using defaults:", err);
-    return getDefaultHomeSections();
+    console.error("[HomeSectionsStore] Failed to read home sections from Supabase, using defaults:", err);
+    return defaults;
   }
 }
 
-export function updateHomeSections(partial: Partial<HomeSectionsData>): HomeSectionsData {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
-    const current = getHomeSections();
-    const updated: HomeSectionsData = {
-      ...current,
-      ...partial,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const tempFile = `${HOME_SECTIONS_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(updated, null, 2), "utf-8");
-    fs.renameSync(tempFile, HOME_SECTIONS_FILE);
-
-    return updated;
-  } catch (err) {
-    console.error("[HomeSectionsStore] Failed to update home sections:", err);
-    throw err;
+export async function updateHomeSections(partial: Partial<HomeSectionsData>): Promise<HomeSectionsData> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
+  const db = client as CmsDbClient;
+
+  const current = await getHomeSections();
+  const updated: HomeSectionsData = {
+    ...current,
+    ...partial,
+  };
+
+  const { error } = await db
+    .from("site_settings")
+    .upsert({ key: SECTIONS_KEY, value: JSON.parse(JSON.stringify(updated)) }, { onConflict: "key" });
+  if (error) throw error;
+
+  invalidateCmsCache(CACHE_KEY);
+  return updated;
 }

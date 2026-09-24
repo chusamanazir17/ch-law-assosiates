@@ -12,7 +12,7 @@ export async function GET() {
   }
 
   try {
-    const settings = getSiteSettings();
+    const settings = await getSiteSettings();
     return NextResponse.json({ success: true, settings });
   } catch (error) {
     return NextResponse.json(
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const updated = updateSiteSettings(body);
+    const updated = await updateSiteSettings(body);
 
     revalidatePath("/");
     revalidatePath("/updates");

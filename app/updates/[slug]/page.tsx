@@ -133,9 +133,12 @@ export default async function PostReaderPage({
         {/* Cover Image */}
         {post.cover_image_url && (
           <div className="relative mb-10 overflow-hidden rounded-2xl border border-navy-900/10 dark:border-white/10 shadow-lg aspect-video bg-navy-950">
-            <img
+            <Image
               src={post.cover_image_url}
               alt={post.title}
+              fill
+              priority
+              sizes="(min-width: 896px) 896px, 100vw"
               className="h-full w-full object-cover"
             />
           </div>

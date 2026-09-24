@@ -16,27 +16,26 @@ export default function TaxReturnPopupModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Don't show in admin panel or office management system
-    if (pathname.startsWith("/admin") || pathname.startsWith("/office")) {
+    // Only show on the landing page, never in admin/office areas
+    if (pathname !== "/") {
       return;
     }
-
 
     // Check if dismissed in this session
     try {
       const isDismissed = sessionStorage.getItem(POPUP_DISMISS_KEY);
       if (!isDismissed) {
-        // Show after brief 700ms delay for smooth page entrance
+        // Give visitors time to read the page before showing the promo
         const timer = setTimeout(() => {
           setIsOpen(true);
-        }, 700);
+        }, 6000);
         return () => clearTimeout(timer);
       }
     } catch {
       // If sessionStorage is unavailable, show after delay
       const timer = setTimeout(() => {
         setIsOpen(true);
-      }, 700);
+      }, 6000);
       return () => clearTimeout(timer);
     }
   }, [pathname]);

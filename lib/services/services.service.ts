@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { ServiceOrderRecord } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateServiceOrderDTO {
   order_number?: string;
@@ -22,7 +25,7 @@ export async function listServiceOrders(filter?: {
   clientId?: string;
   search?: string;
 }): Promise<ServiceOrderRecord[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("service_orders")
     .select(`
@@ -39,7 +42,7 @@ export async function listServiceOrders(filter?: {
     query = query.eq("category", filter.category);
   }
 
-  if (filter?.clientId) {
+  if (filter?.clientId && isUuid(filter.clientId)) {
     query = query.eq("client_id", filter.clientId);
   }
 
@@ -61,7 +64,8 @@ export async function listServiceOrders(filter?: {
 }
 
 export async function getServiceOrderById(id: string): Promise<ServiceOrderRecord | null> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("service_orders")
     .select(`
@@ -85,14 +89,19 @@ export async function getServiceOrderById(id: string): Promise<ServiceOrderRecor
 }
 
 export async function createServiceOrderRecord(dto: CreateServiceOrderDTO): Promise<ServiceOrderRecord> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const orderNumber = dto.order_number || `SO-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+  let resolvedClientId = dto.client_id;
+  if (resolvedClientId && !isUuid(resolvedClientId)) {
+    resolvedClientId = null;
+  }
 
   const { data, error } = await supabase
     .from("service_orders")
     .insert({
       order_number: orderNumber,
-      client_id: dto.client_id || null,
+      client_id: resolvedClientId,
       customer_name: dto.customer_name.trim(),
       service_name: dto.service_name.trim(),
       category: dto.category || "Legal Drafting",
@@ -121,14 +130,22 @@ export async function createServiceOrderRecord(dto: CreateServiceOrderDTO): Prom
   } as ServiceOrderRecord;
 }
 
-export async function updateServiceOrderRecord(id: string, updates: Partial<CreateServiceOrderDTO>): Promise<ServiceOrderRecord> {
-  const supabase = await createClient();
+export async function updateServiceOrderRecord(id: string, updates: Partial<CreateServiceOrderDTO>): Promise<ServiceOrderRecord | null> {
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
+
+  const sanitizedUpdates: any = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  if ("client_id" in sanitizedUpdates && !isUuid(sanitizedUpdates.client_id)) {
+    delete sanitizedUpdates.client_id;
+  }
+
   const { data, error } = await supabase
     .from("service_orders")
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
+    .update(sanitizedUpdates)
     .eq("id", id)
     .select(`
       *,
@@ -148,7 +165,8 @@ export async function updateServiceOrderRecord(id: string, updates: Partial<Crea
 }
 
 export async function deleteServiceOrderRecord(id: string): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase.from("service_orders").delete().eq("id", id);
   if (error) {
     throw new Error(`Failed to delete service order: ${error.message}`);

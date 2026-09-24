@@ -15,7 +15,6 @@ import {
   ExternalLink,
   type LucideIcon,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import type { SiteAnnouncement } from "@/types/cms";
 
 type AnnouncementTone = "info" | "warning" | "danger" | "dark";
@@ -51,12 +50,8 @@ export default function AnnouncementsManager() {
       if (data.success && Array.isArray(data.announcements)) {
         setAnnouncements(data.announcements);
       } else {
-        const supabase = createClient();
-        const { data: sData } = await supabase
-          .from("site_announcements")
-          .select("*")
-          .order("created_at", { ascending: false });
-        setAnnouncements(sData || []);
+        setAnnouncements([]);
+        setMessage({ type: "error", text: data.error || "Failed to load announcements." });
       }
     } catch (error) {
       console.error("[Announcements Load Error]", error);

@@ -16,7 +16,6 @@ import {
   X,
   History,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { validateDeadlineForm, type DeadlineFormData } from "@/lib/validation/deadline";
 import type { DeadlineWithCategory, TaxCategory } from "@/types/reminders";
 
@@ -47,16 +46,16 @@ export default function DeadlinesManager() {
   // Fetch categories
   useEffect(() => {
     async function loadCategories() {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from("tax_categories")
-          .select("*")
-          .order("sort_order", { ascending: true });
-        if (error) throw error;
-        setCategories(data || []);
+        const res = await fetch("/api/admin/deadlines");
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.error || "Failed to load tax categories.");
+        setCategories(json.categories || []);
+        setDeadlines(json.deadlines || []);
       } catch (error) {
         setFeedback({ type: "error", message: getErrorMessage(error, "Failed to load tax categories.") });
+      } finally {
+        setIsLoading(false);
       }
     }
     loadCategories();
@@ -65,37 +64,12 @@ export default function DeadlinesManager() {
   // Fetch deadlines
   const fetchDeadlines = useCallback(async () => {
     setIsLoading(true);
-    const supabase = createClient();
     try {
-      const { data, error } = await supabase
-        .from("tax_deadlines")
-        .select(
-          `
-          id,
-          category_id,
-          tax_year_or_period,
-          title,
-          filing_deadline,
-          official_source_url,
-          verified_at,
-          verified_by,
-          is_active,
-          revision,
-          created_at,
-          updated_at,
-          tax_categories ( id, name, slug )
-        `
-        )
-        .order("filing_deadline", { ascending: true });
-
-      if (error) throw error;
-
-      const mapped: DeadlineWithCategory[] = (data || []).map((deadline: any) => ({
-        ...deadline,
-        category: deadline.tax_categories ?? undefined,
-      }));
-
-      setDeadlines(mapped);
+      const res = await fetch("/api/admin/deadlines");
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to load tax deadlines.");
+      setDeadlines(json.deadlines || []);
+      if (Array.isArray(json.categories)) setCategories(json.categories);
     } catch (err) {
       console.error("[Deadlines Fetch Error]", err);
       setFeedback({ type: "error", message: getErrorMessage(err, "Failed to load tax deadlines.") });
@@ -148,45 +122,25 @@ export default function DeadlinesManager() {
     setIsSaving(true);
     setFeedback(null);
 
-    const supabase = createClient();
     try {
-      if (editingId) {
-        // Update existing deadline
-        const { error } = await supabase
-          .from("tax_deadlines")
-          .update({
-            category_id: formData.category_id,
-            tax_year_or_period: formData.tax_year_or_period.trim(),
-            title: formData.title.trim(),
-            filing_deadline: formData.filing_deadline,
-            official_source_url: formData.official_source_url?.trim() || null,
-            is_active: formData.is_active,
-          })
-          .eq("id", editingId);
+      const res = await fetch("/api/admin/deadlines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          editingId
+            ? { action: "save", id: editingId, ...formData }
+            : { action: "save", ...formData }
+        ),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to save deadline.");
 
-        if (error) throw error;
-        setFeedback({
-          type: "success",
-          message: "Tax deadline updated. If the filing date changed, verification has been reset for safety.",
-        });
-      } else {
-        // Create new deadline
-        const { error } = await supabase.from("tax_deadlines").insert({
-          category_id: formData.category_id,
-          tax_year_or_period: formData.tax_year_or_period.trim(),
-          title: formData.title.trim(),
-          filing_deadline: formData.filing_deadline,
-          official_source_url: formData.official_source_url?.trim() || null,
-          is_active: formData.is_active,
-          revision: 1,
-        });
-
-        if (error) throw error;
-        setFeedback({
-          type: "success",
-          message: "New tax deadline created. Please verify it against official tax authority announcements before reminders are dispatched.",
-        });
-      }
+      setFeedback({
+        type: "success",
+        message: editingId
+          ? "Tax deadline updated. If the filing date changed, verification has been reset for safety."
+          : "New tax deadline created. Please verify it against official tax authority announcements before reminders are dispatched.",
+      });
 
       setIsModalOpen(false);
       fetchDeadlines();
@@ -202,26 +156,17 @@ export default function DeadlinesManager() {
 
   // Explicit Verification Toggle Action
   const handleVerifyDeadline = async (dl: DeadlineWithCategory) => {
-    const supabase = createClient();
     const isCurrentlyVerified = dl.verified_at !== null;
 
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!isCurrentlyVerified && !user) throw new Error("Your administrator session has expired. Please sign in again.");
+      const res = await fetch("/api/admin/deadlines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", id: dl.id, verified: !isCurrentlyVerified }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to update verification status.");
 
-      const nextVerifiedAt = isCurrentlyVerified ? null : new Date().toISOString();
-      const nextVerifiedBy = isCurrentlyVerified ? null : user?.id || null;
-      const { error } = await supabase
-        .from("tax_deadlines")
-        .update({
-          verified_at: nextVerifiedAt,
-          verified_by: nextVerifiedBy,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", dl.id);
-
-      if (error) throw error;
       setFeedback({
         type: "success",
         message: isCurrentlyVerified
@@ -236,17 +181,14 @@ export default function DeadlinesManager() {
 
   // Toggle Active
   const handleToggleActive = async (dl: DeadlineWithCategory) => {
-    const supabase = createClient();
     try {
-      const { error } = await supabase
-        .from("tax_deadlines")
-        .update({
-          is_active: !dl.is_active,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", dl.id);
-
-      if (error) throw error;
+      const res = await fetch("/api/admin/deadlines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle-active", id: dl.id, is_active: !dl.is_active }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to toggle status.");
       fetchDeadlines();
     } catch (error) {
       setFeedback({ type: "error", message: getErrorMessage(error, "Failed to toggle status.") });

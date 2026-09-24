@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { validateSubscription } from "@/lib/validation/subscription";
-import { addOrUpdateSubscriber, TAX_CATEGORY_MAP } from "@/lib/db/subscribersStore";
+import { addOrUpdateSubscriber, getCategoryNamesByIds } from "@/lib/db/subscribersStore";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { sendSubscriptionConfirmationEmail } from "@/lib/email/emailService";
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     console.log(`[Subscription Registered] Email: ${email}, Name: ${name}, Categories: ${categoryIds.join(", ")}`);
 
     // Dispatch confirmation email to subscriber
-    const categoryNames = categoryIds.map((id) => TAX_CATEGORY_MAP[id]?.name || id);
+    const categoryNames = await getCategoryNamesByIds(categoryIds);
     const emailResult = await sendSubscriptionConfirmationEmail({
       to: email,
       name,

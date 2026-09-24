@@ -1,6 +1,59 @@
-import fs from "fs";
-import path from "path";
+import {
+  cmsCacheGet,
+  cmsCacheSet,
+  getCmsClient,
+  invalidateCmsCache,
+  isCmsBackendConfigured,
+} from "@/lib/db/cmsClient";
 import { HERO_IMAGES, SITE } from "@/lib/site";
+import type { Database } from "@/types/database.types";
+
+type CmsDbClient = import("@supabase/supabase-js").SupabaseClient<Database>;
+
+const CACHE_KEY = "cms:pages";
+
+type PageRow = Database["public"]["Tables"]["cms_pages"]["Row"];
+
+function rowToPage(row: PageRow): PageContentItem {
+  return {
+    id: row.id,
+    route: row.route,
+    title: row.title ?? "",
+    heroBadge: row.hero_badge ?? "",
+    heroHeadline: row.hero_headline ?? "",
+    heroSubtitle: row.hero_subtitle ?? "",
+    heroImage: row.hero_image ?? "",
+    primaryCtaText: row.primary_cta_text ?? "",
+    primaryCtaHref: row.primary_cta_href ?? "",
+    secondaryCtaText: row.secondary_cta_text ?? "",
+    secondaryCtaHref: row.secondary_cta_href ?? "",
+    leadContent: row.lead_content ?? "",
+    metaTitle: row.meta_title ?? "",
+    metaDescription: row.meta_description ?? "",
+    status: row.status === "draft" ? "draft" : "published",
+    updatedAt: row.updated_at,
+  };
+}
+
+function pageToRow(page: PageContentItem) {
+  return {
+    id: page.id,
+    route: page.route,
+    title: page.title ?? "",
+    hero_badge: page.heroBadge ?? "",
+    hero_headline: page.heroHeadline ?? "",
+    hero_subtitle: page.heroSubtitle ?? "",
+    hero_image: page.heroImage ?? "",
+    primary_cta_text: page.primaryCtaText ?? "",
+    primary_cta_href: page.primaryCtaHref ?? "",
+    secondary_cta_text: page.secondaryCtaText ?? "",
+    secondary_cta_href: page.secondaryCtaHref ?? "",
+    lead_content: page.leadContent ?? "",
+    meta_title: page.metaTitle ?? "",
+    meta_description: page.metaDescription ?? "",
+    status: page.status ?? "published",
+  };
+}
 
 export interface PageContentItem {
   id: string;
@@ -20,9 +73,6 @@ export interface PageContentItem {
   status: "published" | "draft";
   updatedAt: string;
 }
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const PAGES_FILE = path.join(DATA_DIR, "pagesContent.json");
 
 const DEFAULT_PAGES: PageContentItem[] = [
   {
@@ -243,81 +293,95 @@ const DEFAULT_PAGES: PageContentItem[] = [
   },
 ];
 
-export function getAllPagesContent(): PageContentItem[] {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+export async function getAllPagesContent(): Promise<PageContentItem[]> {
+  const cached = cmsCacheGet<PageContentItem[]>(CACHE_KEY);
+  if (cached) return cached;
 
-    if (!fs.existsSync(PAGES_FILE)) {
-      fs.writeFileSync(PAGES_FILE, JSON.stringify(DEFAULT_PAGES, null, 2), "utf-8");
+  if (!isCmsBackendConfigured()) return DEFAULT_PAGES;
+
+  try {
+    const client = await getCmsClient();
+    if (!client) return DEFAULT_PAGES;
+    const db = client as CmsDbClient;
+
+    const { data, error } = await db.from("cms_pages").select("*").order("route", { ascending: true });
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      // First run on a fresh database: seed the page defaults.
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+        const rows = DEFAULT_PAGES.map((page) => pageToRow(page));
+        const { error: insertError } = await db.from("cms_pages").upsert(rows, { onConflict: "id" });
+        if (insertError) throw insertError;
+        console.info(`[PagesContentStore] Seeded ${rows.length} default pages into Supabase.`);
+      }
       return DEFAULT_PAGES;
     }
 
-    const content = fs.readFileSync(PAGES_FILE, "utf-8");
-    const parsed = JSON.parse(content) as PageContentItem[];
-    return parsed;
+    const pages = (data as PageRow[]).map(rowToPage);
+    cmsCacheSet(CACHE_KEY, pages);
+    return pages;
   } catch (err) {
-    console.error("[PagesContentStore] Failed to read pages, using defaults:", err);
+    console.error("[PagesContentStore] Failed to read pages from Supabase, using defaults:", err);
     return DEFAULT_PAGES;
   }
 }
 
-export function getPageContentByRoute(route: string): PageContentItem | null {
-  const all = getAllPagesContent();
+export async function getPageContentByRoute(route: string): Promise<PageContentItem | null> {
+  const all = await getAllPagesContent();
   return all.find((p) => p.route === route || p.id === route) || null;
 }
 
-export function updatePageContent(pageData: Partial<PageContentItem>): PageContentItem {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
-    const all = getAllPagesContent();
-    const index = all.findIndex(
-      (p) => (pageData.id && p.id === pageData.id) || (pageData.route && p.route === pageData.route)
-    );
-
-    let updated: PageContentItem;
-
-    if (index >= 0) {
-      updated = {
-        ...all[index],
-        ...pageData,
-        updatedAt: new Date().toISOString(),
-      };
-      all[index] = updated;
-    } else {
-      const newId = pageData.id || pageData.route?.replace(/^\//, "").replace(/\//g, "-") || `page-${Date.now()}`;
-      updated = {
-        id: newId,
-        route: pageData.route || `/${newId}`,
-        title: pageData.title || "Custom Page",
-        heroBadge: pageData.heroBadge || "OFFICIAL SERVICE",
-        heroHeadline: pageData.heroHeadline || pageData.title || "Legal Services",
-        heroSubtitle: pageData.heroSubtitle || "",
-        heroImage: pageData.heroImage || HERO_IMAGES.home,
-        primaryCtaText: pageData.primaryCtaText || "Contact Us",
-        primaryCtaHref: pageData.primaryCtaHref || "/#contact",
-        secondaryCtaText: pageData.secondaryCtaText || "WhatsApp",
-        secondaryCtaHref: pageData.secondaryCtaHref || SITE.whatsappHref,
-        leadContent: pageData.leadContent || "",
-        metaTitle: pageData.metaTitle || pageData.title || "Legal Services",
-        metaDescription: pageData.metaDescription || "",
-        status: pageData.status || "published",
-        updatedAt: new Date().toISOString(),
-      };
-      all.push(updated);
-    }
-
-    const tempFile = `${PAGES_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(all, null, 2), "utf-8");
-    fs.renameSync(tempFile, PAGES_FILE);
-
-    return updated;
-  } catch (err) {
-    console.error("[PagesContentStore] Failed to update page content:", err);
-    throw err;
+export async function updatePageContent(pageData: Partial<PageContentItem>): Promise<PageContentItem> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
+  const db = client as CmsDbClient;
+
+  const all = await getAllPagesContent();
+  const existing = all.find(
+    (p) => (pageData.id && p.id === pageData.id) || (pageData.route && p.route === pageData.route)
+  );
+
+  const nowIso = new Date().toISOString();
+
+  if (existing) {
+    const updated: PageContentItem = {
+      ...existing,
+      ...pageData,
+      id: existing.id,
+      updatedAt: nowIso,
+    };
+    const { error } = await db.from("cms_pages").update(pageToRow(updated)).eq("id", existing.id);
+    if (error) throw error;
+
+    invalidateCmsCache(CACHE_KEY);
+    return updated;
+  }
+
+  const newId = pageData.id || pageData.route?.replace(/^\//, "").replace(/\//g, "-") || `page-${Date.now()}`;
+  const created: PageContentItem = {
+    id: newId,
+    route: pageData.route || `/${newId}`,
+    title: pageData.title || "Custom Page",
+    heroBadge: pageData.heroBadge || "OFFICIAL SERVICE",
+    heroHeadline: pageData.heroHeadline || pageData.title || "Legal Services",
+    heroSubtitle: pageData.heroSubtitle || "",
+    heroImage: pageData.heroImage || HERO_IMAGES.home,
+    primaryCtaText: pageData.primaryCtaText || "Contact Us",
+    primaryCtaHref: pageData.primaryCtaHref || "/#contact",
+    secondaryCtaText: pageData.secondaryCtaText || "WhatsApp",
+    secondaryCtaHref: pageData.secondaryCtaHref || SITE.whatsappHref,
+    leadContent: pageData.leadContent || "",
+    metaTitle: pageData.metaTitle || pageData.title || "Legal Services",
+    metaDescription: pageData.metaDescription || "",
+    status: pageData.status || "published",
+    updatedAt: nowIso,
+  };
+  const { error } = await db.from("cms_pages").insert(pageToRow(created));
+  if (error) throw error;
+
+  invalidateCmsCache(CACHE_KEY);
+  return created;
 }

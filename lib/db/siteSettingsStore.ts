@@ -1,6 +1,18 @@
-import fs from "fs";
-import path from "path";
+import {
+  cmsCacheGet,
+  cmsCacheSet,
+  getCmsClient,
+  invalidateCmsCache,
+  isCmsBackendConfigured,
+} from "@/lib/db/cmsClient";
 import { SITE, HERO_IMAGES } from "@/lib/site";
+import type { Database } from "@/types/database.types";
+
+type CmsDbClient = import("@supabase/supabase-js").SupabaseClient<Database>;
+
+// The whole SiteSettings document is persisted as a single JSONB row.
+const SETTINGS_KEY = "site";
+const CACHE_KEY = "cms:site-settings";
 
 export interface NavMenuItem {
   id: string;
@@ -75,9 +87,6 @@ export interface SiteSettings {
   footerSettings: FooterSettings;
   updatedAt: string;
 }
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const SETTINGS_FILE = path.join(DATA_DIR, "siteSettings.json");
 
 function getDefaultSettings(): SiteSettings {
   return {
@@ -157,48 +166,67 @@ function getDefaultSettings(): SiteSettings {
   };
 }
 
-export function getSiteSettings(): SiteSettings {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const cached = cmsCacheGet<SiteSettings>(CACHE_KEY);
+  if (cached) return cached;
 
-    if (!fs.existsSync(SETTINGS_FILE)) {
-      const defaults = getDefaultSettings();
-      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(defaults, null, 2), "utf-8");
+  const defaults = getDefaultSettings();
+
+  if (!isCmsBackendConfigured()) return defaults;
+
+  try {
+    const client = await getCmsClient();
+    if (!client) return defaults;
+    const db = client as CmsDbClient;
+
+    const { data, error } = await db
+      .from("site_settings")
+      .select("value")
+      .eq("key", SETTINGS_KEY)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data?.value) {
+      // First run on a fresh database: persist the defaults.
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+        const { error: insertError } = await db
+          .from("site_settings")
+          .upsert({ key: SETTINGS_KEY, value: JSON.parse(JSON.stringify(defaults)) }, { onConflict: "key" });
+        if (insertError) throw insertError;
+        console.info("[SiteSettingsStore] Seeded default site settings into Supabase.");
+      }
       return defaults;
     }
 
-    const content = fs.readFileSync(SETTINGS_FILE, "utf-8");
-    const parsed = JSON.parse(content);
-    return { ...getDefaultSettings(), ...parsed };
+    const settings: SiteSettings = { ...defaults, ...(data.value as Partial<SiteSettings>) };
+    cmsCacheSet(CACHE_KEY, settings);
+    return settings;
   } catch (err) {
-    console.error("[SiteSettingsStore] Failed to read settings, falling back to defaults:", err);
-    return getDefaultSettings();
+    console.error("[SiteSettingsStore] Failed to read settings from Supabase, falling back to defaults:", err);
+    return defaults;
   }
 }
 
-export function updateSiteSettings(partial: Partial<SiteSettings>): SiteSettings {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
-    const current = getSiteSettings();
-    const updated: SiteSettings = {
-      ...current,
-      ...partial,
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Atomic write
-    const tempFile = `${SETTINGS_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(updated, null, 2), "utf-8");
-    fs.renameSync(tempFile, SETTINGS_FILE);
-
-    return updated;
-  } catch (err) {
-    console.error("[SiteSettingsStore] Failed to update settings:", err);
-    throw err;
+export async function updateSiteSettings(partial: Partial<SiteSettings>): Promise<SiteSettings> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
+  const db = client as CmsDbClient;
+
+  const current = await getSiteSettings();
+  const updated: SiteSettings = {
+    ...current,
+    ...partial,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const { error } = await db
+    .from("site_settings")
+    .upsert({ key: SETTINGS_KEY, value: JSON.parse(JSON.stringify(updated)) }, { onConflict: "key" });
+  if (error) throw error;
+
+  invalidateCmsCache(CACHE_KEY);
+  return updated;
 }

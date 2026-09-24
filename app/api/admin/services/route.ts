@@ -19,14 +19,14 @@ export async function GET(request: NextRequest) {
   try {
     const slug = request.nextUrl.searchParams.get("slug");
     if (slug) {
-      const service = getServiceBySlug(slug);
+      const service = await getServiceBySlug(slug);
       if (!service) {
         return NextResponse.json({ success: false, error: "Service not found" }, { status: 404 });
       }
       return NextResponse.json({ success: true, service });
     }
 
-    const services = getAllServices();
+    const services = await getAllServices();
     return NextResponse.json({ success: true, services });
   } catch (error) {
     return NextResponse.json(
@@ -44,14 +44,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const existing = (body.id && getServiceBySlug(body.id)) || (body.slug && getServiceBySlug(body.slug));
+    const existing =
+      (body.id && (await getServiceBySlug(body.id))) ||
+      (body.slug && (await getServiceBySlug(body.slug)));
     const effectiveName = body.name || existing?.name;
 
     if (!effectiveName || typeof effectiveName !== "string" || !effectiveName.trim()) {
       return NextResponse.json({ success: false, error: "Service name is required" }, { status: 400 });
     }
 
-    const saved = saveService({ ...(existing || {}), ...body, name: effectiveName });
+    const saved = await saveService({ ...(existing || {}), ...body, name: effectiveName });
 
     revalidatePath("/");
     revalidatePath("/#services");
@@ -82,7 +84,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Service ID is required" }, { status: 400 });
     }
 
-    const deleted = deleteService(id);
+    const deleted = await deleteService(id);
     if (!deleted) {
       return NextResponse.json({ success: false, error: "Service not found" }, { status: 404 });
     }

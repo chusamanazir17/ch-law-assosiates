@@ -25,12 +25,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [settings, services, pages, homeSections] = await Promise.all([
+    getSiteSettings(),
+    getAllServices(),
+    getAllPagesContent(),
+    getHomeSections(),
+  ]);
+
   const initialCms = {
-    settings: getSiteSettings(),
-    services: getAllServices(),
-    pages: getAllPagesContent(),
-    homeSections: getHomeSections(),
+    settings,
+    services,
+    pages,
+    homeSections,
     isLoading: false,
   };
 

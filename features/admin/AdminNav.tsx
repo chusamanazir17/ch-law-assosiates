@@ -12,8 +12,17 @@ export default function AdminNav() {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    }
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore Supabase errors if unconfigured
+    }
     router.push("/admin/login");
     router.refresh();
   };

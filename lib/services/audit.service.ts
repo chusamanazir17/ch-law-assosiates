@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { AuditLog } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface RecordAuditLogDTO {
   user_id?: string | null;
@@ -16,7 +19,7 @@ export async function listAuditLogs(filter?: {
   entityType?: string;
   limit?: number;
 }): Promise<AuditLog[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("audit_logs")
     .select("*")
@@ -43,9 +46,11 @@ export async function listAuditLogs(filter?: {
 
 export async function recordAuditLog(dto: RecordAuditLogDTO): Promise<void> {
   try {
-    const supabase = await createClient();
+    const supabase = await getAdminDatabaseClient();
+    const sanitizedUserId = dto.user_id && isUuid(dto.user_id) ? dto.user_id : null;
+
     await supabase.from("audit_logs").insert({
-      user_id: dto.user_id || null,
+      user_id: sanitizedUserId,
       user_name: dto.user_name || null,
       user_role: dto.user_role || null,
       action: dto.action,

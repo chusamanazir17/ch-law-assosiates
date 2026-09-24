@@ -16,7 +16,7 @@ export async function GET() {
   }
 
   try {
-    const sections = getHomeSections();
+    const sections = await getHomeSections();
     return NextResponse.json({ success: true, sections });
   } catch (error) {
     return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as Partial<HomeSectionsData>;
-    const updated = updateHomeSections(body);
+    const updated = await updateHomeSections(body);
 
     // Revalidate public landing page and feeds
     revalidatePath("/");

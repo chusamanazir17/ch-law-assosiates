@@ -15,7 +15,6 @@ import {
   Filter,
   X,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import type { DeliveryWithDetails, ReminderDelivery } from "@/types/reminders";
 
 const PAGE_SIZE = 15;
@@ -47,52 +46,13 @@ export default function ReminderHistory() {
 
   const fetchDeliveries = useCallback(async () => {
     setIsLoading(true);
-    const supabase = createClient();
     try {
-      let query = supabase
-        .from("reminder_deliveries")
-        .select(
-          `
-          id,
-          subscriber_id,
-          deadline_id,
-          deadline_revision,
-          reminder_interval,
-          scheduled_date,
-          status,
-          provider_message_id,
-          idempotency_key,
-          attempt_count,
-          last_attempt_at,
-          sent_at,
-          error_details,
-          created_at,
-          updated_at,
-          subscribers ( name, email, status ),
-          tax_deadlines (
-            title,
-            tax_year_or_period,
-            filing_deadline,
-            tax_categories ( name )
-          )
-        `,
-          { count: "exact" }
-        );
+      const params = new URLSearchParams({ status: statusFilter, page: String(currentPage) });
+      const res = await fetch(`/api/admin/reminder-history?${params.toString()}`);
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to load reminder history.");
 
-      if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
-      }
-
-      const from = (currentPage - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      const { data, count, error } = await query
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-      if (error) throw error;
-
-      const mapped: DeliveryWithDetails[] = (data || []).map((delivery: any) => ({
+      const mapped: DeliveryWithDetails[] = (json.deliveries || []).map((delivery: any) => ({
         ...delivery,
         subscriber: delivery.subscribers ?? undefined,
         deadline: delivery.tax_deadlines
@@ -104,7 +64,7 @@ export default function ReminderHistory() {
       }));
 
       setDeliveries(mapped);
-      setTotalCount(count || 0);
+      setTotalCount(json.totalCount || 0);
     } catch (err) {
       console.error("[Delivery History Error]", err);
     } finally {
@@ -116,22 +76,20 @@ export default function ReminderHistory() {
     fetchDeliveries();
   }, [fetchDeliveries]);
 
-  // Load verified deadlines for test email modal
+  // Load verified deadlines for test email modal (included in the history API)
   useEffect(() => {
     async function loadVerifiedDeadlines() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("tax_deadlines")
-        .select("id, title, tax_year_or_period, filing_deadline, is_active, tax_categories(name)")
-        .eq("is_active", true)
-        .not("verified_at", "is", null);
-      if (error) {
+      try {
+        const res = await fetch("/api/admin/reminder-history?status=all&page=1");
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.error || "Failed to load verified deadlines.");
+        const data = json.verifiedDeadlines || [];
+        setVerifiedDeadlines(data);
+        setSelectedDeadlineId(data?.[0]?.id || "");
+      } catch (error) {
         console.error("[Verified Deadlines Load Error]", error);
         setActionNotice({ type: "error", message: "Verified deadlines could not be loaded for test email selection." });
-        return;
       }
-      setVerifiedDeadlines(data || []);
-      setSelectedDeadlineId(data?.[0]?.id || "");
     }
     loadVerifiedDeadlines();
   }, []);
@@ -140,20 +98,15 @@ export default function ReminderHistory() {
   const handleRetryDelivery = async (deliveryId: string) => {
     setRetryingId(deliveryId);
     setActionNotice(null);
-    const supabase = createClient();
 
     try {
-      const { error } = await supabase
-        .from("reminder_deliveries")
-        .update({
-          status: "queued",
-          attempt_count: 0,
-          error_details: "Queued for retry by administrator.",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", deliveryId);
-
-      if (error) throw error;
+      const res = await fetch("/api/admin/reminder-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deliveryId }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed to retry delivery.");
 
       setActionNotice({ type: "success", message: "Delivery successfully reset to queued status for the next scheduled batch." });
       fetchDeliveries();
@@ -172,8 +125,11 @@ export default function ReminderHistory() {
     setIsSendingTest(true);
     setTestResult(null);
 
-    const supabase = createClient();
     try {
+      // The send-test-reminder Edge Function requires a real Supabase Auth
+      // session (it checks is_admin on the caller's JWT).
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
       const { data, error } = await supabase.functions.invoke("send-test-reminder", {
         body: {
           deadline_id: selectedDeadlineId,

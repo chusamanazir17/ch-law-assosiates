@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { OfficeTask } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateTaskDTO {
   title: string;
@@ -13,7 +16,7 @@ export interface CreateTaskDTO {
 }
 
 export async function listTasks(filter?: { status?: string; assignedTo?: string }): Promise<OfficeTask[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("tasks")
     .select(`
@@ -28,7 +31,7 @@ export async function listTasks(filter?: { status?: string; assignedTo?: string 
     query = query.eq("status", filter.status as any);
   }
 
-  if (filter?.assignedTo) {
+  if (filter?.assignedTo && isUuid(filter.assignedTo)) {
     query = query.eq("assigned_to", filter.assignedTo);
   }
 
@@ -47,15 +50,20 @@ export async function listTasks(filter?: { status?: string; assignedTo?: string 
 }
 
 export async function createTaskRecord(dto: CreateTaskDTO): Promise<OfficeTask> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
+
+  const sanitizedAssignedTo = dto.assigned_to && isUuid(dto.assigned_to) ? dto.assigned_to : null;
+  const sanitizedCaseId = dto.case_id && isUuid(dto.case_id) ? dto.case_id : null;
+  const sanitizedClientId = dto.client_id && isUuid(dto.client_id) ? dto.client_id : null;
+
   const { data, error } = await supabase
     .from("tasks")
     .insert({
       title: dto.title.trim(),
       description: dto.description || null,
-      assigned_to: dto.assigned_to || null,
-      case_id: dto.case_id || null,
-      client_id: dto.client_id || null,
+      assigned_to: sanitizedAssignedTo,
+      case_id: sanitizedCaseId,
+      client_id: sanitizedClientId,
       due_date: dto.due_date,
       priority: dto.priority || "medium",
       status: dto.status || "pending",
@@ -72,7 +80,8 @@ export async function createTaskRecord(dto: CreateTaskDTO): Promise<OfficeTask> 
 }
 
 export async function updateTaskStatus(id: string, status: OfficeTask["status"]): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase
     .from("tasks")
     .update({ status, updated_at: new Date().toISOString() })
@@ -82,7 +91,8 @@ export async function updateTaskStatus(id: string, status: OfficeTask["status"])
 }
 
 export async function deleteTaskRecord(id: string): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase.from("tasks").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete task: ${error.message}`);
 }

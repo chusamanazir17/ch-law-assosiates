@@ -218,9 +218,12 @@ export default async function UpdatesPage({
               <div className="grid lg:grid-cols-12 gap-0">
                 {featuredPost.cover_image_url ? (
                   <div className="lg:col-span-7 relative aspect-video lg:aspect-auto overflow-hidden bg-navy-950">
-                    <img
+                    <Image
                       src={featuredPost.cover_image_url}
                       alt={featuredPost.title}
+                      fill
+                      priority
+                      sizes="(min-width: 1024px) 58vw, 100vw"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
                     <div className="absolute top-4 left-4">
@@ -281,9 +284,11 @@ export default async function UpdatesPage({
                 <div>
                   {post.cover_image_url && (
                     <div className="relative aspect-video overflow-hidden bg-navy-950">
-                      <img
+                      <Image
                         src={post.cover_image_url}
                         alt={post.title}
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                         className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
                       />
                     </div>

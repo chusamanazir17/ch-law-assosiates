@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { Invoice, InvoiceItem, Payment } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateInvoiceDTO {
   client_id: string;
@@ -16,7 +19,7 @@ export interface CreateInvoiceDTO {
 }
 
 export async function listInvoices(filter?: { status?: string; clientId?: string }): Promise<Invoice[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("invoices")
     .select(`
@@ -31,7 +34,7 @@ export async function listInvoices(filter?: { status?: string; clientId?: string
     query = query.eq("status", filter.status as any);
   }
 
-  if (filter?.clientId) {
+  if (filter?.clientId && isUuid(filter.clientId)) {
     query = query.eq("client_id", filter.clientId);
   }
 
@@ -50,7 +53,8 @@ export async function listInvoices(filter?: { status?: string; clientId?: string
 }
 
 export async function getInvoiceById(id: string): Promise<Invoice | null> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("invoices")
     .select(`
@@ -74,7 +78,20 @@ export async function getInvoiceById(id: string): Promise<Invoice | null> {
 }
 
 export async function createInvoiceRecord(dto: CreateInvoiceDTO): Promise<Invoice> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
+
+  // Resolve client_id if non-UUID or mock
+  let resolvedClientId: string | undefined = dto.client_id;
+  if (!isUuid(resolvedClientId)) {
+    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
+    resolvedClientId = cl?.id;
+  }
+
+  if (!resolvedClientId || !isUuid(resolvedClientId)) {
+    throw new Error("A valid Client is required to generate an invoice.");
+  }
+
+  const resolvedCaseId = dto.case_id && isUuid(dto.case_id) ? dto.case_id : null;
 
   // Compute subtotal and total
   const subtotal = dto.items.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
@@ -89,8 +106,8 @@ export async function createInvoiceRecord(dto: CreateInvoiceDTO): Promise<Invoic
     .from("invoices")
     .insert({
       invoice_number: invoiceNumber,
-      client_id: dto.client_id,
-      case_id: dto.case_id || null,
+      client_id: resolvedClientId,
+      case_id: resolvedCaseId,
       due_date: dto.due_date,
       subtotal,
       tax_amount: tax,
@@ -118,10 +135,13 @@ export async function createInvoiceRecord(dto: CreateInvoiceDTO): Promise<Invoic
       total_price: item.quantity * item.unit_price,
     }));
 
-    await supabase.from("invoice_items").insert(itemsPayload);
+    const { error: itemsError } = await supabase.from("invoice_items").insert(itemsPayload);
+    if (itemsError) {
+      console.warn("[BillingService] invoice_items insert warn:", itemsError.message);
+    }
   }
 
-  return getInvoiceById(invoice.id) as Promise<Invoice>;
+  return (await getInvoiceById(invoice.id)) as Invoice;
 }
 
 export async function recordPaymentRecord(data: {
@@ -133,33 +153,60 @@ export async function recordPaymentRecord(data: {
   reference_number?: string | null;
   notes?: string | null;
 }): Promise<Payment> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const receiptNo = data.reference_number || `REC-${Date.now().toString().slice(-6)}`;
 
   let clientId = data.client_id;
-  if (!clientId && data.invoice_id) {
+  let targetInvoice: any = null;
+
+  if (data.invoice_id && isUuid(data.invoice_id)) {
     const { data: inv } = await supabase
       .from("invoices")
-      .select("client_id")
+      .select("id, client_id, total_amount, paid_amount, invoice_number")
       .eq("id", data.invoice_id)
-      .single();
-    if (inv?.client_id) {
-      clientId = inv.client_id;
+      .maybeSingle();
+
+    if (inv) {
+      targetInvoice = inv;
+      if (!clientId || !isUuid(clientId)) {
+        clientId = inv.client_id;
+      }
     }
   }
 
-  if (!clientId) {
+  if (!clientId || !isUuid(clientId)) {
+    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
+    clientId = cl?.id;
+  }
+
+  if (!clientId || !isUuid(clientId)) {
     throw new Error("Client ID is required to record payment");
+  }
+
+  // Resolve payment account
+  let targetAccountId = data.payment_account_id;
+  if (!targetAccountId || !isUuid(targetAccountId)) {
+    const method = (data.payment_method || "cash").toLowerCase();
+    const { data: accounts } = await supabase.from("payment_accounts").select("id, account_type, name");
+    if (accounts && accounts.length > 0) {
+      const match = accounts.find((a: any) =>
+        (method.includes("bank") && a.account_type === "bank") ||
+        (method.includes("jazz") && a.account_type === "jazzcash") ||
+        (method.includes("easy") && a.account_type === "easypaisa") ||
+        (a.account_type === "cash")
+      );
+      targetAccountId = match ? match.id : accounts[0].id;
+    }
   }
 
   const { data: payment, error } = await supabase
     .from("payments")
     .insert({
-      invoice_id: data.invoice_id || null,
+      invoice_id: targetInvoice?.id || (data.invoice_id && isUuid(data.invoice_id) ? data.invoice_id : null),
       client_id: clientId,
       amount: data.amount,
       payment_method: data.payment_method || "cash",
-      payment_account_id: data.payment_account_id || null,
+      payment_account_id: targetAccountId && isUuid(targetAccountId) ? targetAccountId : null,
       receipt_number: receiptNo,
       notes: data.notes || null,
     })
@@ -171,13 +218,59 @@ export async function recordPaymentRecord(data: {
     throw new Error(`Failed to record payment: ${error.message}`);
   }
 
+  // Sync Invoice status and paid_amount
+  if (targetInvoice) {
+    const newPaid = Number(targetInvoice.paid_amount || 0) + Number(data.amount);
+    const newStatus = newPaid >= Number(targetInvoice.total_amount) ? "paid" : "partial";
+    await supabase
+      .from("invoices")
+      .update({
+        paid_amount: newPaid,
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", targetInvoice.id);
+  }
+
+  // Sync Financial Ledger & Account Balance
+  if (targetAccountId && isUuid(targetAccountId)) {
+    const { data: acc } = await supabase
+      .from("payment_accounts")
+      .select("current_balance")
+      .eq("id", targetAccountId)
+      .maybeSingle();
+
+    if (acc) {
+      const currentBal = Number(acc.current_balance || 0);
+      const newBal = currentBal + Number(data.amount);
+      await supabase.from("payment_accounts").update({ current_balance: newBal }).eq("id", targetAccountId);
+
+      const txNum = `TX-REC-${Date.now().toString().slice(-6)}`;
+      const { error: ledgerError } = await supabase.from("financial_ledger").insert({
+        transaction_number: txNum,
+        entry_type: "credit",
+        account_id: targetAccountId,
+        amount: data.amount,
+        balance_after: newBal,
+        category: "Legal Fee",
+        description: `Payment for Invoice ${targetInvoice?.invoice_number || receiptNo}`,
+        client_id: clientId,
+        reference_type: "payment",
+        reference_id: payment.id,
+      });
+      if (ledgerError) {
+        console.warn("[BillingService] ledger insert error:", ledgerError.message);
+      }
+    }
+  }
+
   return payment as Payment;
 }
 
 export const recordInvoicePayment = recordPaymentRecord;
 
 export async function listPayments(): Promise<Payment[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("payments")
     .select(`

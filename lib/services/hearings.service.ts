@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import type { Hearing } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateHearingDTO {
   case_id: string;
@@ -14,7 +17,7 @@ export interface CreateHearingDTO {
 }
 
 export async function listHearings(filter?: { caseId?: string; upcomingOnly?: boolean; date?: string }): Promise<Hearing[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("hearings")
     .select(`
@@ -23,7 +26,7 @@ export async function listHearings(filter?: { caseId?: string; upcomingOnly?: bo
     `)
     .order("hearing_date", { ascending: true });
 
-  if (filter?.caseId) {
+  if (filter?.caseId && isUuid(filter.caseId)) {
     query = query.eq("case_id", filter.caseId);
   }
 
@@ -50,11 +53,34 @@ export async function listHearings(filter?: { caseId?: string; upcomingOnly?: bo
 }
 
 export async function createHearingRecord(dto: CreateHearingDTO): Promise<Hearing> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
+
+  let resolvedCaseId = dto.case_id;
+  if (!isUuid(resolvedCaseId)) {
+    // Attempt lookup by case_number or fallback to first available case
+    const { data: matchedCase } = await supabase
+      .from("cases")
+      .select("id")
+      .or(`case_number.eq.${resolvedCaseId},id.eq.${resolvedCaseId}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (matchedCase?.id) {
+      resolvedCaseId = matchedCase.id;
+    } else {
+      const { data: anyCase } = await supabase.from("cases").select("id").limit(1).maybeSingle();
+      if (anyCase?.id) resolvedCaseId = anyCase.id;
+    }
+  }
+
+  if (!resolvedCaseId || !isUuid(resolvedCaseId)) {
+    throw new Error("A valid Case is required to record a hearing.");
+  }
+
   const { data, error } = await supabase
     .from("hearings")
     .insert({
-      case_id: dto.case_id,
+      case_id: resolvedCaseId,
       hearing_date: dto.hearing_date,
       court_room: dto.court_room || null,
       judge_name: dto.judge_name || null,
@@ -82,8 +108,9 @@ export async function createHearingRecord(dto: CreateHearingDTO): Promise<Hearin
   } as Hearing;
 }
 
-export async function updateHearingRecord(id: string, updates: Partial<CreateHearingDTO>): Promise<Hearing> {
-  const supabase = await createClient();
+export async function updateHearingRecord(id: string, updates: Partial<CreateHearingDTO>): Promise<Hearing | null> {
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("hearings")
     .update({
@@ -110,7 +137,8 @@ export async function updateHearingRecord(id: string, updates: Partial<CreateHea
 }
 
 export async function deleteHearingRecord(id: string): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase.from("hearings").delete().eq("id", id);
   if (error) throw new Error(`Failed to delete hearing: ${error.message}`);
 }

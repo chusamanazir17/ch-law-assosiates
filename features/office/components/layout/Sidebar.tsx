@@ -3,6 +3,8 @@ import { useOffice } from '../../context/OfficeContext';
 import {
   Briefcase,
   LayoutGrid,
+  Gavel,
+  Scale,
   Wallet,
   FileCheck2,
   Users,
@@ -191,6 +193,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <LayoutGrid className="w-4 h-4 shrink-0" />
                     {!isCollapsed && <span>Dashboard</span>}
+                  </button>
+
+                  {/* Legal Cases */}
+                  <button
+                    onClick={() => handleNav('cases')}
+                    title="Legal Cases"
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
+                    } rounded-lg text-left transition-colors cursor-pointer ${
+                      activeSection === 'cases'
+                        ? 'bg-[#1473E6] text-white font-semibold shadow-xs'
+                        : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
+                    }`}
+                  >
+                    <Gavel className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span>Legal Cases</span>}
+                  </button>
+
+                  {/* Hearings */}
+                  <button
+                    onClick={() => handleNav('hearings')}
+                    title="Hearings Calendar"
+                    className={`w-full flex items-center ${
+                      isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
+                    } rounded-lg text-left transition-colors cursor-pointer ${
+                      activeSection === 'hearings'
+                        ? 'bg-[#1473E6] text-white font-semibold shadow-xs'
+                        : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
+                    }`}
+                  >
+                    <Scale className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span>Hearings</span>}
                   </button>
 
                   {/* Fee Invoices & Billing */}

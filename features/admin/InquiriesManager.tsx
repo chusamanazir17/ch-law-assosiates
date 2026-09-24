@@ -31,7 +31,6 @@ import {
   ChevronDown,
   UserCheck,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import type { ConsultationInquiry } from "@/types/cms";
 
 type InquiryStatus = ConsultationInquiry["status"];
@@ -88,93 +87,6 @@ function MiniSparkline({
   );
 }
 
-// Fallback initial demo inquiries if database is empty or fetching fails
-const INITIAL_DEMO_INQUIRIES: ExtendedInquiry[] = [
-  {
-    id: "inq-1",
-    name: "Rana Zafar Iqbal",
-    phone: "+92 300 1234567",
-    email: "rana.zafar@example.com",
-    service_needed: "Income Tax Filing",
-    message: "I'd like to know more about salaried tax filing and wealth statement reconciliation. Could you please share the required documentation, timeline, and appointment availability?",
-    created_at: "2026-09-21T08:24:00Z",
-    status: "new",
-    priority: "High",
-    assignedTo: { name: "Zain Ahmed" },
-    location: "Sahiwal, Punjab",
-    source: "Website Contact Form",
-  },
-  {
-    id: "inq-2",
-    name: "Haji Abdul Rehman",
-    phone: "+92 321 7654321",
-    email: "haji.rehman@example.com",
-    service_needed: "E-Stamp Services",
-    message: "I am facing an issue with e-stamp Challan 32-A generation for commercial property transfer. Need assistance in calculating statutory stamp duty.",
-    created_at: "2026-09-20T18:17:00Z",
-    status: "in_progress",
-    priority: "Medium",
-    assignedTo: { name: "Sara Malik" },
-    location: "Chichawatni, Punjab",
-    source: "Website Contact Form",
-  },
-  {
-    id: "inq-3",
-    name: "Sana Khan",
-    phone: "+92 333 9988776",
-    email: "sana.khan@example.com",
-    service_needed: "Business Registration",
-    message: "We are interested in registering a private limited IT firm and obtaining NTN + PRA sales tax enrollment. Please advise on procedure.",
-    created_at: "2026-09-20T11:03:00Z",
-    status: "completed",
-    priority: "High",
-    assignedTo: { name: "Zain Ahmed" },
-    location: "Lahore, Pakistan",
-    source: "Corporate Advisory Portal",
-  },
-  {
-    id: "inq-4",
-    name: "Ali Murtaza",
-    phone: "+92 345 5544332",
-    email: "ali.murtaza@example.com",
-    service_needed: "Property Tax",
-    message: "Can you please share more details about your consulting fees for property valuation appeals and Capital Value Tax assessment?",
-    created_at: "2026-09-19T15:45:00Z",
-    status: "new",
-    priority: "Low",
-    assignedTo: { name: "Ali Raza" },
-    location: "Sahiwal, Punjab",
-    source: "Website Contact Form",
-  },
-  {
-    id: "inq-5",
-    name: "Fatima Tariq",
-    phone: "+92 312 3344556",
-    email: "fatima.tariq@example.com",
-    service_needed: "Corporate Advisory",
-    message: "I have a question about our firm's recent annual withholding audit notice from FBR RTO Sahiwal. Seeking representation.",
-    created_at: "2026-09-19T10:12:00Z",
-    status: "completed",
-    priority: "Medium",
-    assignedTo: { name: "Fatima Tariq" },
-    location: "Sahiwal, Punjab",
-    source: "Direct Referral",
-  },
-  {
-    id: "inq-6",
-    name: "Imran Baloch",
-    phone: "+92 301 2233445",
-    email: "imran.baloch@example.com",
-    service_needed: "Registry & Legal Deeds",
-    message: "I would like to know if you offer deed drafting for gift settlement between family members and subsequent sub-registrar registration.",
-    created_at: "2026-09-18T19:36:00Z",
-    status: "archived",
-    priority: "Low",
-    assignedTo: { name: "Hassan Khan" },
-    location: "Okara, Punjab",
-    source: "Website Contact Form",
-  },
-];
 
 export default function InquiriesManager() {
   const [inquiries, setInquiries] = useState<ExtendedInquiry[]>([]);
@@ -235,7 +147,7 @@ export default function InquiriesManager() {
       const res = await fetch("/api/admin/inquiries");
       if (res.ok) {
         const json = await res.json();
-        if (json.success && json.inquiries && json.inquiries.length > 0) {
+        if (json.success && json.inquiries) {
           const mapped: ExtendedInquiry[] = json.inquiries.map((inq: any, idx: number) => ({
             ...inq,
             priority: inq.priority || (idx % 3 === 0 ? "High" : idx % 3 === 1 ? "Medium" : "Low"),
@@ -247,38 +159,15 @@ export default function InquiriesManager() {
           }));
           setInquiries(mapped);
           if (!selectedInquiry) setSelectedInquiry(mapped[0]);
-          setIsLoading(false);
-          return;
+        } else {
+          setInquiries([]);
         }
-      }
-
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("consultation_inquiries")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        const mapped: ExtendedInquiry[] = data.map((inq: any, idx: number) => ({
-          ...inq,
-          priority: inq.priority || (idx % 3 === 0 ? "High" : idx % 3 === 1 ? "Medium" : "Low"),
-          assignedTo: inq.assignedTo || {
-            name: ["Zain Ahmed", "Sara Malik", "Ali Raza", "Fatima Tariq", "Hassan Khan"][idx % 5],
-          },
-          location: inq.location || "Sahiwal, Punjab",
-          source: inq.source || "Website Contact Form",
-        }));
-        setInquiries(mapped);
-        if (!selectedInquiry) setSelectedInquiry(mapped[0]);
       } else {
-        // Use demo inquiries if no records exist yet
-        setInquiries(INITIAL_DEMO_INQUIRIES);
-        if (!selectedInquiry) setSelectedInquiry(INITIAL_DEMO_INQUIRIES[0]);
+        setInquiries([]);
       }
     } catch (error) {
       console.warn("[Inquiries Load]", error);
-      setInquiries(INITIAL_DEMO_INQUIRIES);
-      if (!selectedInquiry) setSelectedInquiry(INITIAL_DEMO_INQUIRIES[0]);
+      setInquiries([]);
     } finally {
       setIsLoading(false);
     }
@@ -310,21 +199,8 @@ export default function InquiriesManager() {
         return;
       }
 
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("consultation_inquiries")
-        .update({ status: newStatus })
-        .eq("id", id);
-
-      if (error) throw error;
-
-      setInquiries((prev) =>
-        prev.map((inq) => (inq.id === id ? { ...inq, status: newStatus } : inq))
-      );
-      setMessage({ type: "success", text: `Status updated to ${newStatus}.` });
-      if (selectedInquiry && selectedInquiry.id === id) {
-        setSelectedInquiry((prev) => (prev ? { ...prev, status: newStatus } : null));
-      }
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error || "Failed to update status.");
     } catch (error) {
       setMessage({ type: "error", text: getErrorMessage(error, "Failed to update status.") });
     } finally {
@@ -353,16 +229,8 @@ export default function InquiriesManager() {
         return;
       }
 
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("consultation_inquiries")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-      setInquiries((prev) => prev.filter((i) => i.id !== id));
-      setMessage({ type: "success", text: "Inquiry removed from inbox." });
-      if (selectedInquiry?.id === id) setSelectedInquiry(null);
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error || "Failed to delete inquiry.");
     } catch (error) {
       setMessage({ type: "error", text: getErrorMessage(error, "Failed to delete inquiry.") });
     } finally {

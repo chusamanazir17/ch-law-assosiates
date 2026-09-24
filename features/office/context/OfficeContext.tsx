@@ -612,6 +612,39 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.value) {
         setBusinessSettings(prev => ({ ...prev, ...settingsRes.value.value }));
       }
+
+      // 11. Sync Staff Users (from Supabase profiles)
+      if (employeesRes.status === 'fulfilled' && employeesRes.value?.success && Array.isArray(employeesRes.value.employees)) {
+        if (employeesRes.value.employees.length > 0) {
+          const roleLabels: Record<string, SystemUser['role']> = {
+            super_admin: 'Admin',
+            office_admin: 'Admin',
+            lawyer: 'Tax Consultant',
+            accountant: 'Accountant',
+            receptionist: 'Staff',
+            staff: 'Staff'
+          };
+          setSystemUsers(employeesRes.value.employees.map((emp: any) => {
+            const displayName = emp.full_name || emp.email || 'Staff';
+            const roleLabel = roleLabels[emp.role] || 'Staff';
+            return {
+              id: emp.id,
+              name: displayName,
+              email: emp.email || '',
+              role: roleLabel,
+              status: 'Offline' as const,
+              lastLogin: emp.updated_at ? formatDateTime(new Date(emp.updated_at)) : '—',
+              avatarInitials: displayName
+                .split(' ')
+                .map((part: string) => part[0])
+                .slice(0, 2)
+                .join('')
+                .toUpperCase(),
+              phone: emp.phone || undefined
+            };
+          }));
+        }
+      }
     } catch (err) {
       console.warn('[OfficeContext] Data sync encountered an error; fallback cache retained:', err);
     } finally {
@@ -622,6 +655,25 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Hydrate on mount
   useEffect(() => {
     refreshData();
+  }, [refreshData]);
+
+  // Re-sync canonical data from the database when the user navigates between
+  // office sections or returns to the tab — keeps locally-optimistic rows
+  // (client-generated IDs/numbers) reconciled with Supabase.
+  useEffect(() => {
+    if (activeSection !== 'dashboard' || typeof window === 'undefined') {
+      refreshData();
+      return;
+    }
+    // Dashboard is the landing section; mount already refreshed it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleFocus = () => refreshData();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [refreshData]);
 
   // Modals state
@@ -853,7 +905,14 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         client_id: clientId,
         reference_no: receiptNo
       })
-    }).catch(err => console.warn('[OfficeContext] Cash In DB persist error:', err));
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error('[OfficeContext] Cash In failed to persist in DB:', errData.error || res.statusText);
+        }
+      })
+      .catch(err => console.error('[OfficeContext] Cash In DB network persist error:', err));
 
     return receiptNo;
   };
@@ -942,7 +1001,14 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         amount,
         description: notes || payeeDescription
       })
-    }).catch(err => console.warn('[OfficeContext] Cash Out DB persist error:', err));
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error('[OfficeContext] Cash Out failed to persist in DB:', errData.error || res.statusText);
+        }
+      })
+      .catch(err => console.error('[OfficeContext] Cash Out DB persist error:', err));
   };
 
   // Central Account Transfer
@@ -1000,8 +1066,16 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         amount,
         description: notes || `Transfer from ${fromAccount} to ${toAccount}`
       })
-    }).catch(err => console.warn('[OfficeContext] Transfer DB persist error:', err));
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error('[OfficeContext] Transfer failed to persist in DB:', errData.error || res.statusText);
+        }
+      })
+      .catch(err => console.error('[OfficeContext] Transfer DB persist error:', err));
   };
+
 
   // Stamp Sale
   const recordStampSale = ({

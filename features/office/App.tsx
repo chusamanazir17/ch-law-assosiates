@@ -7,6 +7,8 @@ import { TopBar } from './components/layout/TopBar';
 
 // Views
 import { DashboardView } from './components/views/DashboardView';
+import { CasesView } from './components/views/CasesView';
+import { HearingsView } from './components/views/HearingsView';
 import { CashManagementView } from './components/views/CashManagementView';
 import { StampManagementView } from './components/views/StampManagementView';
 import { ClientsView } from './components/views/ClientsView';
@@ -59,9 +61,6 @@ const MainLayout: React.FC = () => {
             services: 'composing',
             register: 'cash',
             'daily-register': 'cash',
-            cases: 'dashboard',
-            hearings: 'dashboard',
-            court: 'dashboard',
           };
           const resolved = aliasMap[tabNorm] || tabNorm;
           setActiveSection(resolved);
@@ -77,9 +76,7 @@ const MainLayout: React.FC = () => {
               finance: 'cash',
               estamp: 'stamps',
               services: 'composing',
-              cases: 'dashboard',
-              hearings: 'dashboard',
-              court: 'dashboard',
+              court: 'cases',
             };
             setActiveSection(aliasMap[section] || section);
             return;
@@ -126,9 +123,11 @@ const MainLayout: React.FC = () => {
   const renderActiveView = () => {
     switch (activeSection) {
       case 'dashboard':
-      case 'cases':
-      case 'hearings':
         return <DashboardView />;
+      case 'cases':
+        return <CasesView />;
+      case 'hearings':
+        return <HearingsView />;
       case 'invoices':
         return <InvoicesView />;
       case 'attendance':

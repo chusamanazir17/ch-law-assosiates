@@ -1,5 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import type { LegalCase, Client, Profile } from "@/types/office";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import type { LegalCase } from "@/types/office";
+
+const isUuid = (str: any): boolean =>
+  typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 
 export interface CreateCaseDTO {
   case_number: string;
@@ -18,7 +21,7 @@ export interface CreateCaseDTO {
 }
 
 export async function listCases(filter?: { status?: string; lawyerId?: string; clientId?: string; search?: string }): Promise<LegalCase[]> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   let query = supabase
     .from("cases")
     .select(`
@@ -32,7 +35,7 @@ export async function listCases(filter?: { status?: string; lawyerId?: string; c
     query = query.eq("status", filter.status as any);
   }
 
-  if (filter?.clientId) {
+  if (filter?.clientId && isUuid(filter.clientId)) {
     query = query.eq("case_clients.client_id", filter.clientId);
   }
 
@@ -57,7 +60,8 @@ export async function listCases(filter?: { status?: string; lawyerId?: string; c
 }
 
 export async function getCaseById(id: string): Promise<LegalCase | null> {
-  const supabase = await createClient();
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("cases")
     .select(`
@@ -84,7 +88,7 @@ export async function getCaseById(id: string): Promise<LegalCase | null> {
 }
 
 export async function createCaseRecord(dto: CreateCaseDTO): Promise<LegalCase> {
-  const supabase = await createClient();
+  const supabase = await getAdminDatabaseClient();
   const now = new Date().toISOString();
 
   const { data: newCase, error: caseErr } = await supabase
@@ -109,29 +113,42 @@ export async function createCaseRecord(dto: CreateCaseDTO): Promise<LegalCase> {
     throw new Error(`Failed to create case: ${caseErr.message}`);
   }
 
-  // Link client if provided
-  if (dto.client_id) {
-    await supabase.from("case_clients").insert({
-      case_id: newCase.id,
-      client_id: dto.client_id,
-      client_role: dto.client_role || "petitioner",
-    });
+  // Link client if provided and is valid UUID
+  let resolvedClientId = dto.client_id;
+  if (resolvedClientId && !isUuid(resolvedClientId)) {
+    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
+    resolvedClientId = cl?.id;
   }
 
-  // Link lawyer if provided
-  if (dto.lawyer_id) {
-    await supabase.from("case_lawyers").insert({
+  if (resolvedClientId && isUuid(resolvedClientId)) {
+    const { error: caseClientError } = await supabase.from("case_clients").insert({
+      case_id: newCase.id,
+      client_id: resolvedClientId,
+      client_role: dto.client_role || "petitioner",
+    });
+    if (caseClientError) {
+      console.warn("[CasesService] case_clients insert warning:", caseClientError.message);
+    }
+  }
+
+  // Link lawyer if provided and is valid UUID
+  if (dto.lawyer_id && isUuid(dto.lawyer_id)) {
+    const { error: caseLawyerError } = await supabase.from("case_lawyers").insert({
       case_id: newCase.id,
       lawyer_id: dto.lawyer_id,
       role: "lead",
     });
+    if (caseLawyerError) {
+      console.warn("[CasesService] case_lawyers insert warning:", caseLawyerError.message);
+    }
   }
 
   return newCase as LegalCase;
 }
 
-export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDTO>): Promise<LegalCase> {
-  const supabase = await createClient();
+export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDTO>): Promise<LegalCase | null> {
+  if (!isUuid(id)) return null;
+  const supabase = await getAdminDatabaseClient();
   const { client_id, lawyer_id, client_role, ...caseFields } = updates;
 
   const { data, error } = await supabase
@@ -149,11 +166,11 @@ export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDT
     throw new Error(`Failed to update case: ${error.message}`);
   }
 
-  if (client_id) {
+  if (client_id && isUuid(client_id)) {
     await assignClientToCase(id, client_id, client_role || "petitioner");
   }
 
-  if (lawyer_id) {
+  if (lawyer_id && isUuid(lawyer_id)) {
     await assignLawyerToCase(id, lawyer_id, "lead");
   }
 
@@ -161,7 +178,8 @@ export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDT
 }
 
 export async function assignLawyerToCase(caseId: string, lawyerId: string, role = "lead"): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(caseId) || !isUuid(lawyerId)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase
     .from("case_lawyers")
     .upsert({
@@ -177,7 +195,8 @@ export async function assignLawyerToCase(caseId: string, lawyerId: string, role 
 }
 
 export async function assignClientToCase(caseId: string, clientId: string, clientRole = "petitioner"): Promise<void> {
-  const supabase = await createClient();
+  if (!isUuid(caseId) || !isUuid(clientId)) return;
+  const supabase = await getAdminDatabaseClient();
   const { error } = await supabase
     .from("case_clients")
     .upsert({
