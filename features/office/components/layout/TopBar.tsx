@@ -30,7 +30,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
   const {
     isDarkMode,
     toggleDarkMode,
-    setIsSearchModalOpen,
     setActiveSection,
     setActiveSubSection,
     stampStock,
@@ -38,10 +37,16 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
     dailyClosing,
     auditLogs,
     unreadNotifications,
-    markNotificationsRead
+    markNotificationsRead,
+    clients,
+    receipts,
+    transactions,
+    tasks,
+    serviceOrders
   } = useOffice();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const notifRef = useRef<HTMLDivElement>(null);
@@ -61,18 +66,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Keyboard shortcut Ctrl + K
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsSearchModalOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setIsSearchModalOpen]);
-
   // Notifications computed
   const lowStockCount = stampStock.filter(s => s.status !== 'OK').length;
   const overdueTax = taxCases.filter(t => t.status === 'Overdue' || t.status === 'Documents Required').length;
@@ -91,26 +84,78 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           <Menu className="w-5 h-5" />
         </button>
 
-        {/* Global Search Input - Hidden on mobile view, shown on sm+ */}
-        <div
-          onClick={() => setIsSearchModalOpen(true)}
-          className={`relative w-full hidden sm:flex items-center cursor-pointer group transition-all duration-200 ${
-            isSidebarCollapsed 
-              ? 'max-w-[220px] md:max-w-[260px] xl:max-w-[300px]' 
-              : 'max-w-[180px] md:max-w-[210px] lg:max-w-[240px]'
-          }`}
-        >
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-hover:text-[#B8832A] transition-colors">
+        {/* Global Search — inline, stays in place while typing */}
+        <div className={`relative w-full hidden sm:flex items-center flex-col group transition-all duration-200 ${
+          isSidebarCollapsed 
+            ? 'max-w-[220px] md:max-w-[260px] xl:max-w-[300px]' 
+            : 'max-w-[180px] md:max-w-[210px] lg:max-w-[240px]'
+        }`}>
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#B8832A] transition-colors">
             <Search className="w-4 h-4 shrink-0" />
           </div>
           <input
             type="text"
-            readOnly
-            placeholder={isSidebarCollapsed ? "Search clients, receipts, transactions, CNIC..." : "Search clients, CNIC, receipts..."}
-            className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 group-hover:border-[#B8832A] group-hover:bg-white dark:group-hover:bg-[#0E1A2E] transition-all cursor-pointer shadow-2xs font-medium truncate"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder={isSidebarCollapsed ? "Search clients, receipts..." : "Search clients, receipts..."}
+            className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#B8832A] focus:bg-white dark:focus:bg-[#0E1A2E] transition-all shadow-2xs font-medium"
           />
-        </div>
-      </div>
+
+          {/* Inline results dropdown */}
+          {searchQuery.trim() && (
+            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-[#0E1A2E] rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 text-xs max-h-[420px] overflow-y-auto">
+              {(() => {
+                const q = searchQuery.trim().toLowerCase();
+                const clientHits = clients.filter(c =>
+                  c.name.toLowerCase().includes(q) || (c.businessName || '').toLowerCase().includes(q) || (c.cnic || '').includes(q) || (c.ntn || '').includes(q)
+                ).slice(0, 3);
+                const receiptHits = receipts.filter(r =>
+                  r.receiptNo.toLowerCase().includes(q) || r.clientName.toLowerCase().includes(q) || (r.service || '').toLowerCase().includes(q)
+                ).slice(0, 3);
+                const txHits = transactions.filter(t =>
+                  t.description.toLowerCase().includes(q) || t.clientOrPayee.toLowerCase().includes(q)
+                ).slice(0, 3);
+                const taskHits = tasks.filter(t =>
+                  (t.title || '').toLowerCase().includes(q) || (t.client || '').toLowerCase().includes(q)
+                ).slice(0, 2);
+                const caseHits = taxCases.filter(tc =>
+                  (tc.clientName || '').toLowerCase().includes(q) || (tc.cprNumber || '').toLowerCase().includes(q)
+                ).slice(0, 2);
+
+                const groups: Array<{ title: string; section: string; rows: Array<{ key: string; main: string; sub: string }> }> = [];
+                if (clientHits.length) groups.push({ title: 'Clients', section: 'clients', rows: clientHits.map(c => ({ key: c.id, main: c.name, sub: c.businessName || c.cnic || 'Client' })) });
+                if (receiptHits.length) groups.push({ title: 'Receipts', section: 'receipts', rows: receiptHits.map(r => ({ key: r.id, main: r.receiptNo + ' — ' + r.clientName, sub: r.service })) });
+                if (txHits.length) groups.push({ title: 'Transactions', section: 'cash', rows: txHits.map(t => ({ key: t.id, main: t.description || t.clientOrPayee, sub: (t.type === 'IN' ? '+ ' : '- ') + 'Rs. ' + Number(t.amount || 0).toLocaleString() })) });
+                if (caseHits.length) groups.push({ title: 'Tax Cases', section: 'tax', rows: caseHits.map(tc => ({ key: tc.id, main: tc.clientName || 'Tax Case', sub: tc.returnType || '' })) });
+                if (taskHits.length) groups.push({ title: 'Tasks', section: 'tasks', rows: taskHits.map(t => ({ key: t.id, main: t.title || 'Task', sub: t.dueDate || '' })) });
+
+                if (groups.length === 0) {
+                  return <div className="px-4 py-3 text-slate-400">No matches for "“{searchQuery}”"</div>;
+                }
+
+                return groups.map(g => (
+                  <div key={g.title} className="py-1">
+                    <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{g.title}</div>
+                    {g.rows.map(row => (
+                      <button
+                        key={row.key}
+                        onClick={() => {
+                          setActiveSection(g.section);
+                          setSearchQuery('');
+                          setIsNotifOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between gap-2"
+                      >
+                        <span className="font-semibold text-slate-800 dark:text-slate-100 truncate">{row.main}</span>
+                        <span className="text-[10px] text-slate-400 truncate shrink-0">{row.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+        </div>      </div>
 
       {/* Right Controls: Dark Theme Toggle, Notifications, and Profile Section on the right-hand side */}
       <div className="flex items-center gap-1 sm:gap-2 md:gap-2.5 shrink-0">

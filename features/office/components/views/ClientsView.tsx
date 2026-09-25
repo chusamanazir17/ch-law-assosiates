@@ -175,6 +175,13 @@ export const ClientsView: React.FC = () => {
       </div>
 
       {/* 3. Main Directory Table + Selected Client Profile Card */}
+      {clientList.length === 0 ? (
+        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-10 text-center shadow-xs">
+          <Users className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">No clients yet</h3>
+          <p className="text-xs text-slate-400 mt-1">Clients you add will appear here. Use "Add New Client" to create your first one.</p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Client Directory (Span 2) */}
         <div className="lg:col-span-2 bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs">
@@ -522,6 +529,8 @@ export const ClientsView: React.FC = () => {
         </div>
       </div>
       </div>
+
+      )}
 
       {/* 4. Bottom 3-Column Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

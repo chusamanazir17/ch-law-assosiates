@@ -536,17 +536,17 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0">
+            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0 overflow-hidden">
               <div onClick={() => setActiveSection("stamps")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Stamps</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> <span className="truncate">Stamps</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
               </div>
               <div onClick={() => setActiveSection("tax")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Tax</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span> <span className="truncate">Tax</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.taxTotal.toLocaleString()}</span>
               </div>
               <div onClick={() => setActiveSection("composing")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Composing</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span> <span className="truncate">Composing</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.composingTotal.toLocaleString()}</span>
               </div>
             </div>
@@ -578,21 +578,21 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0">
+            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0 overflow-hidden">
               <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-600"></span> Cash</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-teal-600 shrink-0"></span> <span className="truncate">Cash</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
               </div>
               <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Bank</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span> <span className="truncate">Bank</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
               </div>
               <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> JazzCash</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span> <span className="truncate">JazzCash</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
               </div>
               <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500"></span> EasyPaisa</span>
+                <span className="flex items-center gap-1.5 min-w-0"><span className="w-2 h-2 rounded-full bg-sky-500 shrink-0"></span> <span className="truncate">EasyPaisa</span></span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
               </div>
             </div>
