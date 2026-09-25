@@ -57,57 +57,8 @@ export const HearingsView: React.FC = () => {
         }
       } catch (err) {
 
-        console.warn('Using fallback hearings data:', err);
-        setHearings([
-          {
-            id: 'h-1',
-            case_id: 'c-101',
-            case_number: 'WP-1042/2026',
-            case_title: 'Chaudhry Tariq vs Province of Punjab',
-            hearing_date: '2026-09-25',
-            court_room: 'LHC Multan Bench - Court 2',
-            judge_name: 'Mr. Justice A. R. Qureshi',
-            purpose: 'Hearing on Stay Application & Record Call',
-            proceedings_summary: 'Notice issued to Revenue Board. Stay extended till next date.',
-            next_hearing_date: '2026-10-12',
-            next_purpose: 'Rejoinder by Petitioner',
-            status: 'scheduled',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'h-2',
-            case_id: 'c-102',
-            case_number: 'CS-892/2025',
-            case_title: 'Malik Aslam vs Muhammad Hanif',
-            hearing_date: '2026-09-28',
-            court_room: 'Court Room 4, District Court Sahiwal',
-            judge_name: 'Ch. Noman Akram',
-            purpose: 'Cross Examination of Witness PW-1',
-            proceedings_summary: 'Examination in chief concluded. Original Sale Deed exhibited as Ex-P1.',
-            next_hearing_date: '2026-10-15',
-            next_purpose: 'Cross examination continued',
-            status: 'scheduled',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'h-3',
-            case_id: 'c-103',
-            case_number: 'TAX-412/2026',
-            case_title: 'Sahiwal Cotton Ginners vs Commissioner IR',
-            hearing_date: '2026-10-02',
-            court_room: 'ATIR Lahore Bench',
-            judge_name: 'Judicial Member Bench',
-            purpose: 'Arguments on Limitation Bar',
-            proceedings_summary: 'Department representative sought adjournment.',
-            next_hearing_date: '2026-10-24',
-            next_purpose: 'Final arguments',
-            status: 'scheduled',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        ]);
+        console.warn('[HearingsView] Could not load live hearings:', err);
+        setHearings([]);
       } finally {
         setIsLoading(false);
       }

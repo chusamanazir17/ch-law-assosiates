@@ -55,55 +55,8 @@ export const CasesView: React.FC = () => {
         }
       } catch (err) {
 
-        console.warn('Could not load live cases, using fallback:', err);
-        // Fallback realistic seed data
-        setCases([
-          {
-            id: 'c-101',
-            case_number: 'WP-1042/2026',
-            title: 'Chaudhry Tariq vs Province of Punjab (Land Revenue Title)',
-            court_name: 'Lahore High Court (Multan Bench)',
-            judge_name: 'Mr. Justice A. R. Qureshi',
-            case_type: 'Writ Petition',
-            case_category: 'Property & Revenue',
-            stage: 'Final Arguments',
-            status: 'active',
-            filing_date: '2026-01-15',
-            description: 'Constitutional challenge against arbitrary reassessment of agricultural land mutation in Sahiwal.',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'c-102',
-            case_number: 'CS-892/2025',
-            title: 'Malik Aslam vs Muhammad Hanif (Specific Performance of Sale Deed)',
-            court_name: 'Senior Civil Court Sahiwal',
-            judge_name: 'Ch. Noman Akram (Civil Judge)',
-            case_type: 'Civil',
-            case_category: 'Property Transfer',
-            stage: 'Evidence',
-            status: 'active',
-            filing_date: '2025-11-20',
-            description: 'Suit for specific performance regarding commercial plot on High Street Sahiwal with registered Baye-Nama.',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'c-103',
-            case_number: 'TAX-412/2026',
-            title: 'Sahiwal Cotton Ginners vs Commissioner IR (FBR Audit Notice)',
-            court_name: 'Appellate Tribunal Inland Revenue (ATIR)',
-            judge_name: 'Judicial Member Bench',
-            case_type: 'Tax & FBR',
-            case_category: 'Income Tax',
-            stage: 'Hearing Notice',
-            status: 'active',
-            filing_date: '2026-02-10',
-            description: 'Appeal under Section 131 against unjust levy of sales tax default surcharge.',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        ]);
+        console.warn('[CasesView] Could not load live cases:', err);
+        setCases([]);
       } finally {
         setIsLoading(false);
       }

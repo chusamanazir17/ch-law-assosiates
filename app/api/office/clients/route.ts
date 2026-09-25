@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const newClient = await createClientRecord({
-      full_name: body.full_name || body.name,
+      full_name: (body.full_name || body.name || "").trim(),
       business_name: body.business_name || body.businessName || null,
       client_type: body.client_type || body.clientType || "individual",
       cnic: body.cnic || null,

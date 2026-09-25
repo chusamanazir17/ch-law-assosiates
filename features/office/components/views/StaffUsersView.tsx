@@ -26,53 +26,13 @@ import {
 import { StaffUser } from '../../types';
 
 export const StaffUsersView: React.FC = () => {
-  const { auditLogs } = useOffice();
+  const { auditLogs, systemUsers } = useOffice();
   const [searchQuery, setSearchQuery] = useState('');
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
 
-  // Built-in staff details enriched with permissions
-  const [staffList, setStaffList] = useState<StaffUser[]>([
-    {
-      id: 'USR-01',
-      name: 'Usama Ali',
-      role: 'Super Admin & Tax Consultant',
-      email: 'usama@chchamber.com',
-      phone: '0300-1234567',
-      permissions: ['All Modules', 'Ledger', 'Reversals', 'System Settings', 'Audit Logs'],
-      status: 'Active',
-      lastActive: 'Online Now'
-    },
-    {
-      id: 'USR-02',
-      name: 'Chaudhry Hameed',
-      role: 'Lead Advocate & Stamp Licensee',
-      email: 'ch.hameed@chchamber.com',
-      phone: '0300-7654321',
-      permissions: ['E-Stamp Issuance', 'Treasury Purchase', 'Tax Returns', 'Legal Petitions'],
-      status: 'Active',
-      lastActive: '10 mins ago'
-    },
-    {
-      id: 'USR-03',
-      name: 'Rashid Minhas',
-      role: 'Composing & Registry Operator',
-      email: 'rashid@chchamber.com',
-      phone: '0302-8889991',
-      permissions: ['Composing Queue', 'Print Receipts', 'Cash In (Counter)'],
-      status: 'Active',
-      lastActive: '1 hour ago'
-    },
-    {
-      id: 'USR-04',
-      name: 'M. Kashif',
-      role: 'Tax Filing Assistant',
-      email: 'kashif@chchamber.com',
-      phone: '0345-1122334',
-      permissions: ['Tax Return Docs', 'Client CRM', 'Tasks & Deadlines'],
-      status: 'Active',
-      lastActive: 'Yesterday'
-    }
-  ]);
+  // Staff directory — populated live from Supabase profiles via the
+  // employees API below. No built-in dummy rows.
+  const [staffList, setStaffList] = useState<StaffUser[]>([]);
 
   React.useEffect(() => {
     async function fetchEmployees() {
@@ -108,6 +68,16 @@ export const StaffUsersView: React.FC = () => {
     s.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Live audit trail rows (from Supabase audit_logs)
+  const recentAuditRows = auditLogs.slice(0, 5).map(log => ({
+    time: log.dateTime || '',
+    user: log.user || 'System',
+    action: log.action || 'Event',
+    ref: log.details || log.record || '—',
+    term: log.module || 'System',
+    status: 'VERIFIED'
+  }));
 
   return (
     <div className="space-y-6">
@@ -152,7 +122,7 @@ export const StaffUsersView: React.FC = () => {
         />
         <KpiCard
           label="Role Tiers"
-          value="4"
+          value={`${new Set(staffList.map(s => s.role)).size}`}
           subValue="Role levels"
           change="Zero privilege creep"
           changeType="neutral"
@@ -162,7 +132,7 @@ export const StaffUsersView: React.FC = () => {
         />
         <KpiCard
           label="Permissions"
-          value="16"
+          value="RLS"
           subValue="Permission rules"
           change="Enforced at runtime"
           changeType="neutral"
@@ -373,13 +343,7 @@ export const StaffUsersView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {[
-                { time: '22-09-2025 15:42', user: 'Usama Ali', action: 'Fast Cash In', ref: 'REC-2025-0891 (Rs. 15,000)', term: 'Counter POS 1', status: 'VERIFIED' },
-                { time: '22-09-2025 14:10', user: 'Chaudhry Hameed', action: 'E-Stamp Issued', ref: 'STM-2025-0892 (Rs. 500 Stamp)', term: 'E-Stamping Desk', status: 'VERIFIED' },
-                { time: '22-09-2025 12:30', user: 'Rashid Minhas', action: 'Composing Order Created', ref: 'COMP-4412 (Sale Agreement)', term: 'Urdu InPage Desk', status: 'VERIFIED' },
-                { time: '22-09-2025 11:15', user: 'Usama Ali', action: 'Expense Recorded', ref: 'EXP-1092 (Legal Paper Rs. 2,500)', term: 'Admin Terminal', status: 'VERIFIED' },
-                { time: '22-09-2025 09:00', user: 'System', action: 'Daily Balance Opening', ref: 'Cash Drawer Initialized (Rs. 45,000)', term: 'Automated Daemon', status: 'VERIFIED' }
-              ].map((log, idx) => (
+              {recentAuditRows.map((log, idx) => (
                 <tr key={idx} className="hover:bg-slate-50">
                   <td className="py-2.5 px-3 tabular-nums text-slate-500 whitespace-nowrap text-[11px]">{log.time}</td>
                   <td className="py-2.5 px-3 font-bold text-[#0D2344] whitespace-nowrap">{log.user}</td>

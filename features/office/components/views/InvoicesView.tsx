@@ -58,59 +58,8 @@ export const InvoicesView: React.FC = () => {
         }
       } catch (err) {
 
-        console.warn('Using fallback invoices data:', err);
-        setInvoices([
-          {
-            id: 'inv-1',
-            invoice_number: 'INV-2026-0041',
-            client_id: 'cl-1',
-            client_name: 'Chaudhry Tariq Mehmood',
-            case_number: 'WP-1042/2026',
-            issue_date: '2026-09-01',
-            due_date: '2026-09-20',
-            subtotal: 50000,
-            tax_amount: 0,
-            discount_amount: 5000,
-            total_amount: 45000,
-            paid_amount: 45000,
-            status: 'paid',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'inv-2',
-            invoice_number: 'INV-2026-0042',
-            client_id: 'cl-2',
-            client_name: 'Malik Aslam Cotton Traders',
-            case_number: 'CS-892/2025',
-            issue_date: '2026-09-10',
-            due_date: '2026-09-30',
-            subtotal: 35000,
-            tax_amount: 0,
-            discount_amount: 0,
-            total_amount: 35000,
-            paid_amount: 15000,
-            status: 'partial',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'inv-3',
-            invoice_number: 'INV-2026-0043',
-            client_id: 'cl-3',
-            client_name: 'Dr. Farooq Tariq',
-            issue_date: '2026-09-18',
-            due_date: '2026-10-05',
-            subtotal: 12000,
-            tax_amount: 0,
-            discount_amount: 0,
-            total_amount: 12000,
-            paid_amount: 0,
-            status: 'unpaid',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        ]);
+        console.warn('[InvoicesView] Could not load live invoices:', err);
+        setInvoices([]);
       } finally {
         setIsLoading(false);
       }

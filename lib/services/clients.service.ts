@@ -67,7 +67,7 @@ export async function createClientRecord(dto: CreateClientDTO): Promise<Client> 
       client_type: dto.client_type || "individual",
       cnic: dto.cnic ? dto.cnic.trim() : null,
       ntn: dto.ntn ? dto.ntn.trim() : null,
-      mobile: dto.mobile.trim(),
+      mobile: dto.mobile ? dto.mobile.trim() : "N/A",
       phone: dto.phone ? dto.phone.trim() : null,
       email: dto.email ? dto.email.trim() : null,
       city: dto.city || "Sahiwal",

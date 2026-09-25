@@ -29,37 +29,98 @@ export const ReportsView: React.FC = () => {
     receipts,
     stampStock,
     taxCases,
-    clients
+    clients,
+    tasks
   } = useOffice();
 
   const [activeReportTab, setActiveReportTab] = useState<
     'executive' | 'pnl' | 'cashflow' | 'stamp' | 'clients' | 'staff'
   >('executive');
 
-  // Compute Financials
-  const totalRevenue = 678200;
-  const totalExpense = 142500;
+  // Compute Financials — from the live Supabase-backed context
+  const incomeTx = transactions.filter(t => t.type === 'IN');
+  const expenseTx = transactions.filter(t => t.type === 'OUT');
+  const totalRevenue = incomeTx.reduce((acc, t) => acc + Number(t.amount || 0), 0);
+  const totalExpense = expenseTx.reduce((acc, t) => acc + Number(t.amount || 0), 0);
   const netProfit = totalRevenue - totalExpense;
   const totalStockValue = stampStock.reduce((acc, s) => acc + s.stockValue, 0);
+  const totalOutstanding = clients.reduce((acc, c) => acc + Number(c.outstanding || 0), 0);
+  const outstandingClients = clients.filter(c => Number(c.outstanding || 0) > 0).length;
+
+  // Revenue by category (from live IN transactions)
+  const revByCategory = (() => {
+    const map = new Map<string, number>();
+    incomeTx.forEach(t => {
+      const key = t.serviceOrCategory || 'Other';
+      map.set(key, (map.get(key) || 0) + Number(t.amount || 0));
+    });
+    const colors = ['bg-[#1473E6]', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500', 'bg-rose-500'];
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, amount], idx) => ({
+        name,
+        pct: totalRevenue > 0 ? `${Math.round((amount / totalRevenue) * 100)}%` : '0%',
+        amount: `Rs. ${amount.toLocaleString()}`,
+        color: colors[idx % colors.length]
+      }));
+  })();
+
+  // Income vs Expenses chart data — grouped per day from live transactions
+  const incomeExpenseChartData = (() => {
+    const byDate = new Map<string, { income: number; expense: number }>();
+    transactions.forEach(t => {
+      const label = t.dateTime || '';
+      const key = label.includes(' ') ? label.split(' ')[0] : label;
+      const entry = byDate.get(key) || { income: 0, expense: 0 };
+      if (t.type === 'IN') entry.income += Number(t.amount || 0);
+      else entry.expense += Number(t.amount || 0);
+      byDate.set(key, entry);
+    });
+    return Array.from(byDate.entries())
+      .slice(-8)
+      .map(([label, v]) => ({ label: label.slice(0, 6), ...v }));
+  })();
+
+  // Top revenue-contributing clients (by lifetime billing)
+  const topClients = [...clients]
+    .sort((a, b) => Number(b.totalBilling || 0) - Number(a.totalBilling || 0))
+    .slice(0, 5)
+    .map(c => ({
+      name: c.name,
+      cases: c.documents?.length || 0,
+      invoiced: Number(c.totalBilling || 0),
+      paid: Number(c.paidAmount || 0),
+      bal: Number(c.outstanding || 0)
+    }));
+
+  // Staff performance from the live task list
+  const staffRanking = (() => {
+    const byStaff = new Map<string, { role: string; completed: number; pending: number }>();
+    tasks.forEach(t => {
+      const key = t.assignedStaff || 'Unassigned';
+      const entry = byStaff.get(key) || { role: 'Staff', completed: 0, pending: 0 };
+      if (t.status === 'Completed') entry.completed += 1; else entry.pending += 1;
+      byStaff.set(key, entry);
+    });
+    return Array.from(byStaff.entries())
+      .sort((a, b) => b[1].completed - a[1].completed)
+      .slice(0, 5)
+      .map(([staff, s]) => ({
+        staff,
+        role: s.role,
+        completed: s.completed,
+        pending: s.pending,
+        turnaround: s.completed + s.pending > 0
+          ? `${((s.completed + s.pending) / Math.max(1, s.completed)).toFixed(1)} Days`
+          : '—',
+        score: s.completed + s.pending > 0 ? `${Math.round((s.completed / (s.completed + s.pending)) * 100)}%` : '—'
+      }));
+  })();
 
   const handlePrint = () => {
     window.print();
   };
-
-  const topClients = [
-    { name: 'Sahiwal Traders', cases: 8, invoiced: 'Rs. 95,000', paid: 'Rs. 85,000', bal: 'Rs. 10,000' },
-    { name: 'Mian Rashid Advocate', cases: 6, invoiced: 'Rs. 72,000', paid: 'Rs. 72,000', bal: 'Rs. 0' },
-    { name: 'Tariq Mahmood Industries', cases: 5, invoiced: 'Rs. 58,000', paid: 'Rs. 45,000', bal: 'Rs. 13,000' },
-    { name: 'Al-Madina Agro Chemicals', cases: 4, invoiced: 'Rs. 42,000', paid: 'Rs. 42,000', bal: 'Rs. 0' },
-    { name: 'Muhammad Ali & Sons', cases: 4, invoiced: 'Rs. 36,000', paid: 'Rs. 32,000', bal: 'Rs. 4,000' }
-  ];
-
-  const staffRanking = [
-    { staff: 'Usama (Admin)', role: 'Lead Consultant', completed: 34, pending: 4, turnaround: '1.8 Days', score: '98%' },
-    { staff: 'Chaudhry H.', role: 'Senior Advocate', completed: 28, pending: 2, turnaround: '2.1 Days', score: '96%' },
-    { staff: 'Legal Drafter 1', role: 'Composing Specialist', completed: 42, pending: 5, turnaround: '0.8 Days', score: '99%' },
-    { staff: 'Junior Tax Associate', role: 'FBR E-Filing', completed: 19, pending: 3, turnaround: '2.6 Days', score: '94%' }
-  ];
 
   return (
     <div className="space-y-6">
@@ -120,9 +181,9 @@ export const ReportsView: React.FC = () => {
         />
         <KpiCard
           label="Outstanding"
-          value="Rs. 84,200"
-          subValue="12 clients pending"
-          change="91% collected"
+          value={`Rs. ${totalOutstanding.toLocaleString()}`}
+          subValue={`${outstandingClients} clients pending`}
+          change={totalRevenue > 0 ? `${Math.round((1 - totalOutstanding / Math.max(1, totalRevenue)) * 100)}% collected` : "No data yet"}
           changeType="neutral"
           icon={<Clock className="w-4 h-4" />}
           iconBgColor="bg-amber-50 text-amber-600"
@@ -138,7 +199,7 @@ export const ReportsView: React.FC = () => {
         />
         <KpiCard
           label="Avg Turnaround"
-          value="2.1 Days"
+          value={staffRanking.length > 0 ? `${(staffRanking.reduce((a, s) => a + parseFloat(s.turnaround) || 0, 0) / staffRanking.length).toFixed(1)} Days` : "—"}
           subValue="Filing speed SLA"
           change="Fast compliance"
           changeType="positive"
@@ -189,7 +250,13 @@ export const ReportsView: React.FC = () => {
                 </span>
               </div>
               <div className="h-48 pt-2">
-                <IncomeExpenseBarChart />
+                {incomeExpenseChartData.length === 0 ? (
+                  <div className="h-[200px] flex items-center justify-center text-xs text-slate-400">
+                    No transactions recorded yet — the chart will populate from live data
+                  </div>
+                ) : (
+                  <IncomeExpenseBarChart data={incomeExpenseChartData} />
+                )}
               </div>
             </div>
 
@@ -203,12 +270,7 @@ export const ReportsView: React.FC = () => {
                 <span className="text-[10px] text-slate-500 font-medium">PKR 678,200 Total</span>
               </div>
               <div className="space-y-3 pt-2 text-xs">
-                {[
-                  { name: 'Income Tax Return Filings & Iris', pct: '48%', amount: 'Rs. 325,500', color: 'bg-[#1473E6]' },
-                  { name: 'E-Stamp Issuance & Court Fee', pct: '24%', amount: 'Rs. 162,800', color: 'bg-emerald-500' },
-                  { name: 'Legal Composing & Agreement Drafting', pct: '18%', amount: 'Rs. 122,100', color: 'bg-indigo-500' },
-                  { name: 'NTN & Corporate Advisory', pct: '10%', amount: 'Rs. 67,800', color: 'bg-amber-500' }
-                ].map(item => (
+                {revByCategory.map(item => (
                   <div key={item.name}>
                     <div className="flex justify-between font-semibold mb-1">
                       <span className="text-slate-700">{item.name}</span>

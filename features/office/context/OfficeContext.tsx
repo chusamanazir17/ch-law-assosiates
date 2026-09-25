@@ -21,24 +21,7 @@ import {
   BusinessSettings,
   AccountType
 } from '../types';
-import {
-  initialClients,
-  initialStampStock,
-  initialStampMovements,
-  initialStampAdjustments,
-  initialTransactions,
-  initialTaxCases,
-  initialServiceOrders,
-  initialReceipts,
-  initialExpenses,
-  initialRecurringExpenses,
-  initialUtilityBills,
-  initialSystemUsers,
-  initialAuditLogs,
-  initialTasks,
-  initialDailyClosing,
-  initialBusinessSettings
-} from '../data/seedData';
+import { initialBusinessSettings } from '../data/seedData';
 
 interface AccountBalances {
   cashOffice: number;
@@ -228,83 +211,42 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Loading State
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Ledger & Balances
-  const [transactions, setTransactions] = useState<LedgerTransaction[]>(() => {
-    const saved = safeGetItem('ch_transactions');
-    return saved ? JSON.parse(saved) : initialTransactions;
+  // Ledger & Balances — server data only; empty until Supabase responds
+  const [transactions, setTransactions] = useState<LedgerTransaction[]>([]);
+
+  const [accountBalances, setAccountBalances] = useState<AccountBalances>({
+    cashOffice: 0,
+    bankAccount: 0,
+    jazzCash: 0,
+    easyPaisa: 0
   });
 
-  const [accountBalances, setAccountBalances] = useState<AccountBalances>(() => {
-    const saved = safeGetItem('ch_account_balances');
-    return saved ? JSON.parse(saved) : {
-      cashOffice: 72800,
-      bankAccount: 286500,
-      jazzCash: 28200,
-      easyPaisa: 20000
-    };
+  // Entities — populated exclusively by refreshData() from Supabase
+  const [clients, setClients] = useState<Client[]>([]);
+  const [stampStock, setStampStock] = useState<StampStockItem[]>([]);
+  const [stampMovements, setStampMovements] = useState<StampMovement[]>([]);
+  const [stampAdjustments, setStampAdjustments] = useState<StampAdjustment[]>([]);
+  const [taxCases, setTaxCases] = useState<TaxCase[]>([]);
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([]);
+  const [utilityBills, setUtilityBills] = useState<UtilityBill[]>([]);
+  const [tasks, setTasks] = useState<OfficeTask[]>([]);
+  const [dailyClosing, setDailyClosing] = useState<DailyClosing>({
+    date: new Date().toISOString().split('T')[0],
+    openingBalance: 0,
+    openingCash: 0,
+    cashIn: 0,
+    cashOut: 0,
+    expectedCash: 0,
+    actualCash: 0,
+    difference: 0,
+    isClosed: false
   });
-
-  // Entities
-  const [clients, setClients] = useState<Client[]>(() => {
-    const saved = safeGetItem('ch_clients');
-    return saved ? JSON.parse(saved) : initialClients;
-  });
-
-  const [stampStock, setStampStock] = useState<StampStockItem[]>(() => {
-    const saved = safeGetItem('ch_stamp_stock');
-    return saved ? JSON.parse(saved) : initialStampStock;
-  });
-
-  const [stampMovements, setStampMovements] = useState<StampMovement[]>(() => {
-    const saved = safeGetItem('ch_stamp_movements');
-    return saved ? JSON.parse(saved) : initialStampMovements;
-  });
-
-  const [stampAdjustments, setStampAdjustments] = useState<StampAdjustment[]>(() => {
-    const saved = safeGetItem('ch_stamp_adjustments');
-    return saved ? JSON.parse(saved) : initialStampAdjustments;
-  });
-
-  const [taxCases, setTaxCases] = useState<TaxCase[]>(() => {
-    const saved = safeGetItem('ch_tax_cases');
-    return saved ? JSON.parse(saved) : initialTaxCases;
-  });
-
-  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>(() => {
-    const saved = safeGetItem('ch_service_orders');
-    return saved ? JSON.parse(saved) : initialServiceOrders;
-  });
-
-  const [receipts, setReceipts] = useState<Receipt[]>(() => {
-    const saved = safeGetItem('ch_receipts');
-    return saved ? JSON.parse(saved) : initialReceipts;
-  });
-
-  const [expenses, setExpenses] = useState<Expense[]>(() => {
-    const saved = safeGetItem('ch_expenses');
-    return saved ? JSON.parse(saved) : initialExpenses;
-  });
-
-  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>(initialRecurringExpenses);
-  const [utilityBills, setUtilityBills] = useState<UtilityBill[]>(initialUtilityBills);
-
-  const [tasks, setTasks] = useState<OfficeTask[]>(() => {
-    const saved = safeGetItem('ch_tasks');
-    return saved ? JSON.parse(saved) : initialTasks;
-  });
-
-  const [dailyClosing, setDailyClosing] = useState<DailyClosing>(() => {
-    const saved = safeGetItem('ch_daily_closing');
-    return saved ? JSON.parse(saved) : initialDailyClosing;
-  });
-
   const [dailyClosingHistory, setDailyClosingHistory] = useState<DailyClosing[]>([]);
-  const [systemUsers, setSystemUsers] = useState<SystemUser[]>(initialSystemUsers);
-
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
-    const saved = safeGetItem('ch_audit_logs');
-    return saved ? JSON.parse(saved) : initialAuditLogs;
-  });
+  const [systemUsers, setSystemUsers] = useState<SystemUser[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   // Live notification state: unread = audit entries not yet seen in the bell
   const [notificationReadCount, setNotificationReadCount] = useState<number>(0);
@@ -409,7 +351,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 1. Sync Clients
       if (clientsRes.status === 'fulfilled' && clientsRes.value?.success && Array.isArray(clientsRes.value.clients)) {
-        if (clientsRes.value.clients.length > 0) {
+        if (true) {
           const mappedClients: Client[] = clientsRes.value.clients.map((dbClient: any) => ({
             id: dbClient.id,
             name: dbClient.full_name || dbClient.name || 'Unnamed Client',
@@ -458,7 +400,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setAccountBalances(balances);
         }
 
-        if (Array.isArray(txs) && txs.length > 0) {
+        if (Array.isArray(txs)) {
           setTransactions(txs.map((t: any) => ({
             id: t.id,
             dateTime: t.created_at ? formatDateTime(new Date(t.created_at)) : formatDateTime(),
@@ -474,7 +416,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           })));
         }
 
-        if (Array.isArray(exps) && exps.length > 0) {
+        if (Array.isArray(exps)) {
           setExpenses(exps.map((e: any) => ({
             id: e.id,
             date: e.expense_date || new Date().toISOString().split('T')[0],
@@ -493,7 +435,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // 3. Sync Stamps
       if (stampsRes.status === 'fulfilled' && stampsRes.value?.success) {
         const { products, movements } = stampsRes.value;
-        if (Array.isArray(products) && products.length > 0) {
+        if (Array.isArray(products)) {
           setStampStock(products.map((p: any) => ({
             id: p.id,
             denomination: Number(p.denomination),
@@ -509,7 +451,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           })));
         }
 
-        if (Array.isArray(movements) && movements.length > 0) {
+        if (Array.isArray(movements)) {
           setStampMovements(movements.map((m: any) => ({
             id: m.id,
             dateTime: m.created_at ? formatDateTime(new Date(m.created_at)) : formatDateTime(),
@@ -527,7 +469,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 4. Sync Tax Cases
       if (taxRes.status === 'fulfilled' && taxRes.value?.success && Array.isArray(taxRes.value.cases)) {
-        if (taxRes.value.cases.length > 0) {
+        if (true) {
           setTaxCases(taxRes.value.cases.map((tc: any) => ({
             id: tc.id,
             clientName: tc.client_name || 'Walk-in Client',
@@ -550,7 +492,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 5. Sync Service Orders
       if (servicesRes.status === 'fulfilled' && servicesRes.value?.success && Array.isArray(servicesRes.value.orders)) {
-        if (servicesRes.value.orders.length > 0) {
+        if (true) {
           setServiceOrders(servicesRes.value.orders.map((so: any) => ({
             id: so.id,
             orderNo: so.order_number,
@@ -571,7 +513,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 6. Sync Receipts
       if (receiptsRes.status === 'fulfilled' && receiptsRes.value?.success && Array.isArray(receiptsRes.value.receipts)) {
-        if (receiptsRes.value.receipts.length > 0) {
+        if (true) {
           setReceipts(receiptsRes.value.receipts.map((r: any) => ({
             id: r.id,
             receiptNo: r.receipt_number,
@@ -592,7 +534,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 7. Sync Tasks
       if (tasksRes.status === 'fulfilled' && tasksRes.value?.success && Array.isArray(tasksRes.value.tasks)) {
-        if (tasksRes.value.tasks.length > 0) {
+        if (true) {
           setTasks(tasksRes.value.tasks.map((t: any) => ({
             id: t.id,
             title: t.title,
@@ -627,7 +569,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 9. Sync Audit Logs
       if (auditRes.status === 'fulfilled' && auditRes.value?.success && Array.isArray(auditRes.value.logs)) {
-        if (auditRes.value.logs.length > 0) {
+        if (true) {
           setAuditLogs(auditRes.value.logs.map((al: any) => ({
             id: al.id,
             dateTime: al.created_at || '',
@@ -649,7 +591,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // 11. Sync Staff Users (from Supabase profiles)
       if (employeesRes.status === 'fulfilled' && employeesRes.value?.success && Array.isArray(employeesRes.value.employees)) {
-        if (employeesRes.value.employees.length > 0) {
+        if (true) {
           const roleLabels: Record<string, SystemUser['role']> = {
             super_admin: 'Admin',
             office_admin: 'Admin',
@@ -721,51 +663,6 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isNewServiceOrderModalOpen, setIsNewServiceOrderModalOpen] = useState(false);
   const [isNewTaxReturnModalOpen, setIsNewTaxReturnModalOpen] = useState(false);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-
-  // Persistence local cache side-effects
-  useEffect(() => {
-    safeSetItem('ch_transactions', JSON.stringify(transactions));
-  }, [transactions]);
-
-  useEffect(() => {
-    safeSetItem('ch_account_balances', JSON.stringify(accountBalances));
-  }, [accountBalances]);
-
-  useEffect(() => {
-    safeSetItem('ch_clients', JSON.stringify(clients));
-  }, [clients]);
-
-  useEffect(() => {
-    safeSetItem('ch_stamp_stock', JSON.stringify(stampStock));
-  }, [stampStock]);
-
-  useEffect(() => {
-    safeSetItem('ch_stamp_movements', JSON.stringify(stampMovements));
-  }, [stampMovements]);
-
-  useEffect(() => {
-    safeSetItem('ch_tax_cases', JSON.stringify(taxCases));
-  }, [taxCases]);
-
-  useEffect(() => {
-    safeSetItem('ch_service_orders', JSON.stringify(serviceOrders));
-  }, [serviceOrders]);
-
-  useEffect(() => {
-    safeSetItem('ch_receipts', JSON.stringify(receipts));
-  }, [receipts]);
-
-  useEffect(() => {
-    safeSetItem('ch_expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  useEffect(() => {
-    safeSetItem('ch_audit_logs', JSON.stringify(auditLogs));
-  }, [auditLogs]);
-
-  useEffect(() => {
-    safeSetItem('ch_daily_closing', JSON.stringify(dailyClosing));
-  }, [dailyClosing]);
 
   const addAuditLog = (entry: Omit<AuditLog, 'id' | 'dateTime'>) => {
     const newLog: AuditLog = {
