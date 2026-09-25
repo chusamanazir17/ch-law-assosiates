@@ -43,3 +43,4 @@ coverage/
 .chrome-preview-profile/
 capture-live-previews.mjs
 *.zip
+dev-server.log
