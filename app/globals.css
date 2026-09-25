@@ -972,6 +972,16 @@ html[lang="ur"] textarea {
   scrollbar-color: #1e3a5f transparent;
 }
 
+/* Native form controls must follow the app theme, not the OS setting —
+   without this, dark-OS users see dark input fields in light mode. */
+.office-shell {
+  color-scheme: light;
+}
+
+.dark .office-shell {
+  color-scheme: dark;
+}
+
 /* Office inputs: consistent height, radius, and focus treatment for every
    text input, select and textarea inside the office shell. */
 .office-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),

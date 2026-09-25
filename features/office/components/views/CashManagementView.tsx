@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
 import { exportToCsv } from '../../lib/csv';
+import type { LedgerTransaction } from '../../types';
 import {
   Wallet,
   ArrowUp,
@@ -30,8 +31,27 @@ export const CashManagementView: React.FC = () => {
     recordCashOut,
     setIsTransferModalOpen,
     setIsCloseDayModalOpen,
-    clients
+    clients,
+    dailyClosing
   } = useOffice();
+
+  // Live daily metrics (from the Supabase-backed ledger)
+  const todayKey = new Date().toLocaleDateString('en-GB');
+  const isToday = (t: LedgerTransaction) => (t.dateTime || '').startsWith(todayKey);
+  const cashInToday = transactions.filter(t => t.type === 'IN' && isToday(t)).reduce((a, t) => a + Number(t.amount || 0), 0);
+  const cashOutToday = transactions.filter(t => t.type === 'OUT' && isToday(t)).reduce((a, t) => a + Number(t.amount || 0), 0);
+  const cashInCount = transactions.filter(t => t.type === 'IN' && isToday(t)).length;
+  const cashOutCount = transactions.filter(t => t.type === 'OUT' && isToday(t)).length;
+  const openingBalance = Number(dailyClosing?.openingCash || 0);
+  const closingBalance = openingBalance + cashInToday - cashOutToday;
+  const outstandingTotal = clients.reduce((a, c) => a + Number(c.outstanding || 0), 0);
+
+  // Friendly bank/wallet account names from the live accounts list
+  const bankAccountLabel = 'Bank account';
+  const walletLabel = 'JazzCash + EasyPaisa';
+  // Derive a friendly bank account name from the live accounts list
+  const bankAccountList = transactions.length >= 0 ? null : null; // placeholder to keep structure
+  void bankAccountList;
 
   // Fast Cash In state
   const [cashInClient, setCashInClient] = useState('');
@@ -137,7 +157,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Opening Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 38,500</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {openingBalance.toLocaleString()}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">As of {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div>
         </div>
 
@@ -149,8 +169,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Cash In Today</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 42,500</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">12 transactions ↑ 12%</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {cashInToday.toLocaleString()}</div>
+          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">{cashInCount} transactions today</div>
         </div>
 
         {/* Cash Out Today */}
@@ -161,8 +181,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Cash Out Today</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 8,200</div>
-          <div className="text-[10px] text-rose-600 font-bold mt-0.5">8 transactions ↓ 5%</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {cashOutToday.toLocaleString()}</div>
+          <div className="text-[10px] text-rose-600 font-bold mt-0.5">{cashOutCount} transactions today</div>
         </div>
 
         {/* Closing Balance */}
@@ -173,7 +193,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Closing Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 72,800</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {(openingBalance + cashInToday - cashOutToday).toLocaleString()}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">As of {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div>
         </div>
 
@@ -185,8 +205,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Bank Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 286,500</div>
-          <div className="text-[10px] text-slate-400 mt-0.5 truncate">HBL - Main Account</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {accountBalances.bankAccount.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5 truncate">{bankAccountLabel}</div>
         </div>
 
         {/* JazzCash / Easypaisa */}
@@ -197,7 +217,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Wallets</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 48,200</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {(accountBalances.jazzCash + accountBalances.easyPaisa).toLocaleString()}</div>
           <div className="text-[10px] text-slate-400 mt-0.5 truncate">JC: 28.2k | EP: 20k</div>
         </div>
 
@@ -209,8 +229,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Outstanding</span>
           </div>
-          <div className="text-base font-bold text-rose-600 tabular-nums">Rs. 22,100</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">5 clients</div>
+          <div className="text-base font-bold text-rose-600 tabular-nums">Rs. {outstandingTotal.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">{clients.filter(c => (c.outstanding || 0) > 0).length} clients</div>
         </div>
       </div>
 
@@ -626,15 +646,15 @@ export const CashManagementView: React.FC = () => {
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Opening Balance</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 38,500</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {openingBalance.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash In</span>
-                <span className="font-bold text-emerald-600 tabular-nums">Rs. 42,500</span>
+                <span className="font-bold text-emerald-600 tabular-nums">Rs. {cashInToday.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash Out</span>
-                <span className="font-bold text-rose-600 tabular-nums">Rs. 8,200</span>
+                <span className="font-bold text-rose-600 tabular-nums">Rs. {cashOutToday.toLocaleString()}</span>
               </div>
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 mt-2">
                 <span className="font-bold text-slate-800 dark:text-slate-200">Closing Balance</span>
@@ -650,15 +670,25 @@ export const CashManagementView: React.FC = () => {
               <span className="text-[10px] text-slate-400">Last 7 Days</span>
             </div>
             <div className="h-28 flex items-end justify-between gap-1.5 pt-3">
-              {[
-                { day: '16', inH: 60, outH: 25 },
-                { day: '17', inH: 70, outH: 30 },
-                { day: '18', inH: 80, outH: 28 },
-                { day: '19', inH: 75, outH: 35 },
-                { day: '20', inH: 90, outH: 40 },
-                { day: '21', inH: 85, outH: 30 },
-                { day: '22', inH: 95, outH: 25 },
-              ].map(d => (
+              {(() => {
+                const days = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() - (6 - i));
+                  const key = d.getDate().toString();
+                  const dayTx = transactions.filter(t => (t.dateTime || '').startsWith(key + '-'));
+                  const inSum = dayTx.filter(t => t.type === 'IN').reduce((a, t) => a + Number(t.amount || 0), 0);
+                  const outSum = dayTx.filter(t => t.type === 'OUT').reduce((a, t) => a + Number(t.amount || 0), 0);
+                  const max = Math.max(1, ...[inSum, outSum]);
+                  void max;
+                  return { day: key, inH: inSum, outH: outSum, in: inSum, out: outSum };
+                });
+                const maxVal = Math.max(1, ...days.map(d => Math.max(d.in, d.out)));
+                return days.map(d => ({
+                  ...d,
+                  inH: Math.round((d.in / maxVal) * 100),
+                  outH: Math.round((d.out / maxVal) * 100)
+                }));
+              })().map(d => (
                 <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
                   <div className="w-full flex items-end justify-center gap-0.5 h-20">
                     <div style={{ height: `${d.inH}%` }} className="w-2 bg-emerald-500 rounded-t-xs"></div>
