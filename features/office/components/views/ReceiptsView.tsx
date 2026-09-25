@@ -28,7 +28,8 @@ export const ReceiptsView: React.FC = () => {
   const {
     receipts,
     setSelectedReceiptId,
-    setIsQuickCashInOpen
+    setIsQuickCashInOpen,
+    businessSettings
   } = useOffice();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -253,16 +254,32 @@ export const ReceiptsView: React.FC = () => {
                 </span>
               </div>
 
-              {/* Chamber Header */}
+              {/* Chamber Header — mirrors the business settings used on printed receipts */}
               <div className="text-center border-b border-slate-300 pb-2.5">
                 <div className="font-extrabold text-[#0D2344] text-sm tracking-wide uppercase">
-                  CHAMBER 121 - LEGAL & TAX CONSULTANTS
+                  {(businessSettings?.businessName || 'CH Composing E-Stamp & Tax Advisor').toUpperCase()}
                 </div>
                 <div className="text-[10px] text-slate-600 font-medium mt-0.5">
-                  District Courts Compound, Sahiwal, Punjab • Tel: 0300-1234567 / 040-555121
+                  {businessSettings?.address || 'Chamber No. 121, District Courts (Kachahri), Sahiwal'}
+                  {businessSettings?.phone ? ` • Tel: ${businessSettings.phone}` : ''}
                 </div>
-                <div className="inline-block mt-1 bg-[#0D2344] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">
-                  OFFICIAL RECEIPT VOUCHER
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  <div className="bg-[#0D2344] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest">
+                    Official Receipt Voucher
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded border text-[10px] font-black uppercase tracking-widest ${
+                      selectedReceipt.status === 'PAID'
+                        ? 'border-emerald-600 text-emerald-700'
+                        : selectedReceipt.status === 'CANCELLED'
+                          ? 'border-rose-600 text-rose-700'
+                          : selectedReceipt.status === 'PARTIAL'
+                            ? 'border-amber-600 text-amber-700'
+                            : 'border-slate-500 text-slate-700'
+                    }`}
+                  >
+                    {selectedReceipt.status}
+                  </span>
                 </div>
               </div>
 
@@ -336,7 +353,12 @@ export const ReceiptsView: React.FC = () => {
               {/* Share & Actions Toolbar */}
               <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200">
                 <button
-                  onClick={() => alert(`Sending Receipt ${selectedReceipt.receiptNo} to ${selectedReceipt.clientName} via WhatsApp`)}
+                  onClick={() => {
+                    const msg = encodeURIComponent(
+                      `Receipt ${selectedReceipt.receiptNo} — ${selectedReceipt.service}: Received Rs. ${selectedReceipt.paidAmount.toLocaleString()} of Rs. ${selectedReceipt.amount.toLocaleString()} (${selectedReceipt.status}). Thank you for choosing ${businessSettings?.businessName || 'CH Composing'}.`
+                    );
+                    window.open(`https://wa.me/?text=${msg}`, '_blank');
+                  }}
                   className="py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center gap-1 cursor-pointer text-[11px]"
                 >
                   <Phone className="w-3 h-3" />

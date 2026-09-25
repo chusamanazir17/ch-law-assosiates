@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { CopyableText } from './CopyableText';
 
 interface KpiCardProps {
   label?: string;
@@ -16,6 +17,7 @@ interface KpiCardProps {
   onViewDetails?: () => void;
   className?: string;
   centered?: boolean;
+  copyable?: boolean;
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({
@@ -32,7 +34,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   viewDetailsText,
   onViewDetails,
   className = '',
-  centered = false
+  centered = false,
+  copyable = false
 }) => {
   const displayLabel = label || title || '';
   const resolvedChangeType =
@@ -62,7 +65,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           </div>
           <div className="min-w-0">
             <div className={`text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight mb-1.5 truncate ${centered ? 'text-center' : ''}`}>{displayLabel}</div>
-            <div className={`${String(value).length > 10 ? 'text-lg sm:text-xl leading-snug' : 'text-2xl sm:text-[28px] leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{value}</div>
+            <div className={`${String(value).length > 10 ? 'text-lg sm:text-xl leading-snug' : 'text-2xl sm:text-[28px] leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{copyable ? <CopyableText value={String(value)} label={displayLabel} className="text-inherit dark:text-inherit">{value}</CopyableText> : value}</div>
           </div>
         </div>
         {viewDetailsText && (

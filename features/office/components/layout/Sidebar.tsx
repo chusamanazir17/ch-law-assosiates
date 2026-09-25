@@ -83,20 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Top: Branding Header */}
         <div>
           <div className="p-3.5 sm:p-4 border-b border-[#142639]">
-            {/* Expanded: collapse toggle sits above the CH Composing lines */}
-            {!isCollapsed && (
-            <div className="hidden lg:flex justify-end mb-1.5">
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                title="Collapse sidebar (Ctrl + B)"
-                aria-label="Collapse sidebar"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] active:scale-95 transition-all cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            </div>
-            )}
+
             <div className={`flex items-center justify-between gap-2.5 ${isCollapsed ? 'lg:justify-center' : ''}`}>
             <div className={`flex items-center min-w-0 ${isCollapsed ? 'lg:justify-center' : 'gap-2.5 sm:gap-3'}`}>
               {/* CH Gold Shield Emblem */}
@@ -137,6 +124,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <X className="w-5 h-5" />
             </button>
 
+            {/* Desktop collapse toggle — level with the CH Composing lines */}
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              title="Collapse sidebar (Ctrl + B)"
+              aria-label="Collapse sidebar"
+              className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Collapsed: expand toggle below the CH logo */}

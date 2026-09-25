@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
+import { CopyableText } from '../common/CopyableText';
 import {
   Wallet,
   ArrowUp,
@@ -235,19 +236,21 @@ export const DashboardView: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Today's Cash In */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shadow-2xs">
               <ArrowUp className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Today's Cash In</div>
-              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
-                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
-                {todayCashIn.toLocaleString()}
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin truncate">Today's Cash In</div>
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
+                <CopyableText value={String(todayCashIn)} label="cash in amount" className="text-inherit">
+                  {todayCashIn.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5 font-admin">
-                <span>↑ Live</span>
-                <span className="text-slate-400 font-normal">registered today</span>
+                <span className="shrink-0">↑ Live</span>
+                <span className="text-slate-400 font-normal truncate">registered today</span>
               </div>
             </div>
           </div>
@@ -261,19 +264,21 @@ export const DashboardView: React.FC = () => {
 
         {/* Today's Cash Out */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-2xs">
               <ArrowDown className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Today's Cash Out</div>
-              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
-                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
-                {todayCashOut.toLocaleString()}
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin truncate">Today's Cash Out</div>
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
+                <CopyableText value={String(todayCashIn)} label="cash out amount" className="text-inherit">
+                  {todayCashOut.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1 mt-0.5 font-admin">
-                <span>Expenses</span>
-                <span className="text-slate-400 font-normal">and outgoings</span>
+                <span className="shrink-0">Expenses</span>
+                <span className="text-slate-400 font-normal truncate">and outgoings</span>
               </div>
             </div>
           </div>
@@ -287,15 +292,17 @@ export const DashboardView: React.FC = () => {
 
         {/* Current Cash Balance */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-[#1473E6] dark:text-[#38BDF8] flex items-center justify-center shadow-2xs">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Current Cash Balance</div>
-              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex items-baseline">
-                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 mr-1">Rs.</span>
-                {(accountBalances.cashOffice || 0).toLocaleString()}
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
+                <CopyableText value={String(accountBalances.cashOffice || 0)} label="cash balance">
+                  {(accountBalances.cashOffice || 0).toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 font-admin">
                 In office hand ledger
@@ -312,14 +319,16 @@ export const DashboardView: React.FC = () => {
 
         {/* Total Transactions */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs">
               <Receipt className="w-6 h-6" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Total Transactions</div>
-              <div className="text-2xl sm:text-[26px] font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5">
-                {transactions.length}
+              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5">
+                <CopyableText value={String(transactions.length)} label="today's transactions">
+                  {transactions.length}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5 font-admin">
                 <span className="text-emerald-600 font-semibold">{totalCashInCount} In</span> | <span className="text-rose-600 font-semibold">{totalCashOutCount} Out</span>
@@ -346,7 +355,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Stamps Sold</div>
               <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
-                Rs. {metrics.stampsSoldAmount.toLocaleString()}
+                <CopyableText value={String(metrics.stampsSoldAmount)} label="stamps sold">
+                  Rs. {metrics.stampsSoldAmount.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.stampsSoldQty} stamps</div>
             </div>
@@ -365,7 +376,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Composing</div>
               <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
-                Rs. {metrics.composingTotal.toLocaleString()}
+                <CopyableText value={String(metrics.composingTotal)} label="composing income">
+                  Rs. {metrics.composingTotal.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.composingCount} jobs</div>
             </div>
@@ -384,7 +397,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Tax Advisory</div>
               <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
-                Rs. {metrics.taxTotal.toLocaleString()}
+                <CopyableText value={String(metrics.taxTotal)} label="tax income">
+                  Rs. {metrics.taxTotal.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.taxCount} cases</div>
             </div>
@@ -403,7 +418,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Outstanding</div>
               <div className="text-sm sm:text-[15px] font-bold text-rose-600 font-admin tabular-nums tracking-tight">
-                Rs. {metrics.totalOutstanding.toLocaleString()}
+                <CopyableText value={String(metrics.totalOutstanding)} label="outstanding total">
+                  Rs. {metrics.totalOutstanding.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.outstandingCount} clients</div>
             </div>
@@ -422,7 +439,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Today's Net</div>
               <div className={`text-sm sm:text-[15px] font-bold font-admin tabular-nums tracking-tight ${metrics.todayNet >= 0 ? 'text-slate-900 dark:text-slate-100' : 'text-rose-600'}`}>
-                Rs. {metrics.todayNet.toLocaleString()}
+                <CopyableText value={String(metrics.todayNet)} label="today net">
+                  Rs. {metrics.todayNet.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-emerald-600 font-semibold font-admin">
                 {metrics.todayNet >= 0 ? 'Positive Flow' : 'Deficit'}
@@ -443,7 +462,9 @@ export const DashboardView: React.FC = () => {
             <div className="min-w-0">
               <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tracking-tight uppercase font-admin">Total Liquidity</div>
               <div className="text-sm sm:text-[15px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums tracking-tight">
-                Rs. {metrics.combinedLiquidity.toLocaleString()}
+                <CopyableText value={String(metrics.combinedLiquidity)} label="total liquidity">
+                  Rs. {metrics.combinedLiquidity.toLocaleString()}
+                </CopyableText>
               </div>
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">All Accounts</div>
             </div>

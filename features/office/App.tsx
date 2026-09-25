@@ -165,7 +165,7 @@ const MainLayout: React.FC = () => {
 
 
   return (
-    <div className="office-shell flex h-screen w-screen overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18] text-[#0F172A] dark:text-[#F1F5F9] font-admin antialiased select-none transition-colors duration-150">
+    <div className="office-shell flex h-screen w-screen overflow-hidden bg-[#F8FAFC] dark:bg-[#070D18] text-[#0F172A] dark:text-[#F1F5F9] font-admin antialiased transition-colors duration-150">
       {/* Dark Navy Sidebar */}
       <Sidebar
         isOpen={isMobileSidebarOpen}
