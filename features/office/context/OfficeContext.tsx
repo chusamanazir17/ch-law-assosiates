@@ -575,7 +575,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             balance: Number(r.balance_due || 0),
             paymentMethod: r.payment_method,
             remarks: r.notes || '',
-            status: r.status === 'paid' ? 'PAID' : r.status === 'cancelled' ? 'CANCELLED' : 'PARTIAL',
+            status: r.status === 'paid' ? 'PAID' : r.status === 'cancelled' ? 'CANCELLED' : r.status === 'unpaid' ? 'UNPAID' : 'PARTIAL',
             authorizedBy: 'CH Law Associates'
           })));
         }

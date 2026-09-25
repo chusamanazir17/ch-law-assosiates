@@ -515,16 +515,16 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="space-y-1.5 text-xs font-admin flex-1">
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Stamp Sales</span>
+            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0">
+              <div onClick={() => setActiveSection("stamps")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Stamps</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Tax Advisory</span>
+              <div onClick={() => setActiveSection("tax")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Tax</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.taxTotal.toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+              <div onClick={() => setActiveSection("composing")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Composing</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.composingTotal.toLocaleString()}</span>
               </div>
@@ -557,20 +557,20 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {/* Legend */}
-            <div className="space-y-1.5 text-xs font-admin flex-1">
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-600"></span> Cash Office</span>
+            <div className="space-y-1.5 text-xs font-admin flex-1 min-w-0">
+              <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-600"></span> Cash</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Bank Account</span>
+              <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Bank</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+              <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> JazzCash</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+              <div onClick={() => setActiveSection("cash")} className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-md px-1 -mx-1 transition-colors flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500"></span> EasyPaisa</span>
                 <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
               </div>
@@ -626,8 +626,8 @@ export const DashboardView: React.FC = () => {
         </div>
       </div>
 
-      {/* 5. Bottom 4-Column Operations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      {/* 5. Bottom 3-Column Operations Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Column 1: Recent Transactions & Outstanding Clients */}
         <div className="space-y-4">
           {/* Recent Transactions */}
@@ -814,52 +814,7 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
 
-        {/* Column 4: Office Partner & Compliance Card */}
-        <div className="bg-gradient-to-br from-[#0B1B2C] to-[#132A44] text-white rounded-2xl p-5 shadow-xs flex flex-col justify-between overflow-hidden relative border border-slate-800 font-admin">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3 border border-amber-500/30">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <h3 className="font-bold text-base text-white tracking-tight leading-snug font-admin">
-              Chamber Practice Operations
-            </h3>
-            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed font-normal">
-              E-Stamp | Composing | FBR Tax Advisory For Individuals & Businesses
-            </p>
-
-            <div className="space-y-2 mt-4 text-xs font-admin">
-              <div className="flex items-center gap-2 text-emerald-400 font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="text-white text-[11px]">Accurate & Compliant</span>
-              </div>
-              <div className="flex items-center gap-2 text-emerald-400 font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="text-white text-[11px]">FBR & E-Stamp Treasury</span>
-              </div>
-              <div className="flex items-center gap-2 text-emerald-400 font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="text-white text-[11px]">Chamber No. 121 Sahiwal</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Pakistan E-Stamp visual representation */}
-          <div className="mt-5 rounded-xl bg-white/10 p-3 border border-white/15 backdrop-blur-xs flex items-center justify-between font-admin">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
-                ₨
-              </div>
-              <div>
-                <div className="text-[11px] font-bold text-white tracking-wide uppercase font-admin">Pakistan E-Stamp</div>
-                <div className="text-[10px] text-slate-300 font-admin">Chamber No. 121 Sahiwal</div>
-              </div>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold font-admin">
-              Verified
-            </span>
-          </div>
         </div>
       </div>
-    </div>
   );
 };

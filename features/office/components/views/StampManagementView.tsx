@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
+import { exportToCsv } from '../../lib/csv';
 import {
   FileCheck2,
   ShoppingCart,
@@ -22,54 +23,100 @@ import {
 export const StampManagementView: React.FC = () => {
   const {
     stampStock,
+    stampMovements,
+    stampAdjustments,
     setIsStampSaleModalOpen,
     recordStampSale,
     recordStampPurchase,
     recordStampAdjustment
   } = useOffice();
 
-  // Stock overview data
-  const stockTable = [
-    { den: 'Rs. 50', opening: 200, purchased: 500, sold: 620, remaining: 80, pPrice: 42, sPrice: 50, val: 4000, status: 'Low' },
-    { den: 'Rs. 100', opening: 150, purchased: 400, sold: 320, remaining: 230, pPrice: 85, sPrice: 100, val: 23000, status: 'OK' },
-    { den: 'Rs. 500', opening: 80, purchased: 200, sold: 150, remaining: 130, pPrice: 420, sPrice: 500, val: 65000, status: 'OK' },
-    { den: 'Rs. 1,000', opening: 50, purchased: 120, sold: 90, remaining: 80, pPrice: 850, sPrice: 1000, val: 80000, status: 'OK' },
-    { den: 'Rs. 5,000', opening: 20, purchased: 60, sold: 45, remaining: 35, pPrice: 4200, sPrice: 5000, val: 175000, status: 'Low' },
-  ];
+  // Live stock overview derived from Supabase-backed stamp stock
+  const stockTable = stampStock.map(s => {
+    const remaining = Number(s.remaining || 0);
+    const minLevel = Number(s.minimumLevel || 0);
+    return {
+      den: `Rs. ${Number(s.denomination).toLocaleString()}`,
+      opening: Number(s.openingStock || 0),
+      purchased: Number(s.purchased || 0),
+      sold: Number(s.sold || 0),
+      remaining,
+      pPrice: Number(s.purchasePrice || 0),
+      sPrice: Number(s.salePrice || 0),
+      val: Number(s.stockValue || remaining * Number(s.purchasePrice || 0)),
+      status: s.status || (remaining <= minLevel / 2 ? 'Critical' : remaining <= minLevel ? 'Low' : 'OK'),
+    };
+  });
 
-  // Recent sales
-  const recentSales = [
-    { time: '22-09-2025 11:45 AM', den: 'Rs. 100', qty: 10, amt: 1000, client: 'Asad Khan' },
-    { time: '22-09-2025 10:30 AM', den: 'Rs. 500', qty: 5, amt: 2500, client: 'Zara Enterprises' },
-    { time: '22-09-2025 10:15 AM', den: 'Rs. 50', qty: 20, amt: 1000, client: 'Bilal Ahmed' },
-    { time: '22-09-2025 09:50 AM', den: 'Rs. 1,000', qty: 3, amt: 3000, client: 'Hasan & Co.' },
-    { time: '22-09-2025 09:10 AM', den: 'Rs. 5,000', qty: 1, amt: 5000, client: 'Ali Traders' },
-  ];
+  // Recent sales / purchases / movements derived from the live movement log
+  const fmtDen = (d: number | string) => `Rs. ${Number(d).toLocaleString()}`;
+  const recentSales = stampMovements.filter(m => m.type === 'Sale').slice(0, 5).map(m => ({
+    time: m.dateTime,
+    den: fmtDen(m.denomination),
+    qty: Math.abs(Number(m.qty || 0)),
+    amt: Math.abs(Number(m.amount || 0)),
+    client: m.clientOrSupplier || 'Counter Sale',
+  }));
 
-  // Recent purchases
-  const recentPurchases = [
-    { time: '21-09-2025 04:30 PM', den: 'Rs. 5,000', qty: 20, amt: 84000, supplier: 'State Bank' },
-    { time: '20-09-2025 11:20 AM', den: 'Rs. 1,000', qty: 50, amt: 42500, supplier: 'State Bank' },
-    { time: '18-09-2025 02:15 PM', den: 'Rs. 500', qty: 100, amt: 42000, supplier: 'State Bank' },
-    { time: '16-09-2025 10:40 AM', den: 'Rs. 100', qty: 200, amt: 17000, supplier: 'State Bank' },
-    { time: '15-09-2025 09:30 AM', den: 'Rs. 50', qty: 300, amt: 12600, supplier: 'State Bank' },
-  ];
+  const recentPurchases = stampMovements.filter(m => m.type === 'Purchase').slice(0, 5).map(m => ({
+    time: m.dateTime,
+    den: fmtDen(m.denomination),
+    qty: Math.abs(Number(m.qty || 0)),
+    amt: Math.abs(Number(m.amount || 0)),
+    supplier: m.clientOrSupplier || 'Supplier',
+  }));
 
-  // Stock movement history
-  const stockMovements = [
-    { time: '22-09-2025 11:45', type: 'Sale', den: 'Rs. 100', qty: '-10', bal: 230 },
-    { time: '22-09-2025 10:20', type: 'Purchase', den: 'Rs. 500', qty: '+50', bal: 130 },
-    { time: '21-09-2025 03:10', type: 'Adjustment', den: 'Rs. 50', qty: '-20', bal: 80 },
-    { time: '22-09-2025 12:45', type: 'Sale', den: 'Rs. 1,000', qty: '-5', bal: 80 },
-    { time: '19-09-2025 09:15', type: 'Purchase', den: 'Rs. 100', qty: '+100', bal: 240 },
-  ];
+  const stockMovementLog = stampMovements.slice(0, 5).map(m => ({
+    time: m.dateTime,
+    type: m.type,
+    den: fmtDen(m.denomination),
+    qty: `${m.type === 'Sale' ? '-' : m.type === 'Purchase' ? '+' : ''}${Math.abs(Number(m.qty || 0))}`,
+    bal: Number(m.balance || 0),
+  }));
 
-  // Stock adjustments
-  const stockAdjustments = [
-    { time: '21-09-2025 03:10 PM', den: 'Rs. 50', prev: 100, adj: 80, diff: -20, reason: 'Damaged stamps (torn edges)', user: 'Usama' },
-    { time: '17-09-2025 11:25 AM', den: 'Rs. 1,000', prev: 85, adj: 80, diff: -5, reason: 'Physical count adjustment', user: 'Admin' },
-    { time: '12-09-2025 09:40 AM', den: 'Rs. 500', prev: 120, adj: 130, diff: +10, reason: 'Excess found in physical count', user: 'Usama' },
-  ];
+  const stockAdjustments = stampAdjustments.map(a => ({
+    time: a.dateTime,
+    den: fmtDen(a.denomination),
+    prev: Number(a.previousStock || 0),
+    adj: Number(a.adjustedStock || 0),
+    diff: Number(a.difference || 0),
+    reason: a.reason,
+    user: a.adjustedBy || 'Admin',
+  }));
+
+  // KPI metrics computed from live data
+  const todayKey = new Date().toLocaleDateString('en-GB');
+  const isToday = (t: string) => (t || '').startsWith(todayKey);
+  const totalStockValue = stockTable.reduce((a, s) => a + s.val, 0);
+  const todaySalesAmt = stampMovements.filter(m => m.type === 'Sale' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
+  const todayPurchaseAmt = stampMovements.filter(m => m.type === 'Purchase' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
+  const lowStockCount = stockTable.filter(s => s.status !== 'OK').length;
+  const inventoryProfit = stockTable.reduce((a, s) => a + s.sold * Math.max(0, s.sPrice - s.pPrice), 0);
+  const adjustmentCount = stampAdjustments.length;
+
+  // Monthly sales for the last 6 months, derived from the movement log
+  const monthlySales = Array.from({ length: 6 }, (_, idx) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (5 - idx));
+    const key = d.toLocaleDateString('en-GB', { month: 'short' });
+    const total = stampMovements
+      .filter(m => m.type === 'Sale' && (m.dateTime || '').includes(key))
+      .reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
+    return { m: key, val: total };
+  });
+  const maxMonthlySale = Math.max(...monthlySales.map(x => x.val), 1);
+  const totalStockItems = stockTable.reduce((a, s) => a + s.remaining, 0);
+  const totalPurchasedValue = stockTable.reduce((a, s) => a + s.purchased * s.pPrice, 0);
+  const totalSoldValue = stockTable.reduce((a, s) => a + s.sold * s.sPrice, 0);
+
+  // Filters
+  const [denominationFilter, setDenominationFilter] = useState('ALL');
+  const [stockStatusFilter, setStockStatusFilter] = useState('ALL');
+  const filteredStockTable = stockTable.filter(
+    s =>
+      (denominationFilter === 'ALL' || s.den === denominationFilter) &&
+      (stockStatusFilter === 'ALL' || s.status === stockStatusFilter)
+  );
 
   return (
     <div className="space-y-5">
@@ -92,8 +139,8 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Total Stock Value</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 486,200</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 12% from last month</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {totalStockValue.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">{stockTable.length} denominations in stock</div>
         </div>
 
         {/* Today's Stamp Sales */}
@@ -104,8 +151,8 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Today's Sales</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 34,300</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 18% from yesterday</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {todaySalesAmt.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">Today's stamp sales</div>
         </div>
 
         {/* Today's Stamp Purchases */}
@@ -116,8 +163,8 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Today's Purchases</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 18,500</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 5% from yesterday</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {todayPurchaseAmt.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">Today's purchases</div>
         </div>
 
         {/* Low Stock Items */}
@@ -128,7 +175,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Low Stock Items</span>
           </div>
-          <div className="text-base font-bold text-rose-600 tabular-nums">3</div>
+          <div className="text-base font-bold text-rose-600 tabular-nums">{lowStockCount}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">Denominations below limit</div>
         </div>
 
@@ -140,55 +187,70 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Inventory Profit</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 96,800</div>
-          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 14% this month</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {inventoryProfit.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">Sold × margin</div>
         </div>
 
-        {/* Pending Reconciliation */}
+        {/* Stock Adjustments */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs">
           <div className="flex items-center gap-2 mb-1.5">
             <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
               <RotateCw className="w-4 h-4" />
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Pending Reconcile</span>
+            <span className="text-[11px] text-slate-500 font-medium">Stock Adjustments</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">2</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">Transactions to verify</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">{adjustmentCount}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">Stock adjustments recorded</div>
         </div>
       </div>
 
       {/* 3. Filter Toolbar */}
       <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <select className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
-            <option>All Denominations</option>
-            <option>Rs. 50</option>
-            <option>Rs. 100</option>
-            <option>Rs. 500</option>
-            <option>Rs. 1,000</option>
-            <option>Rs. 5,000</option>
+          <select
+            value={denominationFilter}
+            onChange={e => setDenominationFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-700 dark:text-slate-200 cursor-pointer"
+          >
+            <option value="ALL">All Denominations</option>
+            {stockTable.map(s => (
+              <option key={s.den} value={s.den}>{s.den}</option>
+            ))}
           </select>
 
-          <select className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
-            <option>All Status</option>
-            <option>OK</option>
-            <option>Low</option>
-            <option>Critical</option>
+          <select
+            value={stockStatusFilter}
+            onChange={e => setStockStatusFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium text-slate-700 dark:text-slate-200 cursor-pointer"
+          >
+            <option value="ALL">All Status</option>
+            <option value="OK">OK</option>
+            <option value="Low">Low</option>
+            <option value="Critical">Critical</option>
           </select>
 
-          <div className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium">
-            {`${new Date(Date.now() - 21 * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} - ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
-          </div>
+          <span className="text-slate-400 font-medium">
+            {filteredStockTable.length} of {stockTable.length} denominations
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">
-            Apply Filters
-          </button>
-          <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg">
+          <button
+            onClick={() => { setDenominationFilter('ALL'); setStockStatusFilter('ALL'); }}
+            className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
             Reset
           </button>
-          <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg flex items-center gap-1">
+          <button
+            onClick={() =>
+              exportToCsv(
+                `stamp-stock-${new Date().toISOString().split('T')[0]}.csv`,
+                ['Denomination', 'Opening', 'Purchased', 'Sold', 'Remaining', 'Purchase Price', 'Sale Price', 'Stock Value (PKR)', 'Status'],
+                filteredStockTable.map(s => [s.den, s.opening, s.purchased, s.sold, s.remaining, s.pPrice, s.sPrice, s.val, s.status])
+              )
+            }
+            className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg flex items-center gap-1 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
             <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
@@ -221,12 +283,12 @@ export const StampManagementView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 tabular-nums">
-                {stockTable.map(s => (
+                {filteredStockTable.map(s => (
                   <tr key={s.den} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                     <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">{s.den}</td>
                     <td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400">{s.opening}</td>
-                    <td className="py-2.5 px-3 text-right text-emerald-600">+{s.purchased}</td>
-                    <td className="py-2.5 px-3 text-right text-rose-600">-{s.sold}</td>
+                    <td className="py-2.5 px-3 text-right text-emerald-600">{s.purchased > 0 ? `+${s.purchased}` : s.purchased}</td>
+                    <td className="py-2.5 px-3 text-right text-rose-600">{s.sold > 0 ? `-${s.sold}` : s.sold}</td>
                     <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-slate-100">{s.remaining}</td>
                     <td className="py-2.5 px-3 text-right text-slate-500">Rs. {s.pPrice}</td>
                     <td className="py-2.5 px-3 text-right text-slate-500">Rs. {s.sPrice}</td>
@@ -262,19 +324,19 @@ export const StampManagementView: React.FC = () => {
           </div>
 
           <div className="h-40 flex items-end justify-between gap-2 pt-4 border-b border-slate-100 dark:border-slate-800">
-            {[
-              { m: 'Apr', val: 28 },
-              { m: 'May', val: 32 },
-              { m: 'Jun', val: 45 },
-              { m: 'Jul', val: 38 },
-              { m: 'Aug', val: 52 },
-              { m: 'Sep', val: 34 },
-            ].map(item => (
-              <div key={item.m} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-                <div style={{ height: `${(item.val / 60) * 100}%` }} className="w-5 bg-blue-500 rounded-t-sm transition-all duration-300"></div>
-                <span className="text-[9px] text-slate-400 font-medium">{item.m}</span>
+            {monthlySales.every(x => x.val === 0) ? (
+              <div className="w-full h-full flex items-center justify-center text-[11px] text-slate-400 font-medium">
+                No stamp sales recorded yet — sales will chart here
               </div>
-            ))}
+            ) : (
+              monthlySales.map(item => (
+                <div key={item.m} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                  <span className="text-[9px] font-bold text-slate-500 tabular-nums">{item.val > 0 ? item.val.toLocaleString() : ''}</span>
+                  <div style={{ height: `${Math.max(4, (item.val / maxMonthlySale) * 100)}%` }} className="w-5 bg-blue-500 rounded-t-sm transition-all duration-300"></div>
+                  <span className="text-[9px] text-slate-400 font-medium">{item.m}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -285,31 +347,31 @@ export const StampManagementView: React.FC = () => {
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Stock (Items)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">555</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">{totalStockItems.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Stock Value</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 486,200</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {totalStockValue.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Purchased (YTD)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 1,125,000</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {totalPurchasedValue.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Sold (YTD)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 1,028,200</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {totalSoldValue.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Inventory Profit</span>
-                <span className="font-bold text-emerald-600 tabular-nums">Rs. 96,800</span>
+                <span className="font-bold text-emerald-600 tabular-nums">Rs. {inventoryProfit.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Low Stock Items</span>
-                <span className="font-bold text-rose-600 tabular-nums">3</span>
+                <span className="font-bold text-rose-600 tabular-nums">{lowStockCount}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
-                <span>Pending Reconciliation</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">2</span>
+                <span>Stock Adjustments</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">{adjustmentCount}</span>
               </div>
             </div>
           </div>
@@ -408,7 +470,7 @@ export const StampManagementView: React.FC = () => {
             <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
-            {stockMovements.map((m, i) => (
+            {stockMovementLog.map((m, i) => (
               <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
                 <div>
                   <div className="font-medium text-slate-800 dark:text-slate-200">{m.type} ({m.den})</div>

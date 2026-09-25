@@ -121,7 +121,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
         )}
 
         {/* Printable Receipt Paper */}
-        <div id="printable-receipt" className="p-8 text-[#0D2344] bg-white relative">
+        <div id="printable-receipt" className="px-6 py-5 text-[#0D2344] bg-white relative">
           {/* Watermark if Cancelled */}
           {receipt.status === 'CANCELLED' && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 opacity-15">
@@ -132,16 +132,16 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           )}
 
           {/* Letterhead Header */}
-          <div className="border-b-2 border-[#0B1B2C] pb-4 mb-4">
+          <div className="border-b-2 border-[#0B1B2C] pb-3 mb-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-xl bg-[#0B1B2C] border-2 border-amber-400 flex items-center justify-center p-1 shrink-0">
-                  <span className="font-['Playfair_Display',serif] font-black text-2xl text-amber-400">
+                <div className="w-11 h-11 rounded-lg bg-[#0B1B2C] border-2 border-amber-400 flex items-center justify-center p-1 shrink-0">
+                  <span className="font-['Playfair_Display',serif] font-black text-xl text-amber-400">
                     CH
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-[18px] font-black tracking-tight uppercase text-[#0B1B2C] font-['Playfair_Display',serif]">
+                  <h1 className="text-[15px] font-black tracking-tight uppercase text-[#0B1B2C] font-['Playfair_Display',serif]">
                     CH Composing E-Stamp & Tax Advisor
                   </h1>
                   <div className="text-[11px] font-bold text-[#1473E6] uppercase tracking-wider">
@@ -162,7 +162,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           </div>
 
           {/* Receipt Info Bar */}
-          <div className="bg-[#F8FAFC] border border-[#DCE6F1] rounded-xl p-3 mb-4 flex items-center justify-between text-xs">
+          <div className="bg-[#F8FAFC] border border-[#DCE6F1] rounded-lg px-3 py-2 mb-3 flex items-center justify-between gap-2 flex-wrap text-[11px]">
             <div>
               <span className="text-slate-500 font-medium">Receipt No: </span>
               <span className="font-mono font-bold text-[#0D2344]">{receipt.receiptNo}</span>
@@ -175,13 +175,26 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
               <span className="text-slate-500 font-medium">Payment Mode: </span>
               <span className="font-semibold text-slate-800">{receipt.paymentMethod}</span>
             </div>
-            <div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center rounded-md border-2 px-3 py-1 text-sm font-black uppercase tracking-widest ${
+                  receipt.status === 'PAID'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : receipt.status === 'CANCELLED'
+                      ? 'border-rose-600 text-rose-700'
+                      : receipt.status === 'PARTIAL'
+                        ? 'border-amber-600 text-amber-700'
+                        : 'border-slate-500 text-slate-700'
+                }`}
+              >
+                {receipt.status === 'PAID' ? 'PAID' : receipt.status === 'CANCELLED' ? 'CANCELLED' : receipt.status === 'PARTIAL' ? 'PARTIALLY PAID' : 'UNPAID'}
+              </span>
               <StatusBadge status={receipt.status} />
             </div>
           </div>
 
           {/* Client Details Box */}
-          <div className="border border-slate-200 rounded-xl p-3.5 mb-4 text-xs">
+          <div className="border border-slate-200 rounded-lg p-3 mb-3 text-xs">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-[11px] text-slate-400 uppercase font-semibold">Received With Thanks From:</span>
@@ -197,9 +210,9 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           </div>
 
           {/* Line Items Table */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden mb-4 text-xs">
+          <div className="border border-slate-200 rounded-lg overflow-hidden mb-3 text-xs">
             <table className="w-full text-left">
-              <thead className="bg-[#0B1B2C] text-white text-[11px] uppercase tracking-wider">
+              <thead className="bg-[#0B1B2C] text-white text-[10px] uppercase tracking-wider">
                 <tr>
                   <th className="py-2.5 px-3">#</th>
                   <th className="py-2.5 px-3">Particulars / Service Description</th>
@@ -210,11 +223,11 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 <tr>
-                  <td className="py-3 px-3 text-slate-400">1</td>
-                  <td className="py-3 px-3 font-semibold text-slate-800">{receipt.service}</td>
-                  <td className="py-3 px-3 text-center">1</td>
-                  <td className="py-3 px-3 text-right">Rs. {receipt.amount.toLocaleString()}</td>
-                  <td className="py-3 px-3 text-right font-bold text-[#0D2344]">
+                  <td className="py-2 px-3 text-slate-400">1</td>
+                  <td className="py-2 px-3 font-semibold text-slate-800">{receipt.service}</td>
+                  <td className="py-2 px-3 text-center">1</td>
+                  <td className="py-2 px-3 text-right">Rs. {receipt.amount.toLocaleString()}</td>
+                  <td className="py-2 px-3 text-right font-bold text-[#0D2344]">
                     Rs. {receipt.amount.toLocaleString()}
                   </td>
                 </tr>
@@ -223,7 +236,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           </div>
 
           {/* Financial Breakdown & Amount in Words */}
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6 text-xs">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-4 text-xs">
             <div className="flex-1 bg-[#F8FAFC] border border-slate-200 rounded-xl p-3 w-full">
               <div className="text-[11px] text-slate-500 font-semibold uppercase">Amount in Words:</div>
               <div className="text-xs font-bold text-[#0D2344] italic mt-1">
@@ -255,17 +268,17 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           </div>
 
           {/* Signatures & Seal */}
-          <div className="pt-6 border-t border-slate-200 flex items-end justify-between text-xs">
+          <div className="pt-4 border-t border-slate-200 flex items-end justify-between text-xs">
             <div className="text-center">
               <div className="w-36 border-b border-slate-400 mb-1"></div>
               <div className="text-[11px] text-slate-500">Customer Signature</div>
             </div>
 
             {/* Official Circular Stamp */}
-            <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#1473E6] flex flex-col items-center justify-center p-1 text-center text-[8px] font-bold text-[#1473E6] uppercase tracking-tighter rotate-[-12deg] opacity-80">
+            <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#1473E6] flex flex-col items-center justify-center p-1 text-center text-[6px] font-bold text-[#1473E6] uppercase tracking-tighter rotate-[-12deg] opacity-80">
               <span>CH Chamber</span>
               <span className="text-[7px]">Sahiwal Courts</span>
-              <span className="text-[10px] text-amber-500 font-black">★ VERIFIED ★</span>
+              <span className="text-[8px] text-amber-500 font-black">★ VERIFIED ★</span>
               <span>No. 121</span>
             </div>
 

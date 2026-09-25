@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
+import { exportToCsv } from '../../lib/csv';
 import {
   Wallet,
   ArrowUp,
@@ -312,11 +313,25 @@ export const CashManagementView: React.FC = () => {
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
           </div>
 
-          <button className="px-3 py-1.5 bg-[#1473E6] hover:bg-[#0F62C4] text-white rounded-lg font-semibold flex items-center gap-1.5 transition-colors">
-            <Search className="w-3.5 h-3.5" /> Search
-          </button>
-
-          <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-medium flex items-center gap-1.5 transition-colors">
+          <button
+            onClick={() =>
+              exportToCsv(
+                `cash-transactions-${new Date().toISOString().split('T')[0]}.csv`,
+                ['Date', 'Type', 'Description', 'Client/Payee', 'Category', 'Account', 'Amount (PKR)', 'Reference'],
+                filteredList.map(tx => [
+                  tx.dateTime,
+                  tx.type,
+                  tx.description,
+                  tx.clientOrPayee,
+                  tx.serviceOrCategory,
+                  tx.account,
+                  tx.amount,
+                  tx.referenceNo || ''
+                ])
+              )
+            }
+            className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-medium flex items-center gap-1.5 transition-colors"
+          >
             <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
@@ -705,11 +720,6 @@ export const CashManagementView: React.FC = () => {
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">
                       Completed
                     </span>
-                  </td>
-                  <td className="py-3 px-3 text-center">
-                    <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
                   </td>
                 </tr>
               ))}

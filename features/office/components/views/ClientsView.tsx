@@ -25,15 +25,19 @@ import {
 } from 'lucide-react';
 
 import { initialClients } from '../../data/seedData';
+import { exportToCsv } from '../../lib/csv';
 
 export const ClientsView: React.FC = () => {
-  const { clients, serviceOrders, receipts, tasks, setIsNewClientModalOpen, setIsQuickCashInOpen } = useOffice();
+  const { clients, serviceOrders, receipts, tasks, setIsNewClientModalOpen, setIsQuickCashInOpen, setActiveSection } = useOffice();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClientIndex, setSelectedClientIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('Overview');
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const clientList = clients && clients.length > 0 ? clients : initialClients;
+  const allClients = clients && clients.length > 0 ? clients : initialClients;
+  const clientList =
+    statusFilter === 'ALL' ? allClients : allClients.filter(c => (c.status || 'Active') === statusFilter);
 
   const filtered = clientList.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -191,11 +195,31 @@ export const ClientsView: React.FC = () => {
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" />
               </div>
 
-              <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5" /> Filter
-              </button>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="h-9 px-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                title="Filter clients by status"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Outstanding">Outstanding</option>
+                <option value="Inactive">Inactive</option>
+              </select>
 
-              <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1">
+              <button
+                onClick={() =>
+                  exportToCsv(
+                    `clients-${new Date().toISOString().split('T')[0]}.csv`,
+                    ['Name', 'Business', 'CNIC', 'NTN', 'Mobile', 'Email', 'Address', 'Status', 'Outstanding (PKR)', 'Member Since'],
+                    clientList.map(c => [
+                      c.name, c.businessName, c.cnic, c.ntn, c.mobile || c.phone || '', c.email,
+                      c.address, c.status, c.outstanding || 0, c.memberSince
+                    ])
+                  )
+                }
+                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
                 <Download className="w-3.5 h-3.5" /> Export
               </button>
 
@@ -287,9 +311,6 @@ export const ClientsView: React.FC = () => {
                   <div className="text-xs text-slate-400 font-medium">{selected.businessName}</div>
                 </div>
               </div>
-              <button className="text-slate-400 hover:text-slate-600 p-1">
-                <MoreVertical className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Contact details */}
@@ -483,11 +504,17 @@ export const ClientsView: React.FC = () => {
               >
                 <CreditCard className="w-3.5 h-3.5" /> Record Pay
               </button>
-              <button className="py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5">
-                <Upload className="w-3.5 h-3.5" /> Upload Doc
+              <button
+                onClick={() => setActiveSection('invoices')}
+                className="py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5"
+              >
+                <FileText className="w-3.5 h-3.5" /> New Invoice
               </button>
-              <button className="py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5">
-                <FileText className="w-3.5 h-3.5" /> New Service
+              <button
+                onClick={() => setActiveSection('tax')}
+                className="py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5"
+              >
+                <Coins className="w-3.5 h-3.5" /> New Tax Case
               </button>
             </div>
           </div>

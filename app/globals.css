@@ -971,3 +971,25 @@ html[lang="ur"] textarea {
   scrollbar-width: thin;
   scrollbar-color: #1e3a5f transparent;
 }
+
+/* Office inputs: consistent height, radius, and focus treatment for every
+   text input, select and textarea inside the office shell. */
+.office-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.office-shell select,
+.office-shell textarea {
+  min-height: 2.375rem;
+  border-radius: 0.55rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.office-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+.office-shell select:focus,
+.office-shell textarea:focus {
+  outline: none;
+  border-color: #1473e6;
+  box-shadow: 0 0 0 3px rgba(20, 115, 230, 0.14);
+}
+
+.office-shell select {
+  cursor: pointer;
+}
