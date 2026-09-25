@@ -72,7 +72,7 @@ export const ReceiptsView: React.FC = () => {
       >
         <button
           onClick={() => setIsQuickCashInOpen(true)}
-          className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Issue New Receipt</span>
@@ -88,7 +88,7 @@ export const ReceiptsView: React.FC = () => {
           change="+14 this week"
           changeType="positive"
           icon={<Receipt className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
         <KpiCard
           label="Total Collected"
@@ -146,7 +146,7 @@ export const ReceiptsView: React.FC = () => {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search receipt #, client name, service, or payment method..."
-            className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6] bg-slate-50/50"
+            className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A] bg-slate-50/50"
           />
         </div>
 
@@ -200,7 +200,7 @@ export const ReceiptsView: React.FC = () => {
                         isSelected ? 'bg-blue-50/60 font-semibold' : ''
                       }`}
                     >
-                      <td className="py-3 px-3 tabular-nums font-bold text-[#1473E6] whitespace-nowrap">
+                      <td className="py-3 px-3 tabular-nums font-bold text-[#B8832A] whitespace-nowrap">
                         <CopyableText value={String(r.receiptNo)} label="receipt number">{r.receiptNo}</CopyableText>
                       </td>
                       <td className="py-3 px-3 text-slate-500 whitespace-nowrap text-[11px]">{r.dateTime}</td>
@@ -234,7 +234,7 @@ export const ReceiptsView: React.FC = () => {
             </div>
             <button
               onClick={() => window.print()}
-              className="px-3 py-1.5 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+              className="px-3 py-1.5 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Receipt</span>
@@ -287,7 +287,7 @@ export const ReceiptsView: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
                 <div>
                   <span className="text-slate-400 block text-[10px]">Receipt No:</span>
-                  <span className="tabular-nums font-bold text-[#1473E6]">{selectedReceipt.receiptNo}</span>
+                  <span className="tabular-nums font-bold text-[#B8832A]">{selectedReceipt.receiptNo}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-400 block text-[10px]">Date & Time:</span>
@@ -373,7 +373,7 @@ export const ReceiptsView: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setSelectedReceiptId(selectedReceipt.id)}
-                  className="py-1.5 bg-blue-50 hover:bg-blue-100 text-[#1473E6] rounded-lg font-semibold flex items-center justify-center gap-1 cursor-pointer text-[11px]"
+                  className="py-1.5 bg-blue-50 hover:bg-blue-100 text-[#B8832A] rounded-lg font-semibold flex items-center justify-center gap-1 cursor-pointer text-[11px]"
                 >
                   <Eye className="w-3 h-3" />
                   <span>Audit View</span>

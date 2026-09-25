@@ -91,7 +91,7 @@ export const StaffUsersView: React.FC = () => {
       >
         <button
           onClick={() => setIsNewUserModalOpen(true)}
-          className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
         >
           <UserPlus className="w-4 h-4" />
           <span>Add System User</span>
@@ -107,7 +107,7 @@ export const StaffUsersView: React.FC = () => {
           change="Chamber 121 Team"
           changeType="positive"
           icon={<ShieldCheck className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
           centered
         />
         <KpiCard
@@ -179,7 +179,7 @@ export const StaffUsersView: React.FC = () => {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search staff, role, email..."
-                className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6] bg-slate-50/50"
+                className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A] bg-slate-50/50"
               />
             </div>
           </div>
@@ -207,7 +207,7 @@ export const StaffUsersView: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md bg-blue-50 text-[#1473E6] font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded-md bg-blue-50 text-[#B8832A] font-bold text-[10px]">
                         {member.role}
                       </span>
                     </td>
@@ -249,7 +249,7 @@ export const StaffUsersView: React.FC = () => {
           <div className="bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3 text-xs">
             <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2">
               <h4 className="font-bold text-[#0D2344] flex items-center gap-1.5">
-                <Shield className="w-4 h-4 text-[#1473E6]" />
+                <Shield className="w-4 h-4 text-[#B8832A]" />
                 <span>Role Permission Hierarchy</span>
               </h4>
               <span className="text-[10px] text-slate-400">Chamber RBAC</span>
@@ -322,7 +322,7 @@ export const StaffUsersView: React.FC = () => {
         <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2.5">
           <div>
             <h4 className="font-bold text-[#0D2344] flex items-center gap-1.5">
-              <History className="w-4 h-4 text-[#1473E6]" />
+              <History className="w-4 h-4 text-[#B8832A]" />
               <span>Chamber Security & Financial Audit Trail</span>
             </h4>
             <p className="text-[10px] text-slate-400">Chronological immutable log of all cash, stamp, and compliance changes</p>
@@ -426,7 +426,7 @@ export const StaffUsersView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg"
+                  className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg"
                 >
                   Create User
                 </button>

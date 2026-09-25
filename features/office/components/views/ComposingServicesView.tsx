@@ -115,7 +115,7 @@ export const ComposingServicesView: React.FC = () => {
       >
         <button
           onClick={() => setIsNewOrderModalOpen(true)}
-          className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>New Composing Order</span>
@@ -131,7 +131,7 @@ export const ComposingServicesView: React.FC = () => {
           change="+4 added today"
           changeType="neutral"
           icon={<FileText className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
         <KpiCard
           label="In Progress"
@@ -190,7 +190,7 @@ export const ComposingServicesView: React.FC = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-[#1473E6] text-white shadow-2xs'
+                  ? 'bg-[#B8832A] text-white shadow-2xs'
                   : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/80'
               }`}
             >
@@ -207,7 +207,7 @@ export const ComposingServicesView: React.FC = () => {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search customer, document type, order #..."
-              className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6] bg-slate-50/50"
+              className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A] bg-slate-50/50"
             />
           </div>
 
@@ -368,7 +368,7 @@ export const ComposingServicesView: React.FC = () => {
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => updateServiceOrderStatus(selectedOrder.id, 'Ready')}
-                  className="w-full py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="w-full py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                 >
                   <FileCheck2 className="w-4 h-4" />
                   <span>Mark as Ready for Pickup</span>
@@ -406,7 +406,7 @@ export const ComposingServicesView: React.FC = () => {
         <div className="lg:col-span-8 bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3">
           <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2.5">
             <h4 className="text-xs font-bold text-[#0D2344] flex items-center gap-1.5">
-              <FileSignature className="w-4 h-4 text-[#1473E6]" />
+              <FileSignature className="w-4 h-4 text-[#B8832A]" />
               <span>Chamber 121 Legal Drafting - Standard Tariff Schedule</span>
             </h4>
             <span className="text-[11px] font-semibold text-slate-400">Fixed Bar Council Rates</span>
@@ -428,7 +428,7 @@ export const ComposingServicesView: React.FC = () => {
                   <tr key={item.name} className="hover:bg-slate-50/80">
                     <td className="py-2.5 px-3 font-bold text-[#0D2344]">{item.name}</td>
                     <td className="py-2.5 px-3 text-slate-500">{item.pages}</td>
-                    <td className="py-2.5 px-3 text-right font-bold text-[#1473E6]">{item.rate}</td>
+                    <td className="py-2.5 px-3 text-right font-bold text-[#B8832A]">{item.rate}</td>
                     <td className="py-2.5 px-3 text-center text-slate-600 tabular-nums text-[11px]">{item.time}</td>
                     <td className="py-2.5 px-3 text-center">
                       <button
@@ -571,7 +571,7 @@ export const ComposingServicesView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg"
+                  className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg"
                 >
                   Create Order
                 </button>

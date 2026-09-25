@@ -49,7 +49,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`h-10 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 hover:border-[#1473E6] hover:bg-slate-50 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${buttonClassName}`}
+        className={`h-10 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 hover:border-[#B8832A] hover:bg-slate-50 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${buttonClassName}`}
       >
         <div className="flex items-center gap-2 truncate">
           {icon && <span className="text-slate-500 shrink-0">{icon}</span>}
@@ -69,15 +69,15 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 onChange(option.value);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-3.5 py-2 flex items-center justify-between hover:bg-blue-50 hover:text-[#1473E6] transition-colors cursor-pointer text-sm ${
-                option.value === value ? 'bg-blue-50 text-[#1473E6] font-semibold' : 'text-slate-700 font-medium'
+              className={`w-full text-left px-3.5 py-2 flex items-center justify-between hover:bg-blue-50 hover:text-[#B8832A] transition-colors cursor-pointer text-sm ${
+                option.value === value ? 'bg-blue-50 text-[#B8832A] font-semibold' : 'text-slate-700 font-medium'
               }`}
             >
               <div className="flex items-center gap-2.5 truncate">
                 {option.icon}
                 <span className="truncate">{option.label}</span>
               </div>
-              {option.value === value && <Check className="w-4 h-4 text-[#1473E6]" />}
+              {option.value === value && <Check className="w-4 h-4 text-[#B8832A]" />}
             </button>
           ))}
         </div>

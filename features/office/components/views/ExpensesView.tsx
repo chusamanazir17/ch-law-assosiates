@@ -143,7 +143,7 @@ export const ExpensesView: React.FC = () => {
           change={rentTotal > 0 ? "Recorded" : "No expense yet"}
           changeType={rentTotal > 0 ? "positive" : "neutral"}
           icon={<Building className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
         <KpiCard
           label="Utilities (LESCO/PTCL)"
@@ -327,7 +327,7 @@ export const ExpensesView: React.FC = () => {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search vendor, description, category..."
-                  className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6] bg-slate-50/50"
+                  className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A] bg-slate-50/50"
                 />
               </div>
 

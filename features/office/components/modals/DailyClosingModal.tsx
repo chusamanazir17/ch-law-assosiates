@@ -45,9 +45,9 @@ export const DailyClosingModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
       <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="px-5 py-4 bg-gradient-to-r from-[#0B1B2C] to-[#122B42] text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-gradient-to-r from-[#05162B] to-[#122B42] text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#0F70F5] flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-lg bg-[#96691B] flex items-center justify-center text-white">
               <Calculator className="w-5 h-5" />
             </div>
             <div>
@@ -118,7 +118,7 @@ export const DailyClosingModal: React.FC = () => {
                 value={reopenReason}
                 onChange={e => setReopenReason(e.target.value)}
                 placeholder="State the audit explanation (e.g. Late stamp sale recorded after 7 PM)"
-                className="w-full p-2.5 border border-[#DCE6F1] rounded-lg text-slate-900 focus:outline-hidden focus:border-[#1473E6]"
+                className="w-full p-2.5 border border-[#DCE6F1] rounded-lg text-slate-900 focus:outline-hidden focus:border-[#B8832A]"
               />
             </div>
 
@@ -160,7 +160,7 @@ export const DailyClosingModal: React.FC = () => {
               </div>
               <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-sm text-[#0D2344]">
                 <span>System Expected Cash:</span>
-                <span className="text-[#1473E6]">Rs. {expected.toLocaleString()}</span>
+                <span className="text-[#B8832A]">Rs. {expected.toLocaleString()}</span>
               </div>
             </div>
 
@@ -176,7 +176,7 @@ export const DailyClosingModal: React.FC = () => {
                   min="0"
                   value={actualCash}
                   onChange={e => setActualCash(e.target.value === '' ? '' : Number(e.target.value))}
-                  className="w-full h-10 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold text-base focus:outline-hidden focus:border-[#1473E6]"
+                  className="w-full h-10 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold text-base focus:outline-hidden focus:border-[#B8832A]"
                 />
               </div>
             </div>
@@ -221,7 +221,7 @@ export const DailyClosingModal: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-[#0F70F5] hover:bg-[#1473E6] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-[#96691B] hover:bg-[#B8832A] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
               >
                 <Lock className="w-4 h-4" />
                 <span>Confirm & Lock Day</span>

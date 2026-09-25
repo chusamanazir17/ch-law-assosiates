@@ -69,7 +69,7 @@ export const TasksDeadlinesView: React.FC = () => {
       >
         <button
           onClick={() => setIsNewTaskModalOpen(true)}
-          className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>New Task / Deadline</span>
@@ -85,7 +85,7 @@ export const TasksDeadlinesView: React.FC = () => {
           change="Real-time synchronized"
           changeType="positive"
           icon={<Calendar className="w-5 h-5" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
 
         <KpiCard
@@ -129,7 +129,7 @@ export const TasksDeadlinesView: React.FC = () => {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search task title, assigned person..."
-              className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6]"
+              className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A]"
             />
           </div>
 
@@ -165,7 +165,7 @@ export const TasksDeadlinesView: React.FC = () => {
                     type="checkbox"
                     checked={isDone}
                     onChange={() => {}}
-                    className="w-4 h-4 rounded text-[#1473E6] cursor-pointer"
+                    className="w-4 h-4 rounded text-[#B8832A] cursor-pointer"
                   />
                   <div className="min-w-0">
                     <div className={`font-semibold text-xs text-slate-900 truncate ${isDone ? 'line-through text-slate-400' : ''}`}>
@@ -255,7 +255,7 @@ export const TasksDeadlinesView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg"
+                  className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg"
                 >
                   Save Task
                 </button>

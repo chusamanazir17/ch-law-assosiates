@@ -54,7 +54,7 @@ export const ReportsView: React.FC = () => {
       const key = t.serviceOrCategory || 'Other';
       map.set(key, (map.get(key) || 0) + Number(t.amount || 0));
     });
-    const colors = ['bg-[#1473E6]', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500', 'bg-rose-500'];
+    const colors = ['bg-[#B8832A]', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500', 'bg-rose-500'];
     return Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
@@ -142,7 +142,7 @@ export const ReportsView: React.FC = () => {
           </button>
           <button
             onClick={handlePrint}
-            className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Print Audit Statement</span>
@@ -159,7 +159,7 @@ export const ReportsView: React.FC = () => {
           change="+18.4% YoY"
           changeType="positive"
           icon={<DollarSign className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
         <KpiCard
           label="Op. Expenses"
@@ -223,7 +223,7 @@ export const ReportsView: React.FC = () => {
             onClick={() => setActiveReportTab(tab.key as any)}
             className={`px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap shrink-0 ${
               activeReportTab === tab.key
-                ? 'bg-[#1473E6] text-white shadow-xs'
+                ? 'bg-[#B8832A] text-white shadow-xs'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
             }`}
           >
@@ -368,7 +368,7 @@ export const ReportsView: React.FC = () => {
             <div className="bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3 text-xs">
               <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2">
                 <h4 className="font-bold text-[#0D2344] flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-[#1473E6]" />
+                  <Users className="w-3.5 h-3.5 text-[#B8832A]" />
                   <span>Staff Case Filing & SLA Compliance</span>
                 </h4>
                 <span className="text-[10px] text-slate-400">Active Staff (4)</span>

@@ -37,7 +37,7 @@ export const TransferModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
       <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="px-5 py-4 bg-gradient-to-r from-[#0B1B2C] to-[#122B42] text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-gradient-to-r from-[#05162B] to-[#122B42] text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center text-white">
               <ArrowRightLeft className="w-5 h-5" />
@@ -108,7 +108,7 @@ export const TransferModal: React.FC = () => {
                 required
                 value={amount}
                 onChange={e => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold focus:outline-hidden focus:border-[#1473E6]"
+                className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold focus:outline-hidden focus:border-[#B8832A]"
               />
             </div>
           </div>

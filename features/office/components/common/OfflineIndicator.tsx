@@ -10,7 +10,7 @@ export const OfflineIndicator: React.FC = () => {
   return (
     <div
       id="pwa-offline-banner"
-      className="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-md z-50 flex items-center justify-between gap-3 rounded-xl bg-[#0B1B2C]/95 text-white border border-amber-500/40 p-3 shadow-xl backdrop-blur-md animate-in slide-in-from-bottom-2 duration-200"
+      className="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-md z-50 flex items-center justify-between gap-3 rounded-xl bg-[#05162B]/95 text-white border border-amber-500/40 p-3 shadow-xl backdrop-blur-md animate-in slide-in-from-bottom-2 duration-200"
     >
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">

@@ -50,7 +50,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-2xl overflow-hidden my-6">
         {/* Modal Top Actions */}
-        <div className="px-5 py-3 bg-[#0B1B2C] text-white flex items-center justify-between print:hidden">
+        <div className="px-5 py-3 bg-[#05162B] text-white flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm">Receipt Preview: {receipt.receiptNo}</span>
             <StatusBadge status={receipt.status} />
@@ -60,7 +60,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
               <>
                 <button
                   onClick={handlePrint}
-                  className="px-3 py-1.5 bg-[#1473E6] hover:bg-[#0F70F5] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-3 py-1.5 bg-[#B8832A] hover:bg-[#96691B] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print Receipt</span>
@@ -135,7 +135,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           <div className="border-b-2 border-[#0B1B2C] pb-3 mb-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-lg bg-[#0B1B2C] border-2 border-amber-400 flex items-center justify-center p-1 shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-[#05162B] border-2 border-amber-400 flex items-center justify-center p-1 shrink-0">
                   <span className="font-['Playfair_Display',serif] font-black text-xl text-amber-400">
                     CH
                   </span>
@@ -144,7 +144,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
                   <h1 className="text-[15px] font-black tracking-tight uppercase text-[#0B1B2C] font-['Playfair_Display',serif]">
                     CH Composing E-Stamp & Tax Advisor
                   </h1>
-                  <div className="text-[11px] font-bold text-[#1473E6] uppercase tracking-wider">
+                  <div className="text-[11px] font-bold text-[#B8832A] uppercase tracking-wider">
                     Tax Consultants & Legal Composing Services
                   </div>
                   <div className="text-[11px] text-slate-600 font-medium">
@@ -203,7 +203,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
               </div>
               <div className="text-right">
                 <span className="text-[11px] text-slate-400 uppercase font-semibold">Service Description:</span>
-                <div className="text-sm font-bold text-[#1473E6] mt-0.5">{receipt.service}</div>
+                <div className="text-sm font-bold text-[#B8832A] mt-0.5">{receipt.service}</div>
                 <div className="text-[11px] text-slate-600 italic">{receipt.remarks || 'Professional consultancy'}</div>
               </div>
             </div>
@@ -212,7 +212,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
           {/* Line Items Table */}
           <div className="border border-slate-200 rounded-lg overflow-hidden mb-3 text-xs">
             <table className="w-full text-left">
-              <thead className="bg-[#0B1B2C] text-white text-[10px] uppercase tracking-wider">
+              <thead className="bg-[#05162B] text-white text-[10px] uppercase tracking-wider">
                 <tr>
                   <th className="py-2.5 px-3">#</th>
                   <th className="py-2.5 px-3">Particulars / Service Description</th>
@@ -275,7 +275,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
             </div>
 
             {/* Official Circular Stamp */}
-            <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#1473E6] flex flex-col items-center justify-center p-1 text-center text-[6px] font-bold text-[#1473E6] uppercase tracking-tighter rotate-[-12deg] opacity-80">
+            <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#B8832A] flex flex-col items-center justify-center p-1 text-center text-[6px] font-bold text-[#B8832A] uppercase tracking-tighter rotate-[-12deg] opacity-80">
               <span>CH Chamber</span>
               <span className="text-[7px]">Sahiwal Courts</span>
               <span className="text-[8px] text-amber-500 font-black">★ VERIFIED ★</span>

@@ -104,7 +104,7 @@ export const ClientsView: React.FC = () => {
         {/* Total Clients */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs">
           <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#B8832A] flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Total Clients</span>
@@ -331,7 +331,7 @@ export const ClientsView: React.FC = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1.5 rounded-md font-semibold cursor-pointer whitespace-nowrap transition-colors shrink-0 ${
                     activeTab === tab
-                      ? 'bg-[#1473E6] text-white shadow-xs'
+                      ? 'bg-[#B8832A] text-white shadow-xs'
                       : 'text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                   }`}
                 >
@@ -529,7 +529,7 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Top Outstanding Clients</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
             {topOutstanding.length === 0 ? (
@@ -552,7 +552,7 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Client Activity</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
           </div>
           <div className="space-y-2.5 text-xs">
             <div className="flex items-start gap-2">
@@ -583,7 +583,7 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Client Distribution</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">Live</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">Live</span>
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">

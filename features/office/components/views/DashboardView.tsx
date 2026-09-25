@@ -227,7 +227,7 @@ export const DashboardView: React.FC = () => {
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-xs disabled:opacity-50"
           title="Refresh data from Supabase"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#1473E6]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#B8832A]' : ''}`} />
           {isLoading ? 'Syncing...' : 'Live Synced'}
         </button>
       </PageHeader>
@@ -237,12 +237,12 @@ export const DashboardView: React.FC = () => {
         {/* Today's Cash In */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shadow-2xs">
-              <ArrowUp className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shadow-2xs shrink-0">
+              <ArrowUp className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin truncate">Today's Cash In</div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+              <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
                 <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
                 <CopyableText value={String(todayCashIn)} label="cash in amount" className="text-inherit">
                   {todayCashIn.toLocaleString()}
@@ -256,7 +256,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs text-[#B8832A] hover:text-[#7D5715] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -265,12 +265,12 @@ export const DashboardView: React.FC = () => {
         {/* Today's Cash Out */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-2xs">
-              <ArrowDown className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shadow-2xs shrink-0">
+              <ArrowDown className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin truncate">Today's Cash Out</div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+              <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
                 <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
                 <CopyableText value={String(todayCashIn)} label="cash out amount" className="text-inherit">
                   {todayCashOut.toLocaleString()}
@@ -284,7 +284,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('expenses')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs text-[#B8832A] hover:text-[#7D5715] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -293,12 +293,12 @@ export const DashboardView: React.FC = () => {
         {/* Current Cash Balance */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-[#1473E6] dark:text-[#38BDF8] flex items-center justify-center shadow-2xs">
-              <Wallet className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-[#B8832A] dark:text-[#E3BA63] flex items-center justify-center shadow-2xs">
+              <Wallet className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Current Cash Balance</div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
+              <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
                 <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
                 <CopyableText value={String(accountBalances.cashOffice || 0)} label="cash balance">
                   {(accountBalances.cashOffice || 0).toLocaleString()}
@@ -311,7 +311,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs text-[#B8832A] hover:text-[#7D5715] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -320,8 +320,8 @@ export const DashboardView: React.FC = () => {
         {/* Total Transactions */}
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs">
-              <Receipt className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs shrink-0">
+              <Receipt className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin">Total Transactions</div>
@@ -337,7 +337,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
+            className="text-xs text-[#B8832A] hover:text-[#7D5715] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -362,7 +362,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.stampsSoldQty} stamps</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -370,7 +370,7 @@ export const DashboardView: React.FC = () => {
         {/* Composing Income */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#B8832A] flex items-center justify-center shrink-0">
               <Monitor className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -383,7 +383,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.composingCount} jobs</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('composing')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('composing')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -404,7 +404,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.taxCount} cases</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -425,7 +425,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">{metrics.outstandingCount} clients</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -448,7 +448,7 @@ export const DashboardView: React.FC = () => {
               </div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -456,7 +456,7 @@ export const DashboardView: React.FC = () => {
         {/* Total Liquidity / Combined Accounts */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#B8832A] flex items-center justify-center shrink-0">
               <BarChart2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -469,7 +469,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] text-slate-400 dark:text-slate-500 font-admin">All Accounts</div>
             </div>
           </div>
-          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold text-right mt-1.5 transition-colors">
+          <button onClick={() => setActiveSection('reports')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold text-right mt-1.5 transition-colors">
             Details &rarr;
           </button>
         </div>
@@ -609,37 +609,37 @@ export const DashboardView: React.FC = () => {
           <div className="grid grid-cols-2 gap-2 mt-2 font-admin">
             <button
               onClick={() => setIsQuickCashInOpen(true)}
-              className="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" /> Cash In
             </button>
             <button
               onClick={() => setIsQuickCashOutOpen(true)}
-              className="p-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <Minus className="w-4 h-4" /> Cash Out
             </button>
             <button
               onClick={() => setActiveSection('clients')}
-              className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <Users className="w-4 h-4" /> New Client
             </button>
             <button
               onClick={() => setIsStampSaleModalOpen(true)}
-              className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <FileCheck2 className="w-4 h-4" /> Stamp Sale
             </button>
             <button
               onClick={() => setActiveSection('tax')}
-              className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <FileText className="w-4 h-4" /> New Tax Case
             </button>
             <button
               onClick={() => setActiveSection('receipts')}
-              className="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95"
+              className="p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <Receipt className="w-4 h-4" /> Create Receipt
             </button>
@@ -655,7 +655,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Recent Transactions</h3>
-              <button onClick={() => setActiveSection('cash')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setActiveSection('cash')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
@@ -685,7 +685,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Outstanding Clients</h3>
-              <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
@@ -716,7 +716,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Low Stamp Stock</h3>
-              <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
@@ -743,7 +743,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Live Activity Feed</h3>
-              <button onClick={() => setActiveSection('audit')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setActiveSection('audit')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
@@ -773,7 +773,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Upcoming Deadlines</h3>
-              <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 View All
               </button>
             </div>
@@ -802,7 +802,7 @@ export const DashboardView: React.FC = () => {
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">
                 Daily Closing ({dailyClosing?.date || new Date().toLocaleDateString('en-GB')})
               </h3>
-              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
+              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 {dailyClosing?.isClosed ? 'Closed' : 'Close Day'}
               </button>
             </div>

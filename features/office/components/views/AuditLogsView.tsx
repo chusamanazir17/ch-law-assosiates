@@ -54,7 +54,7 @@ export const AuditLogsView: React.FC = () => {
           change="Real-time capture"
           changeType="positive"
           icon={<History className="w-5 h-5" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
 
         <KpiCard
@@ -98,7 +98,7 @@ export const AuditLogsView: React.FC = () => {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search user, action, details, record ID..."
-              className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6]"
+              className="w-full h-8 pl-8 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A]"
             />
           </div>
 
@@ -146,7 +146,7 @@ export const AuditLogsView: React.FC = () => {
                     })()}
                   </td>
                   <td className="py-3 px-3 font-bold text-[#0D2344] whitespace-nowrap">{log.user}</td>
-                  <td className="py-3 px-3 whitespace-nowrap tabular-nums text-[11px] font-bold text-[#1473E6]">
+                  <td className="py-3 px-3 whitespace-nowrap tabular-nums text-[11px] font-bold text-[#B8832A]">
                     {log.action}
                   </td>
                   <td className="py-3 px-3 whitespace-nowrap">

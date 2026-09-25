@@ -147,8 +147,8 @@
 .dark input:not([type="checkbox"]):not([type="radio"]):focus,
 .dark textarea:focus,
 .dark select:focus {
-  border-color: #38BDF8 !important;
-  outline-color: #38BDF8 !important;
+  border-color: #E3BA63 !important;
+  outline-color: #E3BA63 !important;
 }
 
 .dark input::placeholder,

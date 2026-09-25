@@ -57,21 +57,21 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     (color && colorMap[color] ? colorMap[color] : 'bg-blue-50 text-blue-600');
 
   return (
-    <div className={`bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between shadow-2xs hover:border-[#1473E6]/40 dark:hover:border-[#1473E6]/60 hover:shadow-xs transition-all ${centered ? 'items-center text-center' : ''} ${className}`}>
+    <div className={`bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between shadow-2xs hover:border-[#B8832A]/40 dark:hover:border-[#B8832A]/60 hover:shadow-xs transition-all ${centered ? 'items-center text-center' : ''} ${className}`}>
       <div className={`${centered ? 'flex-col items-center gap-2 w-full' : 'flex items-start justify-between gap-3'}`}>
         <div className={`${centered ? 'flex flex-col items-center gap-2 w-full' : 'flex items-center gap-3.5 min-w-0'}`}>
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${resolvedBgColor}`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${resolvedBgColor}`}>
             {icon}
           </div>
           <div className="min-w-0">
             <div className={`text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight mb-1.5 truncate ${centered ? 'text-center' : ''}`}>{displayLabel}</div>
-            <div className={`${String(value).length > 10 ? 'text-lg sm:text-xl leading-snug' : 'text-2xl sm:text-[28px] leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{copyable ? <CopyableText value={String(value)} label={displayLabel} className="text-inherit dark:text-inherit">{value}</CopyableText> : value}</div>
+            <div className={`${String(value).length > 10 ? 'text-base sm:text-lg leading-snug' : 'text-xl sm:text-2xl leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{copyable ? <CopyableText value={String(value)} label={displayLabel} className="text-inherit dark:text-inherit">{value}</CopyableText> : value}</div>
           </div>
         </div>
         {viewDetailsText && (
           <button
             onClick={onViewDetails}
-            className="text-xs font-semibold text-[#1473E6] dark:text-[#38BDF8] hover:text-[#0F62C4] dark:hover:text-[#7DD3FC] hover:underline flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors shrink-0 pt-0.5"
+            className="text-xs font-semibold text-[#B8832A] dark:text-[#E3BA63] hover:text-[#96691B] dark:hover:text-[#7DD3FC] hover:underline flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors shrink-0 pt-0.5"
           >
             {viewDetailsText}
             <span aria-hidden="true">&rarr;</span>

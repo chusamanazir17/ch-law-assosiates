@@ -76,7 +76,7 @@ export const SettingsView: React.FC = () => {
               </div>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white rounded-lg font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                className="px-4 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white rounded-lg font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>Save Changes</span>

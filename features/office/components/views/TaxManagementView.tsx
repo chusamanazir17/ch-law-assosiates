@@ -131,11 +131,11 @@ export const TaxManagementView: React.FC = () => {
         quote="“Accuracy in Law, Efficiency in Filing”"
       >
         <div className="flex items-center gap-2">
-          <div className="flex bg-[#0B1B2C]/5 p-0.5 rounded-lg border border-[#DCE6F1]">
+          <div className="flex bg-[#05162B]/5 p-0.5 rounded-lg border border-[#DCE6F1]">
             <button
               onClick={() => setActiveViewMode('kanban')}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
-                activeViewMode === 'kanban' ? 'bg-[#1473E6] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                activeViewMode === 'kanban' ? 'bg-[#B8832A] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Kanban Board
@@ -143,7 +143,7 @@ export const TaxManagementView: React.FC = () => {
             <button
               onClick={() => setActiveViewMode('table')}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
-                activeViewMode === 'table' ? 'bg-[#1473E6] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                activeViewMode === 'table' ? 'bg-[#B8832A] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               All Cases Table
@@ -151,7 +151,7 @@ export const TaxManagementView: React.FC = () => {
           </div>
           <button
             onClick={() => setIsNewCaseModalOpen(true)}
-            className="px-3.5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>New Tax Case</span>
@@ -168,7 +168,7 @@ export const TaxManagementView: React.FC = () => {
           change="+2 this week"
           changeType="neutral"
           icon={<Clock className="w-4 h-4" />}
-          iconBgColor="bg-blue-50 text-[#1473E6]"
+          iconBgColor="bg-blue-50 text-[#B8832A]"
         />
         <KpiCard
           label="Submitted Returns"
@@ -226,7 +226,7 @@ export const TaxManagementView: React.FC = () => {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search by client name, return type, NTN or CNIC..."
-            className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#1473E6] bg-slate-50/50"
+            className="w-full h-9 pl-9 pr-3 border border-[#DCE6F1] rounded-lg text-xs focus:outline-hidden focus:border-[#B8832A] bg-slate-50/50"
           />
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
@@ -281,8 +281,8 @@ export const TaxManagementView: React.FC = () => {
                             <div
                               key={tc.id}
                               onClick={() => setSelectedCaseId(tc.id)}
-                              className={`p-2.5 rounded-lg border bg-white shadow-2xs cursor-pointer transition-all hover:shadow-xs hover:border-[#1473E6] ${
-                                isSelected ? 'ring-2 ring-[#1473E6] border-transparent' : 'border-[#DCE6F1]'
+                              className={`p-2.5 rounded-lg border bg-white shadow-2xs cursor-pointer transition-all hover:shadow-xs hover:border-[#B8832A] ${
+                                isSelected ? 'ring-2 ring-[#B8832A] border-transparent' : 'border-[#DCE6F1]'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-1 mb-1">
@@ -410,7 +410,7 @@ export const TaxManagementView: React.FC = () => {
                 <div className="space-y-2 pt-1">
                   <button
                     onClick={() => updateTaxCaseStatus(selectedCase.id, 'Submitted')}
-                    className="w-full py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                    className="w-full py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Mark as Submitted on FBR Iris</span>
@@ -508,7 +508,7 @@ export const TaxManagementView: React.FC = () => {
         <div className="bg-white rounded-xl border border-[#DCE6F1] p-3.5 shadow-xs space-y-2.5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 className="text-xs font-bold text-[#0D2344] flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-[#1473E6]" />
+              <Calendar className="w-3.5 h-3.5 text-[#B8832A]" />
               <span>Upcoming Tax Returns</span>
             </h4>
             <span className="text-[10px] text-slate-400 font-semibold">Next 7 Days</span>
@@ -524,7 +524,7 @@ export const TaxManagementView: React.FC = () => {
                   <div className="font-bold text-[#0D2344]">{item.client}</div>
                   <div className="text-[10px] text-slate-500">{item.type} • Due: {item.due}</div>
                 </div>
-                <div className="font-bold text-[#1473E6] text-[11px]">{item.fee}</div>
+                <div className="font-bold text-[#B8832A] text-[11px]">{item.fee}</div>
               </div>
             ))}
           </div>
@@ -716,7 +716,7 @@ export const TaxManagementView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg"
+                  className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg"
                 >
                   Create Case
                 </button>

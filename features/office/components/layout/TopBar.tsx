@@ -100,14 +100,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
               : 'max-w-[180px] md:max-w-[210px] lg:max-w-[240px]'
           }`}
         >
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-hover:text-[#1473E6] transition-colors">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-hover:text-[#B8832A] transition-colors">
             <Search className="w-4 h-4 shrink-0" />
           </div>
           <input
             type="text"
             readOnly
             placeholder={isSidebarCollapsed ? "Search clients, receipts, transactions, CNIC..." : "Search clients, CNIC, receipts..."}
-            className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 group-hover:border-[#1473E6] group-hover:bg-white dark:group-hover:bg-[#0E1A2E] transition-all cursor-pointer shadow-2xs font-medium truncate"
+            className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 group-hover:border-[#B8832A] group-hover:bg-white dark:group-hover:bg-[#0E1A2E] transition-all cursor-pointer shadow-2xs font-medium truncate"
           />
         </div>
       </div>
@@ -137,7 +137,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
         <div className={`items-center gap-2 bg-slate-50 dark:bg-[#0A1424] border border-slate-200 dark:border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs shrink-0 whitespace-nowrap ${
           isSidebarCollapsed ? 'hidden md:flex' : 'hidden xl:flex'
         }`}>
-          <Calendar className="w-4 h-4 text-[#1473E6] shrink-0" />
+          <Calendar className="w-4 h-4 text-[#B8832A] shrink-0" />
           <span>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
 
@@ -180,7 +180,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-100">Notifications</span>
                 <span
                   onClick={() => { markNotificationsRead(); setIsNotifOpen(false); }}
-                  className="text-xs text-[#1473E6] dark:text-[#38BDF8] font-semibold cursor-pointer hover:underline"
+                  className="text-xs text-[#B8832A] dark:text-[#E3BA63] font-semibold cursor-pointer hover:underline"
                 >
                   Mark all as read
                 </span>
@@ -265,7 +265,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-2 sm:gap-2.5 pl-1.5 sm:pl-2 pr-1.5 sm:pr-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full bg-[#1473E6] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+            <div className="w-8 h-8 rounded-full bg-[#B8832A] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
               UA
             </div>
             <div className="hidden sm:block text-left leading-tight">
@@ -290,7 +290,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                     setActiveSection('users');
                     setIsProfileOpen(false);
                   }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#1473E6] dark:hover:text-[#38BDF8] cursor-pointer font-medium transition-colors"
+                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#B8832A] dark:hover:text-[#E3BA63] cursor-pointer font-medium transition-colors"
                 >
                   <User className="w-4 h-4" />
                   <span>Staff & Roles</span>
@@ -301,7 +301,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                     setActiveSection('audit');
                     setIsProfileOpen(false);
                   }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#1473E6] dark:hover:text-[#38BDF8] cursor-pointer font-medium transition-colors"
+                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#B8832A] dark:hover:text-[#E3BA63] cursor-pointer font-medium transition-colors"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Audit Logs</span>
@@ -312,7 +312,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                     setActiveSection('settings');
                     setIsProfileOpen(false);
                   }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#1473E6] dark:hover:text-[#38BDF8] cursor-pointer font-medium transition-colors"
+                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-[#B8832A] dark:hover:text-[#E3BA63] cursor-pointer font-medium transition-colors"
                 >
                   <Sliders className="w-4 h-4" />
                   <span>System Settings</span>

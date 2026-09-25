@@ -62,7 +62,7 @@ export const StampSaleModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
       <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="px-5 py-4 bg-gradient-to-r from-[#0B1B2C] to-[#122B42] text-white flex items-center justify-between">
+        <div className="px-5 py-4 bg-gradient-to-r from-[#05162B] to-[#122B42] text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center text-white">
               <FileCheck2 className="w-5 h-5" />
@@ -99,7 +99,7 @@ export const StampSaleModal: React.FC = () => {
                     onClick={() => setDenomination(den)}
                     className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
                       isSelected
-                        ? 'border-[#1473E6] bg-blue-50/70 text-[#1473E6] font-bold shadow-xs'
+                        ? 'border-[#B8832A] bg-blue-50/70 text-[#B8832A] font-bold shadow-xs'
                         : 'border-[#DCE6F1] bg-white text-slate-700 hover:border-slate-300'
                     }`}
                   >
@@ -138,7 +138,7 @@ export const StampSaleModal: React.FC = () => {
                 required
                 value={quantity}
                 onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
-                className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold focus:outline-hidden focus:border-[#1473E6]"
+                className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold focus:outline-hidden focus:border-[#B8832A]"
               />
               {qty > availableStock && (
                 <div className="text-rose-600 text-[10px] font-semibold mt-1 flex items-center gap-1">
@@ -149,7 +149,7 @@ export const StampSaleModal: React.FC = () => {
 
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Total Bill (PKR)</label>
-              <div className="h-9 px-3 bg-slate-50 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold flex items-center text-sm text-[#1473E6]">
+              <div className="h-9 px-3 bg-slate-50 border border-[#DCE6F1] rounded-lg text-slate-900 font-bold flex items-center text-sm text-[#B8832A]">
                 Rs. {totalAmount.toLocaleString()}
               </div>
             </div>
@@ -168,7 +168,7 @@ export const StampSaleModal: React.FC = () => {
                   setClientId('');
                 }}
                 placeholder="Purchaser name or deed party..."
-                className="flex-1 h-9 px-3 border border-[#DCE6F1] rounded-lg text-slate-900 focus:outline-hidden focus:border-[#1473E6]"
+                className="flex-1 h-9 px-3 border border-[#DCE6F1] rounded-lg text-slate-900 focus:outline-hidden focus:border-[#B8832A]"
               />
               <select
                 onChange={e => handleClientSelect(e.target.value)}
@@ -223,7 +223,7 @@ export const StampSaleModal: React.FC = () => {
             <button
               type="submit"
               disabled={qty <= 0 || qty > availableStock}
-              className="px-5 py-2 bg-[#1473E6] hover:bg-[#0F70F5] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Complete Stamp Sale</span>

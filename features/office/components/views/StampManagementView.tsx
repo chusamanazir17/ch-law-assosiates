@@ -262,7 +262,7 @@ export const StampManagementView: React.FC = () => {
         <div className="lg:col-span-2 bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-slate-100">
-              <Layers className="w-4 h-4 text-[#1473E6]" />
+              <Layers className="w-4 h-4 text-[#B8832A]" />
               <span>Stamp Stock Overview</span>
             </div>
           </div>
@@ -320,7 +320,7 @@ export const StampManagementView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Monthly Stamp Sales</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View Report</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View Report</span>
           </div>
 
           <div className="h-40 flex items-end justify-between gap-2 pt-4 border-b border-slate-100 dark:border-slate-800">
@@ -394,7 +394,7 @@ export const StampManagementView: React.FC = () => {
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-rose-500" /> Low Stock Alerts
               </h3>
-              <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+              <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
             </div>
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
@@ -423,7 +423,7 @@ export const StampManagementView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Stamp Sales</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
             {recentSales.map((s, i) => (
@@ -445,7 +445,7 @@ export const StampManagementView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Purchases</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
             {recentPurchases.map((p, i) => (
@@ -467,7 +467,7 @@ export const StampManagementView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Stock Movement</h3>
-            <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
+            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
           </div>
           <div className="space-y-2 text-xs">
             {stockMovementLog.map((m, i) => (

@@ -78,7 +78,7 @@ export const CopyableText: React.FC<CopyableTextProps> = ({
       onTouchStart={startPress}
       onTouchEnd={endPress}
       title={`Click or long-press to copy ${label}`}
-      className={`group/ct inline-flex items-center gap-1 cursor-pointer align-middle transition-colors hover:text-[#1473E6] dark:hover:text-sky-300 ${className}`}
+      className={`group/ct inline-flex items-center gap-1 cursor-pointer align-middle transition-colors hover:text-[#B8832A] dark:hover:text-sky-300 ${className}`}
     >
       {children ?? value}
       {copied ? (

@@ -168,7 +168,7 @@ export const CashManagementView: React.FC = () => {
         {/* Closing Balance */}
         <div className="bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-3.5 shadow-2xs">
           <div className="flex items-center gap-2 mb-1.5">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1473E6] flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#B8832A] flex items-center justify-center shrink-0">
               <Wallet className="w-4 h-4" />
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Closing Balance</span>
@@ -270,7 +270,7 @@ export const CashManagementView: React.FC = () => {
       {/* 4. Transaction Filters Toolbar */}
       <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
-          <Calendar className="w-4 h-4 text-[#1473E6]" />
+          <Calendar className="w-4 h-4 text-[#B8832A]" />
           <span>Transaction Filters</span>
         </div>
 
@@ -575,7 +575,7 @@ export const CashManagementView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Account Balances</h3>
-              <button onClick={() => setIsTransferModalOpen(true)} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <button onClick={() => setIsTransferModalOpen(true)} className="text-[11px] text-[#B8832A] hover:underline font-semibold">
                 Transfer &rarr;
               </button>
             </div>
@@ -619,7 +619,7 @@ export const CashManagementView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Daily Closing ({new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})</h3>
-              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
+              <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#B8832A] hover:underline font-semibold">
                 View Details
               </button>
             </div>

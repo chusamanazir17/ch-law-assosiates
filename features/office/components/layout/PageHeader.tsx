@@ -27,11 +27,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <svg className="w-3.5 h-3.5 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </span>
         <span className="text-slate-300 dark:text-slate-600">|</span>
-        <span className="text-slate-500 dark:text-slate-400 hover:text-[#1473E6] cursor-pointer">CH Admin Portal</span>
+        <span className="text-slate-500 dark:text-slate-400 hover:text-[#B8832A] cursor-pointer">CH Admin Portal</span>
         <ChevronRight className="w-3 h-3 text-slate-400" />
-        <span className="text-slate-500 dark:text-slate-400 hover:text-[#1473E6] cursor-pointer">Website CMS</span>
+        <span className="text-slate-500 dark:text-slate-400 hover:text-[#B8832A] cursor-pointer">Website CMS</span>
         <ChevronRight className="w-3 h-3 text-slate-400" />
-        <span className="text-[#1473E6] dark:text-[#38BDF8] font-semibold">{breadcrumb[breadcrumb.length - 1] || 'Office Management'}</span>
+        <span className="text-[#B8832A] dark:text-[#E3BA63] font-semibold">{breadcrumb[breadcrumb.length - 1] || 'Office Management'}</span>
       </div>
 
       {/* Main Header Banner */}
@@ -45,7 +45,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
         {/* Left: Icon, Title & Subtitle */}
         <div className="flex items-center gap-3.5 z-10">
-          <div className="w-12 h-12 rounded-xl bg-[#0B1B2C] text-white flex items-center justify-center shadow-sm shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-[#05162B] text-white flex items-center justify-center shadow-sm shrink-0">
             {icon}
           </div>
           <div>
@@ -63,7 +63,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {children}
 
           <div className="hidden lg:flex flex-col items-end pr-4 border-r border-slate-200 dark:border-slate-800 text-right">
-            <span className="font-serif italic text-base text-[#1473E6] dark:text-[#38BDF8] font-semibold leading-tight">
+            <span className="font-serif italic text-base text-[#B8832A] dark:text-[#E3BA63] font-semibold leading-tight">
               {quote}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-1 leading-snug">
@@ -74,7 +74,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
           {/* Location Badge */}
           <div className="flex items-center gap-2.5 bg-blue-50/70 dark:bg-[#0A1322] border border-blue-100 dark:border-slate-800 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 shadow-2xs">
-            <div className="w-7 h-7 rounded-lg bg-[#1473E6] text-white flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-[#B8832A] text-white flex items-center justify-center shrink-0">
               <MapPin className="w-3.5 h-3.5" />
             </div>
             <div className="leading-tight text-left">

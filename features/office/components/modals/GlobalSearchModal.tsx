@@ -86,7 +86,7 @@ export const GlobalSearchModal: React.FC = () => {
       >
         {/* Search Input Bar - The only element shown when opened */}
         <div className={`p-4 sm:p-4 flex items-center gap-3 ${q ? 'border-b border-slate-200 dark:border-slate-800' : ''}`}>
-          <Search className="w-5 h-5 text-[#1473E6] shrink-0" />
+          <Search className="w-5 h-5 text-[#B8832A] shrink-0" />
           <input
             type="text"
             autoFocus
@@ -134,7 +134,7 @@ export const GlobalSearchModal: React.FC = () => {
                         setActiveSection('clients');
                         handleClose();
                       }}
-                      className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-[#1473E6] hover:bg-blue-50/40 dark:hover:bg-blue-950/40 flex items-center justify-between cursor-pointer transition-all shadow-2xs"
+                      className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-[#B8832A] hover:bg-blue-50/40 dark:hover:bg-blue-950/40 flex items-center justify-between cursor-pointer transition-all shadow-2xs"
                     >
                       <div className="min-w-0 flex-1 pr-3">
                         <div className="font-bold text-sm text-slate-900 dark:text-slate-100 font-heading truncate">{c.name}</div>

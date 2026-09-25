@@ -40,7 +40,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'h
         <button
           id="pwa-install-sidebar-btn"
           onClick={handleInstall}
-          className={`w-full flex items-center justify-center gap-2 bg-[#1473E6] hover:bg-[#0F62C4] text-white py-2 px-3 rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer ${className}`}
+          className={`w-full flex items-center justify-center gap-2 bg-[#B8832A] hover:bg-[#96691B] text-white py-2 px-3 rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer ${className}`}
         >
           <Download className="w-4 h-4 shrink-0" />
           <span className="truncate">Install App Offline</span>
@@ -52,7 +52,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'h
       <button
         id="pwa-install-header-btn"
         onClick={handleInstall}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B1B2C] hover:bg-[#142639] text-white text-xs font-semibold shadow-xs border border-slate-700/80 transition-all cursor-pointer ${className}`}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#05162B] hover:bg-[#142639] text-white text-xs font-semibold shadow-xs border border-slate-700/80 transition-all cursor-pointer ${className}`}
         title="Install CH Office Management System for faster offline loading"
       >
         <Download className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -90,7 +90,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'h
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 text-slate-900">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-[#0B1B2C] text-amber-400 flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 rounded-xl bg-[#05162B] text-amber-400 flex items-center justify-center font-bold text-sm">
                     CH
                   </div>
                   <div>
@@ -134,7 +134,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ variant = 'h
 
               <button
                 onClick={() => setShowIOSGuide(false)}
-                className="w-full py-2.5 rounded-xl bg-[#0B1B2C] hover:bg-[#142639] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-[#05162B] hover:bg-[#142639] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
                 Got It
               </button>

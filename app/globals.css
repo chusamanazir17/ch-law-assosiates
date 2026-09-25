@@ -986,8 +986,8 @@ html[lang="ur"] textarea {
 .office-shell select:focus,
 .office-shell textarea:focus {
   outline: none;
-  border-color: #1473e6;
-  box-shadow: 0 0 0 3px rgba(20, 115, 230, 0.14);
+  border-color: #B8832A;
+  box-shadow: 0 0 0 3px rgba(184, 131, 42, 0.18);
 }
 
 .office-shell select {
