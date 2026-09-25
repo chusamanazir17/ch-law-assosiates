@@ -993,3 +993,132 @@ html[lang="ur"] textarea {
 .office-shell select {
   cursor: pointer;
 }
+
+/* ============================================================================
+   Office dark-theme alignment
+   These rules normalize component colors that use hardcoded light-mode
+   utilities across the office views, so text/cards/inputs/buttons stay
+   consistent in dark mode. (Re-homed from the orphan office stylesheet.)
+   ============================================================================ */
+.dark .office-shell .bg-white:not([data-theme-keep="light"]) {
+  background-color: #0D1829 !important;
+}
+
+.dark .office-shell .bg-slate-50,
+.dark .office-shell .bg-slate-50\/90,
+.dark .office-shell .bg-slate-50\/80 {
+  background-color: #0A1322 !important;
+}
+
+.dark .office-shell .bg-slate-100 {
+  background-color: #142236 !important;
+}
+
+.dark .office-shell .border-slate-200,
+.dark .office-shell .border-slate-200\/90,
+.dark .office-shell .border-slate-200\/80,
+.dark .office-shell .border-slate-200\/60,
+.dark .office-shell .border-\[\#DCE6F1\] {
+  border-color: #1A2E4B !important;
+}
+
+.dark .office-shell .border-slate-100 {
+  border-color: #16263E !important;
+}
+
+.dark .office-shell .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+.dark .office-shell .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #16263E !important;
+}
+
+.dark .office-shell .text-slate-900,
+.dark .office-shell .text-\[\#0F172A\],
+.dark .office-shell .text-\[\#0D2344\] {
+  color: #F8FAFC !important;
+}
+
+.dark .office-shell .text-slate-800 {
+  color: #E2E8F0 !important;
+}
+
+.dark .office-shell .text-slate-700 {
+  color: #CBD5E1 !important;
+}
+
+.dark .office-shell .text-slate-600 {
+  color: #94A3B8 !important;
+}
+
+.dark .office-shell .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+.dark .office-shell .text-slate-400 {
+  color: #64748B !important;
+}
+
+.dark .office-shell input:not([type="checkbox"]):not([type="radio"]),
+.dark .office-shell textarea,
+.dark .office-shell select {
+  background-color: #091322 !important;
+  border-color: #1B2F4C !important;
+  color: #F1F5F9 !important;
+}
+
+.dark .office-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark .office-shell textarea:focus,
+.dark .office-shell select:focus {
+  border-color: #38BDF8 !important;
+}
+
+.dark .office-shell input::placeholder,
+.dark .office-shell textarea::placeholder {
+  color: #64748B !important;
+}
+
+.dark .office-shell table thead th,
+.dark .office-shell table thead tr {
+  background-color: #0A1424 !important;
+  color: #94A3B8 !important;
+  border-color: #1A2E4B !important;
+}
+
+.dark .office-shell table tbody tr {
+  border-color: #16263E !important;
+}
+
+.dark .office-shell table tbody tr:hover {
+  background-color: #122137 !important;
+}
+
+.dark .office-shell .hover\:bg-slate-100:hover,
+.dark .office-shell .hover\:bg-slate-50:hover {
+  background-color: #14243B !important;
+}
+
+.dark .office-shell .hover\:text-slate-900:hover {
+  color: #FFFFFF !important;
+}
+
+/* Printable receipt paper must remain paper-white with dark text */
+.office-shell #printable-receipt,
+.office-shell #printable-receipt * {
+  background-color: #FFFFFF !important;
+  color: #0D2344 !important;
+  border-color: #CBD5E1 !important;
+}
+
+@media print {
+  .office-shell body *, body * {
+    visibility: hidden;
+  }
+  .office-shell #printable-receipt, .office-shell #printable-receipt * {
+    visibility: visible;
+  }
+  .office-shell #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

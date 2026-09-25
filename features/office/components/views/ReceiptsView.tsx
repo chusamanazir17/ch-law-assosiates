@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
+import { CopyableText } from '../common/CopyableText';
 import { KpiCard } from '../common/KpiCard';
 import { StatusBadge } from '../common/StatusBadge';
 import {
@@ -199,7 +200,7 @@ export const ReceiptsView: React.FC = () => {
                       }`}
                     >
                       <td className="py-3 px-3 tabular-nums font-bold text-[#1473E6] whitespace-nowrap">
-                        {r.receiptNo}
+                        <CopyableText value={String(r.receiptNo)} label="receipt number">{r.receiptNo}</CopyableText>
                       </td>
                       <td className="py-3 px-3 text-slate-500 whitespace-nowrap text-[11px]">{r.dateTime}</td>
                       <td className="py-3 px-3 font-bold text-[#0D2344] whitespace-nowrap">

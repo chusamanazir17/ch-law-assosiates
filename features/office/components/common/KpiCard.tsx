@@ -15,6 +15,7 @@ interface KpiCardProps {
   viewDetailsText?: string;
   onViewDetails?: () => void;
   className?: string;
+  centered?: boolean;
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({
@@ -30,7 +31,8 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   iconBgColor,
   viewDetailsText,
   onViewDetails,
-  className = ''
+  className = '',
+  centered = false
 }) => {
   const displayLabel = label || title || '';
   const resolvedChangeType =
@@ -52,14 +54,14 @@ export const KpiCard: React.FC<KpiCardProps> = ({
     (color && colorMap[color] ? colorMap[color] : 'bg-blue-50 text-blue-600');
 
   return (
-    <div className={`bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between shadow-2xs hover:border-[#1473E6]/40 dark:hover:border-[#1473E6]/60 hover:shadow-xs transition-all ${className}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3.5 min-w-0">
+    <div className={`bg-white dark:bg-[#0D1829] rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between shadow-2xs hover:border-[#1473E6]/40 dark:hover:border-[#1473E6]/60 hover:shadow-xs transition-all ${centered ? 'items-center text-center' : ''} ${className}`}>
+      <div className={`${centered ? 'flex-col items-center gap-2 w-full' : 'flex items-start justify-between gap-3'}`}>
+        <div className={`${centered ? 'flex flex-col items-center gap-2 w-full' : 'flex items-center gap-3.5 min-w-0'}`}>
           <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${resolvedBgColor}`}>
             {icon}
           </div>
           <div className="min-w-0">
-            <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight mb-1.5 truncate">{displayLabel}</div>
+            <div className={`text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight mb-1.5 truncate ${centered ? 'text-center' : ''}`}>{displayLabel}</div>
             <div className={`${String(value).length > 10 ? 'text-lg sm:text-xl leading-snug' : 'text-2xl sm:text-[28px] leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{value}</div>
           </div>
         </div>
@@ -75,7 +77,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
       </div>
 
       {(change || subValue) && (
-        <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400 font-medium">
+        <div className={`mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400 font-medium w-full ${centered ? 'text-center' : ''}`}>
           {change && (
             <div className="flex items-center gap-1.5 min-w-0">
               {resolvedChangeType === 'positive' ? (
@@ -93,7 +95,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
               )}
             </div>
           )}
-          {subValue && <span className="text-slate-500 dark:text-slate-400 font-medium ml-auto text-[11px] text-right">{subValue}</span>}
+          {subValue && <span className={`text-slate-500 dark:text-slate-400 font-medium text-[11px] ${centered ? '' : 'ml-auto text-right'}`}>{subValue}</span>}
         </div>
       )}
     </div>

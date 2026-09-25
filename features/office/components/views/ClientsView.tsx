@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { initialClients } from '../../data/seedData';
+import { CopyableText } from '../common/CopyableText';
 import { exportToCsv } from '../../lib/csv';
 
 export const ClientsView: React.FC = () => {

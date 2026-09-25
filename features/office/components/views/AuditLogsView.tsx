@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
+import { CopyableText } from '../common/CopyableText';
 import { KpiCard } from '../common/KpiCard';
 import { StatusBadge } from '../common/StatusBadge';
 import {
@@ -154,7 +155,9 @@ export const AuditLogsView: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-3 px-3 tabular-nums text-slate-500 whitespace-nowrap text-[11px]">
-                    {log.recordId || log.record || log.id}
+                    <CopyableText value={String(log.recordId || log.record || log.id)} label="record ID">
+                      {log.recordId || log.record || log.id}
+                    </CopyableText>
                   </td>
                   <td className="py-3 px-3 text-slate-700 font-normal">
                     {log.details || log.afterNew || log.beforePrevious || 'Transaction ledger updated'}

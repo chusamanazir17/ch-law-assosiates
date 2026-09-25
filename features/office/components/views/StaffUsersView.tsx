@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
 import { KpiCard } from '../common/KpiCard';
+import { CopyableText } from '../common/CopyableText';
 import { StatusBadge } from '../common/StatusBadge';
 import {
   ShieldCheck,
@@ -137,6 +138,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="positive"
           icon={<ShieldCheck className="w-4 h-4" />}
           iconBgColor="bg-blue-50 text-[#1473E6]"
+          centered
         />
         <KpiCard
           label="Active Session"
@@ -146,6 +148,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="positive"
           icon={<Key className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
+          centered
         />
         <KpiCard
           label="Role Tiers"
@@ -155,6 +158,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="neutral"
           icon={<Shield className="w-4 h-4" />}
           iconBgColor="bg-indigo-50 text-indigo-600"
+          centered
         />
         <KpiCard
           label="Permissions"
@@ -164,6 +168,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="neutral"
           icon={<Sliders className="w-4 h-4" />}
           iconBgColor="bg-amber-50 text-amber-600"
+          centered
         />
         <KpiCard
           label="Audit Records"
@@ -173,6 +178,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="positive"
           icon={<Lock className="w-4 h-4" />}
           iconBgColor="bg-teal-50 text-teal-600"
+          centered
         />
         <KpiCard
           label="System Health"
@@ -182,6 +188,7 @@ export const StaffUsersView: React.FC = () => {
           changeType="positive"
           icon={<Server className="w-4 h-4" />}
           iconBgColor="bg-purple-50 text-purple-600"
+          centered
         />
       </div>
 
@@ -224,7 +231,10 @@ export const StaffUsersView: React.FC = () => {
                   <tr key={member.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-3 px-3">
                       <div className="font-bold text-[#0D2344]">{member.name}</div>
-                      <div className="text-[10px] text-slate-400 tabular-nums">ID: {member.id} • {member.lastActive}</div>
+                      <div className="text-[10px] text-slate-400 tabular-nums">
+                        <CopyableText value={member.id} label="staff ID">ID: {String(member.id).slice(0, 8)}…</CopyableText>
+                        {' '}• {member.lastActive}
+                      </div>
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded-md bg-blue-50 text-[#1473E6] font-bold text-[10px]">
