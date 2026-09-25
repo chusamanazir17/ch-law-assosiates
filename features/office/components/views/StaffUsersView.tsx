@@ -130,7 +130,7 @@ export const StaffUsersView: React.FC = () => {
       {/* 6 Top KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <KpiCard
-          label="Total System Users"
+          label="System Users"
           value={staffList.length}
           subValue="Verified Chamber staff"
           change="Chamber 121 Team"
@@ -139,36 +139,36 @@ export const StaffUsersView: React.FC = () => {
           iconBgColor="bg-blue-50 text-[#1473E6]"
         />
         <KpiCard
-          label="Active Sessions"
-          value="1 Active"
-          subValue="Usama Ali (Admin)"
+          label="Active Session"
+          value="1"
+          subValue="Active — Usama Ali (Admin)"
           change="Logged in (Counter)"
           changeType="positive"
           icon={<Key className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
         />
         <KpiCard
-          label="Security Role Tiers"
-          value="4 Levels"
-          subValue="Granular permissioning"
+          label="Role Tiers"
+          value="4"
+          subValue="Role levels"
           change="Zero privilege creep"
           changeType="neutral"
           icon={<Shield className="w-4 h-4" />}
           iconBgColor="bg-indigo-50 text-indigo-600"
         />
         <KpiCard
-          label="Permission Matrix"
-          value="16 Rules"
-          subValue="Module access locked"
+          label="Permissions"
+          value="16"
+          subValue="Permission rules"
           change="Enforced at runtime"
           changeType="neutral"
           icon={<Sliders className="w-4 h-4" />}
           iconBgColor="bg-amber-50 text-amber-600"
         />
         <KpiCard
-          label="Audit Log Records"
-          value="284 Events"
-          subValue="100% financial actions"
+          label="Audit Records"
+          value="284"
+          subValue="Audit events logged"
           change="Immutable trail"
           changeType="positive"
           icon={<Lock className="w-4 h-4" />}
@@ -176,8 +176,8 @@ export const StaffUsersView: React.FC = () => {
         />
         <KpiCard
           label="System Health"
-          value="100% Online"
-          subValue="Local SQLite / JSON DB"
+          value="100%"
+          subValue="Uptime — Live Supabase"
           change="Auto snapshot 11:59PM"
           changeType="positive"
           icon={<Server className="w-4 h-4" />}

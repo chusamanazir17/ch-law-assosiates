@@ -73,7 +73,7 @@ export const ReportsView: React.FC = () => {
       >
         <div className="flex items-center gap-2">
           <button
-            onClick={() => alert('Exporting Chamber 121 Financial Audit Report to Excel...')}
+            onClick={handlePrint}
             className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-[#DCE6F1] text-slate-700 text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
@@ -101,7 +101,7 @@ export const ReportsView: React.FC = () => {
           iconBgColor="bg-blue-50 text-[#1473E6]"
         />
         <KpiCard
-          label="Operating Expenses"
+          label="Op. Expenses"
           value={`Rs. ${totalExpense.toLocaleString()}`}
           subValue="Chamber overheads & paper"
           change="Within budget"
@@ -110,7 +110,7 @@ export const ReportsView: React.FC = () => {
           iconBgColor="bg-rose-50 text-rose-600"
         />
         <KpiCard
-          label="Net Operating Profit"
+          label="Net Profit"
           value={`Rs. ${netProfit.toLocaleString()}`}
           subValue="78.9% Net Margin"
           change="Strong surplus"
@@ -119,7 +119,7 @@ export const ReportsView: React.FC = () => {
           iconBgColor="bg-emerald-50 text-emerald-600"
         />
         <KpiCard
-          label="Outstanding Balances"
+          label="Outstanding"
           value="Rs. 84,200"
           subValue="12 clients pending"
           change="91% collected"
@@ -128,7 +128,7 @@ export const ReportsView: React.FC = () => {
           iconBgColor="bg-amber-50 text-amber-600"
         />
         <KpiCard
-          label="Stamp Inventory Asset"
+          label="Stamp Asset"
           value={`Rs. ${totalStockValue.toLocaleString()}`}
           subValue="Liquid inventory in safe"
           change="Current cost value"
@@ -137,7 +137,7 @@ export const ReportsView: React.FC = () => {
           iconBgColor="bg-indigo-50 text-indigo-600"
         />
         <KpiCard
-          label="Avg Case Turnaround"
+          label="Avg Turnaround"
           value="2.1 Days"
           subValue="Filing speed SLA"
           change="Fast compliance"

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import {
   Menu,
+  Wallet,
   Search,
   Calendar,
   Bell,
@@ -34,7 +35,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
     setActiveSubSection,
     stampStock,
     taxCases,
-    dailyClosing
+    dailyClosing,
+    auditLogs,
+    unreadNotifications,
+    markNotificationsRead
   } = useOffice();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -92,8 +96,8 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           onClick={() => setIsSearchModalOpen(true)}
           className={`relative w-full hidden sm:flex items-center cursor-pointer group transition-all duration-200 ${
             isSidebarCollapsed 
-              ? 'max-w-xs md:max-w-md xl:max-w-lg' 
-              : 'max-w-[190px] md:max-w-[220px] lg:max-w-[260px] xl:max-w-xs'
+              ? 'max-w-[220px] md:max-w-[260px] xl:max-w-[300px]' 
+              : 'max-w-[180px] md:max-w-[210px] lg:max-w-[240px]'
           }`}
         >
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-hover:text-[#1473E6] transition-colors">
@@ -103,7 +107,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             type="text"
             readOnly
             placeholder={isSidebarCollapsed ? "Search clients, receipts, transactions, CNIC..." : "Search clients, CNIC, receipts..."}
-            className="w-full h-9.5 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 group-hover:border-[#1473E6] group-hover:bg-white dark:group-hover:bg-[#0E1A2E] transition-all cursor-pointer shadow-2xs font-medium truncate"
+            className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 group-hover:border-[#1473E6] group-hover:bg-white dark:group-hover:bg-[#0E1A2E] transition-all cursor-pointer shadow-2xs font-medium truncate"
           />
         </div>
       </div>
@@ -162,9 +166,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 w-4 h-4 bg-[#F43F5E] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-[#0B1526] shadow-2xs">
-              5
-            </span>
+            {unreadNotifications > 0 && (
+              <span className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 min-w-4 h-4 px-0.5 bg-[#F43F5E] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-[#0B1526] shadow-2xs">
+                {unreadNotifications > 9 ? '9+' : unreadNotifications}
+              </span>
+            )}
           </button>
 
           {/* Notifications Dropdown */}
@@ -172,63 +178,81 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             <div className="absolute right-0 mt-2 w-80 sm:w-84 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-[#0E1A2E] rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2.5 z-50 text-xs">
               <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-100">Notifications</span>
-                <span className="text-xs text-[#1473E6] dark:text-[#38BDF8] font-semibold cursor-pointer hover:underline">
+                <span
+                  onClick={() => { markNotificationsRead(); setIsNotifOpen(false); }}
+                  className="text-xs text-[#1473E6] dark:text-[#38BDF8] font-semibold cursor-pointer hover:underline"
+                >
                   Mark all as read
                 </span>
               </div>
 
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
-                <div
-                  onClick={() => {
-                    setActiveSection('stamps');
-                    setIsNotifOpen(false);
-                  }}
-                  className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
-                >
-                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">Low Stamp Stock Alert</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Rs. 50 and Rs. 5,000 stamps are below minimum reorder levels.
+                {lowStockCount > 0 && (
+                  <div
+                    onClick={() => { setActiveSection('stamps'); setIsNotifOpen(false); }}
+                    className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">Low Stamp Stock Alert</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        {lowStockCount} denomination{lowStockCount > 1 ? 's are' : ' is'} below the minimum reorder level.
+                      </div>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 font-medium">10 mins ago</div>
                   </div>
-                </div>
+                )}
 
-                <div
-                  onClick={() => {
-                    setActiveSection('tax');
-                    setIsNotifOpen(false);
-                  }}
-                  className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
-                >
-                  <Clock className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">Tax Filing Deadlines</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Muhammad Ali & Asad Khan return due date is 25 September.
+                {overdueTax > 0 && (
+                  <div
+                    onClick={() => { setActiveSection('tax'); setIsNotifOpen(false); }}
+                    className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                  >
+                    <Clock className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">Tax Cases Needing Attention</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        {overdueTax} tax case{overdueTax > 1 ? 's' : ''} overdue or missing documents.
+                      </div>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 font-medium">25 mins ago</div>
                   </div>
-                </div>
+                )}
 
-                <div
-                  onClick={() => {
-                    setActiveSection('cash');
-                    setActiveSubSection('daily-closing');
-                    setIsNotifOpen(false);
-                  }}
-                  className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">Daily Cash Closing</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Today's expected cash in drawer is Rs. {dailyClosing.expectedCash.toLocaleString()}.
+                {auditLogs.slice(0, 7).map(log => {
+                  const parsed = log.dateTime ? new Date(log.dateTime) : null;
+                  const time = parsed && !isNaN(parsed.getTime())
+                    ? parsed.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : typeof log.dateTime === 'string' ? log.dateTime : '';
+                  const moduleIcon: Record<string, React.ReactNode> = {
+                    Cash: <Wallet className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />,
+                    Stamps: <FileText className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />,
+                    Tax: <FileText className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />,
+                    Receipt: <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />,
+                    Receipts: <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />,
+                    Client: <User className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />,
+                    Clients: <User className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />,
+                    Settings: <Sliders className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                  };
+                  return (
+                    <div
+                      key={log.id}
+                      onClick={() => { markNotificationsRead(); setIsNotifOpen(false); }}
+                      className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                    >
+                      {moduleIcon[log.module] || <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
+                      <div className="min-w-0">
+                        <div className="font-semibold text-xs text-slate-900 dark:text-slate-100">{log.action} — {log.module}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed truncate">
+                          {log.details || `${log.action} recorded`}
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 font-medium">{time}</div>
+                      </div>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-1 font-medium">1 hour ago</div>
-                  </div>
-                </div>
+                  );
+                })}
+
+                {lowStockCount === 0 && overdueTax === 0 && auditLogs.length === 0 && (
+                  <div className="p-6 text-center text-xs text-slate-400">You're all caught up</div>
+                )}
               </div>
             </div>
           )}

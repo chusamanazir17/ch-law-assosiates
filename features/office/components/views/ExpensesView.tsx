@@ -57,7 +57,34 @@ export const ExpensesView: React.FC = () => {
     return matchQ && matchCat;
   });
 
-  const totalExpense = expenseTransactions.reduce((acc, e) => acc + e.amount, 0) || 142500;
+  const totalExpense = expenseTransactions.reduce((acc, e) => acc + e.amount, 0);
+
+  // Per-category totals from the live ledger
+  const sumCategory = (keywords: string[]) =>
+    expenseTransactions
+      .filter(e => keywords.some(k => e.serviceOrCategory.toLowerCase().includes(k)))
+      .reduce((acc, e) => acc + e.amount, 0);
+  const rentTotal = sumCategory(['rent', 'rates']);
+  const utilitiesTotal = sumCategory(['utilit', 'bills', 'lesco', 'ptcl', 'electric']);
+  const printingTotal = sumCategory(['printing', 'stationery', 'paper']);
+  const salariesTotal = sumCategory(['salary', 'stipend']);
+  const teaTotal = sumCategory(['tea', 'hospitality', 'refreshment']);
+
+  // Live category breakdown (top 5 by spend)
+  const byCategory = new Map<string, number>();
+  expenseTransactions.forEach(e => {
+    const key = e.serviceOrCategory || 'General';
+    byCategory.set(key, (byCategory.get(key) || 0) + e.amount);
+  });
+  const categoryBreakdown = Array.from(byCategory.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, amount], idx) => ({
+      name,
+      amount,
+      pct: totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0,
+      color: ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-indigo-500', 'bg-rose-500'][idx % 5],
+    }));
 
   const handleRecordExpense = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,21 +104,7 @@ export const ExpensesView: React.FC = () => {
     setDescription('');
   };
 
-  const recurringExpenses = [
-    { name: 'Chamber 121 Rent (Bar Compound)', amount: 'Rs. 35,000', due: '1st of month', status: 'Paid' },
-    { name: 'LESCO Electricity Commercial Meter', amount: 'Rs. 18,500', due: '12th of month', status: 'Paid' },
-    { name: 'PTCL High-Speed Legal Fiber', amount: 'Rs. 4,200', due: '18th of month', status: 'Paid' },
-    { name: 'Chamber Tea & Hospitality Hotel Tab', amount: 'Rs. 6,000', due: 'Weekly settle', status: 'Due' },
-    { name: 'District Bar Association Library Dues', amount: 'Rs. 3,500', due: 'Monthly', status: 'Paid' }
-  ];
 
-  const categoryBreakdown = [
-    { name: 'Chamber Rent & Maintenance', pct: '28%', amount: 'Rs. 40,000', color: 'bg-blue-500' },
-    { name: 'Staff Salaries & Stipends', pct: '35%', amount: 'Rs. 50,000', color: 'bg-emerald-500' },
-    { name: 'Utilities (LESCO & PTCL)', pct: '16%', amount: 'Rs. 22,700', color: 'bg-amber-500' },
-    { name: 'Printing, Paper & Cartridges', pct: '13%', amount: 'Rs. 18,500', color: 'bg-indigo-500' },
-    { name: 'Hospitality & Refreshments', pct: '8%', amount: 'Rs. 11,300', color: 'bg-rose-500' }
-  ];
 
   return (
     <div className="space-y-6">
@@ -117,7 +130,7 @@ export const ExpensesView: React.FC = () => {
         <KpiCard
           label="Total Expenses"
           value={`Rs. ${totalExpense.toLocaleString()}`}
-          subValue="Current month outflow"
+          subValue="Ledger outflow to date"
           change="Within budget"
           changeType="neutral"
           icon={<CreditCard className="w-4 h-4" />}
@@ -125,45 +138,45 @@ export const ExpensesView: React.FC = () => {
         />
         <KpiCard
           label="Chamber Rent"
-          value="Rs. 35,000"
+          value={`Rs. ${rentTotal.toLocaleString()}`}
           subValue="Chamber 121 Sahiwal"
-          change="Paid on 1st"
-          changeType="positive"
+          change={rentTotal > 0 ? "Recorded" : "No expense yet"}
+          changeType={rentTotal > 0 ? "positive" : "neutral"}
           icon={<Building className="w-4 h-4" />}
           iconBgColor="bg-blue-50 text-[#1473E6]"
         />
         <KpiCard
           label="Utilities (LESCO/PTCL)"
-          value="Rs. 22,700"
+          value={`Rs. ${utilitiesTotal.toLocaleString()}`}
           subValue="Power & legal internet"
-          change="All bills clear"
-          changeType="positive"
+          change={utilitiesTotal > 0 ? "Recorded" : "No expense yet"}
+          changeType={utilitiesTotal > 0 ? "positive" : "neutral"}
           icon={<Zap className="w-4 h-4" />}
           iconBgColor="bg-amber-50 text-amber-600"
         />
         <KpiCard
           label="Printing & Paper"
-          value="Rs. 18,500"
+          value={`Rs. ${printingTotal.toLocaleString()}`}
           subValue="Legal sheets & toner"
-          change="Sahiwal Mart"
+          change={printingTotal > 0 ? "Recorded" : "No expense yet"}
           changeType="neutral"
           icon={<Printer className="w-4 h-4" />}
           iconBgColor="bg-indigo-50 text-indigo-600"
         />
         <KpiCard
           label="Staff & Associates"
-          value="Rs. 50,000"
+          value={`Rs. ${salariesTotal.toLocaleString()}`}
           subValue="Salaries & honoraria"
-          change="4 staff members"
+          change={salariesTotal > 0 ? "Recorded" : "No expense yet"}
           changeType="neutral"
           icon={<Users className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
         />
         <KpiCard
           label="Tea & Refreshments"
-          value="Rs. 11,300"
+          value={`Rs. ${teaTotal.toLocaleString()}`}
           subValue="Client hospitality"
-          change="Hotel account"
+          change={teaTotal > 0 ? "Recorded" : "No expense yet"}
           changeType="neutral"
           icon={<Coffee className="w-4 h-4" />}
           iconBgColor="bg-purple-50 text-purple-600"
@@ -193,7 +206,7 @@ export const ExpensesView: React.FC = () => {
                   value={payee}
                   onChange={e => setPayee(e.target.value)}
                   placeholder="e.g. Sahiwal Stationery Mart / LESCO..."
-                  className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg bg-slate-50/50"
+                  className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg bg-slate-50/50"
                 />
               </div>
 
@@ -203,7 +216,7 @@ export const ExpensesView: React.FC = () => {
                   <select
                     value={category}
                     onChange={e => setCategory(e.target.value)}
-                    className="w-full h-8.5 px-2 bg-white border border-[#DCE6F1] rounded-lg font-medium"
+                    className="w-full h-9 px-2 bg-white border border-[#DCE6F1] rounded-lg font-medium"
                   >
                     <option value="Printing & Stationery">Printing & Stationery</option>
                     <option value="Chamber Rent & Rates">Chamber Rent & Rates</option>
@@ -224,7 +237,7 @@ export const ExpensesView: React.FC = () => {
                     value={amount}
                     onChange={e => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="e.g. 2500"
-                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg font-bold text-rose-600"
+                    className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg font-bold text-rose-600"
                   />
                 </div>
               </div>
@@ -235,7 +248,7 @@ export const ExpensesView: React.FC = () => {
                   <select
                     value={account}
                     onChange={e => setAccount(e.target.value as any)}
-                    className="w-full h-8.5 px-2 bg-white border border-[#DCE6F1] rounded-lg font-medium"
+                    className="w-full h-9 px-2 bg-white border border-[#DCE6F1] rounded-lg font-medium"
                   >
                     <option value="cash">Chamber Cash Drawer</option>
                     <option value="hbl">HBL Business Account</option>
@@ -250,7 +263,7 @@ export const ExpensesView: React.FC = () => {
                     type="text"
                     disabled
                     value="Usama (Admin)"
-                    className="w-full h-8.5 px-3 bg-slate-100 border border-[#DCE6F1] rounded-lg text-slate-600 font-medium"
+                    className="w-full h-9 px-3 bg-slate-100 border border-[#DCE6F1] rounded-lg text-slate-600 font-medium"
                   />
                 </div>
               </div>
@@ -262,7 +275,7 @@ export const ExpensesView: React.FC = () => {
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="e.g. 5 Reams Legal Green Sheets for Court Plaints"
-                  className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg"
+                  className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg"
                 />
               </div>
 
@@ -276,35 +289,6 @@ export const ExpensesView: React.FC = () => {
             </form>
           </div>
 
-          {/* Chamber Monthly Recurring Expenses */}
-          <div className="bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3 text-xs">
-            <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2">
-              <h4 className="font-bold text-[#0D2344] flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-[#1473E6]" />
-                <span>Fixed Monthly Commitments</span>
-              </h4>
-              <span className="text-[10px] text-slate-400 font-semibold">Chamber 121</span>
-            </div>
-
-            <div className="space-y-2">
-              {recurringExpenses.map(item => (
-                <div key={item.name} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
-                  <div>
-                    <div className="font-semibold text-[#0D2344]">{item.name}</div>
-                    <div className="text-[10px] text-slate-500">Due: {item.due}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-slate-800">{item.amount}</div>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
-                      item.status === 'Paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Category Breakdown & Expenses Register Table */}
@@ -317,14 +301,16 @@ export const ExpensesView: React.FC = () => {
             </div>
 
             <div className="space-y-2.5">
-              {categoryBreakdown.map(cat => (
+              {categoryBreakdown.length === 0 ? (
+                <div className="py-3 text-center text-slate-400">No expenses recorded yet</div>
+              ) : categoryBreakdown.map(cat => (
                 <div key={cat.name}>
                   <div className="flex justify-between font-semibold mb-1">
                     <span className="text-slate-700">{cat.name}</span>
                     <span className="text-slate-800 tabular-nums font-bold">{cat.amount} ({cat.pct})</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${cat.color}`} style={{ width: cat.pct }}></div>
+                    <div className={`h-full rounded-full ${cat.color}`} style={{ width: `${cat.pct}%` }}></div>
                   </div>
                 </div>
               ))}

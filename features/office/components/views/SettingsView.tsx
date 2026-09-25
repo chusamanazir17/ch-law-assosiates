@@ -15,7 +15,21 @@ import {
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
-  const { accountBalances } = useOffice();
+  const {
+    accountBalances,
+    transactions,
+    clients,
+    taxCases,
+    serviceOrders,
+    receipts,
+    expenses,
+    stampStock,
+    stampMovements,
+    tasks,
+    auditLogs,
+    dailyClosing,
+    businessSettings
+  } = useOffice();
 
   const [businessName, setBusinessName] = useState('CH Composing E-Stamp & Tax Advisor');
   const [chamberAddress, setChamberAddress] = useState('Chamber No. 121, District Courts (Kachahri), Sahiwal');
@@ -52,7 +66,7 @@ export const SettingsView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
         {/* Left 2 Cols: Chamber Profile & Letterhead */}
         <div className="lg:col-span-2 space-y-4">
-          <form onSubmit={handleSave} className="bg-white rounded-xl border border-[#DCE6F1] p-5 shadow-xs space-y-4">
+          <form onSubmit={handleSave} className="bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <h3 className="text-sm font-bold text-[#0D2344]">Chamber Official Identity & Letterhead</h3>
@@ -76,9 +90,9 @@ export const SettingsView: React.FC = () => {
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Business Name</label>
+                <label className="block text-slate-700 font-semibold mb-0.5">Business Name</label>
                 <input
                   type="text"
                   value={businessName}
@@ -88,7 +102,7 @@ export const SettingsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Chamber Physical Address</label>
+                <label className="block text-slate-700 font-semibold mb-0.5">Chamber Physical Address</label>
                 <input
                   type="text"
                   value={chamberAddress}
@@ -99,7 +113,7 @@ export const SettingsView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Mobile / WhatsApp</label>
+                  <label className="block text-slate-700 font-semibold mb-0.5">Mobile / WhatsApp</label>
                   <input
                     type="text"
                     value={phone}
@@ -109,7 +123,7 @@ export const SettingsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Landline Office</label>
+                  <label className="block text-slate-700 font-semibold mb-0.5">Landline Office</label>
                   <input
                     type="text"
                     value={landline}
@@ -121,7 +135,7 @@ export const SettingsView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Chamber NTN Number</label>
+                  <label className="block text-slate-700 font-semibold mb-0.5">Chamber NTN Number</label>
                   <input
                     type="text"
                     value={ntn}
@@ -131,7 +145,7 @@ export const SettingsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Official Email</label>
+                  <label className="block text-slate-700 font-semibold mb-0.5">Official Email</label>
                   <input
                     type="email"
                     value={email}
@@ -185,8 +199,20 @@ export const SettingsView: React.FC = () => {
             <button
               onClick={() => {
                 const data = {
-                  balances: accountBalances,
-                  timestamp: new Date().toISOString()
+                  exportedAt: new Date().toISOString(),
+                  accountBalances,
+                  transactions,
+                  clients,
+                  taxCases,
+                  serviceOrders,
+                  receipts,
+                  expenses,
+                  stampStock,
+                  stampMovements,
+                  tasks,
+                  auditLogs,
+                  dailyClosing,
+                  businessSettings
                 };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -202,20 +228,6 @@ export const SettingsView: React.FC = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-xl border border-rose-200 p-5 shadow-xs space-y-3 bg-rose-50/20">
-            <h3 className="text-sm font-bold text-rose-800">Danger Zone: Reset Demo</h3>
-            <p className="text-slate-600 leading-relaxed text-[11px]">
-              Restore all initial test clients, PKR transactions, receipts, and stamp counts to default factory state.
-            </p>
-
-            <button
-              onClick={handleResetData}
-              className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to Seed Data</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>

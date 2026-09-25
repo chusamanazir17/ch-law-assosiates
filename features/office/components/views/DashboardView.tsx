@@ -507,10 +507,10 @@ export const DashboardView: React.FC = () => {
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="30, 100" strokeDashoffset="-70" />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight truncate max-w-[80px]">
-                  Rs. {totalRevenue.toLocaleString()}
+                <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight max-w-[88px]">
+                  {totalRevenue.toLocaleString()}
                 </span>
-                <span className="text-[9px] text-slate-400 font-medium font-admin">Total Income</span>
+                <span className="text-[8px] font-semibold text-slate-400 font-admin uppercase tracking-wide">Rs. Total</span>
               </div>
             </div>
 
@@ -549,10 +549,10 @@ export const DashboardView: React.FC = () => {
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="20, 100" strokeDashoffset="-80" />
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight truncate max-w-[80px]">
-                  Rs. {metrics.combinedLiquidity.toLocaleString()}
+                <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight max-w-[88px]">
+                  {metrics.combinedLiquidity.toLocaleString()}
                 </span>
-                <span className="text-[9px] text-slate-400 font-medium font-admin">Total Liquid</span>
+                <span className="text-[8px] font-semibold text-slate-400 font-admin uppercase tracking-wide">Rs. Total</span>
               </div>
             </div>
 

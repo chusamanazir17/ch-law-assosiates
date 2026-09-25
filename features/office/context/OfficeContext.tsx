@@ -90,6 +90,8 @@ interface OfficeContextType {
   
   // UI & Modals
   isDarkMode: boolean;
+  unreadNotifications: number;
+  markNotificationsRead: () => void;
   toggleDarkMode: () => void;
   isSearchModalOpen: boolean;
   setIsSearchModalOpen: (open: boolean) => void;
@@ -303,6 +305,13 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const saved = safeGetItem('ch_audit_logs');
     return saved ? JSON.parse(saved) : initialAuditLogs;
   });
+
+  // Live notification state: unread = audit entries not yet seen in the bell
+  const [notificationReadCount, setNotificationReadCount] = useState<number>(0);
+  const unreadNotifications = Math.max(0, auditLogs.length - notificationReadCount);
+  const markNotificationsRead = useCallback(() => {
+    setNotificationReadCount(auditLogs.length);
+  }, [auditLogs.length]);
 
   const [businessSettings, setBusinessSettings] = useState<BusinessSettings>(initialBusinessSettings);
 
@@ -1843,6 +1852,8 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         isLoading,
         refreshData,
         isDarkMode,
+        unreadNotifications,
+        markNotificationsRead,
         toggleDarkMode,
         isSearchModalOpen,
         setIsSearchModalOpen,

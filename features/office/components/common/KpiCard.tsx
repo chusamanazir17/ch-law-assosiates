@@ -60,7 +60,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
           </div>
           <div className="min-w-0">
             <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider leading-tight mb-1.5 truncate">{displayLabel}</div>
-            <div className="text-2xl sm:text-[28px] font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none tabular-nums">{value}</div>
+            <div className={`${String(value).length > 10 ? 'text-lg sm:text-xl leading-snug' : 'text-2xl sm:text-[28px] leading-none'} font-bold text-slate-900 dark:text-slate-100 tracking-tight tabular-nums`}>{value}</div>
           </div>
         </div>
         {viewDetailsText && (
