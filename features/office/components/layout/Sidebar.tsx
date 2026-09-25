@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import {
   Briefcase,
@@ -45,25 +45,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Collapsible accordion states
   const [isOfficeExpanded, setIsOfficeExpanded] = useState(true);
 
-  // Mouse-driven peek: hovering the collapsed rail (or scrolling the wheel
-  // over it) opens it as an overlay; moving the mouse away closes it again.
-  const [isPeekOpen, setIsPeekOpen] = useState(false);
-  const peekTimer = useRef<number | null>(null);
-  const openPeek = () => {
-    if (peekTimer.current) window.clearTimeout(peekTimer.current);
-    peekTimer.current = window.setTimeout(() => setIsPeekOpen(true), 200);
-  };
-  const closePeek = () => {
-    if (peekTimer.current) window.clearTimeout(peekTimer.current);
-    peekTimer.current = null;
-    setIsPeekOpen(false);
-  };
-  const handleWheelPeek = (e: React.WheelEvent) => {
-    if (!isCollapsed) return;
-    if (e.deltaY < 0) openPeek();
-    else closePeek();
-  };
-  const peekActive = isCollapsed && isPeekOpen;
   const [isCashExpanded, setIsCashExpanded] = useState(false);
   const [isStampExpanded, setIsStampExpanded] = useState(false);
   const [isTaxExpanded, setIsTaxExpanded] = useState(false);
@@ -95,22 +76,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        onMouseEnter={openPeek}
-        onMouseLeave={closePeek}
-        onWheel={handleWheelPeek}
-        className={`fixed lg:relative top-0 bottom-0 left-0 h-full bg-[#0B1B2C] text-slate-300 flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-[#15293E] select-none max-lg:overflow-x-hidden lg:overflow-visible ${
-          isOpen || peekActive ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
-        } w-[285px] max-w-[85vw] ${
-          peekActive
-            ? 'lg:fixed lg:w-[265px] z-50'
-            : isCollapsed
-              ? 'lg:w-[72px] z-40'
-              : 'lg:relative lg:w-[265px] z-30'
-        }`}
+        className={`fixed lg:relative top-0 bottom-0 left-0 z-50 h-full bg-[#0B1B2C] text-slate-300 flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-[#15293E] shrink-0 select-none max-lg:overflow-x-hidden lg:overflow-visible ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+        } w-[285px] max-w-[85vw] ${isCollapsed ? 'lg:w-[72px]' : 'lg:w-[265px]'}`}
       >
         {/* Top: Branding Header */}
         <div>
-          <div className={`p-3.5 sm:p-4 border-b border-[#142639] flex items-center justify-between gap-2.5 ${isCollapsed ? 'lg:justify-center' : ''}`}>
+          <div className="p-3.5 sm:p-4 border-b border-[#142639]">
+            {/* Expanded: collapse toggle sits above the CH Composing lines */}
+            {!isCollapsed && (
+            <div className="hidden lg:flex justify-end mb-1.5">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                title="Collapse sidebar (Ctrl + B)"
+                aria-label="Collapse sidebar"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] active:scale-95 transition-all cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+            )}
+            <div className={`flex items-center justify-between gap-2.5 ${isCollapsed ? 'lg:justify-center' : ''}`}>
             <div className={`flex items-center min-w-0 ${isCollapsed ? 'lg:justify-center' : 'gap-2.5 sm:gap-3'}`}>
               {/* CH Gold Shield Emblem */}
               <div
@@ -150,24 +137,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <X className="w-5 h-5" />
             </button>
 
-            {/* Collapsed: expand toggle inside the rail, below the CH logo */}
-            {isCollapsed && (
-              <div className="hidden lg:flex justify-center w-full pb-1">
-                <button
-                  type="button"
-                  onClick={onToggleCollapse}
-                  title="Expand sidebar (Ctrl + B)"
-                  aria-label="Expand sidebar"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] active:scale-95 transition-all cursor-pointer"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
           </div>
 
-
+          {/* Collapsed: expand toggle below the CH logo */}
+          {isCollapsed && (
+            <div className="hidden lg:flex justify-center w-full pt-2">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                title="Expand sidebar (Ctrl + B)"
+                aria-label="Expand sidebar"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] active:scale-95 transition-all cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          </div>
 
           {/* Navigation Items */}
           <nav className={`p-2.5 space-y-1 overflow-y-auto max-h-[calc(100vh-190px)] custom-scrollbar-dark text-sm font-medium ${isCollapsed ? 'px-2' : ''}`}>
@@ -611,17 +597,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-t border-[#142639] space-y-2">
           {!isCollapsed ? (
             <>
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              title="Collapse sidebar (Ctrl + B)"
-              aria-label="Collapse sidebar"
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-[#163354] text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer border border-[#15293E]"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Collapse Sidebar</span>
-            </button>
-            <div className="border-t border-[#142639] -mx-3"></div>
               <PWAInstallButton variant="sidebar" />
               <div className="bg-[#122538] rounded-xl p-3 border border-slate-700/60 shadow-xs">
                 <div className="flex items-center gap-2.5 text-xs text-slate-300 mb-2">
