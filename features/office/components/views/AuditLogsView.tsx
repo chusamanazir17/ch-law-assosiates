@@ -133,9 +133,19 @@ export const AuditLogsView: React.FC = () => {
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredLogs.map(log => (
                 <tr key={log.id} className="hover:bg-[#F8FAFC] transition-colors">
-                  <td className="py-3 px-3 text-slate-600 whitespace-nowrap">{log.dateTime}</td>
+                  <td className="py-3 px-3 text-slate-600 whitespace-nowrap tabular-nums">
+                    {(() => {
+                      const d = new Date(log.dateTime);
+                      if (!isNaN(d.getTime())) {
+                        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+                          ' • ' +
+                          d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                      }
+                      return typeof log.dateTime === 'string' ? log.dateTime.split(' ').slice(0, 2).join(' ') : '—';
+                    })()}
+                  </td>
                   <td className="py-3 px-3 font-bold text-[#0D2344] whitespace-nowrap">{log.user}</td>
-                  <td className="py-3 px-3 whitespace-nowrap font-mono text-[11px] font-bold text-[#1473E6]">
+                  <td className="py-3 px-3 whitespace-nowrap tabular-nums text-[11px] font-bold text-[#1473E6]">
                     {log.action}
                   </td>
                   <td className="py-3 px-3 whitespace-nowrap">
@@ -143,7 +153,7 @@ export const AuditLogsView: React.FC = () => {
                       {log.module}
                     </span>
                   </td>
-                  <td className="py-3 px-3 font-mono text-slate-500 whitespace-nowrap text-[11px]">
+                  <td className="py-3 px-3 tabular-nums text-slate-500 whitespace-nowrap text-[11px]">
                     {log.recordId || log.record || log.id}
                   </td>
                   <td className="py-3 px-3 text-slate-700 font-normal">

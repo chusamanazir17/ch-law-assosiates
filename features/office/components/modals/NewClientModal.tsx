@@ -144,7 +144,7 @@ export const NewClientModal: React.FC = () => {
                 value={cnic}
                 onChange={e => setCnic(e.target.value)}
                 placeholder="36502-1234567-1"
-                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs font-mono font-medium focus:outline-hidden focus:border-[#1473E6] focus:ring-1 focus:ring-[#1473E6]"
+                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs tabular-nums font-medium focus:outline-hidden focus:border-[#1473E6] focus:ring-1 focus:ring-[#1473E6]"
               />
             </div>
 
@@ -157,7 +157,7 @@ export const NewClientModal: React.FC = () => {
                 value={ntn}
                 onChange={e => setNtn(e.target.value)}
                 placeholder="1234567-8"
-                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs font-mono font-medium focus:outline-hidden focus:border-[#1473E6] focus:ring-1 focus:ring-[#1473E6]"
+                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs tabular-nums font-medium focus:outline-hidden focus:border-[#1473E6] focus:ring-1 focus:ring-[#1473E6]"
               />
             </div>
           </div>

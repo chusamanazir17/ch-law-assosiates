@@ -198,7 +198,7 @@ export const ReceiptsView: React.FC = () => {
                         isSelected ? 'bg-blue-50/60 font-semibold' : ''
                       }`}
                     >
-                      <td className="py-3 px-3 font-mono font-bold text-[#1473E6] whitespace-nowrap">
+                      <td className="py-3 px-3 tabular-nums font-bold text-[#1473E6] whitespace-nowrap">
                         {r.receiptNo}
                       </td>
                       <td className="py-3 px-3 text-slate-500 whitespace-nowrap text-[11px]">{r.dateTime}</td>
@@ -269,11 +269,11 @@ export const ReceiptsView: React.FC = () => {
               <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
                 <div>
                   <span className="text-slate-400 block text-[10px]">Receipt No:</span>
-                  <span className="font-mono font-bold text-[#1473E6]">{selectedReceipt.receiptNo}</span>
+                  <span className="tabular-nums font-bold text-[#1473E6]">{selectedReceipt.receiptNo}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-400 block text-[10px]">Date & Time:</span>
-                  <span className="font-mono text-slate-700">{selectedReceipt.dateTime}</span>
+                  <span className="tabular-nums text-slate-700">{selectedReceipt.dateTime}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[10px]">Received From:</span>

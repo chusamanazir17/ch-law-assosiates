@@ -134,7 +134,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           isSidebarCollapsed ? 'hidden md:flex' : 'hidden xl:flex'
         }`}>
           <Calendar className="w-4 h-4 text-[#1473E6] shrink-0" />
-          <span>Monday, 22 September 2025</span>
+          <span>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
 
         {/* PWA Offline & Install Button - Hidden on mobile header (available in sidebar) */}

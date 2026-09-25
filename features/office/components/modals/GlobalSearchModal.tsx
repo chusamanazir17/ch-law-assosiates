@@ -85,7 +85,7 @@ export const GlobalSearchModal: React.FC = () => {
         className="bg-white dark:bg-[#0E1A2E] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl overflow-hidden transition-all duration-200"
       >
         {/* Search Input Bar - The only element shown when opened */}
-        <div className={`p-4 sm:p-4.5 flex items-center gap-3 ${q ? 'border-b border-slate-200 dark:border-slate-800' : ''}`}>
+        <div className={`p-4 sm:p-4 flex items-center gap-3 ${q ? 'border-b border-slate-200 dark:border-slate-800' : ''}`}>
           <Search className="w-5 h-5 text-[#1473E6] shrink-0" />
           <input
             type="text"
@@ -117,7 +117,7 @@ export const GlobalSearchModal: React.FC = () => {
 
         {/* Results Container: Strictly displayed ONLY when user has entered search text */}
         {q && (
-          <div className="p-4 sm:p-4.5 max-h-96 overflow-y-auto space-y-4 sm:space-y-5 text-sm custom-scrollbar">
+          <div className="p-4 sm:p-4 max-h-96 overflow-y-auto space-y-4 sm:space-y-5 text-sm custom-scrollbar">
             {/* Clients Section */}
             {matchedClients.length > 0 && (
               <div>
@@ -139,7 +139,7 @@ export const GlobalSearchModal: React.FC = () => {
                       <div className="min-w-0 flex-1 pr-3">
                         <div className="font-bold text-sm text-slate-900 dark:text-slate-100 font-heading truncate">{c.name}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
-                          CNIC: <span className="font-mono">{c.cnic}</span> | Tel: <span className="font-mono">{c.phone || c.mobile}</span> | {c.businessName || 'Individual'}
+                          CNIC: <span className="tabular-nums">{c.cnic}</span> | Tel: <span className="tabular-nums">{c.phone || c.mobile}</span> | {c.businessName || 'Individual'}
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 shrink-0">
@@ -171,13 +171,13 @@ export const GlobalSearchModal: React.FC = () => {
                       className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-emerald-400 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/40 flex items-center justify-between cursor-pointer transition-all shadow-2xs"
                     >
                       <div className="min-w-0 flex-1 pr-3">
-                        <div className="font-mono font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{r.receiptNo}</div>
+                        <div className="tabular-nums font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{r.receiptNo}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">
                           {r.clientName} - {r.service} ({r.dateTime})
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <span className="font-bold font-mono text-sm text-emerald-600 dark:text-emerald-400">Rs. {r.paidAmount.toLocaleString()}</span>
+                        <span className="font-bold tabular-nums text-sm text-emerald-600 dark:text-emerald-400">Rs. {r.paidAmount.toLocaleString()}</span>
                         <StatusBadge status={r.status} />
                         <ArrowRight className="w-4 h-4 text-slate-400" />
                       </div>
@@ -208,7 +208,7 @@ export const GlobalSearchModal: React.FC = () => {
                         <div className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{t.clientOrPayee}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate">{t.serviceOrCategory} ({t.dateTime})</div>
                       </div>
-                      <span className={`font-bold font-mono text-sm shrink-0 ${t.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      <span className={`font-bold tabular-nums text-sm shrink-0 ${t.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                         {t.type === 'IN' ? '+' : '-'} Rs. {t.amount.toLocaleString()}
                       </span>
                     </div>

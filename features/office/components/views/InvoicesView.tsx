@@ -361,7 +361,7 @@ export const InvoicesView: React.FC = () => {
                           {inv.client_name || 'Client'}
                         </div>
                         {inv.case_number && (
-                          <div className="text-[11px] text-blue-600 dark:text-blue-400 font-mono">
+                          <div className="text-[11px] text-blue-600 dark:text-blue-400 tabular-nums">
                             Case: {inv.case_number}
                           </div>
                         )}

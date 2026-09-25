@@ -25,7 +25,7 @@ export const OfflineIndicator: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 text-[11px] font-mono font-semibold text-slate-200 shrink-0">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 text-[11px] tabular-nums font-semibold text-slate-200 shrink-0">
         <Database className="w-3.5 h-3.5 text-emerald-400" />
         <span>Cached</span>
       </div>

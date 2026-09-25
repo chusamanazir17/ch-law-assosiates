@@ -342,9 +342,34 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return `${day}-${month}-${year} ${pad(hours)}:${minutes} ${ampm}`;
   };
 
+  // Turn structured audit details ({ after, before }) into a readable sentence
+  // so activity feeds never render raw JSON.
+  const humanizeAuditDetails = (details: unknown): string | undefined => {
+    if (!details) return undefined;
+    if (typeof details === 'string') {
+      const trimmed = details.trim();
+      if (!trimmed || trimmed === '{}' || trimmed === 'null') return undefined;
+      try {
+        const parsed = JSON.parse(trimmed);
+        return humanizeAuditDetails(parsed);
+      } catch {
+        return trimmed;
+      }
+    }
+    if (typeof details === 'object') {
+      const obj = details as Record<string, unknown>;
+      const after = typeof obj.after === 'string' ? obj.after : undefined;
+      const before = typeof obj.before === 'string' ? obj.before : undefined;
+      if (after && before && before !== '-') return `${after} (was: ${before})`;
+      if (after) return after;
+      if (before && before !== '-') return before;
+      return undefined;
+    }
+    return String(details);
+  };
+
   // Full Refresh from Supabase Database
-  const refreshData = useCallback(async () => {
-    try {
+  const refreshData = useCallback(async () => {    try {
       setIsLoading(true);
 
       const [
@@ -596,12 +621,12 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (auditRes.value.logs.length > 0) {
           setAuditLogs(auditRes.value.logs.map((al: any) => ({
             id: al.id,
-            dateTime: al.created_at ? formatDateTime(new Date(al.created_at)) : formatDateTime(),
+            dateTime: al.created_at || '',
             user: al.user_name || 'Admin',
             action: al.action,
             module: al.entity_type,
             record: al.entity_id || '',
-            details: al.details ? JSON.stringify(al.details) : undefined,
+            details: humanizeAuditDetails(al.details),
             ipAddress: al.ip_address || '127.0.0.1',
             sessionStatus: 'Success'
           })));

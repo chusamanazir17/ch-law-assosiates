@@ -287,14 +287,14 @@ export const TaxManagementView: React.FC = () => {
                             >
                               <div className="flex items-start justify-between gap-1 mb-1">
                                 <span className="font-bold text-xs text-[#0D2344] line-clamp-1">{tc.clientName}</span>
-                                <span className="text-[10px] font-mono text-slate-500">{tc.taxYear}</span>
+                                <span className="text-[10px] tabular-nums text-slate-500">{tc.taxYear}</span>
                               </div>
 
                               <div className="text-[10px] text-slate-500 mb-1.5 line-clamp-1 font-medium">
                                 {tc.returnType}
                               </div>
 
-                              <div className="text-[10px] font-mono text-slate-400 mb-2">
+                              <div className="text-[10px] tabular-nums text-slate-400 mb-2">
                                 NTN: {tc.ntn || '381920-4'}
                               </div>
 
@@ -352,7 +352,7 @@ export const TaxManagementView: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-semibold block">NTN / CNIC</span>
-                    <span className="font-mono font-bold text-slate-700">{selectedCase.ntn || '381920-4'}</span>
+                    <span className="tabular-nums font-bold text-slate-700">{selectedCase.ntn || '381920-4'}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-semibold block">Filing Deadline</span>
@@ -374,7 +374,7 @@ export const TaxManagementView: React.FC = () => {
                 {/* CPR / Iris Acknowledgment */}
                 <div className="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-200">
                   <div className="text-[10px] font-bold text-emerald-800 uppercase tracking-wide">FBR Iris CPR Challan</div>
-                  <div className="font-mono text-xs font-bold text-emerald-900 mt-0.5">
+                  <div className="tabular-nums text-xs font-bold text-emerald-900 mt-0.5">
                     {selectedCase.cprNumber || 'CPR-2024-88491-KCH'}
                   </div>
                   <div className="text-[10px] text-emerald-700 mt-0.5">Active Filer Status: ATL Verified</div>
@@ -469,7 +469,7 @@ export const TaxManagementView: React.FC = () => {
                       <div className="font-semibold text-slate-800">{tc.returnType}</div>
                       <div className="text-[10px] text-blue-600 font-semibold">TY {tc.taxYear}</div>
                     </td>
-                    <td className="py-3 px-3 whitespace-nowrap font-mono text-slate-600">
+                    <td className="py-3 px-3 whitespace-nowrap tabular-nums text-slate-600">
                       {tc.ntn || 'Pending NTN'}
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap text-slate-700">
@@ -485,7 +485,7 @@ export const TaxManagementView: React.FC = () => {
                     <td className="py-3 px-3 text-center whitespace-nowrap">
                       <StatusBadge status={tc.status} />
                     </td>
-                    <td className="py-3 px-3 text-center whitespace-nowrap font-mono text-[10px]">
+                    <td className="py-3 px-3 text-center whitespace-nowrap tabular-nums text-[10px]">
                       {tc.cprNumber ? (
                         <span className="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">
                           {tc.cprNumber}
@@ -599,7 +599,7 @@ export const TaxManagementView: React.FC = () => {
               <div key={cal.event} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-slate-800 text-[11px]">{cal.event}</div>
-                  <div className="text-[10px] text-slate-500 font-mono">{cal.date}</div>
+                  <div className="text-[10px] text-slate-500 tabular-nums">{cal.date}</div>
                 </div>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                   cal.alert === 'Critical' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700'

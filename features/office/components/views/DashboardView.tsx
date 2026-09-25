@@ -188,11 +188,20 @@ export const DashboardView: React.FC = () => {
 
   // 7. Recent Audit Activities
   const recentActivities = useMemo(() => {
-    return auditLogs.slice(0, 5).map(log => ({
-      id: log.id,
-      text: log.details || `${log.action} in ${log.module}`,
-      time: log.dateTime ? new Date(log.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'
-    }));
+    return auditLogs.slice(0, 5).map(log => {
+      const parsed = log.dateTime ? new Date(log.dateTime) : null;
+      const time =
+        parsed && !isNaN(parsed.getTime())
+          ? parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : typeof log.dateTime === 'string' && log.dateTime.includes(' ')
+            ? log.dateTime.split(' ').slice(1).join(' ')
+            : 'Just now';
+      return {
+        id: log.id,
+        text: log.details || `${log.action} in ${log.module}`,
+        time
+      };
+    });
   }, [auditLogs]);
 
   // Total collected revenue across all income transactions
@@ -244,7 +253,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -270,7 +279,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('expenses')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -295,7 +304,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -319,7 +328,7 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveSection('cash')}
-            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-end transition-colors"
+            className="text-xs text-[#1473E6] hover:text-[#0f5bb5] font-semibold self-center whitespace-nowrap shrink-0 transition-colors"
           >
             Details &rarr;
           </button>
@@ -509,15 +518,15 @@ export const DashboardView: React.FC = () => {
             <div className="space-y-1.5 text-xs font-admin flex-1">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Stamp Sales</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.stampsSoldAmount.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Tax Advisory</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.taxTotal.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.taxTotal.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Composing</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {metrics.composingTotal.toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {metrics.composingTotal.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -551,19 +560,19 @@ export const DashboardView: React.FC = () => {
             <div className="space-y-1.5 text-xs font-admin flex-1">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-600"></span> Cash Office</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.cashOffice || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-600"></span> Bank Account</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.bankAccount || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> JazzCash</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.jazzCash || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500"></span> EasyPaisa</span>
-                <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
+                <span className="font-semibold tabular-nums whitespace-nowrap text-slate-900 dark:text-slate-100">Rs. {(accountBalances.easyPaisa || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -622,7 +631,7 @@ export const DashboardView: React.FC = () => {
         {/* Column 1: Recent Transactions & Outstanding Clients */}
         <div className="space-y-4">
           {/* Recent Transactions */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Recent Transactions</h3>
               <button onClick={() => setActiveSection('cash')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
@@ -652,7 +661,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Outstanding Clients */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Outstanding Clients</h3>
               <button onClick={() => setActiveSection('clients')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
@@ -670,8 +679,8 @@ export const DashboardView: React.FC = () => {
                       <div className="text-[10px] text-slate-400 truncate">{c.service}</div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-[10px] text-slate-400 tabular-nums">Paid: Rs. {Number(c.paid || 0).toLocaleString()}</div>
-                      <div className="font-bold text-rose-600 tabular-nums">Rs. {Number(c.balance || 0).toLocaleString()}</div>
+                      <div className="font-bold text-rose-600 tabular-nums leading-tight">Rs. {Number(c.balance || 0).toLocaleString()}</div>
+                      <div className="text-[10px] text-slate-400 tabular-nums">paid Rs. {Number(c.paid || 0).toLocaleString()}</div>
                     </div>
                   </div>
                 ))
@@ -683,7 +692,7 @@ export const DashboardView: React.FC = () => {
         {/* Column 2: Low Stamp Stock & Recent Activities */}
         <div className="space-y-4">
           {/* Low Stamp Stock */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Low Stamp Stock</h3>
               <button onClick={() => setActiveSection('stamps')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
@@ -710,7 +719,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Today's Activity */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Live Activity Feed</h3>
               <button onClick={() => setActiveSection('audit')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
@@ -740,7 +749,7 @@ export const DashboardView: React.FC = () => {
         {/* Column 3: Upcoming Deadlines & Daily Closing */}
         <div className="space-y-4">
           {/* Upcoming Deadlines */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">Upcoming Deadlines</h3>
               <button onClick={() => setActiveSection('tax')} className="text-[11px] text-[#1473E6] hover:text-[#0f5bb5] font-semibold transition-colors font-admin">
@@ -767,7 +776,7 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Daily Closing Summary */}
-          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
+          <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">
                 Daily Closing ({dailyClosing?.date || new Date().toLocaleDateString('en-GB')})

@@ -264,11 +264,11 @@ export const ComposingServicesView: React.FC = () => {
                         isSelected ? 'bg-blue-50/50' : ''
                       }`}
                     >
-                      <td className="py-3 px-3 font-mono font-bold text-slate-700">#{order.orderNo}</td>
+                      <td className="py-3 px-3 tabular-nums font-bold text-slate-700">#{order.orderNo}</td>
                       <td className="py-3 px-3 font-bold text-[#0D2344]">{order.customer}</td>
                       <td className="py-3 px-3">
                         <div className="font-semibold text-slate-800">{order.serviceName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{order.fileReference}</div>
+                        <div className="text-[10px] text-slate-400 tabular-nums">{order.fileReference}</div>
                       </td>
                       <td className="py-3 px-3 text-center font-bold text-slate-700">{order.pages}</td>
                       <td className="py-3 px-3 text-right font-bold text-[#0D2344]">
@@ -429,7 +429,7 @@ export const ComposingServicesView: React.FC = () => {
                     <td className="py-2.5 px-3 font-bold text-[#0D2344]">{item.name}</td>
                     <td className="py-2.5 px-3 text-slate-500">{item.pages}</td>
                     <td className="py-2.5 px-3 text-right font-bold text-[#1473E6]">{item.rate}</td>
-                    <td className="py-2.5 px-3 text-center text-slate-600 font-mono text-[11px]">{item.time}</td>
+                    <td className="py-2.5 px-3 text-center text-slate-600 tabular-nums text-[11px]">{item.time}</td>
                     <td className="py-2.5 px-3 text-center">
                       <button
                         onClick={() => {

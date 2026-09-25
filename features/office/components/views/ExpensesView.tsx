@@ -321,7 +321,7 @@ export const ExpensesView: React.FC = () => {
                 <div key={cat.name}>
                   <div className="flex justify-between font-semibold mb-1">
                     <span className="text-slate-700">{cat.name}</span>
-                    <span className="text-slate-800 font-mono font-bold">{cat.amount} ({cat.pct})</span>
+                    <span className="text-slate-800 tabular-nums font-bold">{cat.amount} ({cat.pct})</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${cat.color}`} style={{ width: cat.pct }}></div>
@@ -387,7 +387,7 @@ export const ExpensesView: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-slate-600 max-w-[160px] truncate">{exp.description}</td>
-                      <td className="py-2.5 px-3 text-slate-600 capitalize whitespace-nowrap font-mono text-[10px]">{exp.account}</td>
+                      <td className="py-2.5 px-3 text-slate-600 capitalize whitespace-nowrap tabular-nums text-[10px]">{exp.account}</td>
                       <td className="py-2.5 px-3 text-right font-bold text-[#F43F5E] whitespace-nowrap">
                         - Rs. {exp.amount.toLocaleString()}
                       </td>

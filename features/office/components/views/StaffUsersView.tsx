@@ -224,7 +224,7 @@ export const StaffUsersView: React.FC = () => {
                   <tr key={member.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-3 px-3">
                       <div className="font-bold text-[#0D2344]">{member.name}</div>
-                      <div className="text-[10px] text-slate-400 font-mono">ID: {member.id} • {member.lastActive}</div>
+                      <div className="text-[10px] text-slate-400 tabular-nums">ID: {member.id} • {member.lastActive}</div>
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded-md bg-blue-50 text-[#1473E6] font-bold text-[10px]">
@@ -330,7 +330,7 @@ export const StaffUsersView: React.FC = () => {
                   <div className="font-semibold text-slate-800">Tax Year Active Filing</div>
                   <div className="text-[10px] text-slate-400">TY 2024 / 2025 (FBR IRIS)</div>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-blue-600">Active</span>
+                <span className="text-[10px] tabular-nums font-bold text-blue-600">Active</span>
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@ export const StaffUsersView: React.FC = () => {
             </h4>
             <p className="text-[10px] text-slate-400">Chronological immutable log of all cash, stamp, and compliance changes</p>
           </div>
-          <span className="text-[10px] font-mono font-semibold text-slate-500">Audit Verifier: SHA-256 Valid</span>
+          <span className="text-[10px] tabular-nums font-semibold text-slate-500">Audit Verifier: SHA-256 Valid</span>
         </div>
 
         <div className="overflow-x-auto">
@@ -371,7 +371,7 @@ export const StaffUsersView: React.FC = () => {
                 { time: '22-09-2025 09:00', user: 'System', action: 'Daily Balance Opening', ref: 'Cash Drawer Initialized (Rs. 45,000)', term: 'Automated Daemon', status: 'VERIFIED' }
               ].map((log, idx) => (
                 <tr key={idx} className="hover:bg-slate-50">
-                  <td className="py-2.5 px-3 font-mono text-slate-500 whitespace-nowrap text-[11px]">{log.time}</td>
+                  <td className="py-2.5 px-3 tabular-nums text-slate-500 whitespace-nowrap text-[11px]">{log.time}</td>
                   <td className="py-2.5 px-3 font-bold text-[#0D2344] whitespace-nowrap">{log.user}</td>
                   <td className="py-2.5 px-3 whitespace-nowrap">
                     <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold text-[10px]">
@@ -379,7 +379,7 @@ export const StaffUsersView: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-slate-700">{log.ref}</td>
-                  <td className="py-2.5 px-3 text-slate-500 font-mono text-[10px]">{log.term}</td>
+                  <td className="py-2.5 px-3 text-slate-500 tabular-nums text-[10px]">{log.term}</td>
                   <td className="py-2.5 px-3 text-center whitespace-nowrap">
                     <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px]">
                       {log.status}
@@ -428,7 +428,7 @@ export const StaffUsersView: React.FC = () => {
                   <input
                     type="text"
                     placeholder="0300-1234567"
-                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg font-mono"
+                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg tabular-nums"
                   />
                 </div>
                 <div>
@@ -437,7 +437,7 @@ export const StaffUsersView: React.FC = () => {
                     type="password"
                     maxLength={4}
                     placeholder="4-digit PIN"
-                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg font-mono text-center tracking-widest"
+                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg tabular-nums text-center tracking-widest"
                   />
                 </div>
               </div>

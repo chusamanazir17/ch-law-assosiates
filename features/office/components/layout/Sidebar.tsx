@@ -585,7 +585,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Headphones className="w-4 h-4 text-[#38BDF8] shrink-0" />
                   <div className="overflow-hidden">
                     <div className="text-xs text-slate-400 font-medium">Need Help?</div>
-                    <div className="font-bold text-white text-sm font-mono truncate">+92 300 1234567</div>
+                    <div className="font-bold text-white text-sm tabular-nums truncate">+92 300 1234567</div>
                   </div>
                 </div>
                 <a

@@ -136,8 +136,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Opening Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 38,500</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">As of 22 Sep 2025</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 38,500</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">As of {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div>
         </div>
 
         {/* Cash In Today */}
@@ -148,7 +148,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Cash In Today</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 42,500</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 42,500</div>
           <div className="text-[10px] text-emerald-600 font-bold mt-0.5">12 transactions ↑ 12%</div>
         </div>
 
@@ -160,7 +160,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Cash Out Today</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 8,200</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 8,200</div>
           <div className="text-[10px] text-rose-600 font-bold mt-0.5">8 transactions ↓ 5%</div>
         </div>
 
@@ -172,8 +172,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Closing Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 72,800</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">As of 22 Sep 2025</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 72,800</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">As of {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div>
         </div>
 
         {/* Bank Balance */}
@@ -184,7 +184,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Bank Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 286,500</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 286,500</div>
           <div className="text-[10px] text-slate-400 mt-0.5 truncate">HBL - Main Account</div>
         </div>
 
@@ -196,7 +196,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Wallets</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 48,200</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 48,200</div>
           <div className="text-[10px] text-slate-400 mt-0.5 truncate">JC: 28.2k | EP: 20k</div>
         </div>
 
@@ -208,7 +208,7 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium truncate">Outstanding</span>
           </div>
-          <div className="text-base font-bold text-rose-600 font-mono">Rs. 22,100</div>
+          <div className="text-base font-bold text-rose-600 tabular-nums">Rs. 22,100</div>
           <div className="text-[10px] text-slate-400 mt-0.5">5 clients</div>
         </div>
       </div>
@@ -275,7 +275,7 @@ export const CashManagementView: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 font-medium">
-            16 Sep 2025 - 22 Sep 2025
+            {`${new Date(Date.now() - 6 * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} - ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
           </div>
 
           <select
@@ -386,7 +386,7 @@ export const CashManagementView: React.FC = () => {
                         placeholder="0.00"
                         value={cashInAmount}
                         onChange={e => setCashInAmount(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 tabular-nums font-bold"
                       />
                     </div>
                   </div>
@@ -499,7 +499,7 @@ export const CashManagementView: React.FC = () => {
                         placeholder="0.00"
                         value={cashOutAmount}
                         onChange={e => setCashOutAmount(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 tabular-nums font-bold"
                       />
                     </div>
 
@@ -569,7 +569,7 @@ export const CashManagementView: React.FC = () => {
                 <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Cash (Office)
                 </span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   Rs. {accountBalances.cashOffice.toLocaleString()}
                 </span>
               </div>
@@ -577,7 +577,7 @@ export const CashManagementView: React.FC = () => {
                 <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Bank Account (HBL)
                 </span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   Rs. {accountBalances.bankAccount.toLocaleString()}
                 </span>
               </div>
@@ -585,7 +585,7 @@ export const CashManagementView: React.FC = () => {
                 <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> JazzCash
                 </span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   Rs. {accountBalances.jazzCash.toLocaleString()}
                 </span>
               </div>
@@ -593,7 +593,7 @@ export const CashManagementView: React.FC = () => {
                 <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200">
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500"></span> Easypaisa
                 </span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   Rs. {accountBalances.easyPaisa.toLocaleString()}
                 </span>
               </div>
@@ -603,7 +603,7 @@ export const CashManagementView: React.FC = () => {
           {/* Daily Closing Summary */}
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Daily Closing (22 Sep 2025)</h3>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Daily Closing ({new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})</h3>
               <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#1473E6] hover:underline font-semibold">
                 View Details
               </button>
@@ -611,19 +611,19 @@ export const CashManagementView: React.FC = () => {
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Opening Balance</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 38,500</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 38,500</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash In</span>
-                <span className="font-bold text-emerald-600 font-mono">Rs. 42,500</span>
+                <span className="font-bold text-emerald-600 tabular-nums">Rs. 42,500</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash Out</span>
-                <span className="font-bold text-rose-600 font-mono">Rs. 8,200</span>
+                <span className="font-bold text-rose-600 tabular-nums">Rs. 8,200</span>
               </div>
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 mt-2">
                 <span className="font-bold text-slate-800 dark:text-slate-200">Closing Balance</span>
-                <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm font-mono">Rs. 72,800</span>
+                <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm tabular-nums">Rs. 72,800</span>
               </div>
             </div>
           </div>
@@ -684,8 +684,8 @@ export const CashManagementView: React.FC = () => {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredList.map((tx, idx) => (
                 <tr key={tx.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 px-3 text-slate-400 font-mono">{idx + 1}</td>
-                  <td className="py-3 px-3 text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">{tx.dateTime}</td>
+                  <td className="py-3 px-3 text-slate-400 tabular-nums">{idx + 1}</td>
+                  <td className="py-3 px-3 text-slate-600 dark:text-slate-400 tabular-nums whitespace-nowrap">{tx.dateTime}</td>
                   <td className="py-3 px-3 whitespace-nowrap">
                     <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${tx.type === 'IN' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                       {tx.type}
@@ -695,7 +695,7 @@ export const CashManagementView: React.FC = () => {
                   <td className="py-3 px-3 font-semibold text-slate-900 dark:text-slate-100">{tx.clientOrPayee}</td>
                   <td className="py-3 px-3 text-slate-600 dark:text-slate-400">{tx.serviceOrCategory}</td>
                   <td className="py-3 px-3 text-slate-600 dark:text-slate-400 capitalize">{tx.account}</td>
-                  <td className="py-3 px-3 text-right font-bold font-mono text-slate-900 dark:text-slate-100">
+                  <td className="py-3 px-3 text-right font-bold tabular-nums text-slate-900 dark:text-slate-100">
                     <span className={tx.type === 'IN' ? 'text-emerald-600' : 'text-rose-600'}>
                       {tx.amount.toLocaleString()}
                     </span>

@@ -126,7 +126,7 @@ export const SettingsView: React.FC = () => {
                     type="text"
                     value={ntn}
                     onChange={e => setNtn(e.target.value)}
-                    className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg font-mono font-bold"
+                    className="w-full h-9 px-3 border border-[#DCE6F1] rounded-lg tabular-nums font-bold"
                   />
                 </div>
 

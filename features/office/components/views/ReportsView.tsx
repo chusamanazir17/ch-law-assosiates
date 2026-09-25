@@ -147,8 +147,8 @@ export const ReportsView: React.FC = () => {
         />
       </div>
 
-      {/* Sub Navigation Tabs */}
-      <div className="flex items-center gap-1 border-b border-[#DCE6F1] pb-2 overflow-x-auto">
+      {/* Sub Navigation Tabs — pinned while report content scrolls */}
+      <div className="sticky-subbar -mx-1 px-1 flex items-center gap-1.5 py-2.5 border-b border-slate-200 dark:border-slate-700/80 rounded-t-xl overflow-x-auto no-scrollbar">
         {[
           { key: 'executive', label: 'Executive Analytics' },
           { key: 'pnl', label: 'Profit & Loss Statement' },
@@ -160,10 +160,10 @@ export const ReportsView: React.FC = () => {
           <button
             key={tab.key}
             onClick={() => setActiveReportTab(tab.key as any)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors whitespace-nowrap shrink-0 ${
               activeReportTab === tab.key
                 ? 'bg-[#1473E6] text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
             }`}
           >
             {tab.label}
@@ -172,6 +172,7 @@ export const ReportsView: React.FC = () => {
       </div>
 
       {/* Tab: Executive Analytics (Default with 4 Charts + 2 Tables) */}
+      <div className="pt-4">
       {activeReportTab === 'executive' && (
         <div className="space-y-6">
           {/* 4 Analytics Visual Cards Grid */}
@@ -211,7 +212,7 @@ export const ReportsView: React.FC = () => {
                   <div key={item.name}>
                     <div className="flex justify-between font-semibold mb-1">
                       <span className="text-slate-700">{item.name}</span>
-                      <span className="font-bold text-[#0D2344] font-mono">{item.amount} ({item.pct})</span>
+                      <span className="font-bold text-[#0D2344] tabular-nums">{item.amount} ({item.pct})</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${item.color}`} style={{ width: item.pct }}></div>
@@ -293,7 +294,7 @@ export const ReportsView: React.FC = () => {
                         <td className="py-2.5 px-2.5 text-center text-slate-600">{c.cases}</td>
                         <td className="py-2.5 px-2.5 text-right text-slate-700">{c.invoiced}</td>
                         <td className="py-2.5 px-2.5 text-right font-bold text-emerald-600">{c.paid}</td>
-                        <td className="py-2.5 px-2.5 text-right font-mono font-bold text-rose-600">{c.bal}</td>
+                        <td className="py-2.5 px-2.5 text-right tabular-nums font-bold text-rose-600">{c.bal}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -330,7 +331,7 @@ export const ReportsView: React.FC = () => {
                         </td>
                         <td className="py-2.5 px-2.5 text-center font-bold text-emerald-600">{s.completed}</td>
                         <td className="py-2.5 px-2.5 text-center text-slate-600">{s.pending}</td>
-                        <td className="py-2.5 px-2.5 text-center font-mono text-slate-700">{s.turnaround}</td>
+                        <td className="py-2.5 px-2.5 text-center tabular-nums text-slate-700">{s.turnaround}</td>
                         <td className="py-2.5 px-2.5 text-center">
                           <span className="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px]">
                             {s.score}
@@ -352,7 +353,7 @@ export const ReportsView: React.FC = () => {
           <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-[#0D2344]">Statement of Profit and Loss</h3>
-              <p className="text-xs text-slate-500">For the period ended September 2025 • Currency: PKR</p>
+              <p className="text-xs text-slate-500">For the period ended {new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" })} • Currency: PKR</p>
             </div>
             <div className="text-right text-xs font-semibold text-slate-600">
               Chamber No. 121, Kachahri Sahiwal
@@ -519,7 +520,7 @@ export const ReportsView: React.FC = () => {
                 {clients.map(c => (
                   <tr key={c.id}>
                     <td className="py-2.5 px-3 font-bold text-[#0D2344]">{c.name}</td>
-                    <td className="py-2.5 px-3 text-slate-600 font-mono">{c.mobile || c.phone || 'N/A'}</td>
+                    <td className="py-2.5 px-3 text-slate-600 tabular-nums">{c.mobile || c.phone || 'N/A'}</td>
                     <td className="py-2.5 px-3">{c.businessType || c.type || 'Individual'}</td>
                     <td className="py-2.5 px-3 text-right">Rs. {(c.totalBilling || 0).toLocaleString()}</td>
                     <td className="py-2.5 px-3 text-right font-bold text-rose-600">Rs. {(c.outstanding || 0).toLocaleString()}</td>
@@ -554,7 +555,7 @@ export const ReportsView: React.FC = () => {
                     <td className="py-2.5 px-3 text-slate-600">{s.role}</td>
                     <td className="py-2.5 px-3 text-center font-bold text-emerald-600">{s.completed}</td>
                     <td className="py-2.5 px-3 text-center text-slate-600">{s.pending}</td>
-                    <td className="py-2.5 px-3 text-center font-mono text-slate-700">{s.turnaround}</td>
+                    <td className="py-2.5 px-3 text-center tabular-nums text-slate-700">{s.turnaround}</td>
                     <td className="py-2.5 px-3 text-center">
                       <span className="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px]">
                         {s.score}
@@ -567,6 +568,7 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

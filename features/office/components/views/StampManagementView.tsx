@@ -92,7 +92,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Total Stock Value</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 486,200</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 486,200</div>
           <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 12% from last month</div>
         </div>
 
@@ -104,7 +104,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Today's Sales</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 34,300</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 34,300</div>
           <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 18% from yesterday</div>
         </div>
 
@@ -116,7 +116,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Today's Purchases</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 18,500</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 18,500</div>
           <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 5% from yesterday</div>
         </div>
 
@@ -128,7 +128,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Low Stock Items</span>
           </div>
-          <div className="text-base font-bold text-rose-600 font-mono">3</div>
+          <div className="text-base font-bold text-rose-600 tabular-nums">3</div>
           <div className="text-[10px] text-slate-400 mt-0.5">Denominations below limit</div>
         </div>
 
@@ -140,7 +140,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Inventory Profit</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 96,800</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 96,800</div>
           <div className="text-[10px] text-emerald-600 font-bold mt-0.5">↑ 14% this month</div>
         </div>
 
@@ -152,7 +152,7 @@ export const StampManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Pending Reconcile</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">2</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">2</div>
           <div className="text-[10px] text-slate-400 mt-0.5">Transactions to verify</div>
         </div>
       </div>
@@ -177,7 +177,7 @@ export const StampManagementView: React.FC = () => {
           </select>
 
           <div className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-medium">
-            01 Sep 2025 - 22 Sep 2025
+            {`${new Date(Date.now() - 21 * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} - ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
           </div>
         </div>
 
@@ -220,7 +220,7 @@ export const StampManagementView: React.FC = () => {
                   <th className="py-2.5 px-3 text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 tabular-nums">
                 {stockTable.map(s => (
                   <tr key={s.den} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                     <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">{s.den}</td>
@@ -285,31 +285,31 @@ export const StampManagementView: React.FC = () => {
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Stock (Items)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">555</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">555</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Stock Value</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 486,200</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 486,200</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Purchased (YTD)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 1,125,000</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 1,125,000</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Sold (YTD)</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">Rs. 1,028,200</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. 1,028,200</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Inventory Profit</span>
-                <span className="font-bold text-emerald-600 font-mono">Rs. 96,800</span>
+                <span className="font-bold text-emerald-600 tabular-nums">Rs. 96,800</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Low Stock Items</span>
-                <span className="font-bold text-rose-600 font-mono">3</span>
+                <span className="font-bold text-rose-600 tabular-nums">3</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Pending Reconciliation</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">2</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">2</span>
               </div>
             </div>
           </div>
@@ -335,17 +335,17 @@ export const StampManagementView: React.FC = () => {
               <span className="text-[10px] text-[#1473E6] font-semibold">View All</span>
             </div>
             <div className="space-y-1.5 text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
+              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
                 <span className="font-bold">Rs. 50</span>
                 <span className="text-slate-500">Cur: 80 / Min: 100</span>
                 <span className="text-rose-600 font-bold">Low</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
+              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
                 <span className="font-bold">Rs. 1,000</span>
                 <span className="text-slate-500">Cur: 80 / Min: 100</span>
                 <span className="text-rose-600 font-bold">Low</span>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
+              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
                 <span className="font-bold">Rs. 5,000</span>
                 <span className="text-slate-500">Cur: 35 / Min: 50</span>
                 <span className="text-rose-600 font-bold">Low</span>
@@ -368,9 +368,9 @@ export const StampManagementView: React.FC = () => {
               <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
                 <div>
                   <div className="font-semibold text-slate-800 dark:text-slate-200">{s.client}</div>
-                  <div className="text-[10px] text-slate-400 font-mono">{s.den} × {s.qty}</div>
+                  <div className="text-[10px] text-slate-400 tabular-nums">{s.den} × {s.qty}</div>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right tabular-nums">
                   <div className="font-bold text-emerald-600">Rs. {s.amt.toLocaleString()}</div>
                   <div className="text-[9px] text-slate-400">{s.time.split(' ')[1]} {s.time.split(' ')[2]}</div>
                 </div>
@@ -390,9 +390,9 @@ export const StampManagementView: React.FC = () => {
               <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
                 <div>
                   <div className="font-semibold text-slate-800 dark:text-slate-200">{p.supplier}</div>
-                  <div className="text-[10px] text-slate-400 font-mono">{p.den} × {p.qty}</div>
+                  <div className="text-[10px] text-slate-400 tabular-nums">{p.den} × {p.qty}</div>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right tabular-nums">
                   <div className="font-bold text-slate-900 dark:text-slate-100">Rs. {p.amt.toLocaleString()}</div>
                   <div className="text-[9px] text-slate-400">{p.time.split(' ')[0]}</div>
                 </div>
@@ -412,9 +412,9 @@ export const StampManagementView: React.FC = () => {
               <div key={i} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 last:border-0">
                 <div>
                   <div className="font-medium text-slate-800 dark:text-slate-200">{m.type} ({m.den})</div>
-                  <div className="text-[9px] text-slate-400 font-mono">{m.time}</div>
+                  <div className="text-[9px] text-slate-400 tabular-nums">{m.time}</div>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right tabular-nums">
                   <span className={`font-bold ${m.qty.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'}`}>{m.qty}</span>
                   <div className="text-[9px] text-slate-400">Bal: {m.bal}</div>
                 </div>
@@ -444,7 +444,7 @@ export const StampManagementView: React.FC = () => {
                 <th className="py-2.5 px-3 text-center">Adjusted By</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 tabular-nums">
               {stockAdjustments.map((a, i) => (
                 <tr key={i} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                   <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">{a.time}</td>

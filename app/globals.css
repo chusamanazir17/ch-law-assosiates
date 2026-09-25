@@ -859,3 +859,115 @@ html[lang="ur"] textarea {
   font-feature-settings: "tnum" on, "lnum" on !important;
   letter-spacing: -0.025em !important;
 }
+
+/* ============================================================================
+   Office Management System shell utilities
+   ============================================================================ */
+
+/* Slim, neutral scrollbars for the office workspace and inner scroll regions
+   (overrides the chunky 10px navy page scrollbar). */
+.office-shell,
+.office-shell * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+.office-shell ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.office-shell ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.office-shell ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 9999px;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+.office-shell ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.55);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+.office-shell ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Horizontal scroll strips (tab bars, chip rows): hide the scrollbar but keep
+   the strip scrollable, so it never visually merges with the content. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pinned filter/tab strip: content scrolls beneath it without merging. */
+.sticky-subbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: rgba(248, 250, 252, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.dark .sticky-subbar {
+  background-color: rgba(7, 13, 24, 0.88);
+}
+
+/* Slim minimal scrollbar for inner scroll regions (tables, sidebars, modals).
+   NOTE: these were previously defined only in an orphan stylesheet that was
+   never imported — they are re-homed here so they actually apply. */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #1e3a5f;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #2a4e7a;
+}
+
+.custom-scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #1e3a5f transparent;
+}

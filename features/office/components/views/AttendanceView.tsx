@@ -432,12 +432,12 @@ export const AttendanceView: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-slate-500 dark:text-slate-400">
+                      <td className="py-3.5 px-4 tabular-nums text-xs text-slate-500 dark:text-slate-400">
                         {selectedDate}
                       </td>
                       <td className="py-3.5 px-4">
                         {att?.check_in_time ? (
-                          <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          <span className="tabular-nums text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                             {att.check_in_time}
                           </span>
                         ) : (
@@ -446,7 +446,7 @@ export const AttendanceView: React.FC = () => {
                       </td>
                       <td className="py-3.5 px-4">
                         {att?.check_out_time ? (
-                          <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          <span className="tabular-nums text-xs font-semibold text-slate-700 dark:text-slate-300">
                             {att.check_out_time}
                           </span>
                         ) : (
@@ -554,7 +554,7 @@ export const AttendanceView: React.FC = () => {
                     type="time"
                     value={checkInTime}
                     onChange={e => setCheckInTime(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-mono"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white tabular-nums"
                   />
                 </div>
                 <div>
@@ -565,7 +565,7 @@ export const AttendanceView: React.FC = () => {
                     type="time"
                     value={checkOutTime}
                     onChange={e => setCheckOutTime(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-mono"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white tabular-nums"
                   />
                 </div>
               </div>
