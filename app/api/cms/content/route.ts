@@ -3,6 +3,9 @@ import { getSiteSettings } from "@/lib/db/siteSettingsStore";
 import { getAllServices, getServiceBySlug } from "@/lib/db/servicesStore";
 import { getAllPagesContent, getPageContentByRoute } from "@/lib/db/pagesContentStore";
 import { getHomeSections } from "@/lib/db/homeSectionsStore";
+import { getAllTeamMembers } from "@/lib/db/teamMembersStore";
+import { getAllTestimonials } from "@/lib/db/testimonialsStore";
+import { getAllFaqs } from "@/lib/db/faqsStore";
 
 export const dynamic = "force-dynamic";
 
@@ -12,9 +15,15 @@ export async function GET(request: Request) {
     const route = searchParams.get("route");
     const serviceSlug = searchParams.get("service");
 
-    const settings = await getSiteSettings();
-    const services = await getAllServices();
-    const homeSections = await getHomeSections();
+    const [settings, services, homeSections, teamMembers, testimonials, faqs] =
+      await Promise.all([
+        getSiteSettings(),
+        getAllServices(),
+        getHomeSections(),
+        getAllTeamMembers(),
+        getAllTestimonials(),
+        getAllFaqs(),
+      ]);
 
     if (route) {
       const page = await getPageContentByRoute(route);
@@ -23,6 +32,9 @@ export async function GET(request: Request) {
         settings,
         homeSections,
         page,
+        teamMembers,
+        testimonials,
+        faqs,
       });
     }
 
@@ -33,6 +45,9 @@ export async function GET(request: Request) {
         settings,
         homeSections,
         service,
+        teamMembers,
+        testimonials,
+        faqs,
       });
     }
 
@@ -43,6 +58,9 @@ export async function GET(request: Request) {
       services,
       homeSections,
       pages,
+      teamMembers,
+      testimonials,
+      faqs,
     });
   } catch (error) {
     console.error("[CmsContentAPI] Failed to fetch CMS content:", error);

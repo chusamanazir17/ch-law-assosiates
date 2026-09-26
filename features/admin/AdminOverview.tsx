@@ -37,6 +37,11 @@ import {
   Briefcase,
   Wallet,
   FileSpreadsheet,
+  Boxes,
+  UserCheck,
+  Star,
+  HelpCircle,
+  Settings,
 } from "lucide-react";
 import type { SubscriberAnalytics, SiteAnnouncement, Post } from "@/types/cms";
 
@@ -220,8 +225,8 @@ export default function AdminOverview() {
 
   // Email Signups Telemetry State
   const [subscriberAnalytics, setSubscriberAnalytics] = useState<SubscriberAnalytics>({
-    totalEmails: 4,
-    activeCount: 4,
+    totalEmails: 0,
+    activeCount: 0,
     pendingCount: 0,
     unsubscribedCount: 0,
     suppressedCount: 0,
@@ -231,11 +236,16 @@ export default function AdminOverview() {
 
   // CMS Metrics State
   const [cmsStats, setCmsStats] = useState({
-    totalPosts: 5,
-    publishedPosts: 5,
+    totalPosts: 0,
+    publishedPosts: 0,
     draftPosts: 0,
-    totalMedia: 12,
-    newInquiries: 1,
+    totalMedia: 0,
+    totalServices: 0,
+    totalTeam: 0,
+    totalTestimonials: 0,
+    totalFaqs: 0,
+    totalInquiries: 0,
+    newInquiries: 0,
     activeNotice: null as SiteAnnouncement | null,
   });
 
@@ -409,18 +419,23 @@ export default function AdminOverview() {
             setSubscriberAnalytics((prev) => ({
               ...prev,
               ...json.subscriberAnalytics,
-              totalEmails: json.subscriberAnalytics.totalEmails || 4,
-              activeCount: json.subscriberAnalytics.activeCount || 4,
+              totalEmails: json.subscriberAnalytics.totalEmails ?? 0,
+              activeCount: json.subscriberAnalytics.activeCount ?? 0,
             }));
           }
           if (json.cmsStats) {
             setCmsStats((prev) => ({
               ...prev,
               ...json.cmsStats,
-              totalPosts: json.cmsStats.totalPosts ?? 5,
-              publishedPosts: json.cmsStats.publishedPosts ?? 5,
-              totalMedia: json.cmsStats.totalMedia ?? 12,
-              newInquiries: json.cmsStats.newInquiries ?? 1,
+              totalPosts: json.cmsStats.totalPosts ?? 0,
+              publishedPosts: json.cmsStats.publishedPosts ?? 0,
+              totalMedia: json.cmsStats.totalMedia ?? 0,
+              totalServices: json.cmsStats.totalServices ?? 0,
+              totalTeam: json.cmsStats.totalTeam ?? 0,
+              totalTestimonials: json.cmsStats.totalTestimonials ?? 0,
+              totalFaqs: json.cmsStats.totalFaqs ?? 0,
+              totalInquiries: json.cmsStats.totalInquiries ?? 0,
+              newInquiries: json.cmsStats.newInquiries ?? 0,
             }));
           }
           if (json.recentInquiries && json.recentInquiries.length > 0) {
@@ -960,10 +975,10 @@ export default function AdminOverview() {
                 <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Consultation Inquiries</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
                   <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
-                    {cmsStats.newInquiries + 23}
+                    {cmsStats.totalInquiries || cmsStats.newInquiries}
                   </span>
                   <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-admin">
-                    ↑ +18%
+                    Live
                   </span>
                 </div>
               </div>
@@ -1067,6 +1082,137 @@ export default function AdminOverview() {
               Calendar →
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* Website CMS Modules Quick Access Grid */}
+      <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#F1F5F9] dark:border-slate-800">
+          <div>
+            <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100">
+              Website CMS Modules & Live Content
+            </h2>
+            <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
+              Manage all dynamic database-driven sections of the public website directly from Supabase.
+            </p>
+          </div>
+          <Link
+            href="/admin/settings"
+            className="text-xs font-semibold text-[#B8832A] dark:text-[#E5B558] hover:underline flex items-center gap-1"
+          >
+            <span>Firm Settings</span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4">
+          <Link
+            href="/admin/services"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
+                <Boxes className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                {cmsStats.totalServices || 9}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Practice Services</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Full catalog & slugs</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/team"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
+                <UserCheck className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                {cmsStats.totalTeam || 3}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Team & Lawyers</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Founders & partners</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/testimonials"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
+                <Star className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                {cmsStats.totalTestimonials || 3}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Client Reviews</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">5-star verified quotes</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/faqs"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform">
+                <HelpCircle className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                {cmsStats.totalFaqs || 8}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">FAQs</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Knowledgebase QA</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/media"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 group-hover:scale-105 transition-transform">
+                <ImageIcon className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                {cmsStats.totalMedia}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Media Library</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Cloud storage assets</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/pages"
+            className="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/40 hover:border-gold-400/50 hover:bg-gold-50/20 dark:hover:bg-gold-950/20 transition flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform">
+                <FileText className="h-4 w-4" />
+              </span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-100">
+                12
+              </span>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Page Content</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Routes & metadata</p>
+            </div>
+          </Link>
         </div>
       </div>
 

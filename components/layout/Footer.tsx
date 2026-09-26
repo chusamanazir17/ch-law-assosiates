@@ -41,14 +41,19 @@ export default function Footer() {
   }
 
 
-  const quickLinks = [
-    { label: t.common.home, href: "/" },
-    { label: isUrdu ? "ای سٹامپنگ سروسز" : "E-Stamping", href: "/services/e-stamping" },
-    { label: isUrdu ? "پراپرٹی رجسٹری و انتقال" : "Property Registry", href: "/services/property-land" },
-    { label: isUrdu ? "بزنس و کمپنی رجسٹریشن" : "Business Registration", href: "/services/business-registration" },
-    { label: isUrdu ? "ٹیکس سروسز (FBR)" : "Tax Services", href: "/services/tax" },
-    { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/about" },
-  ];
+  const quickLinks =
+    settings?.navigationMenu && settings.navigationMenu.length > 0
+      ? settings.navigationMenu
+          .filter((item) => item.enabled)
+          .map((item) => ({ label: item.label, href: item.href }))
+      : [
+          { label: t.common.home, href: "/" },
+          { label: isUrdu ? "ای سٹامپنگ سروسز" : "E-Stamping", href: "/services/e-stamping" },
+          { label: isUrdu ? "پراپرٹی رجسٹری و انتقال" : "Property Registry", href: "/services/property-land" },
+          { label: isUrdu ? "بزنس و کمپنی رجسٹریشن" : "Business Registration", href: "/services/business-registration" },
+          { label: isUrdu ? "ٹیکس سروسز (FBR)" : "Tax Services", href: "/services/tax" },
+          { label: isUrdu ? "ہمارے بارے میں" : "About Us", href: "/about" },
+        ];
 
   return (
     <>

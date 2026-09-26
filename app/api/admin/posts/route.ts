@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
   if (!session) return unauthorized();
 
   try {
-    const slug = request.nextUrl.searchParams.get("slug")?.trim();
-    if (slug) {
-      const post = await getAdminPostBySlugOrId(slug);
+    const slugOrId = (
+      request.nextUrl.searchParams.get("id") ||
+      request.nextUrl.searchParams.get("slug")
+    )?.trim();
+    if (slugOrId) {
+      const post = await getAdminPostBySlugOrId(slugOrId);
       if (!post) {
         return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });
       }

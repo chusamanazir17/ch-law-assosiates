@@ -24,6 +24,9 @@ import {
   ExternalLink,
   Headphones,
   Scale,
+  UserCheck,
+  Star,
+  HelpCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminSidebar } from "./AdminSidebarContext";
@@ -73,6 +76,9 @@ export default function AdminSidebar({
       items: [
         { label: "Page Content", href: "/admin/pages", icon: FileText },
         { label: "Services Catalog", href: "/admin/services", icon: Boxes },
+        { label: "Team & Lawyers", href: "/admin/team", icon: UserCheck },
+        { label: "Client Reviews", href: "/admin/testimonials", icon: Star },
+        { label: "FAQ Knowledgebase", href: "/admin/faqs", icon: HelpCircle },
         { label: "Articles & Updates", href: "/admin/posts", icon: FileSpreadsheet },
         { label: "Tax Categories", href: "/admin/categories", icon: Tag },
         { label: "Media Library", href: "/admin/media", icon: ImageIcon },

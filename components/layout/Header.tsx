@@ -232,6 +232,21 @@ export default function Header() {
   const legalGroupActive =
     legalGroupCategories.some((category) => pathname.startsWith(category.href)) || activeDropdown === "legal-group";
 
+  const homeNavItem = settings?.navigationMenu?.find((item) => item.id === "home");
+  const homeLabel = homeNavItem?.label || t.nav.home;
+  const homeHref = homeNavItem?.href || "/";
+  const homeVisible = homeNavItem?.enabled !== false;
+
+  const aboutNavItem = settings?.navigationMenu?.find((item) => item.id === "about");
+  const aboutLabel = aboutNavItem?.label || t.nav.about;
+  const aboutHref = aboutNavItem?.href || "/about";
+  const aboutVisible = aboutNavItem?.enabled !== false;
+
+  const updatesNavItem = settings?.navigationMenu?.find((item) => item.id === "updates");
+  const updatesLabel = updatesNavItem?.label || (isUrdu ? "قانونی رہنمائی" : "Legal Updates");
+  const updatesHref = updatesNavItem?.href || "/updates";
+  const updatesVisible = updatesNavItem?.enabled !== false;
+
   if (pathname.startsWith("/admin") || pathname.startsWith("/office")) return null;
 
   return (
@@ -267,16 +282,18 @@ export default function Header() {
               className="hidden min-w-0 items-center gap-0.5 lg:flex 2xl:gap-1.5"
               onMouseLeave={closeDropdownSoon}
             >
-              <Link
-                href="/"
-                aria-current={pathname === "/" ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
-                  pathname === "/",
-                  isDark
-                )}`}
-              >
-                {t.nav.home}
-              </Link>
+              {homeVisible && (
+                <Link
+                  href={homeHref}
+                  aria-current={pathname === "/" ? "page" : undefined}
+                  className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
+                    pathname === "/",
+                    isDark
+                  )}`}
+                >
+                  {homeLabel}
+                </Link>
+              )}
 
               {primaryNav.map((item) => {
                 const category = categoryMap.get(item.id);
@@ -349,28 +366,32 @@ export default function Header() {
                 </AnimatePresence>
               </div>
 
-              <Link
-                href="/about"
-                aria-current={pathname.startsWith("/about") ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
-                  pathname.startsWith("/about"),
-                  isDark
-                )}`}
-              >
-                {t.nav.about}
-              </Link>
-              <Link
-                href="/updates"
-                aria-current={pathname.startsWith("/updates") ? "page" : undefined}
-                className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
-                  pathname.startsWith("/updates"),
-                  isDark
-                )}`}
-              >
-                {isUrdu ? "قانونی رہنمائی" : "Legal Updates"}
-              </Link>
+              {aboutVisible && (
+                <Link
+                  href={aboutHref}
+                  aria-current={pathname.startsWith("/about") ? "page" : undefined}
+                  className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
+                    pathname.startsWith("/about"),
+                    isDark
+                  )}`}
+                >
+                  {aboutLabel}
+                </Link>
+              )}
+              {updatesVisible && (
+                <Link
+                  href={updatesHref}
+                  aria-current={pathname.startsWith("/updates") ? "page" : undefined}
+                  className={`rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors 2xl:px-3 ${desktopLinkClass(
+                    pathname.startsWith("/updates"),
+                    isDark
+                  )}`}
+                >
+                  {updatesLabel}
+                </Link>
+              )}
               {settings?.navigationMenu
-                ?.filter((item) => item.enabled && !["home", "services", "updates", "reminders", "contact"].includes(item.id))
+                ?.filter((item) => item.enabled && !["home", "services", "about", "updates", "reminders", "contact"].includes(item.id))
                 .map((item) => (
                   <Link
                     key={item.id}
@@ -388,6 +409,16 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              {settings?.headerSettings?.primaryCtaEnabled !== false && (
+                <Link
+                  href={settings?.headerSettings?.primaryCtaHref || "/#contact"}
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-lg bg-[#C8973D] hover:bg-[#b8862f] text-navy-950 font-bold px-3 py-1.5 text-xs shadow-xs transition"
+                >
+                  <Phone className="h-3 w-3" />
+                  <span>{settings?.headerSettings?.primaryCtaText || (isUrdu ? "مشاورت لیں" : "Book Consultation")}</span>
+                </Link>
+              )}
+
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -620,31 +651,63 @@ export default function Header() {
 
             <Divider sx={{ my: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
 
-            <ListItemButton
-              component={Link}
-              href="/about"
-              onClick={() => setDrawerOpen(false)}
-              selected={pathname.startsWith("/about")}
-              sx={{ borderRadius: 2, py: 1.2 }}
-            >
-              <ListItemText
-                primary={t.nav.about}
-                secondary={isUrdu ? "بانی و چیمبر 121 کی تاریخ" : "Our Founder, Story & Leadership"}
-                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-                secondaryTypographyProps={{ fontSize: 11 }}
-              />
-            </ListItemButton>
-            <ListItemButton component={Link} href="/updates" onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
-              <ListItemText
-                primary={isUrdu ? "قانونی رہنمائی اور اپ ڈیٹس" : "Legal Updates & Guides"}
-                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-              />
-            </ListItemButton>
+            {aboutVisible && (
+              <ListItemButton
+                component={Link}
+                href={aboutHref}
+                onClick={() => setDrawerOpen(false)}
+                selected={pathname.startsWith("/about")}
+                sx={{ borderRadius: 2, py: 1.2 }}
+              >
+                <ListItemText
+                  primary={aboutLabel}
+                  secondary={isUrdu ? "بانی و چیمبر 121 کی تاریخ" : "Our Founder, Story & Leadership"}
+                  primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                  secondaryTypographyProps={{ fontSize: 11 }}
+                />
+              </ListItemButton>
+            )}
+            {updatesVisible && (
+              <ListItemButton component={Link} href={updatesHref} onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
+                <ListItemText
+                  primary={updatesLabel}
+                  primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                />
+              </ListItemButton>
+            )}
+            {settings?.navigationMenu
+              ?.filter((item) => item.enabled && !["home", "services", "about", "updates", "reminders", "contact"].includes(item.id))
+              .map((item) => (
+                <ListItemButton
+                  key={item.id}
+                  component={Link}
+                  href={item.href}
+                  target={item.isExternal ? "_blank" : undefined}
+                  rel={item.isExternal ? "noreferrer noopener" : undefined}
+                  onClick={() => setDrawerOpen(false)}
+                  sx={{ borderRadius: 2, py: 1.2 }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                  />
+                </ListItemButton>
+              ))}
           </List>
         </div>
 
         <Divider sx={{ borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
-        <div className={`p-3 ${isDark ? "bg-[#0a1830]" : "bg-white"}`}>
+        <div className={`p-3 space-y-2 ${isDark ? "bg-[#0a1830]" : "bg-white"}`}>
+          {settings?.headerSettings?.primaryCtaEnabled !== false && (
+            <Link
+              href={settings?.headerSettings?.primaryCtaHref || "/#contact"}
+              onClick={() => setDrawerOpen(false)}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#C8973D] text-navy-950 font-bold py-2.5 text-xs shadow-sm transition hover:bg-[#b8862f]"
+            >
+              <Phone className="h-3.5 w-3.5" />
+              <span>{settings?.headerSettings?.primaryCtaText || (isUrdu ? "مشاورت بک کریں" : "Book Consultation")}</span>
+            </Link>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <a
               href={settings?.phone ? `tel:${settings.phone.replace(/[^\d+]/g, "")}` : SITE.phoneHref}

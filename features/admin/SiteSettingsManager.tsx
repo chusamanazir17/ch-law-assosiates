@@ -559,6 +559,44 @@ export default function SiteSettingsManager() {
                   className="mt-1.5 w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3.5 py-2 text-xs text-[#0B1F36] dark:text-slate-100 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
                 />
               </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0B1F36] dark:text-slate-200">
+                  Header CTA Button Text
+                </label>
+                <input
+                  type="text"
+                  value={formData.headerSettings?.primaryCtaText || "Book Consultation"}
+                  onChange={(e) => updateHeaderSettings("primaryCtaText", e.target.value)}
+                  placeholder="e.g. Book Consultation, Call Office"
+                  className="mt-1.5 w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3.5 py-2 text-xs font-semibold text-[#0B1F36] dark:text-slate-100 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#0B1F36] dark:text-slate-200">
+                  Header CTA Button URL
+                </label>
+                <input
+                  type="text"
+                  value={formData.headerSettings?.primaryCtaHref || "/#contact"}
+                  onChange={(e) => updateHeaderSettings("primaryCtaHref", e.target.value)}
+                  placeholder="e.g. /#contact, tel:03057902744, /services"
+                  className="mt-1.5 w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3.5 py-2 text-xs font-mono text-[#0B1F36] dark:text-slate-100 focus:border-[#C8973D] focus:bg-white dark:focus:bg-[#131f37] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="flex items-center gap-2 text-xs font-semibold text-[#0B1F36] dark:text-slate-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.headerSettings?.primaryCtaEnabled !== false}
+                    onChange={(e) => updateHeaderSettings("primaryCtaEnabled", e.target.checked)}
+                    className="h-4 w-4 rounded border-[#E2E8F0] dark:border-slate-700 text-[#C8973D] focus:ring-[#C8973D]/30"
+                  />
+                  <span>Show Header CTA Action Button</span>
+                </label>
+              </div>
             </div>
 
             <div className="border-t border-[#E2E8F0] dark:border-slate-800 pt-5 space-y-4">

@@ -5,12 +5,18 @@ import type { SiteSettings } from "@/lib/db/siteSettingsStore";
 import type { CmsService } from "@/lib/db/servicesStore";
 import type { PageContentItem } from "@/lib/db/pagesContentStore";
 import type { HomeSectionsData } from "@/lib/db/homeSectionsStore";
+import type { CmsTeamMember } from "@/lib/db/teamMembersStore";
+import type { CmsTestimonial } from "@/lib/db/testimonialsStore";
+import type { CmsFaq } from "@/lib/db/faqsStore";
 
 interface CmsState {
   settings: SiteSettings | null;
   services: CmsService[];
   pages: PageContentItem[];
   homeSections: HomeSectionsData | null;
+  teamMembers: CmsTeamMember[];
+  testimonials: CmsTestimonial[];
+  faqs: CmsFaq[];
   isLoading: boolean;
 }
 
@@ -32,6 +38,9 @@ export function refreshCms(): Promise<void> {
           services: data.services || [],
           pages: data.pages || [],
           homeSections: data.homeSections || null,
+          teamMembers: data.teamMembers || [],
+          testimonials: data.testimonials || [],
+          faqs: data.faqs || [],
           isLoading: false,
         };
         notifyCmsUpdated(newState);
@@ -49,6 +58,9 @@ export function useCms(initialData?: Partial<CmsState>) {
       services: initialData.services ?? [],
       pages: initialData.pages ?? [],
       homeSections: initialData.homeSections ?? null,
+      teamMembers: initialData.teamMembers ?? [],
+      testimonials: initialData.testimonials ?? [],
+      faqs: initialData.faqs ?? [],
       isLoading: false,
     };
   }
@@ -59,6 +71,9 @@ export function useCms(initialData?: Partial<CmsState>) {
       services: initialData?.services ?? [],
       pages: initialData?.pages ?? [],
       homeSections: initialData?.homeSections ?? null,
+      teamMembers: initialData?.teamMembers ?? [],
+      testimonials: initialData?.testimonials ?? [],
+      faqs: initialData?.faqs ?? [],
       isLoading: !initialData,
     }
   );
@@ -91,14 +106,27 @@ export function useCms(initialData?: Partial<CmsState>) {
     return state.services.find((s) => s.slug === slug || s.id === slug);
   };
 
+  const getTeamMember = (id: string): CmsTeamMember | undefined => {
+    return state.teamMembers.find((m) => m.id === id || m.name === id);
+  };
+
+  const getFaq = (id: string): CmsFaq | undefined => {
+    return state.faqs.find((f) => f.id === id);
+  };
+
   return {
     settings: state.settings,
     services: state.services,
     pages: state.pages,
     homeSections: state.homeSections,
+    teamMembers: state.teamMembers,
+    testimonials: state.testimonials,
+    faqs: state.faqs,
     isLoading: state.isLoading,
     getPageContent,
     getService,
+    getTeamMember,
+    getFaq,
     refresh: refreshCms,
   };
 }

@@ -94,7 +94,7 @@ function Hero() {
 
       <div className="container-x relative z-10 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:pt-10 lg:pb-16">
         {/* Main Hero Content Area */}
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[460px] lg:min-h-[520px]">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-0 lg:min-h-[520px]">
           {/* Left Column (Text, Buttons, Stats) - sits directly on clean dark navy */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -196,8 +196,8 @@ function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Column: Floating overlays matching the mockup */}
-          <div className="lg:col-span-5 relative h-full min-h-[300px] lg:min-h-[460px] pointer-events-none">
+          {/* Right Column: Floating overlays matching the mockup (hidden on mobile, visible on desktop) */}
+          <div className="hidden lg:block lg:col-span-5 relative h-full min-h-[300px] lg:min-h-[460px] pointer-events-none">
             {/* Elegant Script Overlay in Top Right */}
             <div className="absolute top-2 right-0 sm:top-6 sm:right-4 z-20 text-right drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
               <p className="font-script text-3xl sm:text-4xl lg:text-[42px] text-white leading-[1.08] -rotate-3 select-none">
@@ -416,7 +416,7 @@ function ServicesGrid() {
 
 function PrepareVisit() {
   const { isUrdu, t } = useLanguage();
-  const { homeSections, settings } = useCms();
+  const { homeSections, settings, teamMembers } = useCms();
   const sec = homeSections?.aboutSection;
 
   if (sec?.enabled === false) return null;
@@ -559,7 +559,34 @@ function PrepareVisit() {
                 </div>
 
                 <div className="grid gap-2.5 sm:grid-cols-3">
-                  {OWNERS.map((owner, i) => {
+                  {(teamMembers && teamMembers.length > 0
+                    ? teamMembers.map((m) => {
+                        const initials = (m.name || "")
+                          .split(" ")
+                          .map((w: string) => w[0])
+                          .join("")
+                          .slice(0, 3)
+                          .toUpperCase();
+                        return {
+                          id: m.id,
+                          name: m.name,
+                          nameUrdu: m.nameUrdu || m.name,
+                          role: m.role,
+                          roleUrdu: m.roleUrdu || m.role,
+                          status: m.status,
+                          badge: m.badge || (m.status === "late" ? "1988–2014" : "Partner"),
+                          badgeUrdu: m.badge || (m.status === "late" ? "1988–2014" : "پارٹنر"),
+                          image: m.imageUrl || "/images/owners/haji-nazir-ahmad.jpg",
+                          initials,
+                          bio: m.bio,
+                          bioUrdu: m.bioUrdu,
+                          phone: m.phone || undefined,
+                          phoneHref: m.phone ? `tel:${m.phone.replace(/[^\d+]/g, "")}` : undefined,
+                          whatsapp: m.whatsapp || undefined,
+                        };
+                      })
+                    : OWNERS
+                  ).map((owner, i) => {
                     const isLate = owner.status === "late";
                     return (
                       <div
@@ -730,11 +757,20 @@ function WhyTrust() {
 
 function TestimonialsSection() {
   const { isUrdu } = useLanguage();
-  const { homeSections } = useCms();
+  const { homeSections, testimonials } = useCms();
   const sec = homeSections?.testimonialsSection;
 
   if (sec?.enabled === false) return null;
-  const items = sec?.items?.filter((i) => i.visible !== false) || [];
+  const items = testimonials && testimonials.length > 0
+    ? testimonials.map((t) => ({
+        id: t.id,
+        clientName: t.clientName,
+        clientRole: t.clientTitle,
+        text: t.comment,
+        rating: t.rating,
+        visible: true,
+      }))
+    : (sec?.items?.filter((i) => i.visible !== false) || []);
   if (items.length === 0) return null;
 
   return (
@@ -782,12 +818,23 @@ function TestimonialsSection() {
 
 function FaqSection() {
   const { isUrdu } = useLanguage();
-  const { homeSections } = useCms();
+  const { homeSections, faqs } = useCms();
   const [openId, setOpenId] = React.useState<string | null>("faq-1");
   const sec = homeSections?.faqSection;
 
   if (sec?.enabled === false) return null;
-  const items = (sec?.items?.filter((i) => i.visible !== false) || []).sort((a, b) => a.order - b.order);
+  const items = faqs && faqs.length > 0
+    ? faqs
+        .filter((f) => f.isPublished)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((f) => ({
+          id: f.id,
+          question: f.question,
+          answer: f.answer,
+          order: f.displayOrder,
+          visible: true,
+        }))
+    : (sec?.items?.filter((i) => i.visible !== false) || []).sort((a, b) => a.order - b.order);
   if (items.length === 0) return null;
 
   return (
@@ -956,13 +1003,15 @@ function FinalCta() {
 export default function HomePageClient({ initialCms }: { initialCms?: any }) {
   const { homeSections } = useCms(initialCms);
 
-  const order = (homeSections?.sectionOrder || [
+  const order = homeSections?.sectionOrder || [
     "hero",
     "services",
     "reminders",
+    "testimonials",
+    "faq",
     "office",
     "finalCta",
-  ]).filter((key) => key !== "about" && key !== "whyTrust" && key !== "testimonials" && key !== "faq");
+  ];
 
   const sectionMap: Record<string, React.ReactNode> = {
     hero: <Hero key="hero" />,

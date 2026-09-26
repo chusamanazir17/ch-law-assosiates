@@ -35,7 +35,9 @@ const EMPTY_FORM = {
 export default function PostEditor() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const idParam = searchParams.get("id");
   const slugParam = searchParams.get("slug");
+  const identifier = idParam || slugParam;
 
   const [postId, setPostId] = useState<string | null>(null);
   const [title, setTitle] = useState(EMPTY_FORM.title);
@@ -46,16 +48,16 @@ export default function PostEditor() {
   const [category, setCategory] = useState(EMPTY_FORM.category);
   const [authorName, setAuthorName] = useState(EMPTY_FORM.authorName);
   const [status, setStatus] = useState<EditorStatus>(EMPTY_FORM.status);
-  const [slugTouched, setSlugTouched] = useState(Boolean(slugParam));
-  const [isLoading, setIsLoading] = useState(Boolean(slugParam));
+  const [slugTouched, setSlugTouched] = useState(Boolean(identifier));
+  const [isLoading, setIsLoading] = useState(Boolean(identifier));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slugParam) return;
+    if (!identifier) return;
 
-    const requestedSlug = slugParam;
+    const requestedIdentifier = identifier;
     const controller = new AbortController();
 
     async function loadPost() {
@@ -63,7 +65,8 @@ export default function PostEditor() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/admin/posts?slug=${encodeURIComponent(requestedSlug)}`, {
+        const queryKey = idParam ? "id" : "slug";
+        const response = await fetch(`/api/admin/posts?${queryKey}=${encodeURIComponent(requestedIdentifier)}`, {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -92,7 +95,7 @@ export default function PostEditor() {
 
     void loadPost();
     return () => controller.abort();
-  }, [slugParam]);
+  }, [idParam, slugParam, identifier]);
 
   const characterCounts = useMemo(
     () => ({ title: title.length, excerpt: excerpt.length }),

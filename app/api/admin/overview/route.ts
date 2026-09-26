@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth/admin";
 import { getAllSubscribers } from "@/lib/db/subscribersStore";
 import { getAllInquiries } from "@/lib/db/inquiriesStore";
-
 import { listAllPosts } from "@/lib/services/posts.service";
+import { getAllServices } from "@/lib/db/servicesStore";
+import { getAllTeamMembers } from "@/lib/db/teamMembersStore";
+import { getAllTestimonials } from "@/lib/db/testimonialsStore";
+import { getAllFaqs } from "@/lib/db/faqsStore";
+import { listMediaAssets } from "@/lib/services/media.service";
+import { listAnnouncements } from "@/lib/repositories/announcementsRepository";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +21,27 @@ export async function GET() {
   if (!session) return unauthorized();
 
   try {
-    const subscribers = await getAllSubscribers();
-    const inquiries = await getAllInquiries();
-    const posts = await listAllPosts();
+    const [
+      subscribers,
+      inquiries,
+      posts,
+      services,
+      teamMembers,
+      testimonials,
+      faqs,
+      mediaAssets,
+      announcements,
+    ] = await Promise.all([
+      getAllSubscribers().catch(() => []),
+      getAllInquiries().catch(() => []),
+      listAllPosts().catch(() => []),
+      getAllServices().catch(() => []),
+      getAllTeamMembers().catch(() => []),
+      getAllTestimonials().catch(() => []),
+      getAllFaqs().catch(() => []),
+      listMediaAssets().catch(() => []),
+      listAnnouncements().catch(() => []),
+    ]);
 
     const totalEmails = subscribers.length;
     const activeCount = subscribers.filter((s) => s.status === "active").length;
@@ -50,10 +73,13 @@ export async function GET() {
       categories: (sub.categories || []).map((c) => c.name),
     }));
 
-    const newInquiries = inquiries.filter((inq) => inq.status === "new").length;
+    const newInquiries = inquiries.filter(
+      (inq) => inq.status === "new" || (inq.status as string) === "New"
+    ).length;
     const totalPosts = posts.length;
     const publishedPosts = posts.filter((p) => p.status === "published").length;
     const draftPosts = posts.filter((p) => p.status === "draft").length;
+    const activeNotice = announcements.find((a) => a.is_active) || null;
 
     return NextResponse.json({
       success: true,
@@ -70,9 +96,14 @@ export async function GET() {
         totalPosts,
         publishedPosts,
         draftPosts,
-        totalMedia: 12,
+        totalMedia: mediaAssets.length,
+        totalServices: services.length,
+        totalTeam: teamMembers.length,
+        totalTestimonials: testimonials.length,
+        totalFaqs: faqs.length,
+        totalInquiries: inquiries.length,
         newInquiries,
-        activeNotice: null,
+        activeNotice,
       },
       recentInquiries: inquiries.slice(0, 5),
       recentPosts: posts.slice(0, 6),

@@ -4,6 +4,9 @@ import { getHomeSections } from "@/lib/db/homeSectionsStore";
 import { getAllPagesContent } from "@/lib/db/pagesContentStore";
 import { getSiteSettings } from "@/lib/db/siteSettingsStore";
 import { getAllServices } from "@/lib/db/servicesStore";
+import { getAllTeamMembers } from "@/lib/db/teamMembersStore";
+import { getAllTestimonials } from "@/lib/db/testimonialsStore";
+import { getAllFaqs } from "@/lib/db/faqsStore";
 
 export const metadata: Metadata = {
   title: "Ch Composing Estamp and Tax Advisor | Legal Documentation & Tax Services",
@@ -26,18 +29,25 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [settings, services, pages, homeSections] = await Promise.all([
-    getSiteSettings(),
-    getAllServices(),
-    getAllPagesContent(),
-    getHomeSections(),
-  ]);
+  const [settings, services, pages, homeSections, teamMembers, testimonials, faqs] =
+    await Promise.all([
+      getSiteSettings(),
+      getAllServices(),
+      getAllPagesContent(),
+      getHomeSections(),
+      getAllTeamMembers(),
+      getAllTestimonials(),
+      getAllFaqs(),
+    ]);
 
   const initialCms = {
     settings,
     services,
     pages,
     homeSections,
+    teamMembers,
+    testimonials,
+    faqs,
     isLoading: false,
   };
 

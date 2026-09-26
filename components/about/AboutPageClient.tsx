@@ -31,11 +31,39 @@ import { useCms } from "@/lib/hooks/useCms";
 export default function AboutPageClient() {
   const { isUrdu } = useLanguage();
   const { isDark } = useAppTheme();
-  const { getPageContent, settings } = useCms();
+  const { getPageContent, settings, teamMembers } = useCms();
   const aboutCms = getPageContent("/about");
 
-  const lateFounder = OWNERS.find((o) => o.status === "late") || OWNERS[0];
-  const currentOwners = OWNERS.filter((o) => o.status === "current");
+  const members = teamMembers && teamMembers.length > 0
+    ? teamMembers.map((m) => {
+        const initials = (m.name || "")
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .slice(0, 3)
+          .toUpperCase();
+        return {
+          id: m.id,
+          name: m.name,
+          nameUrdu: m.nameUrdu || m.name,
+          role: m.role,
+          roleUrdu: m.roleUrdu || m.role,
+          status: m.status,
+          badge: m.badge || (m.status === "late" ? "1988–2014" : "Partner"),
+          badgeUrdu: m.badge || (m.status === "late" ? "1988–2014" : "پارٹنر"),
+          image: m.imageUrl || "/images/owners/haji-nazir-ahmad.jpg",
+          initials,
+          bio: m.bio,
+          bioUrdu: m.bioUrdu,
+          phone: m.phone || undefined,
+          phoneHref: m.phone ? `tel:${m.phone.replace(/[^\d+]/g, "")}` : undefined,
+          whatsapp: m.whatsapp || undefined,
+        };
+      })
+    : OWNERS;
+
+  const lateFounder = members.find((o) => o.status === "late") || members[0];
+  const currentOwners = members.filter((o) => o.status === "current");
 
   const heroBadge = isUrdu
     ? "ہماری تاریخ اور عزم • چیمبر 121"
