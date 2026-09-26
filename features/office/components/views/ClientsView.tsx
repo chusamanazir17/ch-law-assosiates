@@ -24,7 +24,6 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-import { initialClients } from '../../data/seedData';
 import { CopyableText } from '../common/CopyableText';
 import { exportToCsv } from '../../lib/csv';
 
@@ -36,7 +35,7 @@ export const ClientsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const allClients = clients && clients.length > 0 ? clients : initialClients;
+  const allClients = clients || [];
   const clientList =
     statusFilter === 'ALL' ? allClients : allClients.filter(c => (c.status || 'Active') === statusFilter);
 

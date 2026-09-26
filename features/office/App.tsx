@@ -30,6 +30,7 @@ import { CashOutModal } from './components/modals/CashOutModal';
 import { TransferModal } from './components/modals/TransferModal';
 import { DailyClosingModal } from './components/modals/DailyClosingModal';
 import { StampSaleModal } from './components/modals/StampSaleModal';
+import { StampProductModal } from './components/modals/StampProductModal';
 import { NewClientModal } from './components/modals/NewClientModal';
 import { PrintReceiptModal } from './components/modals/PrintReceiptModal';
 import { GlobalSearchModal } from './components/modals/GlobalSearchModal';
@@ -196,6 +197,7 @@ const MainLayout: React.FC = () => {
       <TransferModal />
       <DailyClosingModal />
       <StampSaleModal />
+      <StampProductModal />
       <NewClientModal />
       <GlobalSearchModal />
       <PrintReceiptModal

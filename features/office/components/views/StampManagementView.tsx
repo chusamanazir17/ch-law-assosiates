@@ -26,6 +26,7 @@ export const StampManagementView: React.FC = () => {
     stampMovements,
     stampAdjustments,
     setIsStampSaleModalOpen,
+    setIsStampProductModalOpen,
     recordStampSale,
     recordStampPurchase,
     recordStampAdjustment
@@ -91,6 +92,7 @@ export const StampManagementView: React.FC = () => {
   const todaySalesAmt = stampMovements.filter(m => m.type === 'Sale' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
   const todayPurchaseAmt = stampMovements.filter(m => m.type === 'Purchase' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
   const lowStockCount = stockTable.filter(s => s.status !== 'OK').length;
+  const lowStockItems = stockTable.filter(s => s.status !== 'OK');
   const inventoryProfit = stockTable.reduce((a, s) => a + s.sold * Math.max(0, s.sPrice - s.pPrice), 0);
   const adjustmentCount = stampAdjustments.length;
 
@@ -236,6 +238,12 @@ export const StampManagementView: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setIsStampProductModalOpen(true)}
+            className="px-3 py-1.5 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add Stamp
+          </button>
+          <button
             onClick={() => { setDenominationFilter('ALL'); setStockStatusFilter('ALL'); }}
             className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
           >
@@ -302,10 +310,10 @@ export const StampManagementView: React.FC = () => {
                 ))}
                 <tr className="bg-slate-50/80 dark:bg-slate-800/80 font-bold border-t-2 border-slate-200 dark:border-slate-700">
                   <td className="py-2.5 px-3 text-slate-900 dark:text-slate-100">Total</td>
-                  <td className="py-2.5 px-3 text-right">500</td>
-                  <td className="py-2.5 px-3 text-right text-emerald-600">+1,280</td>
-                  <td className="py-2.5 px-3 text-right text-rose-600">-1,225</td>
-                  <td className="py-2.5 px-3 text-right text-slate-900 dark:text-slate-100">555</td>
+                  <td className="py-2.5 px-3 text-right">{filteredStockTable.reduce((a, s) => a + s.opening, 0)}</td>
+                  <td className="py-2.5 px-3 text-right text-emerald-600">+{filteredStockTable.reduce((a, s) => a + s.purchased, 0)}</td>
+                  <td className="py-2.5 px-3 text-right text-rose-600">-{filteredStockTable.reduce((a, s) => a + s.sold, 0)}</td>
+                  <td className="py-2.5 px-3 text-right font-bold">{filteredStockTable.reduce((a, s) => a + s.remaining, 0)}</td>
                   <td className="py-2.5 px-3 text-right">-</td>
                   <td className="py-2.5 px-3 text-right">-</td>
                   <td className="py-2.5 px-3 text-right text-emerald-700 dark:text-emerald-400">Rs. 347,000</td>
@@ -397,11 +405,13 @@ export const StampManagementView: React.FC = () => {
               <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
             </div>
             <div className="space-y-1.5 text-xs">
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
-                <span className="font-bold">Rs. 50</span>
-                <span className="text-slate-500">Cur: 80 / Min: 100</span>
-                <span className="text-rose-600 font-bold">Low</span>
-              </div>
+              {lowStockItems.map(s => (
+                <div key={s.den} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
+                  <span className="font-bold">{s.den}</span>
+                  <span className="text-slate-500">Cur: {s.remaining}</span>
+                  <span className="text-rose-600 font-bold">{s.status}</span>
+                </div>
+              ))}
               <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
                 <span className="font-bold">Rs. 1,000</span>
                 <span className="text-slate-500">Cur: 80 / Min: 100</span>

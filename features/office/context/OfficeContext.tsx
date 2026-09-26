@@ -90,6 +90,8 @@ interface OfficeContextType {
   setIsNewClientModalOpen: (open: boolean) => void;
   isStampSaleModalOpen: boolean;
   setIsStampSaleModalOpen: (open: boolean) => void;
+  isStampProductModalOpen: boolean;
+  setIsStampProductModalOpen: (open: boolean) => void;
   isNewServiceOrderModalOpen: boolean;
   setIsNewServiceOrderModalOpen: (open: boolean) => void;
   isNewTaxReturnModalOpen: boolean;
@@ -660,6 +662,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isCloseDayModalOpen, setIsCloseDayModalOpen] = useState(false);
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [isStampSaleModalOpen, setIsStampSaleModalOpen] = useState(false);
+  const [isStampProductModalOpen, setIsStampProductModalOpen] = useState(false);
   const [isNewServiceOrderModalOpen, setIsNewServiceOrderModalOpen] = useState(false);
   const [isNewTaxReturnModalOpen, setIsNewTaxReturnModalOpen] = useState(false);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
@@ -1766,6 +1769,8 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsNewClientModalOpen,
         isStampSaleModalOpen,
         setIsStampSaleModalOpen,
+        isStampProductModalOpen,
+        setIsStampProductModalOpen,
         isNewServiceOrderModalOpen,
         setIsNewServiceOrderModalOpen,
         isNewTaxReturnModalOpen,

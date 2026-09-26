@@ -32,7 +32,7 @@ export const ComposingServicesView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [selectedOrderId, setSelectedOrderId] = useState<string>(serviceOrders[0]?.id || 'so-1');
+  const [selectedOrderId, setSelectedOrderId] = useState<string>(serviceOrders[0]?.id || '');
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
 
   // New Order Form
@@ -73,7 +73,7 @@ export const ComposingServicesView: React.FC = () => {
   const readyCount = serviceOrders.filter(o => o.status === 'Ready' || o.status === 'Completed').length;
   const deliveredTodayCount = 12;
   const urgentCount = 3;
-  const totalComposingRevenue = serviceOrders.reduce((acc, o) => acc + o.amount, 0) + 24500;
+  const totalComposingRevenue = serviceOrders.reduce((acc, o) => acc + o.amount, 0);
 
   const handleCreateOrder = (e: React.FormEvent) => {
     e.preventDefault();

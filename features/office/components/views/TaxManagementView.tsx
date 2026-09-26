@@ -35,7 +35,7 @@ export const TaxManagementView: React.FC = () => {
   } = useOffice();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCaseId, setSelectedCaseId] = useState<string>(taxCases[0]?.id || 'tc-1');
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(taxCases[0]?.id || '');
   const [isNewCaseModalOpen, setIsNewCaseModalOpen] = useState(false);
   const [activeViewMode, setActiveViewMode] = useState<'kanban' | 'table'>('kanban');
 
@@ -76,7 +76,7 @@ export const TaxManagementView: React.FC = () => {
   const pendingCount = taxCases.filter(t => t.status === 'Documents Required' || t.status === 'In Progress').length;
   const submittedCount = taxCases.filter(t => t.status === 'Submitted' || t.status === 'Completed').length;
   const docsRequiredCount = taxCases.filter(t => t.status === 'Documents Required').length;
-  const overdueCount = taxCases.filter(t => t.status === 'Overdue').length || 2;
+  const overdueCount = taxCases.filter(t => t.status === 'Overdue').length;
   const upcomingDeadlinesCount = 14;
   const totalTaxRevenue = taxCases.reduce((sum, c) => sum + (c.fee || c.amountFee || 0), 0);
 
@@ -591,11 +591,15 @@ export const TaxManagementView: React.FC = () => {
             <span className="text-[10px] text-purple-600 font-semibold">TY 2024/25</span>
           </div>
           <div className="space-y-2 text-xs">
-            {[
-              { event: 'Annual Income Tax Return', date: '30 Sep 2025', alert: 'Critical' },
-              { event: 'Monthly Sales Tax Return', date: '15 Oct 2025', alert: 'Standard' },
-              { event: 'Withholding Quarterly Annex', date: '20 Oct 2025', alert: 'Standard' }
-            ].map(cal => (
+            {taxCases
+              .filter(tc => tc.dueDate)
+              .slice(0, 3)
+              .map(tc => ({
+                event: `${tc.clientName || 'Tax Case'} — ${tc.returnType || 'Return'}`,
+                date: tc.dueDate,
+                alert: tc.status === 'Completed' || tc.status === 'Submitted' ? 'Standard' : 'Critical'
+              }))
+              .map(cal => (
               <div key={cal.event} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-slate-800 text-[11px]">{cal.event}</div>
