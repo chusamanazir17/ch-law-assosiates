@@ -98,6 +98,8 @@ export default function PostsManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
   const [activeTab, setActiveTab] = useState<PostTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -175,8 +177,8 @@ export default function PostsManager() {
   }, [posts]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this post permanently?")) return;
-
+    // Two-step inline confirmation (deleteConfirmId) replaces window.confirm.
+    setDeleteConfirmId(null);
     setActionError(null);
     setPendingId(id);
     try {
@@ -223,8 +225,8 @@ export default function PostsManager() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (!window.confirm(`Delete ${selectedIds.length} selected posts permanently?`)) return;
-
+    // Two-step inline confirmation (bulkDeleteConfirm) replaces window.confirm.
+    setBulkDeleteConfirm(false);
     setActionError(null);
     setPendingId("bulk");
     try {
@@ -590,15 +592,35 @@ export default function PostsManager() {
             <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
               {selectedIds.length} selected
             </span>
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={pendingId === "bulk"}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#0f172a] px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition disabled:opacity-50"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              <span>{pendingId === "bulk" ? "Deleting…" : "Delete selected"}</span>
-            </button>
+            {bulkDeleteConfirm ? (
+              <span className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 p-1">
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  disabled={pendingId === "bulk"}
+                  className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {pendingId === "bulk" ? "Deleting…" : `Confirm (${selectedIds.length})`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBulkDeleteConfirm(false)}
+                  className="px-1 text-[11px] text-slate-500 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setBulkDeleteConfirm(true)}
+                disabled={pendingId === "bulk"}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#0f172a] px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition disabled:opacity-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Delete selected</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSelectedIds([])}
@@ -751,15 +773,35 @@ export default function PostsManager() {
                             <span>{post.status === "published" ? "Unpublish" : "Publish"}</span>
                           </button>
 
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() => void handleDelete(post.id)}
-                            className="rounded-lg p-1.5 text-[#94A3B8] dark:text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 transition"
-                            title="Delete Post"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {deleteConfirmId === post.id ? (
+                            <span className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 p-1">
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => void handleDelete(post.id)}
+                                className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-rose-700"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="px-1 text-[11px] text-slate-500 hover:text-slate-800"
+                              >
+                                Cancel
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => setDeleteConfirmId(post.id)}
+                              className="rounded-lg p-1.5 text-[#94A3B8] dark:text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 transition"
+                              title="Delete Post"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

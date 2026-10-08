@@ -69,6 +69,7 @@ export default function ServicesCatalogManager() {
   const [formData, setFormData] = useState<Partial<CmsService>>({});
   const [activeTab, setActiveTab] = useState<"general" | "content" | "items" | "image" | "seo">("general");
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [slugCheckMessage, setSlugCheckMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
@@ -243,11 +244,9 @@ export default function ServicesCatalogManager() {
   };
 
   const handleDeleteService = async (service: CmsService) => {
-    const confirmed = window.confirm(
-      `Delete "${service.name}"? This will remove its page from the website. This cannot be undone.`
-    );
-    if (!confirmed) return;
-
+    // Two-step inline confirmation — window.confirm hangs automated browsers
+    // and gives no styled feedback, so the confirm step lives in the UI.
+    setDeleteConfirmId(null);
     setLoadError(null);
     try {
       const res = await apiFetch(
@@ -586,15 +585,35 @@ export default function ServicesCatalogManager() {
                       <Edit3 className="h-3.5 w-3.5 text-[#64748B]" />
                       <span>Edit</span>
                     </button>
-                    <button
+                    {deleteConfirmId === service.id ? (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 p-1">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteService(service)}
+                          className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-rose-700"
+                          title={`Delete "${service.name}"? This will remove its page from the website. This cannot be undone.`}
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="px-1 text-[11px] text-slate-500 hover:text-slate-800"
+                        >
+                          Cancel
+                        </button>
+                      </span>
+                    ) : (
+                      <button
                       type="button"
-                      onClick={() => handleDeleteService(service)}
+                      onClick={() => setDeleteConfirmId(service.id)}
                       title="Delete service"
                       className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-2xs transition hover:border-rose-300 hover:bg-rose-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       <span>Delete</span>
                     </button>
+                    )}
                     <Link
                       href={`/services/${service.slug}`}
                       target="_blank"

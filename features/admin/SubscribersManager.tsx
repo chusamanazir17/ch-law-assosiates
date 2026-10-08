@@ -91,6 +91,7 @@ export default function SubscribersManager() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const [isLoading, setIsLoading] = useState(true);
+  const [unsubConfirmId, setUnsubConfirmId] = useState<string | null>(null);
   const [actionFeedback, setActionFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // Modal: Add Subscriber
@@ -232,11 +233,8 @@ export default function SubscribersManager() {
 
   // Action: Unsubscribe client
   const handleUnsubscribeClient = async (subscriberId: string, email: string) => {
-    const confirmAction = window.confirm(
-      `Are you sure you want to unsubscribe ${email}? They will stop receiving automated statutory reminder emails.`
-    );
-    if (!confirmAction) return;
-
+    // Two-step inline confirmation (unsubConfirmId) replaces window.confirm.
+    setUnsubConfirmId(null);
     try {
       const res = await apiFetch("/api/admin/subscribers", {
         method: "POST",
@@ -711,13 +709,31 @@ export default function SubscribersManager() {
                     {/* Actions */}
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
                       {sub.status === "active" ? (
-                        <button
-                          onClick={() => handleUnsubscribeClient(sub.id, sub.email)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 text-[#64748B] dark:text-slate-400 px-2.5 py-1 text-xs font-medium transition"
-                        >
-                          <UserX className="h-3 w-3" />
-                          <span>Unsubscribe</span>
-                        </button>
+                        unsubConfirmId === sub.id ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 p-1">
+                            <button
+                              onClick={() => handleUnsubscribeClient(sub.id, sub.email)}
+                              className="rounded bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-rose-700"
+                              title={`Unsubscribe ${sub.email}? They will stop receiving automated statutory reminder emails.`}
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setUnsubConfirmId(null)}
+                              className="px-1 text-[11px] text-slate-500 hover:text-slate-800"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setUnsubConfirmId(sub.id)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 text-[#64748B] dark:text-slate-400 px-2.5 py-1 text-xs font-medium transition"
+                          >
+                            <UserX className="h-3 w-3" />
+                            <span>Unsubscribe</span>
+                          </button>
+                        )
                       ) : (
                         <span className="text-xs text-[#94A3B8] dark:text-slate-500">
                           Opted out
