@@ -67,6 +67,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (section === 'cash' && subSection === 'cash-out') setIsQuickCashOutOpen(true);
     if (section === 'cash' && subSection === 'daily-closing') setIsCloseDayModalOpen(true);
     if (section === 'stamps' && subSection === 'sales') setIsStampSaleModalOpen(true);
+    // Stamp sub-sections scroll to their card inside the Stamp Management view.
+    if (section === 'stamps' && subSection && subSection !== 'sales' && typeof window !== 'undefined') {
+      window.setTimeout(() => {
+        document.getElementById(`stamp-section-${subSection}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
     if (typeof window !== 'undefined') {
       const targetUrl = section === 'dashboard' ? '/office/dashboard' : `/office/${section}`;
       if (window.location.pathname !== targetUrl) {

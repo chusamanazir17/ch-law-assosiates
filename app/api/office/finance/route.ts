@@ -11,7 +11,9 @@ import {
   recordTransfer,
   listExpenses,
   recordExpense,
+  resolvePaymentAccount,
 } from "@/lib/services/finance.service";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import {
   validateBody,
   clampLimitParam,
@@ -20,6 +22,7 @@ import {
   expenseCreateSchema,
   ledgerEntrySchema,
 } from "@/lib/validation/office";
+import { recordAuditLog } from "@/lib/services/audit.service";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +75,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const action = body.action;
 
+    // Server-side audit trail: every money movement is recorded with the
+    // session identity (client-side audit writes were disabled as API-4).
+    const audit = (auditAction: string, entityId?: string | null, details?: Record<string, unknown>) =>
+      recordAuditLog({
+        user_id: auth.session.user.id,
+        user_name: auth.session.profile?.full_name || auth.session.user.email || "Administrator",
+        user_role: auth.session.role,
+        action: auditAction,
+        entity_type: "finance",
+        entity_id: entityId || null,
+        details: details || null,
+        ip_address: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+      });
+
     if (action === "create_account") {
       const validated = validateBody(paymentAccountCreateSchema, {
         name: body.name,
@@ -84,6 +101,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: validated.error }, { status: 400 });
       }
       const account = await createPaymentAccount(validated.data as any);
+      await audit("Create", (account as any)?.id, { name: (validated.data as any).name });
       return NextResponse.json({ success: true, account }, { status: 201 });
     }
 
@@ -103,12 +121,21 @@ export async function POST(request: NextRequest) {
         amount: number;
         description: string | null;
       };
+      // Resolve account keys/names to UUIDs — the transfer RPC needs real IDs.
+      const supabase = await getAdminDatabaseClient();
+      const fromAcc = await resolvePaymentAccount(supabase, transferData.from_account_id);
+      const toAcc = await resolvePaymentAccount(supabase, transferData.to_account_id);
       const result = await recordTransfer({
-        fromAccountId: transferData.from_account_id,
-        toAccountId: transferData.to_account_id,
+        fromAccountId: fromAcc.id,
+        toAccountId: toAcc.id,
         amount: transferData.amount,
         description: transferData.description || undefined,
         createdBy: auth.session.user.id,
+      });
+      await audit("Transfer", null, {
+        amount: transferData.amount,
+        from: transferData.from_account_id,
+        to: transferData.to_account_id,
       });
       return NextResponse.json({ success: true, ...result }, { status: 201 });
     }
@@ -127,6 +154,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: validated.error }, { status: 400 });
       }
       const expense = await recordExpense(validated.data as any);
+      await audit("Create", (expense as any)?.id, {
+        amount: (validated.data as any).amount,
+        category: (validated.data as any).category,
+        payee: (validated.data as any).payee,
+      });
       return NextResponse.json({ success: true, expense }, { status: 201 });
     }
 
@@ -152,6 +184,12 @@ export async function POST(request: NextRequest) {
       referenceId: (validated.data as any).reference_id,
       clientId: (validated.data as any).client_id,
       createdBy: auth.session.user.id,
+    });
+    await audit("Create", (transaction as any)?.id, {
+      entry_type: (validated.data as any).entry_type,
+      amount: (validated.data as any).amount,
+      category: (validated.data as any).category,
+      description: (validated.data as any).description,
     });
     return NextResponse.json({ success: true, transaction }, { status: 201 });
   } catch (error: any) {

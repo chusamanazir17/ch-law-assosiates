@@ -132,7 +132,7 @@ export const StaffUsersView: React.FC = () => {
         />
         <KpiCard
           label="Audit Records"
-          value="284"
+          value={String(auditLogs.length)}
           subValue="Audit events logged"
           change="Immutable trail"
           changeType="positive"

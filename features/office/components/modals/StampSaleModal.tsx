@@ -107,7 +107,7 @@ export const StampSaleModal: React.FC = () => {
           <div>
             <label className="block text-slate-700 font-semibold mb-1">Select Denomination *</label>
             <div className="grid grid-cols-6 gap-2">
-              {[50, 100, 200, 500, 1000, 5000].map(den => {
+              {stampStock.map(s => s.denomination).sort((a, b) => a - b).map(den => {
                 const stockItem = stampStock.find(s => s.denomination === den);
                 const rem = stockItem ? stockItem.remaining : 0;
                 const isSelected = denomination === den;

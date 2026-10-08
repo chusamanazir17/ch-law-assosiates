@@ -128,8 +128,6 @@ export const ComposingServicesView: React.FC = () => {
           label="Active Jobs"
           value={totalOrders}
           subValue="Court & registry queue"
-          change="+4 added today"
-          changeType="neutral"
           icon={<FileText className="w-4 h-4" />}
           iconBgColor="bg-blue-50 text-[#B8832A]"
         />
@@ -155,8 +153,6 @@ export const ComposingServicesView: React.FC = () => {
           label="Delivered Today"
           value={deliveredTodayCount}
           subValue="Completed jobs"
-          change="100% on-time"
-          changeType="positive"
           icon={<CheckCircle2 className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
         />
@@ -173,8 +169,6 @@ export const ComposingServicesView: React.FC = () => {
           label="Composing Billing"
           value={`Rs. ${totalComposingRevenue.toLocaleString()}`}
           subValue="This month revenue"
-          change="+18.2%"
-          changeType="positive"
           icon={<DollarSign className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
         />

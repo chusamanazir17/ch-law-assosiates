@@ -784,7 +784,6 @@ export const CashManagementView: React.FC = () => {
                 <th className="py-3 px-3 text-right">Amount (Rs.)</th>
                 <th className="py-3 px-3">Staff</th>
                 <th className="py-3 px-3 text-center">Status</th>
-                <th className="py-3 px-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

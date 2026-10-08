@@ -251,7 +251,9 @@ export const paymentCreateSchema = z.object({
 // ---------------------------------------------------------------- expenses
 
 export const expenseCreateSchema = z.object({
-  account_id: optionalUuid,
+  // Accepts a payment-account UUID or a resolvable account key/name —
+  // the finance service resolves non-UUID identifiers.
+  account_id: z.string().min(1).max(120).optional().nullable(),
   category: requiredText(2, 80),
   payee: requiredText(2, 120),
   amount: positiveMoney,
@@ -269,7 +271,10 @@ export const expenseCreateSchema = z.object({
 // ---------------------------------------------------------------- ledger / transfers
 
 export const ledgerEntrySchema = z.object({
-  account_id: uuid,
+  // Accepts a payment-account UUID or a resolvable account key/name
+  // ("cash", "bank", "jazzcash", "easypaisa") — the finance service resolves
+  // non-UUID identifiers via resolvePaymentAccount.
+  account_id: z.string().min(1, { message: "Account is required." }).max(120),
   entry_type: z.enum(["debit", "credit"]),
   amount: positiveMoney,
   category: requiredText(1, 80),
@@ -280,8 +285,10 @@ export const ledgerEntrySchema = z.object({
 });
 
 export const transferCreateSchema = z.object({
-  from_account_id: uuid,
-  to_account_id: uuid,
+  // Accepts payment-account UUIDs or resolvable account keys/names —
+  // the route resolves non-UUID identifiers before calling the service.
+  from_account_id: z.string().min(1, { message: "Source account is required." }).max(120),
+  to_account_id: z.string().min(1, { message: "Destination account is required." }).max(120),
   amount: positiveMoney,
   description: optionalText(500),
 }).refine((v) => v.from_account_id !== v.to_account_id, {

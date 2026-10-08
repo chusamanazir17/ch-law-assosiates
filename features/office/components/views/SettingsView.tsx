@@ -35,7 +35,7 @@ export const SettingsView: React.FC = () => {
   const [chamberAddress, setChamberAddress] = useState('Chamber No. 121, District Courts (Kachahri), Sahiwal');
   const [phone, setPhone] = useState('+92 300 1234567');
   const [landline, setLandline] = useState('+92 40 4567890');
-  const [ntn, setNtn] = useState('8945120-1');
+  const [ntn, setNtn] = useState('');
   const [email, setEmail] = useState('office@chchamber.com');
   const [isSaved, setIsSaved] = useState(false);
 
@@ -161,22 +161,14 @@ export const SettingsView: React.FC = () => {
           <div className="bg-white rounded-xl border border-[#DCE6F1] p-5 shadow-xs space-y-3">
             <h3 className="text-sm font-bold text-[#0D2344]">Connected Banking & Wallet Gateways</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <div className="font-bold text-slate-800">HBL Bank Current Account</div>
-                <div className="text-[11px] text-slate-500">PK36 HABB 0001 2345 6789 01</div>
-                <div className="text-emerald-600 font-bold mt-1">Status: Active & Linked</div>
+              <div className="p-3 rounded-lg border border-dashed border-slate-300 bg-slate-50/60">
+                <div className="font-bold text-slate-700">Bank Account</div>
+                <div className="text-[11px] text-slate-500">Not configured — add your account in Cash Management.</div>
               </div>
 
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <div className="font-bold text-slate-800">JazzCash Merchant Account</div>
-                <div className="text-[11px] text-slate-500">0300-1234567</div>
-                <div className="text-emerald-600 font-bold mt-1">Status: Active & Linked</div>
-              </div>
-
-              <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
-                <div className="font-bold text-slate-800">EasyPaisa Digital Account</div>
-                <div className="text-[11px] text-slate-500">0345-7654321</div>
-                <div className="text-emerald-600 font-bold mt-1">Status: Active & Linked</div>
+              <div className="p-3 rounded-lg border border-dashed border-slate-300 bg-slate-50/60">
+                <div className="font-bold text-slate-700">JazzCash / EasyPaisa</div>
+                <div className="text-[11px] text-slate-500">Not configured — add your wallet in Cash Management.</div>
               </div>
 
               <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">

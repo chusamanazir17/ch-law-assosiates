@@ -271,6 +271,7 @@ export const StampManagementView: React.FC = () => {
       </div>
 
       {/* 4. Stamp Stock Overview + Monthly Stamp Sales + Inventory Summary */}
+      <div id="stamp-section-stock" className="scroll-mt-24" />
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Stamp Stock Overview Table (Span 2) */}
         <div className="lg:col-span-2 bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs">
@@ -434,7 +435,7 @@ export const StampManagementView: React.FC = () => {
         </div>
 
         {/* Recent Stamp Sales */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+        <div id="stamp-section-sales" className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs scroll-mt-24">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Stamp Sales</h3>
             
@@ -456,7 +457,7 @@ export const StampManagementView: React.FC = () => {
         </div>
 
         {/* Recent Purchases */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+        <div id="stamp-section-purchases" className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs scroll-mt-24">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Purchases</h3>
             
@@ -478,7 +479,7 @@ export const StampManagementView: React.FC = () => {
         </div>
 
         {/* Stock Movement History */}
-        <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
+        <div id="stamp-section-adjustments" className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs scroll-mt-24">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Stock Movement</h3>
             

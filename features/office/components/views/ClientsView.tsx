@@ -179,6 +179,12 @@ export const ClientsView: React.FC = () => {
           <Users className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">No clients yet</h3>
           <p className="text-xs text-slate-400 mt-1">Clients you add will appear here. Use "Add New Client" to create your first one.</p>
+          <button
+            onClick={() => setIsNewClientModalOpen(true)}
+            className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add New Client
+          </button>
         </div>
       ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

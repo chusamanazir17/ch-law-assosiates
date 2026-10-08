@@ -530,19 +530,18 @@ export const TaxManagementView: React.FC = () => {
             <span className="text-[10px] text-slate-400 font-semibold">Next 7 Days</span>
           </div>
           <div className="space-y-2 text-xs">
-            {[
-              { client: 'M. Akram & Sons', type: 'Sales Tax Ret.', due: '25-09-2025', fee: 'Rs. 7,500' },
-              { client: 'Haji Aslam Textiles', type: 'Withholding Q3', due: '28-09-2025', fee: 'Rs. 4,000' },
-              { client: 'Dr. Shahzad Tariq', type: 'Income Tax', due: '30-09-2025', fee: 'Rs. 10,000' }
-            ].map(item => (
-              <div key={item.client} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+            {taxCases.filter(tc => tc.dueDate).slice(0, 3).map(tc => (
+              <div key={tc.id} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-[#0D2344]">{item.client}</div>
-                  <div className="text-[10px] text-slate-500">{item.type} • Due: {item.due}</div>
+                  <div className="font-bold text-[#0D2344]">{tc.clientName || 'Tax Case'}</div>
+                  <div className="text-[10px] text-slate-500">{tc.returnType || 'Return'} • Due: {tc.dueDate}</div>
                 </div>
-                <div className="font-bold text-[#B8832A] text-[11px]">{item.fee}</div>
+                <div className="font-bold text-[#B8832A] text-[11px]">{tc.fee ? `Rs. ${Number(tc.fee).toLocaleString()}` : ''}</div>
               </div>
             ))}
+            {taxCases.filter(tc => tc.dueDate).length === 0 && (
+              <div className="p-2 text-center text-slate-400 text-[11px]">No upcoming returns scheduled.</div>
+            )}
           </div>
         </div>
 
@@ -584,13 +583,13 @@ export const TaxManagementView: React.FC = () => {
           </div>
           <div className="space-y-1.5 text-xs">
             {[
-              { doc: 'Bank Statements (12M)', pending: '8 clients pending' },
-              { doc: 'Advance Tax Withholding Certs', pending: '5 clients pending' },
-              { doc: 'Property Purchase Registered Deeds', pending: '3 clients pending' }
-            ].map(d => (
-              <div key={d.doc} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80">
-                <div className="font-semibold text-slate-800 text-[11px]">{d.doc}</div>
-                <div className="text-[10px] text-amber-700 font-medium">{d.pending}</div>
+              'Bank Statements (12M)',
+              'Advance Tax Withholding Certs',
+              'Property Purchase Registered Deeds'
+            ].map(doc => (
+              <div key={doc} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="font-semibold text-slate-800 text-[11px]">{doc}</div>
+                <div className="text-[10px] text-slate-500">Required for return filing</div>
               </div>
             ))}
           </div>
