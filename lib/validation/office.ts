@@ -49,25 +49,30 @@ const uuid = z.string().uuid({ message: "Must be a valid UUID." });
 const optionalUuid = uuid.optional().nullable();
 
 /** Pakistani CNIC: 13 digits, dash-tolerant. Rejects the 'XXXXXXX' placeholder (SEC-06). */
+const emptyToUndef = (v: unknown) =>
+  typeof v === "string" && v.trim() === "" ? undefined : v;
+
 const cnic = z
-  .string()
-  .trim()
-  .regex(/^\d{5}-?\d{7}-?\d{1}$/, {
-    message: "CNIC must be 13 digits (e.g. 36502-1234567-1).",
-  })
-  .refine((v) => !/[xX]/.test(v), { message: "CNIC placeholder values are not allowed." })
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+  .preprocess(
+    emptyToUndef,
+    z
+      .string()
+      .trim()
+      .regex(/^\d{5}-?\d{7}-?\d{1}$/, {
+        message: "CNIC must be 13 digits (e.g. 36502-1234567-1).",
+      })
+      .refine((v) => !/[xX]/.test(v), { message: "CNIC placeholder values are not allowed." })
+      .optional()
+      .nullable()
+  )
+  .transform((v) => (v && (v as string).length > 0 ? v : null));
 
 const email = z
-  .string()
-  .trim()
-  .email({ message: "Email address is invalid." })
-  .max(160)
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+  .preprocess(
+    emptyToUndef,
+    z.string().trim().email({ message: "Email address is invalid." }).max(160).optional().nullable()
+  )
+  .transform((v) => (v && (v as string).length > 0 ? v : null));
 
 // ---------------------------------------------------------------- clients
 
