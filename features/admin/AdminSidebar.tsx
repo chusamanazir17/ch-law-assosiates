@@ -106,8 +106,8 @@ export default function AdminSidebar({
   const sidebarContent = (
     <div
       className={`flex h-full flex-col justify-between overflow-y-auto bg-white dark:bg-[#0b1329] text-[#334155] dark:text-slate-200 border-r border-[#E2E8F0] dark:border-slate-800 ${
-        isReady ? "transition-all duration-300 ease-in-out" : ""
-      } ${isCollapsed ? "w-[72px] px-2 py-4" : "w-64 p-4"}`}
+        isCollapsed ? "w-[72px] px-2 py-4" : "w-64 p-4"
+      }`}
     >
       <div>
         {/* Brand Header */}
@@ -344,8 +344,8 @@ export default function AdminSidebar({
     <>
       {/* Desktop Persistent Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 hidden lg:block ${
-          isReady ? "transition-all duration-300 ease-in-out" : ""
+        className={`fixed inset-y-0 left-0 z-40 hidden lg:block overflow-hidden bg-white dark:bg-[#0b1329] ${
+          isReady ? "transition-[width] duration-300 ease-in-out" : ""
         } ${isCollapsed ? "w-[72px]" : "w-64"}`}
       >
         {sidebarContent}
