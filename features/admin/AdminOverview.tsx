@@ -147,7 +147,13 @@ function MiniSparkline({
   const gradId = `sparkline-grad-${Math.random().toString(36).substring(2, 9)}`;
 
   return (
-    <svg width={width} height={height} className="overflow-visible">
+    <div className="min-w-0 shrink">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="block h-9 w-full max-w-[90px] overflow-visible"
+        preserveAspectRatio="xMaxYMid meet"
+        aria-hidden="true"
+      >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity={fillOpacity} />
@@ -157,6 +163,7 @@ function MiniSparkline({
       <path d={areaD} fill={`url(#${gradId})`} />
       <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+    </div>
   );
 }
 
@@ -986,9 +993,9 @@ export default function AdminOverview() {
       {/* 2. 4 Polished KPI Stat Cards with SVG Sparklines (Screens 1, 2, 3, 4, 8) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Consultation Inquiries */}
-        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex min-w-0 flex-col justify-between">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
                 <MessageSquare className="h-5 w-5" />
               </div>
@@ -1016,9 +1023,9 @@ export default function AdminOverview() {
         </div>
 
         {/* Card 2: Active Tax Reminders */}
-        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex min-w-0 flex-col justify-between">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40 text-[#B8832A] dark:text-[#E5B558] border border-amber-100 dark:border-amber-900/40">
                 <Mail className="h-5 w-5" />
               </div>
@@ -1046,9 +1053,9 @@ export default function AdminOverview() {
         </div>
 
         {/* Card 3: Legal Articles & Guides */}
-        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex min-w-0 flex-col justify-between">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
                 <FileText className="h-5 w-5" />
               </div>
@@ -1076,9 +1083,9 @@ export default function AdminOverview() {
         </div>
 
         {/* Card 4: Impending Statutory Deadlines */}
-        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
+        <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex min-w-0 flex-col justify-between">
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/40">
                 <Calendar className="h-5 w-5" />
               </div>
