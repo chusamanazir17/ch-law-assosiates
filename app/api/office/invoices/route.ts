@@ -1,15 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
+import {
+  requireOfficeAccess,
+  officeErrorResponse,
+} from "@/lib/auth/officePermissions";
 import { listInvoices, createInvoiceRecord, recordInvoicePayment } from "@/lib/services/billing.service";
+import {
+  validateBody,
+  invoiceCreateSchema,
+  paymentCreateSchema,
+} from "@/lib/validation/office";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireOfficeAccess("invoices", "GET", request);
+    if (!auth.ok) return auth.response;
 
     const clientId = request.nextUrl.searchParams.get("client_id") || undefined;
     const status = request.nextUrl.searchParams.get("status") || undefined;
@@ -18,37 +24,53 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, invoices });
   } catch (error: any) {
     console.error("[API Office Invoices GET]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to load invoices" }, { status: 500 });
+    return officeErrorResponse(error, "Failed to load invoices", 500);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireOfficeAccess("invoices", "POST", request);
+    if (!auth.ok) return auth.response;
 
     const body = await request.json();
 
-    // Check if this is a payment recording
+    // Record a payment against an invoice (overpayment-capped server-side).
     if (body.action === "record_payment") {
-      const payment = await recordInvoicePayment({
-        invoice_id: body.invoice_id,
-        client_id: body.client_id,
+      const validated = validateBody(paymentCreateSchema, {
+        invoice_id: body.invoice_id || body.invoiceId,
+        client_id: body.client_id || body.clientId,
         amount: body.amount,
-        payment_method: body.payment_method,
-        payment_account_id: body.payment_account_id,
-        reference_number: body.reference_number,
+        payment_method: body.payment_method || body.paymentMethod,
+        payment_account_id: body.payment_account_id || body.paymentAccountId,
+        reference_number: body.reference_number || body.referenceNumber,
         notes: body.notes,
       });
+      if (!validated.success) {
+        return NextResponse.json({ success: false, error: validated.error }, { status: 400 });
+      }
+
+      const payment = await recordInvoicePayment(validated.data as any);
       return NextResponse.json({ success: true, payment });
     }
 
-    const invoice = await createInvoiceRecord(body);
+    const validated = validateBody(invoiceCreateSchema, {
+      client_id: body.client_id || body.clientId,
+      case_id: body.case_id || body.caseId,
+      due_date: body.due_date || body.dueDate,
+      tax_amount: body.tax_amount ?? body.taxAmount,
+      discount_amount: body.discount_amount ?? body.discountAmount,
+      notes: body.notes,
+      items: body.items,
+    });
+    if (!validated.success) {
+      return NextResponse.json({ success: false, error: validated.error }, { status: 400 });
+    }
+
+    const invoice = await createInvoiceRecord(validated.data as any);
     return NextResponse.json({ success: true, invoice }, { status: 201 });
   } catch (error: any) {
     console.error("[API Office Invoices POST]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to process invoice request" }, { status: 400 });
+    return officeErrorResponse(error, "Failed to process invoice request");
   }
 }

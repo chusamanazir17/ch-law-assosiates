@@ -1,52 +1,63 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
+import {
+  requireOfficeAccess,
+  officeErrorResponse,
+} from "@/lib/auth/officePermissions";
 import { getDailyClosingRecord, saveDailyClosingRecord } from "@/lib/services/finance.service";
+import { validateBody, dailyClosingSchema } from "@/lib/validation/office";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireOfficeAccess("daily-closing", "GET", request);
+    if (!auth.ok) return auth.response;
 
     const date = request.nextUrl.searchParams.get("date") || undefined;
     const closing = await getDailyClosingRecord(date);
     return NextResponse.json({ success: true, closing });
   } catch (error: any) {
     console.error("[API Office Daily Closing GET]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to load daily closing" }, { status: 500 });
+    return officeErrorResponse(error, "Failed to load daily closing", 500);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireOfficeAccess("daily-closing", "POST", request);
+    if (!auth.ok) return auth.response;
 
     const body = await request.json();
-    const closing = await saveDailyClosingRecord({
+
+    // API-3: the ONLY client-supplied figure is the physically counted cash.
+    // opening_cash / cash_in / cash_out / system_cash / difference and the
+    // stamp/bank aggregates are computed server-side from the books.
+    const validated = validateBody(dailyClosingSchema, {
       closing_date: body.closing_date || body.date,
-      opening_cash: Number(body.opening_cash !== undefined ? body.opening_cash : body.openingBalance || 0),
-      cash_in: Number(body.cash_in !== undefined ? body.cash_in : body.cashIn || 0),
-      cash_out: Number(body.cash_out !== undefined ? body.cash_out : body.cashOut || 0),
-      system_cash: Number(body.system_cash !== undefined ? body.system_cash : body.expectedCash || 0),
-      actual_cash: Number(body.actual_cash !== undefined ? body.actual_cash : body.actualCash || 0),
-      difference: Number(body.difference !== undefined ? body.difference : 0),
-      bank_wallets_balance: Number(body.bank_wallets_balance || 0),
-      stamps_sold_count: Number(body.stamps_sold_count || 0),
-      stamps_sold_value: Number(body.stamps_sold_value || 0),
-      status: body.status || "closed",
-      notes: body.notes || body.discrepancyReason || null,
-      closed_by: session.user.id,
+      actual_cash: body.actual_cash ?? body.actualCash,
+      notes: body.notes || body.discrepancyReason,
+    });
+    if (!validated.success) {
+      return NextResponse.json({ success: false, error: validated.error }, { status: 400 });
+    }
+
+    const closingData = validated.data as {
+      closing_date?: string;
+      actual_cash: number;
+      notes: string | null;
+    };
+    const closing = await saveDailyClosingRecord({
+      closing_date: closingData.closing_date,
+      actual_cash: closingData.actual_cash,
+      notes: closingData.notes,
+      closed_by: auth.session.user.id,
+      // FIN-04: only super_admin may amend an already-closed day.
+      allowReopen: auth.session.role === "super_admin",
     });
 
     return NextResponse.json({ success: true, closing }, { status: 201 });
   } catch (error: any) {
     console.error("[API Office Daily Closing POST]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to save daily closing" }, { status: 400 });
+    return officeErrorResponse(error, "Failed to save daily closing");
   }
 }

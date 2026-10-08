@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { X, Lock, Unlock, AlertCircle, CheckCircle2, Calculator } from 'lucide-react';
+import { formatIsoDatePk } from '../utils/pkDates';
 
 export const DailyClosingModal: React.FC = () => {
   const { isCloseDayModalOpen, setIsCloseDayModalOpen, dailyClosing, closeDay, reopenDay } = useOffice();
@@ -9,6 +10,17 @@ export const DailyClosingModal: React.FC = () => {
   const [discrepancyReason, setDiscrepancyReason] = useState('');
   const [reopenReason, setReopenReason] = useState('');
   const [isReopening, setIsReopening] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Refresh the counted-cash default whenever the modal opens with fresh figures.
+  useEffect(() => {
+    if (isCloseDayModalOpen && !dailyClosing.isClosed) {
+      setActualCash(dailyClosing.expectedCash);
+      setDiscrepancyReason('');
+      setFormError('');
+    }
+  }, [isCloseDayModalOpen]);
 
   if (!isCloseDayModalOpen) return null;
 
@@ -18,28 +30,49 @@ export const DailyClosingModal: React.FC = () => {
 
   const handleClose = (e: React.FormEvent) => {
     e.preventDefault();
-    if (actualCash === '') {
-      alert('Please enter actual cash counted in drawer');
+    if (isSubmitting) return;
+    setFormError('');
+
+    if (actualCash === '' || Number.isNaN(currentActual) || currentActual < 0) {
+      setFormError('Please enter the actual cash counted in the drawer (0 or more).');
       return;
     }
     if (diff !== 0 && !discrepancyReason.trim()) {
-      alert('Please state a reason for the discrepancy before closing');
+      setFormError('A discrepancy explanation is required before locking the day.');
       return;
     }
 
-    closeDay(currentActual, discrepancyReason);
-    setIsCloseDayModalOpen(false);
+    setIsSubmitting(true);
+    try {
+      closeDay(currentActual, discrepancyReason);
+      setIsCloseDayModalOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not close the day.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReopen = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setFormError('');
+
     if (!reopenReason.trim()) {
-      alert('Please provide a reason to reopen today\'s closing');
+      setFormError('Please provide an audit reason to reopen the closed day.');
       return;
     }
-    reopenDay(reopenReason);
-    setIsReopening(false);
-    setIsCloseDayModalOpen(false);
+
+    setIsSubmitting(true);
+    try {
+      reopenDay(reopenReason);
+      setIsReopening(false);
+      setIsCloseDayModalOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not reopen the day.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,6 +133,11 @@ export const DailyClosingModal: React.FC = () => {
           </div>
         ) : isReopening ? (
           <form onSubmit={handleReopen} className="p-5 space-y-4 text-xs">
+            {formError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+                {formError}
+              </div>
+            )}
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
@@ -132,19 +170,25 @@ export const DailyClosingModal: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
               >
                 <Unlock className="w-4 h-4" />
-                <span>Confirm Reopen</span>
+                <span>{isSubmitting ? 'Reopening…' : 'Confirm Reopen'}</span>
               </button>
             </div>
           </form>
         ) : (
           <form onSubmit={handleClose} className="p-5 space-y-4 text-xs">
+            {formError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+                {formError}
+              </div>
+            )}
             <div className="bg-[#F8FAFC] p-3 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between text-slate-600">
                 <span>Date:</span>
-                <span className="font-bold text-slate-800">{dailyClosing.date}</span>
+                <span className="font-bold text-slate-800">{formatIsoDatePk(dailyClosing.date)}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600">
                 <span>Opening Cash:</span>
@@ -221,10 +265,11 @@ export const DailyClosingModal: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-[#96691B] hover:bg-[#B8832A] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-[#96691B] hover:bg-[#B8832A] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5"
               >
                 <Lock className="w-4 h-4" />
-                <span>Confirm & Lock Day</span>
+                <span>{isSubmitting ? 'Locking…' : 'Confirm & Lock Day'}</span>
               </button>
             </div>
           </form>

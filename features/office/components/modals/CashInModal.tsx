@@ -14,6 +14,8 @@ export const CashInModal: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [generateReceipt, setGenerateReceipt] = useState(true);
   const [staff, setStaff] = useState('Usama');
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isQuickCashInOpen) return null;
 
@@ -27,27 +29,47 @@ export const CashInModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientName || !amount || Number(amount) <= 0) {
-      alert('Please enter a valid client name and amount');
+    if (isSubmitting) return;
+    setFormError('');
+
+    const amt = Number(amount);
+    if (!clientName.trim()) {
+      setFormError('Please enter the client name.');
+      return;
+    }
+    if (amount === '' || Number.isNaN(amt) || amt <= 0) {
+      setFormError('Please enter a valid amount greater than zero.');
+      return;
+    }
+    if (!account) {
+      setFormError('Please select the account to deposit into.');
       return;
     }
 
-    recordCashIn({
-      clientName,
-      clientId: clientId || undefined,
-      serviceName,
-      amount: Number(amount),
-      account,
-      notes,
-      staff,
-      createReceipt: generateReceipt
-    });
+    setIsSubmitting(true);
+    try {
+      recordCashIn({
+        clientName: clientName.trim(),
+        clientId: clientId || undefined,
+        serviceName,
+        amount: amt,
+        account,
+        notes,
+        staff,
+        createReceipt: generateReceipt
+      });
 
-    setIsQuickCashInOpen(false);
-    // Reset form
-    setClientName('');
-    setAmount(5000);
-    setNotes('');
+      setIsQuickCashInOpen(false);
+      // Reset form
+      setClientName('');
+      setAmount(5000);
+      setNotes('');
+      setFormError('');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not record the cash in entry.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -76,6 +98,11 @@ export const CashInModal: React.FC = () => {
 
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {formError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+              {formError}
+            </div>
+          )}
           {/* Client Selection */}
           <div>
             <label className="block text-slate-700 font-semibold mb-1">Client Name *</label>
@@ -210,10 +237,11 @@ export const CashInModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#10B981] hover:bg-[#059669] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              disabled={isSubmitting}
+              className="px-5 py-2 bg-[#10B981] hover:bg-[#059669] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Record Cash In</span>
+              <span>{isSubmitting ? 'Recording…' : 'Record Cash In'}</span>
             </button>
           </div>
         </form>

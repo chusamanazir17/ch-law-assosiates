@@ -30,6 +30,8 @@ function rowToPage(row: PageRow): PageContentItem {
     leadContent: row.lead_content ?? "",
     metaTitle: row.meta_title ?? "",
     metaDescription: row.meta_description ?? "",
+    canonicalUrl: row.canonical_url ?? "",
+    ogImage: row.og_image ?? "",
     status: row.status === "draft" ? "draft" : "published",
     updatedAt: row.updated_at,
   };
@@ -51,6 +53,8 @@ function pageToRow(page: PageContentItem) {
     lead_content: page.leadContent ?? "",
     meta_title: page.metaTitle ?? "",
     meta_description: page.metaDescription ?? "",
+    canonical_url: page.canonicalUrl?.trim() ? page.canonicalUrl.trim() : null,
+    og_image: page.ogImage?.trim() ? page.ogImage.trim() : null,
     status: page.status ?? "published",
   };
 }
@@ -70,6 +74,8 @@ export interface PageContentItem {
   leadContent: string;
   metaTitle: string;
   metaDescription: string;
+  canonicalUrl?: string;
+  ogImage?: string;
   status: "published" | "draft";
   updatedAt: string;
 }
@@ -330,6 +336,32 @@ export async function getAllPagesContent(): Promise<PageContentItem[]> {
 export async function getPageContentByRoute(route: string): Promise<PageContentItem | null> {
   const all = await getAllPagesContent();
   return all.find((p) => p.route === route || p.id === route) || null;
+}
+
+/**
+ * Delete a page by ID or route. The built-in pages (home, about, updates,
+ * service-*) are protected — only custom pages can be deleted.
+ */
+export async function deletePageContent(idOrRoute: string): Promise<boolean> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
+  }
+  const db = client as CmsDbClient;
+
+  const protectedIds = new Set(DEFAULT_PAGES.map((p) => p.id));
+  const all = await getAllPagesContent();
+  const target = all.find((p) => p.id === idOrRoute || p.route === idOrRoute);
+  if (!target) return false;
+  if (protectedIds.has(target.id)) {
+    throw new Error(`"${target.title}" is a built-in page and cannot be deleted. Set it to Draft to hide it instead.`);
+  }
+
+  const { error } = await db.from("cms_pages").delete().eq("id", target.id);
+  if (error) throw error;
+
+  invalidateCmsCache(CACHE_KEY);
+  return true;
 }
 
 export async function updatePageContent(pageData: Partial<PageContentItem>): Promise<PageContentItem> {

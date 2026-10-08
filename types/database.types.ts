@@ -293,6 +293,10 @@ export type Database = {
           status: 'draft' | 'published';
           views_count: number;
           published_at: string | null;
+          seo_title: string | null;
+          meta_description: string | null;
+          canonical_url: string | null;
+          og_image: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -308,6 +312,10 @@ export type Database = {
           status?: 'draft' | 'published';
           views_count?: number;
           published_at?: string | null;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -323,6 +331,10 @@ export type Database = {
           status?: 'draft' | 'published';
           views_count?: number;
           published_at?: string | null;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -377,6 +389,10 @@ export type Database = {
           items: Json;
           active: boolean;
           sort_order: number;
+          seo_title: string | null;
+          meta_description: string | null;
+          canonical_url: string | null;
+          og_image: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -395,6 +411,10 @@ export type Database = {
           items?: Json;
           active?: boolean;
           sort_order?: number;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -413,6 +433,10 @@ export type Database = {
           items?: Json;
           active?: boolean;
           sort_order?: number;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -434,6 +458,8 @@ export type Database = {
           lead_content: string;
           meta_title: string;
           meta_description: string;
+          canonical_url: string | null;
+          og_image: string | null;
           status: string;
           created_at: string;
           updated_at: string;
@@ -453,6 +479,8 @@ export type Database = {
           lead_content?: string;
           meta_title?: string;
           meta_description?: string;
+          canonical_url?: string | null;
+          og_image?: string | null;
           status?: string;
           created_at?: string;
           updated_at?: string;
@@ -472,7 +500,54 @@ export type Database = {
           lead_content?: string;
           meta_title?: string;
           meta_description?: string;
+          canonical_url?: string | null;
+          og_image?: string | null;
           status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      categories: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string;
+          active: boolean;
+          sort_order: number;
+          seo_title: string | null;
+          meta_description: string | null;
+          canonical_url: string | null;
+          og_image: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string;
+          active?: boolean;
+          sort_order?: number;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string;
+          active?: boolean;
+          sort_order?: number;
+          seo_title?: string | null;
+          meta_description?: string | null;
+          canonical_url?: string | null;
+          og_image?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -850,6 +925,7 @@ export type Database = {
       };
       clients: {
         Row: {
+          deleted_at: string | null;
           id: string;
           client_code: string;
           full_name: string;
@@ -867,6 +943,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           client_code?: string;
           full_name: string;
@@ -884,6 +961,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           client_code?: string;
           full_name?: string;
@@ -981,6 +1059,7 @@ export type Database = {
       };
       cases: {
         Row: {
+          deleted_at: string | null;
           id: string;
           case_number: string;
           title: string;
@@ -998,6 +1077,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           case_number: string;
           title: string;
@@ -1015,6 +1095,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           case_number?: string;
           title?: string;
@@ -1107,6 +1188,7 @@ export type Database = {
       };
       hearings: {
         Row: {
+          deleted_at: string | null;
           id: string;
           case_id: string;
           hearing_date: string;
@@ -1121,6 +1203,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           case_id: string;
           hearing_date: string;
@@ -1135,6 +1218,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           case_id?: string;
           hearing_date?: string;
@@ -1316,6 +1400,7 @@ export type Database = {
       };
       tasks: {
         Row: {
+          deleted_at: string | null;
           id: string;
           title: string;
           description: string | null;
@@ -1329,6 +1414,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           title: string;
           description?: string | null;
@@ -1342,6 +1428,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           title?: string;
           description?: string | null;
@@ -1421,6 +1508,7 @@ export type Database = {
       };
       invoices: {
         Row: {
+          deleted_at: string | null;
           id: string;
           invoice_number: string;
           client_id: string;
@@ -1438,6 +1526,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           invoice_number: string;
           client_id: string;
@@ -1455,6 +1544,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           invoice_number?: string;
           client_id?: string;
@@ -1585,6 +1675,7 @@ export type Database = {
       };
       payments: {
         Row: {
+          deleted_at: string | null;
           id: string;
           invoice_id: string | null;
           client_id: string;
@@ -1598,6 +1689,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           invoice_id?: string | null;
           client_id: string;
@@ -1611,6 +1703,7 @@ export type Database = {
           created_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           invoice_id?: string | null;
           client_id?: string;
@@ -1653,6 +1746,42 @@ export type Database = {
             referencedColumns: ["id"];
           }
         ];
+      };
+      faqs: {
+        Row: {
+          id: string;
+          question: string;
+          answer: string;
+          category: string;
+          page: string;
+          display_order: number;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          question: string;
+          answer: string;
+          category?: string;
+          page?: string;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          question?: string;
+          answer?: string;
+          category?: string;
+          page?: string;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       financial_ledger: {
         Row: {
@@ -1726,6 +1855,7 @@ export type Database = {
       };
       expenses: {
         Row: {
+          deleted_at: string | null;
           id: string;
           account_id: string | null;
           category: string;
@@ -1738,6 +1868,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           account_id?: string | null;
           category: string;
@@ -1750,6 +1881,7 @@ export type Database = {
           created_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           account_id?: string | null;
           category?: string;
@@ -1780,6 +1912,7 @@ export type Database = {
       };
       stamp_products: {
         Row: {
+          deleted_at: string | null;
           id: string;
           name: string;
           denomination: number;
@@ -1792,6 +1925,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           name: string;
           denomination: number;
@@ -1804,6 +1938,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           name?: string;
           denomination?: number;
@@ -1819,6 +1954,7 @@ export type Database = {
       };
       stamp_stock_movements: {
         Row: {
+          deleted_at: string | null;
           id: string;
           stamp_product_id: string;
           movement_type: 'opening' | 'purchase' | 'sale' | 'adjustment_in' | 'adjustment_out' | 'reversal';
@@ -1832,6 +1968,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           stamp_product_id: string;
           movement_type: 'opening' | 'purchase' | 'sale' | 'adjustment_in' | 'adjustment_out' | 'reversal';
@@ -1845,6 +1982,7 @@ export type Database = {
           created_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           stamp_product_id?: string;
           movement_type?: 'opening' | 'purchase' | 'sale' | 'adjustment_in' | 'adjustment_out' | 'reversal';
@@ -1883,6 +2021,7 @@ export type Database = {
       };
       receipts: {
         Row: {
+          deleted_at: string | null;
           id: string;
           receipt_number: string;
           client_id: string | null;
@@ -1897,6 +2036,7 @@ export type Database = {
           created_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           receipt_number: string;
           client_id?: string | null;
@@ -1911,6 +2051,7 @@ export type Database = {
           created_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           receipt_number?: string;
           client_id?: string | null;
@@ -2080,6 +2221,7 @@ export type Database = {
       };
       tax_cases: {
         Row: {
+          deleted_at: string | null;
           id: string;
           case_number: string;
           client_id: string;
@@ -2097,6 +2239,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           case_number: string;
           client_id: string;
@@ -2114,6 +2257,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           case_number?: string;
           client_id?: string;
@@ -2149,6 +2293,7 @@ export type Database = {
       };
       service_orders: {
         Row: {
+          deleted_at: string | null;
           id: string;
           order_number: string;
           client_id: string | null;
@@ -2166,6 +2311,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          deleted_at?: string | null;
           id?: string;
           order_number: string;
           client_id?: string | null;
@@ -2183,6 +2329,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          deleted_at?: string | null;
           id?: string;
           order_number?: string;
           client_id?: string | null;

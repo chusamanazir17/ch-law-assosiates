@@ -25,6 +25,7 @@ import {
   Building2,
 } from "lucide-react";
 import { SITE } from "@/lib/site";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 interface SessionData {
   authenticated: boolean;
@@ -57,7 +58,7 @@ export default function AdminPortalSelector() {
   useEffect(() => {
     async function checkSession() {
       try {
-        const res = await fetch("/api/admin/session", { cache: "no-store" });
+        const res = await apiFetch("/api/admin/session", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           setSession(data);
@@ -111,7 +112,7 @@ export default function AdminPortalSelector() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await apiFetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -140,7 +141,7 @@ export default function AdminPortalSelector() {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await apiFetch("/api/admin/logout", { method: "POST" });
       setSession({ authenticated: false, role: null });
       router.refresh();
     } catch {

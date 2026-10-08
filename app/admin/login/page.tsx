@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Shield, Lock, User, AlertCircle, Loader2, ArrowLeft, KeyRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SITE } from "@/lib/site";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 function LoginForm() {
   const router = useRouter();
@@ -42,7 +43,7 @@ function LoginForm() {
 
     try {
       // 1. Direct credentials verification via API
-      const res = await fetch("/api/admin/login", {
+      const res = await apiFetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

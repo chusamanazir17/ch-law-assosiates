@@ -25,6 +25,7 @@ export async function listTasks(filter?: { status?: string; assignedTo?: string 
       case:cases(case_number),
       client:clients(full_name)
     `)
+    .is("deleted_at", null)
     .order("due_date", { ascending: true });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -82,17 +83,30 @@ export async function createTaskRecord(dto: CreateTaskDTO): Promise<OfficeTask> 
 export async function updateTaskStatus(id: string, status: OfficeTask["status"]): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("tasks")
     .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
 
   if (error) throw new Error(`Failed to update task: ${error.message}`);
+  if (!data) {
+    const err = new Error("Task not found.");
+    (err as any).statusCode = 404;
+    throw err;
+  }
 }
 
 export async function deleteTaskRecord(id: string): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase.from("tasks").delete().eq("id", id);
+  // Soft delete: hidden from lists, retained for history.
+  const { error } = await supabase
+    .from("tasks")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
   if (error) throw new Error(`Failed to delete task: ${error.message}`);
 }

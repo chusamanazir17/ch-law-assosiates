@@ -33,6 +33,10 @@ export interface CmsService {
   items: SubService[];
   active: boolean;
   order: number;
+  seoTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
   updatedAt: string;
 }
 
@@ -268,6 +272,10 @@ function rowToService(row: ServiceRow): CmsService {
     items: Array.isArray(row.items) ? (row.items as unknown as CmsService["items"]) : [],
     active: row.active ?? true,
     order: row.sort_order ?? 100,
+    seoTitle: row.seo_title ?? "",
+    metaDescription: row.meta_description ?? "",
+    canonicalUrl: row.canonical_url ?? "",
+    ogImage: row.og_image ?? "",
     updatedAt: row.updated_at,
   };
 }
@@ -288,6 +296,10 @@ function serviceToRow(service: CmsService) {
     items: JSON.parse(JSON.stringify(service.items ?? [])),
     active: service.active ?? true,
     sort_order: service.order ?? 100,
+    seo_title: service.seoTitle?.trim() ? service.seoTitle.trim() : null,
+    meta_description: service.metaDescription?.trim() ? service.metaDescription.trim() : null,
+    canonical_url: service.canonicalUrl?.trim() ? service.canonicalUrl.trim() : null,
+    og_image: service.ogImage?.trim() ? service.ogImage.trim() : null,
   };
 }
 
@@ -359,6 +371,15 @@ export async function saveService(serviceData: Partial<CmsService> & { name: str
   const slug = serviceData.slug || serviceData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const existing = all.find((s) => s.id === serviceData.id || s.slug === slug) || null;
 
+  // Enforce slug uniqueness against the table (excluding the service being edited)
+  const slugConflict = await db.from("cms_services").select("id").eq("slug", slug).limit(1).maybeSingle();
+  if (slugConflict.error) {
+    throw new Error(`Unable to verify service slug uniqueness: ${slugConflict.error.message}`);
+  }
+  if (slugConflict.data && slugConflict.data.id !== existing?.id) {
+    throw new Error(`A service with the slug "${slug}" already exists. Choose a different slug.`);
+  }
+
   const nowIso = new Date().toISOString();
 
   if (existing) {
@@ -400,6 +421,27 @@ export async function saveService(serviceData: Partial<CmsService> & { name: str
   return createdService;
 }
 
+/**
+ * Check whether a service slug is available (no other service uses it).
+ * Used by the admin editor's live uniqueness check.
+ */
+export async function isServiceSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+  const client = await getCmsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured.");
+  }
+  const db = client as CmsDbClient;
+  const { data, error } = await db
+    .from("cms_services")
+    .select("id")
+    .eq("slug", slug.trim().toLowerCase())
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Unable to verify service slug uniqueness: ${error.message}`);
+  if (!data) return true;
+  return excludeId ? data.id === excludeId : false;
+}
+
 export async function deleteService(idOrSlug: string): Promise<boolean> {
   const client = await getCmsClient();
   if (!client) {
@@ -407,14 +449,20 @@ export async function deleteService(idOrSlug: string): Promise<boolean> {
   }
   const db = client as CmsDbClient;
 
-  const { data, error } = await db
-    .from("cms_services")
-    .delete()
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
-    .select("id");
+  // Look up the row first (by id, then by slug) and delete by primary key.
+  // This avoids postgREST `.or()` escaping pitfalls with user-supplied values.
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+  let column: "id" | "slug" = isUuid ? "id" : "slug";
+  let { data: lookup } = await db.from("cms_services").select("id").eq(column, idOrSlug).limit(1).maybeSingle();
+  if (!lookup && column === "id") {
+    column = "slug";
+    ({ data: lookup } = await db.from("cms_services").select("id").eq("slug", idOrSlug).limit(1).maybeSingle());
+  }
+  if (!lookup) return false;
+
+  const { error } = await db.from("cms_services").delete().eq("id", lookup.id).select("id");
 
   if (error) throw error;
-  const deleted = (data ?? []).length > 0;
-  if (deleted) invalidateCmsCache(CACHE_KEY);
-  return deleted;
+  invalidateCmsCache(CACHE_KEY);
+  return true;
 }

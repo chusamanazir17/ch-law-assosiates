@@ -63,7 +63,8 @@ export const CopyableText: React.FC<CopyableTextProps> = ({
   };
 
   return (
-    <span
+    <button
+      type="button"
       onClick={(e) => {
         e.stopPropagation();
         if (longPressed.current) {
@@ -78,7 +79,8 @@ export const CopyableText: React.FC<CopyableTextProps> = ({
       onTouchStart={startPress}
       onTouchEnd={endPress}
       title={`Click or long-press to copy ${label}`}
-      className={`group/ct inline-flex items-center gap-1 cursor-pointer align-middle transition-colors hover:text-[#B8832A] dark:hover:text-sky-300 ${className}`}
+      aria-label={`Copy ${label} to clipboard`}
+      className={`group/ct inline-flex items-center gap-1 cursor-pointer align-middle text-inherit transition-colors hover:text-[#B8832A] dark:hover:text-sky-300 ${className}`}
     >
       {children ?? value}
       {copied ? (
@@ -86,6 +88,6 @@ export const CopyableText: React.FC<CopyableTextProps> = ({
       ) : (
         <Copy className="w-3 h-3 opacity-0 group-hover/ct:opacity-60 shrink-0 transition-opacity" />
       )}
-    </span>
+    </button>
   );
 };

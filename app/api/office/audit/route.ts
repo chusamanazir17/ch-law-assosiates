@@ -1,51 +1,44 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getUnifiedSession, canAccessOfficeSystem } from "@/lib/services/auth.service";
-import { listAuditLogs, recordAuditLog } from "@/lib/services/audit.service";
+import {
+  requireOfficeAccess,
+  officeErrorResponse,
+} from "@/lib/auth/officePermissions";
+import { listAuditLogs } from "@/lib/services/audit.service";
+import { clampLimitParam } from "@/lib/validation/office";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
+    // RBAC-2: audit logs are readable by super_admin / office_admin only,
+    // matching the RLS intent (the old service-role read nullified it).
+    const auth = await requireOfficeAccess("audit", "GET", request);
+    if (!auth.ok) return auth.response;
 
     const entityType = request.nextUrl.searchParams.get("entity_type") || undefined;
-    const limit = request.nextUrl.searchParams.get("limit")
-      ? parseInt(request.nextUrl.searchParams.get("limit")!, 10)
-      : 100;
+    // API-5: clamp the attacker-controlled limit.
+    const limit = clampLimitParam(request.nextUrl.searchParams.get("limit"), 100, 500);
 
     const logs = await listAuditLogs({ entityType, limit });
     return NextResponse.json({ success: true, logs });
   } catch (error: any) {
     console.error("[API Office Audit GET]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to load audit logs" }, { status: 500 });
+    return officeErrorResponse(error, "Failed to load audit logs", 500);
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getUnifiedSession();
-    if (!session || !canAccessOfficeSystem(session.role)) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    await recordAuditLog({
-      user_id: session.user.id,
-      user_name: session.profile?.full_name || "Office Staff",
-      user_role: session.role,
-      action: body.action,
-      entity_type: body.entity_type || body.module || "General",
-      entity_id: body.entity_id || body.recordId || null,
-      details: body.details || null,
-      ip_address: request.headers.get("x-forwarded-for") || undefined,
-    });
-
-    return NextResponse.json({ success: true }, { status: 201 });
-  } catch (error: any) {
-    console.error("[API Office Audit POST]", error);
-    return NextResponse.json({ success: false, error: error.message || "Failed to record audit log" }, { status: 400 });
-  }
+/**
+ * API-4: the client-side audit write path is removed. Audit rows must only be
+ * emitted server-side (lib/services/audit.service.ts recordAuditLog) with the
+ * session identity — never from arbitrary client-supplied action/entity data.
+ */
+export async function POST() {
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        "Direct audit-log writes are disabled. Audit entries are recorded server-side only.",
+    },
+    { status: 405 }
+  );
 }

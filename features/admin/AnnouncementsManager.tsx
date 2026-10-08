@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { SiteAnnouncement } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 type AnnouncementTone = "info" | "warning" | "danger" | "dark";
 
@@ -45,7 +46,7 @@ export default function AnnouncementsManager() {
   const loadAnnouncements = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/announcements");
+      const res = await apiFetch("/api/admin/announcements");
       const data = await res.json();
       if (data.success && Array.isArray(data.announcements)) {
         setAnnouncements(data.announcements);
@@ -88,7 +89,7 @@ export default function AnnouncementsManager() {
 
   const handleToggleActive = async (ann: SiteAnnouncement) => {
     try {
-      const res = await fetch("/api/admin/announcements", {
+      const res = await apiFetch("/api/admin/announcements", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: ann.id }),
@@ -115,7 +116,7 @@ export default function AnnouncementsManager() {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
 
     try {
-      const res = await fetch(`/api/admin/announcements?id=${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`/api/admin/announcements?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -152,7 +153,7 @@ export default function AnnouncementsManager() {
     };
 
     try {
-      const res = await fetch("/api/admin/announcements", {
+      const res = await apiFetch("/api/admin/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

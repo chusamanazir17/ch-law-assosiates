@@ -13,24 +13,24 @@ interface MonthlyBarChartProps {
   title?: string;
 }
 
-const defaultStampData: MonthlyDataPoint[] = [
-  { month: 'Apr', value: 28000 },
-  { month: 'May', value: 32000 },
-  { month: 'Jun', value: 45000 },
-  { month: 'Jul', value: 38000 },
-  { month: 'Aug', value: 52000 },
-  { month: 'Sep', value: 34300 }
-];
-
 export const MonthlyBarChart: React.FC<MonthlyBarChartProps> = ({
-  data = defaultStampData,
+  data = [],
   barColor = '#3B82F6',
   height = 140,
   valuePrefix = 'Rs. '
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const maxValue = Math.max(...data.map(d => d.value), 60000);
+  // No fabricated demo data: an empty dataset renders an honest empty state.
+  if (data.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center text-xs text-slate-400" style={{ height: `${height}px` }}>
+        No data yet — figures will chart here from live records
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(d => d.value), 1);
   const chartHeight = height - 25;
 
   return (

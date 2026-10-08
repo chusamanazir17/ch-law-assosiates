@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
 import { CopyableText } from '../common/CopyableText';
+import { pkTodayLabel, formatIsoDatePk } from '../utils/pkDates';
 import {
   Wallet,
   ArrowUp,
@@ -52,7 +53,9 @@ export const DashboardView: React.FC = () => {
   } = useOffice();
 
   // 1. Live Dynamic Calculations for Large Cards
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // WF-27 fix: "today" is computed in Asia/Karachi (the business timezone),
+  // formatted to match the date portion of ledger strings ("DD-MM-YYYY ...").
+  const pkToday = useMemo(() => pkTodayLabel(), []);
 
   const { todayCashIn, todayCashOut, totalCashInCount, totalCashOutCount } = useMemo(() => {
     let inSum = 0;
@@ -61,7 +64,9 @@ export const DashboardView: React.FC = () => {
     let outCount = 0;
 
     transactions.forEach(tx => {
-      const isToday = tx.dateTime?.startsWith(todayStr) || tx.dateTime?.includes(todayStr);
+      // Ledger strings are "DD-MM-YYYY HH:MM AM/PM"; the PK day label matches
+      // their date portion exactly (Asia/Karachi day boundary).
+      const isToday = (tx.dateTime || '').startsWith(pkToday);
       if (tx.type === 'IN') {
         inCount++;
         if (isToday) inSum += Number(tx.amount || 0);
@@ -71,16 +76,13 @@ export const DashboardView: React.FC = () => {
       }
     });
 
-    const finalIn = inSum > 0 ? inSum : Number(dailyClosing?.cashIn || 0);
-    const finalOut = outSum > 0 ? outSum : Number(dailyClosing?.cashOut || 0);
-
     return {
-      todayCashIn: finalIn,
-      todayCashOut: finalOut,
+      todayCashIn: inSum,
+      todayCashOut: outSum,
       totalCashInCount: inCount,
       totalCashOutCount: outCount
     };
-  }, [transactions, todayStr, dailyClosing]);
+  }, [transactions, pkToday]);
 
   // 2. Compact Metrics Calculations
   const metrics = useMemo(() => {
@@ -107,6 +109,7 @@ export const DashboardView: React.FC = () => {
       (accountBalances.bankAccount || 0) +
       (accountBalances.jazzCash || 0) +
       (accountBalances.easyPaisa || 0);
+    const serviceIncomeTotal = stampsSoldAmount + taxTotal + composingTotal;
 
     return {
       stampsSoldQty,
@@ -118,7 +121,8 @@ export const DashboardView: React.FC = () => {
       outstandingCount: outstandingClientsList.length,
       totalOutstanding,
       todayNet,
-      combinedLiquidity
+      combinedLiquidity,
+      serviceIncomeTotal
     };
   }, [stampStock, stampMovements, serviceOrders, taxCases, clients, todayCashIn, todayCashOut, accountBalances]);
 
@@ -134,11 +138,10 @@ export const DashboardView: React.FC = () => {
     }));
   }, [transactions]);
 
-  // 4. Outstanding Clients
+  // 4. Outstanding Clients — only clients that actually owe money.
   const outstandingClients = useMemo(() => {
     const list = clients.filter(c => (c.outstanding || 0) > 0);
-    const displayList = list.length > 0 ? list : clients;
-    return displayList.slice(0, 4).map(c => ({
+    return list.slice(0, 4).map(c => ({
       client: c.name,
       service: c.businessName || c.taxStatus || 'Client',
       total: c.totalBilling || 0,
@@ -205,11 +208,39 @@ export const DashboardView: React.FC = () => {
     });
   }, [auditLogs]);
 
-  // Total collected revenue across all income transactions
-  const totalRevenue = useMemo(() => {
-    const txIn = transactions.filter(t => t.type === 'IN').reduce((acc, t) => acc + (t.amount || 0), 0);
-    return txIn > 0 ? txIn : metrics.stampsSoldAmount + metrics.taxTotal + metrics.composingTotal;
-  }, [transactions, metrics]);
+  // Donut segments derived from live figures — never hardcoded proportions.
+  const serviceSegments = useMemo(() => {
+    const total = metrics.serviceIncomeTotal;
+    const defs = [
+      { label: 'Stamps', value: metrics.stampsSoldAmount, color: '#10B981' },
+      { label: 'Tax', value: metrics.taxTotal, color: '#3B82F6' },
+      { label: 'Composing', value: metrics.composingTotal, color: '#F59E0B' }
+    ];
+    let acc = 0;
+    return defs.map(d => {
+      const pct = total > 0 ? (d.value / total) * 100 : 0;
+      const seg = { ...d, pct, offset: acc };
+      acc += pct;
+      return seg;
+    });
+  }, [metrics]);
+
+  const accountSegments = useMemo(() => {
+    const total = metrics.combinedLiquidity;
+    const defs = [
+      { label: 'Cash', value: accountBalances.cashOffice || 0, color: '#0D9488' },
+      { label: 'Bank', value: accountBalances.bankAccount || 0, color: '#2563EB' },
+      { label: 'JazzCash', value: accountBalances.jazzCash || 0, color: '#F59E0B' },
+      { label: 'EasyPaisa', value: accountBalances.easyPaisa || 0, color: '#0EA5E9' }
+    ];
+    let acc = 0;
+    return defs.map(d => {
+      const pct = total > 0 ? (d.value / total) * 100 : 0;
+      const seg = { ...d, pct, offset: acc };
+      acc += pct;
+      return seg;
+    });
+  }, [metrics, accountBalances]);
 
   return (
     <div className="space-y-5">
@@ -272,7 +303,7 @@ export const DashboardView: React.FC = () => {
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-admin truncate">Today's Cash Out</div>
               <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-50 tracking-tight font-admin tabular-nums mt-0.5 flex flex-wrap items-baseline gap-x-1">
                 <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500">Rs.</span>
-                <CopyableText value={String(todayCashIn)} label="cash out amount" className="text-inherit">
+                <CopyableText value={String(todayCashOut)} label="cash out amount" className="text-inherit">
                   {todayCashOut.toLocaleString()}
                 </CopyableText>
               </div>
@@ -491,15 +522,25 @@ export const DashboardView: React.FC = () => {
             </div>
           </div>
 
-          {/* Bar Chart Visualization */}
+          {/* Bar Chart Visualization — bar heights proportional to live figures, no artificial minimums */}
           <div className="h-44 flex items-end justify-between gap-2 pt-4 px-2 border-b border-slate-100 dark:border-slate-800">
-            {[
-              { day: 'Cash In', inc: Math.min(100, Math.max(15, (todayCashIn / (totalRevenue || 1)) * 100)), exp: 0 },
-              { day: 'Cash Out', inc: 0, exp: Math.min(100, Math.max(15, (todayCashOut / (todayCashIn || 1)) * 60)) },
-              { day: 'Stamps', inc: Math.min(100, Math.max(25, (metrics.stampsSoldAmount / (totalRevenue || 1)) * 100)), exp: 10 },
-              { day: 'Tax', inc: Math.min(100, Math.max(20, (metrics.taxTotal / (totalRevenue || 1)) * 100)), exp: 5 },
-              { day: 'Orders', inc: Math.min(100, Math.max(20, (metrics.composingTotal / (totalRevenue || 1)) * 100)), exp: 15 },
-            ].map(b => (
+            {(() => {
+              const denom = Math.max(
+                todayCashIn,
+                todayCashOut,
+                metrics.stampsSoldAmount,
+                metrics.taxTotal,
+                metrics.composingTotal,
+                1
+              );
+              return [
+                { day: 'Cash In', inc: (todayCashIn / denom) * 100, exp: 0 },
+                { day: 'Cash Out', inc: 0, exp: (todayCashOut / denom) * 100 },
+                { day: 'Stamps', inc: (metrics.stampsSoldAmount / denom) * 100, exp: 0 },
+                { day: 'Tax', inc: (metrics.taxTotal / denom) * 100, exp: 0 },
+                { day: 'Orders', inc: (metrics.composingTotal / denom) * 100, exp: 0 },
+              ];
+            })().map(b => (
               <div key={b.day} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
                 <div className="w-full flex items-end justify-center gap-1 h-32">
                   <div style={{ height: `${b.inc}%` }} className="w-3 bg-emerald-500 rounded-t-sm transition-all duration-300"></div>
@@ -519,17 +560,25 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">
-            {/* Donut graphic */}
+            {/* Donut graphic — segments proportional to live figures */}
             <div className="relative w-28 h-28 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E2E8F0" strokeWidth="4.5" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" strokeWidth="4.5" strokeDasharray="40, 100" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3B82F6" strokeWidth="4.5" strokeDasharray="30, 100" strokeDashoffset="-40" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="30, 100" strokeDashoffset="-70" />
+                {metrics.serviceIncomeTotal > 0 && serviceSegments.map(seg => (
+                  <path
+                    key={seg.label}
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke={seg.color}
+                    strokeWidth="4.5"
+                    strokeDasharray={`${seg.pct}, 100`}
+                    strokeDashoffset={-seg.offset}
+                  />
+                ))}
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
                 <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight max-w-[88px]">
-                  {totalRevenue.toLocaleString()}
+                  {metrics.serviceIncomeTotal > 0 ? metrics.serviceIncomeTotal.toLocaleString() : '—'}
                 </span>
                 <span className="text-[8px] font-semibold text-slate-400 font-admin uppercase tracking-wide">Rs. Total</span>
               </div>
@@ -561,17 +610,25 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-between gap-3 my-auto">
-            {/* Donut graphic */}
+            {/* Donut graphic — segments proportional to live balances */}
             <div className="relative w-28 h-28 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E2E8F0" strokeWidth="4.5" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#0D9488" strokeWidth="4.5" strokeDasharray="50, 100" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#2563EB" strokeWidth="4.5" strokeDasharray="30, 100" strokeDashoffset="-50" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#F59E0B" strokeWidth="4.5" strokeDasharray="20, 100" strokeDashoffset="-80" />
+                {metrics.combinedLiquidity > 0 && accountSegments.map(seg => (
+                  <path
+                    key={seg.label}
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke={seg.color}
+                    strokeWidth="4.5"
+                    strokeDasharray={`${seg.pct}, 100`}
+                    strokeDashoffset={-seg.offset}
+                  />
+                ))}
               </svg>
               <div className="absolute flex flex-col items-center justify-center text-center px-1">
                 <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 font-admin tabular-nums leading-tight max-w-[88px]">
-                  {metrics.combinedLiquidity.toLocaleString()}
+                  {metrics.combinedLiquidity > 0 ? metrics.combinedLiquidity.toLocaleString() : '—'}
                 </span>
                 <span className="text-[8px] font-semibold text-slate-400 font-admin uppercase tracking-wide">Rs. Total</span>
               </div>
@@ -800,7 +857,7 @@ export const DashboardView: React.FC = () => {
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 font-admin">
-                Daily Closing ({dailyClosing?.date || new Date().toLocaleDateString('en-GB')})
+                Daily Closing ({dailyClosing?.date ? formatIsoDatePk(dailyClosing.date) : pkTodayLabel()})
               </h3>
               <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#B8832A] hover:text-[#7D5715] font-semibold transition-colors font-admin">
                 {dailyClosing?.isClosed ? 'Closed' : 'Close Day'}

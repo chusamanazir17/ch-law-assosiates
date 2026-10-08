@@ -7,26 +7,26 @@ import { getAllServices } from "@/lib/db/servicesStore";
 import { getAllTeamMembers } from "@/lib/db/teamMembersStore";
 import { getAllTestimonials } from "@/lib/db/testimonialsStore";
 import { getAllFaqs } from "@/lib/db/faqsStore";
+import { getPageSeoMetadata } from "@/lib/cms/pageSeo";
 
-export const metadata: Metadata = {
-  title: "Ch Composing Estamp and Tax Advisor | Legal Documentation & Tax Services",
-  description:
-    "Ch Composing Estamp and Tax Advisor - Sahiwal's premier firm for E-Stamping, property registry, business registration, and FBR tax filings at Sharki Gate Chamber No 121 District Court Sahiwal.",
-  keywords: [
-    "Ch Composing",
-    "E-Stamp and Tax Advisor",
-    "Ch Composing Estamp and Tax Advisor",
-    "E-Stamping Sahiwal",
-    "Property Registry Sahiwal",
-    "District Court Sahiwal Chamber",
-    "SECP Registration",
-    "NTN Registration",
-    "FBR Tax Filing",
-  ],
-  alternates: {
-    canonical: "https://chcomposing.pk",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageSeoMetadata("/", {
+    title: "Ch Composing Estamp and Tax Advisor | Legal Documentation & Tax Services",
+    description:
+      "Ch Composing Estamp and Tax Advisor - Sahiwal's premier firm for E-Stamping, property registry, business registration, and FBR tax filings at Sharki Gate Chamber No 121 District Court Sahiwal.",
+    keywords: [
+      "Ch Composing",
+      "E-Stamp and Tax Advisor",
+      "Ch Composing Estamp and Tax Advisor",
+      "E-Stamping Sahiwal",
+      "Property Registry Sahiwal",
+      "District Court Sahiwal Chamber",
+      "SECP Registration",
+      "NTN Registration",
+      "FBR Tax Filing",
+    ],
+  });
+}
 
 export default async function HomePage() {
   const [settings, services, pages, homeSections, teamMembers, testimonials, faqs] =

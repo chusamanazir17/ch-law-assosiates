@@ -71,7 +71,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         {viewDetailsText && (
           <button
             onClick={onViewDetails}
-            className="text-xs font-semibold text-[#B8832A] dark:text-[#E3BA63] hover:text-[#96691B] dark:hover:text-[#7DD3FC] hover:underline flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors shrink-0 pt-0.5"
+            className="min-h-[44px] inline-flex items-center text-xs font-semibold text-[#B8832A] dark:text-[#E3BA63] hover:text-[#96691B] dark:hover:text-[#7DD3FC] hover:underline gap-1 whitespace-nowrap cursor-pointer transition-colors shrink-0 pt-0.5"
           >
             {viewDetailsText}
             <span aria-hidden="true">&rarr;</span>

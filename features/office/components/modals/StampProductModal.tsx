@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { X, Plus, Loader2 } from 'lucide-react';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const StampProductModal: React.FC = () => {
   const { isStampProductModalOpen, setIsStampProductModalOpen, refreshData } = useOffice();
@@ -39,7 +40,7 @@ export const StampProductModal: React.FC = () => {
 
     setSaving(true);
     try {
-      const res = await fetch('/api/office/stamps', {
+      const res = await apiFetch('/api/office/stamps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

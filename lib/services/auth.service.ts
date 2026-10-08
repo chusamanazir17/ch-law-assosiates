@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { ADMIN_COOKIE_NAME, verifyAdminToken, validateAdminCredentials, createAdminToken } from "@/lib/auth/adminAuth";
+import { ADMIN_COOKIE_NAME, isAdminSessionActive, validateAdminCredentials, createAdminToken } from "@/lib/auth/adminAuth";
 import type { AppRole, Profile } from "@/types/office";
 
 export interface UnifiedSession {
@@ -34,8 +34,8 @@ export async function getUnifiedSession(): Promise<UnifiedSession | null> {
     const cookieStore = await cookies();
     const localToken = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
-    // 1. Check local admin session cookie
-    if (localToken && (await verifyAdminToken(localToken))) {
+    // 1. Check local admin session cookie (signature + TTL + revocation registry)
+    if (localToken && (await isAdminSessionActive(localToken))) {
       return {
         user: {
           id: SUPER_ADMIN_FALLBACK.id,
@@ -62,6 +62,13 @@ export async function getUnifiedSession(): Promise<UnifiedSession | null> {
       .select("*")
       .eq("id", user.id)
       .maybeSingle();
+
+    // H14: suspended / deactivated profiles must not retain API access.
+    // A non-'active' status denies the session outright (fail closed).
+    const profileStatus = (profile as { status?: string } | null)?.status;
+    if (profileStatus && profileStatus !== "active") {
+      return null;
+    }
 
     let resolvedRole: AppRole = "staff";
 

@@ -18,6 +18,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import type { Hearing, LegalCase } from '@/types/office';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const HearingsView: React.FC = () => {
   const [hearings, setHearings] = useState<Hearing[]>([]);
@@ -42,8 +43,8 @@ export const HearingsView: React.FC = () => {
     async function loadData() {
       try {
         const [hRes, cRes] = await Promise.all([
-          fetch('/api/office/hearings').then(r => r.json()),
-          fetch('/api/office/cases').then(r => r.json()),
+          apiFetch('/api/office/hearings').then(r => r.json()),
+          apiFetch('/api/office/cases').then(r => r.json()),
         ]);
 
         if (hRes.success && hRes.hearings) {
@@ -72,7 +73,7 @@ export const HearingsView: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/office/hearings', {
+      const res = await apiFetch('/api/office/hearings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

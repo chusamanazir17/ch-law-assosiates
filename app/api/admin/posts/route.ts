@@ -5,6 +5,7 @@ import {
   getAdminPostBySlugOrId,
   savePost,
   deletePost,
+  isPostSlugAvailable,
 } from "@/lib/services/posts.service";
 import { validatePostInput } from "@/lib/validation/post";
 
@@ -23,6 +24,14 @@ export async function GET(request: NextRequest) {
   if (!session) return unauthorized();
 
   try {
+    // Live slug-uniqueness check for the admin editor.
+    const checkSlug = request.nextUrl.searchParams.get("checkSlug")?.trim().toLowerCase();
+    if (checkSlug) {
+      const excludeId = request.nextUrl.searchParams.get("excludeId")?.trim() || undefined;
+      const available = await isPostSlugAvailable(checkSlug, excludeId);
+      return NextResponse.json({ success: true, available });
+    }
+
     const slugOrId = (
       request.nextUrl.searchParams.get("id") ||
       request.nextUrl.searchParams.get("slug")

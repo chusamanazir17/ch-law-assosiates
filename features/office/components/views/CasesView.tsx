@@ -20,6 +20,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import type { LegalCase } from '@/types/office';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const CasesView: React.FC = () => {
   const { clients } = useOffice();
@@ -46,7 +47,7 @@ export const CasesView: React.FC = () => {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/office/cases');
+        const res = await apiFetch('/api/office/cases');
         const resJson = await res.json();
         if (resJson.success && resJson.cases) {
           setCases(resJson.cases);
@@ -70,7 +71,7 @@ export const CasesView: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/office/cases', {
+      const res = await apiFetch('/api/office/cases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

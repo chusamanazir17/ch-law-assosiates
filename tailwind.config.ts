@@ -58,6 +58,11 @@ const config: Config = {
         sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
         admin: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Roboto", '"Helvetica Neue"', "Arial", "sans-serif"],
         serif: ["var(--font-dm-serif)", "Georgia", "serif"],
+        /* Display heading face. Maps to DM Serif Display, which IS loaded in
+           app/layout.tsx via next/font (var(--font-dm-serif)). Fixes FE-02:
+           font-heading was a silent no-op. Do NOT point this at a font that
+           isn't loaded (see FE-03). */
+        heading: ["var(--font-dm-serif)", "Georgia", "serif"],
         script: ["var(--font-script)", "cursive"],
         urdu: ["var(--font-urdu)", "system-ui", "sans-serif"],
       },
@@ -71,6 +76,12 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(24px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        /* FE-01: `animate-scale-up` was used by Cases/Hearings/Invoices views
+           but never defined. Enter animation for dialogs/popovers. */
+        "scale-up": {
+          "0%": { opacity: "0", transform: "scale(0.96) translateY(8px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
@@ -78,6 +89,7 @@ const config: Config = {
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
+        "scale-up": "scale-up 0.18s ease-out",
         marquee: "marquee 30s linear infinite",
       },
     },

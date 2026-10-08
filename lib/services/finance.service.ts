@@ -1,8 +1,17 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { callRpc } from "@/lib/services/rpc";
+import { pkTodayIso, pkDayRangeUtc } from "@/lib/dates/pkDay";
 import type { FinancialLedgerEntry, PaymentAccount, Expense, DailyClosing } from "@/types/office";
 
 const isUuid = (val?: string | null): val is string =>
   typeof val === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+/** Money guard shared by all financial writes (API-2). */
+function assertPositiveAmount(amount: unknown, label = "Amount"): asserts amount is number {
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    throw new Error(`${label} must be a finite number greater than 0.`);
+  }
+}
 
 export interface RecordTransactionDTO {
   accountId: string;
@@ -180,14 +189,16 @@ export async function resolvePaymentAccount(
 
 export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promise<FinancialLedgerEntry> {
   const supabase = await getAdminDatabaseClient();
-  const txNo = `TXN-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+  assertPositiveAmount(dto.amount);
+  if (dto.entryType !== "debit" && dto.entryType !== "credit") {
+    throw new Error("Entry type must be 'debit' or 'credit'.");
+  }
+  if (!dto.category || !dto.category.trim()) throw new Error("Category is required.");
+  if (!dto.description || !dto.description.trim()) throw new Error("Description is required.");
 
   const targetAccount = await resolvePaymentAccount(supabase, dto.accountId);
   const accountId = targetAccount.id;
-
-  const newBalance = dto.entryType === "credit"
-    ? targetAccount.current_balance + dto.amount
-    : targetAccount.current_balance - dto.amount;
 
   // Sanitize client_id: must be valid UUID and exist in database
   let validClientId: string | null = null;
@@ -196,6 +207,7 @@ export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promis
       .from("clients")
       .select("id")
       .eq("id", dto.clientId)
+      .is("deleted_at", null)
       .maybeSingle();
     if (clientExists) validClientId = clientExists.id;
   }
@@ -214,68 +226,49 @@ export async function recordLedgerTransaction(dto: RecordTransactionDTO): Promis
   // Sanitize reference_id: must be valid UUID
   const validRefId = isUuid(dto.referenceId) ? dto.referenceId : null;
 
-  const { data: entry, error: ledErr } = await supabase
-    .from("financial_ledger")
-    .insert({
-      transaction_number: txNo,
-      account_id: accountId,
-      entry_type: dto.entryType,
-      amount: dto.amount,
-      balance_after: newBalance,
-      category: dto.category.trim(),
-      description: dto.description.trim(),
-      reference_type: dto.referenceType || null,
-      reference_id: validRefId,
-      client_id: validClientId,
-      created_by: validCreatedBy,
-    })
-    .select(`
-      *,
-      account:payment_accounts(name),
-      client:clients(full_name)
-    `)
-    .single();
-
-  if (ledErr) {
-    console.error("[FinanceService] recordLedgerTransaction error:", ledErr);
-    throw new Error(`Failed to record transaction: ${ledErr.message}`);
-  }
-
-  await supabase
-    .from("payment_accounts")
-    .update({
-      current_balance: newBalance,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", accountId);
+  // Atomic single entry: the RPC locks the account row (SELECT ... FOR UPDATE),
+  // writes the ledger row with a sequence-backed transaction number, and bumps
+  // the balance in one transaction (DB-16). Never compute the balance here.
+  const entry = await callRpc<any>(supabase, "record_ledger_entry", {
+    p_account_id: accountId,
+    p_entry_type: dto.entryType,
+    p_amount: dto.amount,
+    p_category: dto.category.trim(),
+    p_description: dto.description.trim(),
+    p_reference_type: dto.referenceType || null,
+    p_reference_id: validRefId,
+    p_client_id: validClientId,
+    p_created_by: validCreatedBy,
+  });
 
   return {
     ...entry,
-    account_name: (entry as any).account?.name,
-    client_name: (entry as any).client?.full_name,
+    account_name: targetAccount.name,
   } as FinancialLedgerEntry;
 }
 
 export async function recordTransfer(dto: RecordTransferDTO): Promise<{ debit: FinancialLedgerEntry; credit: FinancialLedgerEntry }> {
-  const debit = await recordLedgerTransaction({
-    accountId: dto.fromAccountId,
-    entryType: "debit",
-    amount: dto.amount,
-    category: "Transfer",
-    description: dto.description || `Transfer to account`,
-    createdBy: dto.createdBy,
+  const supabase = await getAdminDatabaseClient();
+
+  assertPositiveAmount(dto.amount, "Transfer amount");
+  if (!isUuid(dto.fromAccountId) || !isUuid(dto.toAccountId)) {
+    throw new Error("Both source and destination accounts are required.");
+  }
+
+  // Atomic debit + credit via SECURITY DEFINER RPC (DB-03): a failure between
+  // the two legs rolls back the whole transfer — no unbalanced journal.
+  const result = await callRpc<{ debit: any; credit: any }>(supabase, "transfer_funds", {
+    p_from_account: dto.fromAccountId,
+    p_to_account: dto.toAccountId,
+    p_amount: dto.amount,
+    p_description: dto.description || null,
+    p_created_by: isUuid(dto.createdBy) ? dto.createdBy : null,
   });
 
-  const credit = await recordLedgerTransaction({
-    accountId: dto.toAccountId,
-    entryType: "credit",
-    amount: dto.amount,
-    category: "Transfer",
-    description: dto.description || `Transfer from account`,
-    createdBy: dto.createdBy,
-  });
-
-  return { debit, credit };
+  return {
+    debit: result.debit as FinancialLedgerEntry,
+    credit: result.credit as FinancialLedgerEntry,
+  };
 }
 
 export async function listExpenses(filter?: { accountId?: string; category?: string }): Promise<Expense[]> {
@@ -286,6 +279,7 @@ export async function listExpenses(filter?: { accountId?: string; category?: str
       *,
       account:payment_accounts(name)
     `)
+    .is("deleted_at", null)
     .order("expense_date", { ascending: false });
 
   if (filter?.accountId) {
@@ -318,73 +312,39 @@ export async function recordExpense(data: {
   receipt_url?: string | null;
 }): Promise<Expense> {
   const supabase = await getAdminDatabaseClient();
+
+  assertPositiveAmount(data.amount, "Expense amount");
+  if (!data.category || !data.category.trim()) throw new Error("Expense category is required.");
+  if (!data.payee || !String(data.payee).trim()) throw new Error("Payee is required.");
+
   const targetAccount = await resolvePaymentAccount(supabase, data.account_id);
   const accountId = targetAccount.id;
 
-  const { data: exp, error } = await supabase
-    .from("expenses")
-    .insert({
-      account_id: accountId,
-      category: data.category.trim(),
-      payee: data.payee.trim(),
-      amount: data.amount,
-      expense_date: data.expense_date || new Date().toISOString().split("T")[0],
-      description: data.description || null,
-      receipt_url: data.receipt_url || null,
-    })
-    .select(`
-      *,
-      account:payment_accounts(name)
-    `)
-    .single();
-
-  if (error) {
-    console.error("[FinanceService] recordExpense error:", error);
-    throw new Error(`Failed to record expense: ${error.message}`);
-  }
-
-  // Record the ledger entry.
-  // NOTE: the account balance is debited by the DB trigger
-  // `handle_expense_created` (single source of truth). Do NOT update it here
-  // — doing so debits the same expense twice.
-  // Re-read the balance AFTER the expense insert so `balance_after` reflects
-  // the trigger-applied debit.
-  const { data: refreshedAccount } = await supabase
-    .from("payment_accounts")
-    .select("current_balance")
-    .eq("id", accountId)
-    .maybeSingle();
-  const balanceAfter = Number(
-    refreshedAccount?.current_balance ?? targetAccount.current_balance - data.amount
-  );
-
-  const txNo = `TXN-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
-
-  const { error: ledgerError } = await supabase.from("financial_ledger").insert({
-    transaction_number: txNo,
-    account_id: accountId,
-    entry_type: "debit",
-    amount: data.amount,
-    balance_after: balanceAfter,
-    category: data.category.trim(),
-    description: data.description?.trim() || `Expense paid to ${data.payee.trim()}`,
-    reference_type: "expense",
-    reference_id: exp.id,
+  // Atomic expense + ledger row via SECURITY DEFINER RPC (DB-03). The account
+  // balance is debited by the DB trigger `handle_expense_created` — the single
+  // source of truth — and the RPC writes the companion ledger entry in the
+  // same transaction instead of warn-and-continue.
+  const exp = await callRpc<any>(supabase, "record_expense_atomic", {
+    p_account_id: accountId,
+    p_category: data.category.trim(),
+    p_payee: String(data.payee).trim(),
+    p_amount: data.amount,
+    p_expense_date: data.expense_date || null,
+    p_description: data.description || null,
+    p_receipt_url: data.receipt_url || null,
   });
-
-  if (ledgerError) {
-    console.warn("[FinanceService] ledger insert error:", ledgerError.message);
-  }
 
   return {
     ...exp,
-    account_name: (exp as any).account?.name,
+    account_name: targetAccount.name,
   } as Expense;
 }
 
 export async function getDailyClosingRecord(date?: string): Promise<DailyClosing | null> {
   const supabase = await getAdminDatabaseClient();
-  const targetDate = date || new Date().toISOString().split("T")[0];
+  // closing_date is a PK-calendar date column: default to today in
+  // Asia/Karachi, never the UTC date.
+  const targetDate = date || pkTodayIso();
 
   const { data, error } = await supabase
     .from("daily_closings")
@@ -396,27 +356,153 @@ export async function getDailyClosingRecord(date?: string): Promise<DailyClosing
   return data as DailyClosing | null;
 }
 
-export async function saveDailyClosingRecord(data: Partial<DailyClosing>): Promise<DailyClosing> {
+export interface DailyCashFigures {
+  opening_cash: number;
+  cash_in: number;
+  cash_out: number;
+  system_cash: number;
+  bank_wallets_balance: number;
+  stamps_sold_count: number;
+  stamps_sold_value: number;
+}
+
+/**
+ * Server-side cash reconciliation for a calendar date (API-3).
+ * All control figures are derived from the ledger / stamp movements — the
+ * client only supplies the physically counted cash (actual_cash).
+ */
+export async function computeDailyCashFigures(date: string): Promise<DailyCashFigures> {
   const supabase = await getAdminDatabaseClient();
-  const today = new Date().toISOString().split("T")[0];
+
+  // created_at is timestamptz: filter the Asia/Karachi day as UTC instants.
+  const { startUtcIso: dayStartUtc, endUtcIso: dayEndUtc } = pkDayRangeUtc(date);
+
+  const { data: cashAccounts } = await supabase
+    .from("payment_accounts")
+    .select("id")
+    .eq("account_type", "cash");
+  const cashIds = (cashAccounts || []).map((a: any) => a.id);
+
+  let cashIn = 0;
+  let cashOut = 0;
+  if (cashIds.length > 0) {
+    const { data: credits } = await supabase
+      .from("financial_ledger")
+      .select("amount")
+      .eq("entry_type", "credit")
+      .in("account_id", cashIds)
+      .gte("created_at", dayStartUtc)
+      .lt("created_at", dayEndUtc);
+    const { data: debits } = await supabase
+      .from("financial_ledger")
+      .select("amount")
+      .eq("entry_type", "debit")
+      .in("account_id", cashIds)
+      .gte("created_at", dayStartUtc)
+      .lt("created_at", dayEndUtc);
+    cashIn = (credits || []).reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
+    cashOut = (debits || []).reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
+  }
+
+  // Opening cash = yesterday's closed actual cash (the control chain).
+  const prev = new Date(`${date}T00:00:00Z`);
+  prev.setUTCDate(prev.getUTCDate() - 1);
+  const prevDate = prev.toISOString().split("T")[0];
+  const { data: prevClosing } = await supabase
+    .from("daily_closings")
+    .select("actual_cash")
+    .eq("closing_date", prevDate)
+    .eq("status", "closed")
+    .maybeSingle();
+  const openingCash = Number(prevClosing?.actual_cash || 0);
+
+  const { data: bankAccounts } = await supabase
+    .from("payment_accounts")
+    .select("current_balance")
+    .neq("account_type", "cash");
+  const bankWallets = (bankAccounts || []).reduce(
+    (s: number, r: any) => s + Number(r.current_balance || 0),
+    0
+  );
+
+  const { data: stampSales } = await supabase
+    .from("stamp_stock_movements")
+    .select("quantity, unit_price")
+    .eq("movement_type", "sale")
+    .gte("created_at", dayStartUtc)
+    .lt("created_at", dayEndUtc);
+  const stampsSoldCount = (stampSales || []).reduce(
+    (s: number, r: any) => s + Math.abs(Number(r.quantity || 0)),
+    0
+  );
+  const stampsSoldValue = (stampSales || []).reduce(
+    (s: number, r: any) => s + Math.abs(Number(r.quantity || 0)) * Number(r.unit_price || 0),
+    0
+  );
+
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+
+  return {
+    opening_cash: round2(openingCash),
+    cash_in: round2(cashIn),
+    cash_out: round2(cashOut),
+    system_cash: round2(openingCash + cashIn - cashOut),
+    bank_wallets_balance: round2(bankWallets),
+    stamps_sold_count: stampsSoldCount,
+    stamps_sold_value: round2(stampsSoldValue),
+  };
+}
+
+export async function saveDailyClosingRecord(data: {
+  closing_date?: string;
+  /** Physically counted cash — the ONLY figure accepted from the client (API-3). */
+  actual_cash: number;
+  notes?: string | null;
+  closed_by?: string | null;
+  /** Only super_admin may amend an already-closed day (FIN-04). */
+  allowReopen?: boolean;
+}): Promise<DailyClosing> {
+  const supabase = await getAdminDatabaseClient();
+  const targetDate = data.closing_date || pkTodayIso();
+
+  if (typeof data.actual_cash !== "number" || !Number.isFinite(data.actual_cash) || data.actual_cash < 0) {
+    throw new Error("Actual cash must be a finite number >= 0.");
+  }
+
+  const existing = await getDailyClosingRecord(targetDate);
+  if (existing && existing.status === "closed" && !data.allowReopen) {
+    const err = new Error(
+      `Daily closing for ${targetDate} is already closed and cannot be overwritten.`
+    );
+    (err as any).statusCode = 409;
+    throw err;
+  }
+
+  // All control figures are computed server-side from the books; the client
+  // cannot self-certify its own numbers (API-3).
+  const figures = await computeDailyCashFigures(targetDate);
+  const difference = Math.round((data.actual_cash - figures.system_cash) * 100) / 100;
+
+  const payload: any = {
+    closing_date: targetDate,
+    opening_cash: figures.opening_cash,
+    cash_in: figures.cash_in,
+    cash_out: figures.cash_out,
+    system_cash: figures.system_cash,
+    actual_cash: data.actual_cash,
+    difference,
+    bank_wallets_balance: figures.bank_wallets_balance,
+    stamps_sold_count: figures.stamps_sold_count,
+    stamps_sold_value: figures.stamps_sold_value,
+    status: "closed",
+    notes: data.notes || null,
+    closed_by: isUuid(data.closed_by) ? data.closed_by : null,
+    closed_at: new Date().toISOString(),
+  };
 
   const { data: closing, error } = await supabase
     .from("daily_closings")
-    .upsert({
-      closing_date: data.closing_date || today,
-      opening_cash: data.opening_cash || 0,
-      cash_in: data.cash_in || 0,
-      cash_out: data.cash_out || 0,
-      system_cash: data.system_cash || 0,
-      actual_cash: data.actual_cash || 0,
-      difference: data.difference || 0,
-      bank_wallets_balance: data.bank_wallets_balance || 0,
-      stamps_sold_count: data.stamps_sold_count || 0,
-      stamps_sold_value: data.stamps_sold_value || 0,
-      status: (data.status as any) || "closed",
-      notes: data.notes || null,
-      closed_at: new Date().toISOString(),
-    }, { onConflict: "closing_date" })
+    .upsert(payload, { onConflict: "closing_date" })
     .select()
     .single();
 

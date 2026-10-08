@@ -80,12 +80,13 @@ export async function DELETE(request: NextRequest) {
 
   try {
     const id = request.nextUrl.searchParams.get("id");
-    const storagePath = request.nextUrl.searchParams.get("storagePath");
     if (!id) {
       return NextResponse.json({ success: false, error: "Asset ID is required." }, { status: 400 });
     }
 
-    const { storageWarning } = await deleteMediaAsset({ id, storage_path: storagePath });
+    // NOTE: any client-supplied `storagePath` query param is intentionally
+    // ignored — deleteMediaAsset resolves the path from the database row.
+    const { storageWarning } = await deleteMediaAsset({ id });
     return NextResponse.json({ success: true, storageWarning });
   } catch (error) {
     return NextResponse.json(

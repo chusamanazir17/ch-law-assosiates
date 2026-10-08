@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
+import { getSiteUrl } from "@/config/env";
 import {
   ArrowLeft,
   Calendar,
@@ -33,15 +34,25 @@ export async function generateMetadata({
     };
   }
 
+  // CMS-managed SEO fields take precedence; fall back to post fields.
+  const title = post.seo_title?.trim() || `${post.title} | Ch Composing & Tax Advisor`;
+  const description =
+    post.meta_description?.trim() ||
+    post.excerpt ||
+    "Legal advice, tax compliance guidelines, and e-stamping documentation procedures from Chamber 121, District Court Sahiwal.";
+  const ogImage = post.og_image?.trim() || post.cover_image_url || undefined;
+  const canonical = post.canonical_url?.trim() || `${getSiteUrl()}/updates/${post.slug}`;
+
   return {
-    title: `${post.title} | Ch Composing & Tax Advisor`,
-    description:
-      post.excerpt ||
-      "Legal advice, tax compliance guidelines, and e-stamping documentation procedures from Chamber 121, District Court Sahiwal.",
+    title,
+    description,
+    alternates: {
+      canonical,
+    },
     openGraph: {
-      title: post.title,
-      description: post.excerpt || undefined,
-      images: post.cover_image_url ? [{ url: post.cover_image_url }] : undefined,
+      title: post.seo_title?.trim() || post.title,
+      description: post.meta_description?.trim() || post.excerpt || undefined,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
   };
 }

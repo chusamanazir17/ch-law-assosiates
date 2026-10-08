@@ -5,6 +5,7 @@ import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
 import { exportToCsv } from '../../lib/csv';
 import type { LedgerTransaction } from '../../types';
+import { pkTodayLabel, isLedgerDateToday, pkDayLabel, formatIsoDatePk, pkIsoDate } from '../utils/pkDates';
 import {
   Wallet,
   ArrowUp,
@@ -35,23 +36,23 @@ export const CashManagementView: React.FC = () => {
     dailyClosing
   } = useOffice();
 
-  // Live daily metrics (from the Supabase-backed ledger)
-  const todayKey = new Date().toLocaleDateString('en-GB');
-  const isToday = (t: LedgerTransaction) => (t.dateTime || '').startsWith(todayKey);
+  // Live daily metrics (from the Supabase-backed ledger).
+  // WF-27 fix: "today" is the Asia/Karachi business day; ledger strings are
+  // "DD-MM-YYYY HH:MM AM/PM" so the PK label matches their date portion.
+  const isToday = (t: LedgerTransaction) => isLedgerDateToday(t.dateTime);
   const cashInToday = transactions.filter(t => t.type === 'IN' && isToday(t)).reduce((a, t) => a + Number(t.amount || 0), 0);
   const cashOutToday = transactions.filter(t => t.type === 'OUT' && isToday(t)).reduce((a, t) => a + Number(t.amount || 0), 0);
   const cashInCount = transactions.filter(t => t.type === 'IN' && isToday(t)).length;
   const cashOutCount = transactions.filter(t => t.type === 'OUT' && isToday(t)).length;
   const openingBalance = Number(dailyClosing?.openingCash || 0);
-  const closingBalance = openingBalance + cashInToday - cashOutToday;
+  // Closing cash comes from the server-side daily closing record
+  // (system_cash) — never recomputed client-side from the ledger.
+  const closingBalance = Number(dailyClosing?.expectedCash ?? openingBalance);
   const outstandingTotal = clients.reduce((a, c) => a + Number(c.outstanding || 0), 0);
 
   // Friendly bank/wallet account names from the live accounts list
   const bankAccountLabel = 'Bank account';
   const walletLabel = 'JazzCash + EasyPaisa';
-  // Derive a friendly bank account name from the live accounts list
-  const bankAccountList = transactions.length >= 0 ? null : null; // placeholder to keep structure
-  void bankAccountList;
 
   // Fast Cash In state
   const [cashInClient, setCashInClient] = useState('');
@@ -61,6 +62,8 @@ export const CashManagementView: React.FC = () => {
   const [cashInRef, setCashInRef] = useState('');
   const [cashInNotes, setCashInNotes] = useState('');
   const [cashInSuccess, setCashInSuccess] = useState(false);
+  const [cashInError, setCashInError] = useState('');
+  const [cashInBusy, setCashInBusy] = useState(false);
 
   // Fast Cash Out state
   const [cashOutCategory, setCashOutCategory] = useState('Office Expense');
@@ -70,6 +73,8 @@ export const CashManagementView: React.FC = () => {
   const [cashOutRef, setCashOutRef] = useState('');
   const [cashOutNotes, setCashOutNotes] = useState('');
   const [cashOutSuccess, setCashOutSuccess] = useState(false);
+  const [cashOutError, setCashOutError] = useState('');
+  const [cashOutBusy, setCashOutBusy] = useState(false);
 
   // Filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,50 +84,94 @@ export const CashManagementView: React.FC = () => {
   // Handle Fast Cash In submission
   const handleFastCashIn = (e: React.FormEvent) => {
     e.preventDefault();
+    if (cashInBusy) return;
+    setCashInError('');
+    setCashInSuccess(false);
+
     const amt = parseFloat(cashInAmount);
-    if (!amt || amt <= 0 || !cashInClient) return;
+    if (!cashInClient.trim()) {
+      setCashInError('Please enter the client name.');
+      return;
+    }
+    if (!amt || Number.isNaN(amt) || amt <= 0) {
+      setCashInError('Please enter a valid amount greater than zero.');
+      return;
+    }
+    if (!cashInAccount) {
+      setCashInError('Please select the account the cash goes into.');
+      return;
+    }
 
-    recordCashIn({
-      clientName: cashInClient,
-      serviceName: cashInService,
-      amount: amt,
-      account: cashInAccount as any,
-      referenceNo: cashInRef,
-      notes: cashInNotes,
-      staff: 'Usama (Admin)',
-      createReceipt: true
-    });
+    setCashInBusy(true);
+    try {
+      recordCashIn({
+        clientName: cashInClient.trim(),
+        serviceName: cashInService,
+        amount: amt,
+        account: cashInAccount as any,
+        referenceNo: cashInRef,
+        notes: cashInNotes,
+        staff: 'Usama (Admin)',
+        createReceipt: true
+      });
 
-    setCashInAmount('');
-    setCashInClient('');
-    setCashInRef('');
-    setCashInNotes('');
-    setCashInSuccess(true);
-    setTimeout(() => setCashInSuccess(false), 3000);
+      setCashInAmount('');
+      setCashInClient('');
+      setCashInRef('');
+      setCashInNotes('');
+      setCashInSuccess(true);
+      setTimeout(() => setCashInSuccess(false), 3000);
+    } catch (err) {
+      setCashInError(err instanceof Error ? err.message : 'Could not record the cash in entry.');
+    } finally {
+      setCashInBusy(false);
+    }
   };
 
   // Handle Fast Cash Out submission
   const handleFastCashOut = (e: React.FormEvent) => {
     e.preventDefault();
+    if (cashOutBusy) return;
+    setCashOutError('');
+    setCashOutSuccess(false);
+
     const amt = parseFloat(cashOutAmount);
-    if (!amt || amt <= 0 || !cashOutPayee) return;
+    if (!cashOutPayee.trim()) {
+      setCashOutError('Please enter the payee / description.');
+      return;
+    }
+    if (!amt || Number.isNaN(amt) || amt <= 0) {
+      setCashOutError('Please enter a valid amount greater than zero.');
+      return;
+    }
+    if (!cashOutAccount) {
+      setCashOutError('Please select the account to pay from.');
+      return;
+    }
 
-    recordCashOut({
-      category: cashOutCategory,
-      payeeDescription: cashOutPayee,
-      amount: amt,
-      account: cashOutAccount as any,
-      referenceNo: cashOutRef,
-      notes: cashOutNotes,
-      staff: 'Usama (Admin)'
-    });
+    setCashOutBusy(true);
+    try {
+      recordCashOut({
+        category: cashOutCategory,
+        payeeDescription: cashOutPayee.trim(),
+        amount: amt,
+        account: cashOutAccount as any,
+        referenceNo: cashOutRef,
+        notes: cashOutNotes,
+        staff: 'Usama (Admin)'
+      });
 
-    setCashOutAmount('');
-    setCashOutPayee('');
-    setCashOutRef('');
-    setCashOutNotes('');
-    setCashOutSuccess(true);
-    setTimeout(() => setCashOutSuccess(false), 3000);
+      setCashOutAmount('');
+      setCashOutPayee('');
+      setCashOutRef('');
+      setCashOutNotes('');
+      setCashOutSuccess(true);
+      setTimeout(() => setCashOutSuccess(false), 3000);
+    } catch (err) {
+      setCashOutError(err instanceof Error ? err.message : 'Could not record the cash out entry.');
+    } finally {
+      setCashOutBusy(false);
+    }
   };
 
   // Filtered transactions list
@@ -193,8 +242,8 @@ export const CashManagementView: React.FC = () => {
             </div>
             <span className="text-[11px] text-slate-500 font-medium">Closing Balance</span>
           </div>
-          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {(openingBalance + cashInToday - cashOutToday).toLocaleString()}</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">As of {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {closingBalance.toLocaleString()}</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">System expected (live)</div>
         </div>
 
         {/* Bank Balance */}
@@ -218,7 +267,7 @@ export const CashManagementView: React.FC = () => {
             <span className="text-[11px] text-slate-500 font-medium truncate">Wallets</span>
           </div>
           <div className="text-base font-bold text-slate-900 dark:text-slate-100 tabular-nums">Rs. {(accountBalances.jazzCash + accountBalances.easyPaisa).toLocaleString()}</div>
-          <div className="text-[10px] text-slate-400 mt-0.5 truncate">JC: 28.2k | EP: 20k</div>
+          <div className="text-[10px] text-slate-400 mt-0.5 truncate">JC: {(accountBalances.jazzCash || 0).toLocaleString()} | EP: {(accountBalances.easyPaisa || 0).toLocaleString()}</div>
         </div>
 
         {/* Outstanding Collections */}
@@ -336,7 +385,7 @@ export const CashManagementView: React.FC = () => {
           <button
             onClick={() =>
               exportToCsv(
-                `cash-transactions-${new Date().toISOString().split('T')[0]}.csv`,
+                `cash-transactions-${pkIsoDate()}.csv`,
                 ['Date', 'Type', 'Description', 'Client/Payee', 'Category', 'Account', 'Amount (PKR)', 'Reference'],
                 filteredList.map(tx => [
                   tx.dateTime,
@@ -379,6 +428,11 @@ export const CashManagementView: React.FC = () => {
                   <div className="mb-3 p-2 bg-emerald-50 text-emerald-700 text-xs rounded-lg flex items-center gap-2 font-medium">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
                     Payment recorded & receipt generated successfully!
+                  </div>
+                )}
+                {cashInError && (
+                  <div className="mb-3 p-2 bg-rose-50 text-rose-700 text-xs rounded-lg font-medium border border-rose-200">
+                    {cashInError}
                   </div>
                 )}
 
@@ -468,9 +522,10 @@ export const CashManagementView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer"
+                disabled={cashInBusy}
+                className="w-full mt-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer"
               >
-                <ArrowUp className="w-4 h-4" /> Receive Cash (Cash In)
+                <ArrowUp className="w-4 h-4" /> {cashInBusy ? 'Recording…' : 'Receive Cash (Cash In)'}
               </button>
             </form>
 
@@ -491,6 +546,11 @@ export const CashManagementView: React.FC = () => {
                   <div className="mb-3 p-2 bg-rose-50 text-rose-700 text-xs rounded-lg flex items-center gap-2 font-medium">
                     <CheckCircle2 className="w-4 h-4 shrink-0" />
                     Expense recorded successfully!
+                  </div>
+                )}
+                {cashOutError && (
+                  <div className="mb-3 p-2 bg-rose-50 text-rose-700 text-xs rounded-lg font-medium border border-rose-200">
+                    {cashOutError}
                   </div>
                 )}
 
@@ -581,9 +641,10 @@ export const CashManagementView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer"
+                disabled={cashOutBusy}
+                className="w-full mt-4 py-2.5 bg-rose-500 hover:bg-rose-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer"
               >
-                <ArrowDown className="w-4 h-4" /> Make Payment (Cash Out)
+                <ArrowDown className="w-4 h-4" /> {cashOutBusy ? 'Recording…' : 'Make Payment (Cash Out)'}
               </button>
             </form>
           </div>
@@ -635,10 +696,10 @@ export const CashManagementView: React.FC = () => {
             </div>
           </div>
 
-          {/* Daily Closing Summary */}
+          {/* Daily Closing Summary — figures come from the server-side daily closing record */}
           <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Daily Closing ({new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})</h3>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Daily Closing ({dailyClosing?.date ? formatIsoDatePk(dailyClosing.date) : pkTodayLabel()})</h3>
               <button onClick={() => setIsCloseDayModalOpen(true)} className="text-[11px] text-[#B8832A] hover:underline font-semibold">
                 View Details
               </button>
@@ -650,15 +711,15 @@ export const CashManagementView: React.FC = () => {
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash In</span>
-                <span className="font-bold text-emerald-600 tabular-nums">Rs. {cashInToday.toLocaleString()}</span>
+                <span className="font-bold text-emerald-600 tabular-nums">Rs. {Number(dailyClosing?.cashIn || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                 <span>Total Cash Out</span>
-                <span className="font-bold text-rose-600 tabular-nums">Rs. {cashOutToday.toLocaleString()}</span>
+                <span className="font-bold text-rose-600 tabular-nums">Rs. {Number(dailyClosing?.cashOut || 0).toLocaleString()}</span>
               </div>
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/40 mt-2">
                 <span className="font-bold text-slate-800 dark:text-slate-200">Closing Balance</span>
-                <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm tabular-nums">Rs. 72,800</span>
+                <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm tabular-nums">Rs. {closingBalance.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -671,16 +732,14 @@ export const CashManagementView: React.FC = () => {
             </div>
             <div className="h-28 flex items-end justify-between gap-1.5 pt-3">
               {(() => {
+                // Day boundaries in Asia/Karachi; ledger strings start with "DD-MM-YYYY".
                 const days = Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date();
-                  d.setDate(d.getDate() - (6 - i));
-                  const key = d.getDate().toString();
-                  const dayTx = transactions.filter(t => (t.dateTime || '').startsWith(key + '-'));
+                  const d = new Date(Date.now() - (6 - i) * 86400000);
+                  const key = pkTodayLabel(d);
+                  const dayTx = transactions.filter(t => (t.dateTime || '').startsWith(key));
                   const inSum = dayTx.filter(t => t.type === 'IN').reduce((a, t) => a + Number(t.amount || 0), 0);
                   const outSum = dayTx.filter(t => t.type === 'OUT').reduce((a, t) => a + Number(t.amount || 0), 0);
-                  const max = Math.max(1, ...[inSum, outSum]);
-                  void max;
-                  return { day: key, inH: inSum, outH: outSum, in: inSum, out: outSum };
+                  return { day: pkDayLabel(d), key, inH: inSum, outH: outSum, in: inSum, out: outSum };
                 });
                 const maxVal = Math.max(1, ...days.map(d => Math.max(d.in, d.out)));
                 return days.map(d => ({
@@ -689,7 +748,7 @@ export const CashManagementView: React.FC = () => {
                   outH: Math.round((d.out / maxVal) * 100)
                 }));
               })().map(d => (
-                <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
+                <div key={d.key} className="flex-1 flex flex-col items-center gap-1">
                   <div className="w-full flex items-end justify-center gap-0.5 h-20">
                     <div style={{ height: `${d.inH}%` }} className="w-2 bg-emerald-500 rounded-t-xs"></div>
                     <div style={{ height: `${d.outH}%` }} className="w-2 bg-rose-500 rounded-t-xs"></div>

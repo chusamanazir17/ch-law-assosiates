@@ -29,6 +29,7 @@ export async function listCases(filter?: { status?: string; lawyerId?: string; c
       clients:case_clients(client:clients(*)),
       lawyers:case_lawyers(lawyer:profiles(*))
     `)
+    .is("deleted_at", null)
     .order("filing_date", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -70,6 +71,7 @@ export async function getCaseById(id: string): Promise<LegalCase | null> {
       lawyers:case_lawyers(lawyer:profiles(*))
     `)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {
@@ -113,11 +115,12 @@ export async function createCaseRecord(dto: CreateCaseDTO): Promise<LegalCase> {
     throw new Error(`Failed to create case: ${caseErr.message}`);
   }
 
-  // Link client if provided and is valid UUID
+  // Link client if provided and is valid UUID.
+  // H4: a provided-but-invalid client_id must fail loudly instead of
+  // attaching the case to a random client.
   let resolvedClientId = dto.client_id;
   if (resolvedClientId && !isUuid(resolvedClientId)) {
-    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
-    resolvedClientId = cl?.id;
+    throw new Error("Invalid client_id: must be a valid UUID or omitted.");
   }
 
   if (resolvedClientId && isUuid(resolvedClientId)) {
@@ -146,10 +149,23 @@ export async function createCaseRecord(dto: CreateCaseDTO): Promise<LegalCase> {
   return newCase as LegalCase;
 }
 
-export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDTO>): Promise<LegalCase | null> {
+export async function updateCaseRecord(
+  id: string,
+  updates: Partial<CreateCaseDTO>,
+  opts?: { allowReassignment?: boolean; allowedFields?: readonly string[] }
+): Promise<LegalCase | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
-  const { client_id, lawyer_id, client_role, ...caseFields } = updates;
+
+  // Mass-assignment guard (API-1): only explicitly allowed fields reach the DB.
+  // client_id / lawyer_id reassignment additionally requires the caller to be
+  // super_admin or office_admin (enforced by the route via allowReassignment).
+  const { client_id, lawyer_id, client_role, ...rest } = updates;
+  const allowed = new Set(opts?.allowedFields || []);
+  const caseFields: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    if (allowed.size === 0 || allowed.has(key)) caseFields[key] = value;
+  }
 
   const { data, error } = await supabase
     .from("cases")
@@ -158,20 +174,26 @@ export async function updateCaseRecord(id: string, updates: Partial<CreateCaseDT
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .is("deleted_at", null)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[CasesService] updateCaseRecord error:", error);
     throw new Error(`Failed to update case: ${error.message}`);
   }
 
-  if (client_id && isUuid(client_id)) {
-    await assignClientToCase(id, client_id, client_role || "petitioner");
-  }
+  if (!data) return null;
 
-  if (lawyer_id && isUuid(lawyer_id)) {
-    await assignLawyerToCase(id, lawyer_id, "lead");
+  if (opts?.allowReassignment) {
+    if (client_id) {
+      if (!isUuid(client_id)) throw new Error("Invalid client_id.");
+      await assignClientToCase(id, client_id, client_role || "petitioner");
+    }
+    if (lawyer_id) {
+      if (!isUuid(lawyer_id)) throw new Error("Invalid lawyer_id.");
+      await assignLawyerToCase(id, lawyer_id, "lead");
+    }
   }
 
   return data as LegalCase;

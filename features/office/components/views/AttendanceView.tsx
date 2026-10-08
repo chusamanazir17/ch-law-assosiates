@@ -20,6 +20,7 @@ import {
   Shield
 } from 'lucide-react';
 import type { Profile, AttendanceRecord } from '@/types/office';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const AttendanceView: React.FC = () => {
   const [employees, setEmployees] = useState<Profile[]>([]);
@@ -43,8 +44,8 @@ export const AttendanceView: React.FC = () => {
     setIsLoading(true);
     try {
       const [empRes, attRes] = await Promise.all([
-        fetch('/api/office/employees').then(r => r.json()),
-        fetch(`/api/office/attendance?date=${selectedDate}`).then(r => r.json())
+        apiFetch('/api/office/employees').then(r => r.json()),
+        apiFetch(`/api/office/attendance?date=${selectedDate}`).then(r => r.json())
       ]);
 
       if (empRes.success && empRes.employees) {
@@ -71,7 +72,7 @@ export const AttendanceView: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/office/attendance', {
+      const res = await apiFetch('/api/office/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

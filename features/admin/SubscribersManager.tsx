@@ -30,6 +30,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { SubscriberWithCategories, TaxCategory } from "@/types/reminders";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 const PAGE_SIZE = 12;
 type SubscriberTab = "all" | "active" | "pending" | "unsubscribed";
@@ -107,7 +108,7 @@ export default function SubscribersManager() {
     setActionFeedback(null);
 
     try {
-      const res = await fetch("/api/admin/subscribers");
+      const res = await apiFetch("/api/admin/subscribers");
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -194,7 +195,7 @@ export default function SubscribersManager() {
     if (!confirmAction) return;
 
     try {
-      const res = await fetch("/api/admin/subscribers", {
+      const res = await apiFetch("/api/admin/subscribers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "unsubscribe", id: subscriberId, email }),
@@ -219,7 +220,7 @@ export default function SubscribersManager() {
 
     setAddLoading(true);
     try {
-      const res = await fetch("/api/reminders/subscribe", {
+      const res = await apiFetch("/api/reminders/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

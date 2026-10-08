@@ -5,6 +5,7 @@ import {
   getAllPagesContent,
   getPageContentByRoute,
   updatePageContent,
+  deletePageContent,
 } from "@/lib/db/pagesContentStore";
 
 export const dynamic = "force-dynamic";
@@ -68,3 +69,35 @@ export async function POST(request: NextRequest) {
 }
 
 export const PUT = POST;
+
+export async function DELETE(request: NextRequest) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const route = request.nextUrl.searchParams.get("route")?.trim();
+    const id = request.nextUrl.searchParams.get("id")?.trim();
+    const target = id || route;
+    if (!target) {
+      return NextResponse.json(
+        { success: false, error: "Page ID or route is required" },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await deletePageContent(target);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: "Page content not found" }, { status: 404 });
+    }
+
+    revalidatePath("/");
+    return NextResponse.json({ success: true, deleted: true });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : "Failed to delete page content" },
+      { status: 500 }
+    );
+  }
+}

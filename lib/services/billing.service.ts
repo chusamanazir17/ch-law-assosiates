@@ -1,8 +1,16 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { callRpc } from "@/lib/services/rpc";
 import type { Invoice, InvoiceItem, Payment } from "@/types/office";
 
 const isUuid = (str: any): boolean =>
   typeof str === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+
+/** Money guard (API-2): finite and strictly positive. */
+function assertPositiveAmount(amount: unknown, label = "Amount"): asserts amount is number {
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    throw new Error(`${label} must be a finite number greater than 0.`);
+  }
+}
 
 export interface CreateInvoiceDTO {
   client_id: string;
@@ -28,6 +36,7 @@ export async function listInvoices(filter?: { status?: string; clientId?: string
       case:cases(case_number),
       items:invoice_items(*)
     `)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -64,6 +73,7 @@ export async function getInvoiceById(id: string): Promise<Invoice | null> {
       items:invoice_items(*)
     `)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) throw new Error(`Failed to load invoice: ${error.message}`);
@@ -80,68 +90,51 @@ export async function getInvoiceById(id: string): Promise<Invoice | null> {
 export async function createInvoiceRecord(dto: CreateInvoiceDTO): Promise<Invoice> {
   const supabase = await getAdminDatabaseClient();
 
-  // Resolve client_id if non-UUID or mock
-  let resolvedClientId: string | undefined = dto.client_id;
-  if (!isUuid(resolvedClientId)) {
-    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
-    resolvedClientId = cl?.id;
-  }
-
-  if (!resolvedClientId || !isUuid(resolvedClientId)) {
-    throw new Error("A valid Client is required to generate an invoice.");
+  // H4: an invalid client reference must fail loudly, never attach to a
+  // random client.
+  if (!isUuid(dto.client_id)) {
+    throw new Error("A valid client_id is required to generate an invoice.");
   }
 
   const resolvedCaseId = dto.case_id && isUuid(dto.case_id) ? dto.case_id : null;
-
-  // Compute subtotal and total
-  const subtotal = dto.items.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
-  const tax = dto.tax_amount || 0;
-  const discount = dto.discount_amount || 0;
-  const total = Math.max(0, subtotal + tax - discount);
-
-  // Generate unique invoice number
-  const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
-
-  const { data: invoice, error: invError } = await supabase
-    .from("invoices")
-    .insert({
-      invoice_number: invoiceNumber,
-      client_id: resolvedClientId,
-      case_id: resolvedCaseId,
-      due_date: dto.due_date,
-      subtotal,
-      tax_amount: tax,
-      discount_amount: discount,
-      total_amount: total,
-      paid_amount: 0,
-      status: "unpaid",
-      notes: dto.notes || null,
-    })
-    .select()
-    .single();
-
-  if (invError) {
-    console.error("[BillingService] createInvoiceRecord error:", invError);
-    throw new Error(`Failed to create invoice: ${invError.message}`);
+  if (dto.case_id && !resolvedCaseId) {
+    throw new Error("Invalid case_id: must be a valid UUID or omitted.");
   }
 
-  // Insert items
-  if (dto.items && dto.items.length > 0) {
-    const itemsPayload = dto.items.map(item => ({
-      invoice_id: invoice.id,
-      description: item.description.trim(),
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      total_price: item.quantity * item.unit_price,
-    }));
-
-    const { error: itemsError } = await supabase.from("invoice_items").insert(itemsPayload);
-    if (itemsError) {
-      console.warn("[BillingService] invoice_items insert warn:", itemsError.message);
+  // Validate line items before the RPC (defense in depth; the RPC re-checks).
+  if (!dto.items || dto.items.length === 0) {
+    throw new Error("At least one line item is required.");
+  }
+  for (const item of dto.items) {
+    if (!item.description || !item.description.trim()) {
+      throw new Error("Line item description is required.");
+    }
+    if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+      throw new Error("Line item quantity must be an integer >= 1.");
+    }
+    if (typeof item.unit_price !== "number" || !Number.isFinite(item.unit_price) || item.unit_price < 0) {
+      throw new Error("Line item unit price cannot be negative.");
     }
   }
 
-  return (await getInvoiceById(invoice.id)) as Invoice;
+  // Atomic invoice + items via SECURITY DEFINER RPC (DB-03): totals are
+  // computed in SQL, the invoice number comes from a DB sequence (FIN-12),
+  // and an items failure rolls back the invoice — no orphans.
+  const created = await callRpc<any>(supabase, "create_invoice_with_items", {
+    p_client_id: dto.client_id,
+    p_case_id: resolvedCaseId,
+    p_due_date: dto.due_date,
+    p_tax_amount: dto.tax_amount || 0,
+    p_discount_amount: dto.discount_amount || 0,
+    p_notes: dto.notes || null,
+    p_items: dto.items.map((item) => ({
+      description: item.description.trim(),
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+    })),
+  });
+
+  return (await getInvoiceById(created.id)) as Invoice;
 }
 
 export async function recordPaymentRecord(data: {

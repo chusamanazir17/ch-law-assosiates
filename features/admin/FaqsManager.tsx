@@ -21,6 +21,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import type { CmsFaq } from "@/lib/db/faqsStore";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 const CATEGORIES = [
   "General",
@@ -54,7 +55,7 @@ export default function FaqsManager() {
   const fetchFaqs = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/faqs");
+      const res = await apiFetch("/api/admin/faqs");
       const data = await res.json();
       if (res.ok && data.success) {
         setFaqs(data.faqs || []);
@@ -104,7 +105,7 @@ export default function FaqsManager() {
 
     setIsSaving(true);
     try {
-      const res = await fetch("/api/admin/faqs", {
+      const res = await apiFetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -129,7 +130,7 @@ export default function FaqsManager() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/faqs?id=${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/admin/faqs?id=${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete FAQ");
@@ -147,7 +148,7 @@ export default function FaqsManager() {
 
   const handleTogglePublish = async (item: CmsFaq) => {
     try {
-      await fetch("/api/admin/faqs", {
+      await apiFetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...item, isPublished: !item.isPublished }),
@@ -174,7 +175,7 @@ export default function FaqsManager() {
 
     try {
       const orderedIds = reordered.map((f) => f.id);
-      await fetch("/api/admin/faqs", {
+      await apiFetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "reorder", orderedIds }),

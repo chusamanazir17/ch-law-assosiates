@@ -29,6 +29,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import type { CmsService, SubService } from "@/lib/db/servicesStore";
+import MediaPicker from "@/components/admin/MediaPicker";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 const PRESET_IMAGES = [
   { label: "Legal Chamber / Courtroom", url: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=80" },
@@ -53,7 +55,9 @@ export default function ServicesCatalogManager() {
   const [editingService, setEditingService] = useState<CmsService | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [formData, setFormData] = useState<Partial<CmsService>>({});
-  const [activeTab, setActiveTab] = useState<"general" | "content" | "items" | "image">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "content" | "items" | "image" | "seo">("general");
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [slugCheckMessage, setSlugCheckMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -62,7 +66,7 @@ export default function ServicesCatalogManager() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch("/api/admin/services");
+      const res = await apiFetch("/api/admin/services");
       const data = await res.json();
       if (res.ok && data.success) {
         setServices(data.services || []);
@@ -123,6 +127,33 @@ export default function ServicesCatalogManager() {
     setFormData({});
     setSaveSuccess(null);
     setSaveError(null);
+    setSlugCheckMessage(null);
+  };
+
+  /** Live slug uniqueness check against the cms_services table. */
+  const checkServiceSlug = async () => {
+    const slug = (formData.slug || "").trim().toLowerCase();
+    if (!slug) {
+      setSlugCheckMessage(null);
+      return;
+    }
+    try {
+      const params = new URLSearchParams({ checkSlug: slug });
+      if (editingService?.id) params.set("excludeId", editingService.id);
+      const res = await apiFetch(`/api/admin/services?${params.toString()}`, { cache: "no-store" });
+      const json = (await res.json()) as { success?: boolean; available?: boolean };
+      if (res.ok && json.success) {
+        setSlugCheckMessage(
+          json.available
+            ? { ok: true, text: "Slug is available." }
+            : { ok: false, text: "This slug is already used by another service." }
+        );
+      } else {
+        setSlugCheckMessage(null);
+      }
+    } catch {
+      setSlugCheckMessage(null);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -141,7 +172,7 @@ export default function ServicesCatalogManager() {
           }
         : formData;
 
-      const res = await fetch("/api/admin/services", {
+      const res = await apiFetch("/api/admin/services", {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -168,8 +199,9 @@ export default function ServicesCatalogManager() {
   };
 
   const handleToggleActive = async (service: CmsService) => {
+    setLoadError(null);
     try {
-      const res = await fetch("/api/admin/services", {
+      const res = await apiFetch("/api/admin/services", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -177,16 +209,18 @@ export default function ServicesCatalogManager() {
           active: !service.active,
         }),
       });
-      if (res.ok) {
-        setServices((prev) =>
-          prev.map((s) => (s.id === service.id ? { ...s, active: !s.active } : s))
-        );
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("cms-updated"));
-        }
+      const result = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Unable to update the service status.");
       }
-    } catch {
-      // ignore
+      setServices((prev) =>
+        prev.map((s) => (s.id === service.id ? { ...s, active: !s.active } : s))
+      );
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Unable to update the service status.");
     }
   };
 
@@ -556,6 +590,7 @@ export default function ServicesCatalogManager() {
                 { id: "content", label: "Description & Fees" },
                 { id: "items", label: "Offerings & Documents" },
                 { id: "image", label: "Hero Photography" },
+                { id: "seo", label: "SEO Metadata" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -639,10 +674,16 @@ export default function ServicesCatalogManager() {
                           required
                           value={formData.slug || ""}
                           onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
+                          onBlur={() => void checkServiceSlug()}
                           placeholder="slug-name"
                           className="w-full bg-transparent font-mono text-xs text-[#0B1F36] focus:outline-none"
                         />
                       </div>
+                      {slugCheckMessage && (
+                        <p className={`mt-1.5 text-[11px] font-semibold ${slugCheckMessage.ok ? "text-emerald-700" : "text-rose-600"}`}>
+                          {slugCheckMessage.text}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -826,13 +867,23 @@ export default function ServicesCatalogManager() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-[#0B1F36]">Hero Image URL</label>
-                    <input
-                      type="url"
-                      value={formData.heroImage || ""}
-                      onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
-                      placeholder="https://images.unsplash.com/..."
-                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
-                    />
+                    <div className="mt-1 flex gap-2">
+                      <input
+                        type="url"
+                        value={formData.heroImage || ""}
+                        onChange={(e) => setFormData({ ...formData, heroImage: e.target.value })}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMediaPickerOpen(true)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-dashed border-[#C8973D]/60 bg-[#FDF8EE] px-3 py-2 text-xs font-semibold text-[#96641E] transition hover:border-[#C8973D]"
+                      >
+                        <ImageIcon className="h-3.5 w-3.5" />
+                        Library
+                      </button>
+                    </div>
                   </div>
 
                   {formData.heroImage && (
@@ -876,6 +927,62 @@ export default function ServicesCatalogManager() {
                 </div>
               )}
 
+              {/* Tab 5: SEO Metadata */}
+              {activeTab === "seo" && (
+                <div className="space-y-4">
+                  <p className="text-[11px] leading-relaxed text-[#94A3B8]">
+                    Leave blank to fall back to the service name, description, and hero image on the public service page.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">SEO Title</label>
+                    <input
+                      type="text"
+                      value={formData.seoTitle || ""}
+                      onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+                      maxLength={180}
+                      placeholder="Custom search-result title"
+                      className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0B1F36]">Meta Description</label>
+                    <textarea
+                      rows={3}
+                      value={formData.metaDescription || ""}
+                      onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                      maxLength={500}
+                      placeholder="Search-result description (defaults to the service description)."
+                      className="mt-1 w-full resize-y rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs leading-relaxed text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                    />
+                    <p className="mt-1 text-right text-[11px] tabular-nums text-[#94A3B8]">
+                      {(formData.metaDescription || "").length}/500
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">Canonical URL (optional)</label>
+                      <input
+                        type="url"
+                        value={formData.canonicalUrl || ""}
+                        onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                        placeholder="https://chcomposing.pk/services/your-slug"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0B1F36]">OG Image URL (optional)</label>
+                      <input
+                        type="url"
+                        value={formData.ogImage || ""}
+                        onChange={(e) => setFormData({ ...formData, ogImage: e.target.value })}
+                        placeholder="Defaults to the hero image"
+                        className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Modal Footer */}
               <div className="mt-6 flex items-center justify-between border-t border-[#E2E8F0] pt-4">
                 <button
@@ -899,6 +1006,13 @@ export default function ServicesCatalogManager() {
           </div>
         </div>
       )}
+
+      <MediaPicker
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        title="Choose service hero image"
+        onSelect={(url) => setFormData((prev) => ({ ...prev, heroImage: url }))}
+      />
     </div>
   );
 }

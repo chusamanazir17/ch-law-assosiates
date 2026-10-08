@@ -24,6 +24,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { StaffUser } from '../../types';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const StaffUsersView: React.FC = () => {
   const { auditLogs, systemUsers } = useOffice();
@@ -37,7 +38,7 @@ export const StaffUsersView: React.FC = () => {
   React.useEffect(() => {
     async function fetchEmployees() {
       try {
-        const res = await fetch('/api/office/employees');
+        const res = await apiFetch('/api/office/employees');
         const json = await res.json();
         if (json.success && json.employees && json.employees.length > 0) {
           const mapped: StaffUser[] = json.employees.map((emp: any) => ({

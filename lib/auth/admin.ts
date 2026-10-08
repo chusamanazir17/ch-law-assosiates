@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/auth/adminAuth";
+import { ADMIN_COOKIE_NAME, isAdminSessionActive } from "@/lib/auth/adminAuth";
 
 export interface AdminSession {
   user: User;
@@ -44,11 +44,11 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   try {
     const supabase = await createClient();
 
-    // 1. Check local admin session cookie
+    // 1. Check local admin session cookie (signature + TTL + revocation registry)
     const cookieStore = await cookies();
     const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
 
-    if (token && (await verifyAdminToken(token))) {
+    if (token && (await isAdminSessionActive(token))) {
       return {
         user: LOCAL_ADMIN_USER,
         isLocalAdmin: true,

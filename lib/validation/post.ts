@@ -15,6 +15,30 @@ export interface ValidatedPostInput {
   status: Post["status"];
   views_count?: number;
   published_at?: string | null;
+  seo_title: string | null;
+  meta_description: string | null;
+  canonical_url: string | null;
+  og_image: string | null;
+}
+
+function optionalSeoText(value: unknown, max: number): string | null {
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!text) return null;
+  return text.slice(0, max);
+}
+
+function optionalSeoUrl(value: unknown, label: string): string | null {
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!text) return null;
+  try {
+    const parsed = new URL(text);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      throw new Error();
+    }
+    return parsed.toString();
+  } catch {
+    throw new Error(`${label} must be a valid HTTP or HTTPS URL.`);
+  }
 }
 
 export function slugify(value: string): string {
@@ -95,5 +119,9 @@ export function validatePostInput(input: unknown): ValidatedPostInput {
     status,
     ...(viewsCount !== undefined ? { views_count: viewsCount } : {}),
     published_at: typeof value.published_at === "string" ? value.published_at : null,
+    seo_title: optionalSeoText(value.seo_title, 180),
+    meta_description: optionalSeoText(value.meta_description, 500),
+    canonical_url: optionalSeoUrl(value.canonical_url, "Canonical URL"),
+    og_image: optionalSeoUrl(value.og_image, "OG image URL"),
   };
 }

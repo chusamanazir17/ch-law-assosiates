@@ -22,6 +22,7 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Post } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 type PostTab = "all" | Post["status"];
 type SortOption = "updated" | "alphabetical" | "views";
@@ -110,7 +111,7 @@ export default function PostsManager() {
     setLoadError(null);
 
     try {
-      const response = await fetch("/api/admin/posts", { cache: "no-store" });
+      const response = await apiFetch("/api/admin/posts", { cache: "no-store" });
       const data = (await response.json()) as PostsResponse;
 
       if (!response.ok) {
@@ -179,7 +180,7 @@ export default function PostsManager() {
     setActionError(null);
     setPendingId(id);
     try {
-      const response = await fetch(`/api/admin/posts?id=${encodeURIComponent(id)}`, {
+      const response = await apiFetch(`/api/admin/posts?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
       const data = (await response.json()) as { error?: string };
@@ -201,7 +202,7 @@ export default function PostsManager() {
     setActionError(null);
     setPendingId(post.id);
     try {
-      const response = await fetch("/api/admin/posts", {
+      const response = await apiFetch("/api/admin/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...post, status: nextStatus }),

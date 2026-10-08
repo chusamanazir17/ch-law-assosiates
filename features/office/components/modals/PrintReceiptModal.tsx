@@ -20,6 +20,13 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
   if (!receipt) return null;
 
   const handlePrint = () => {
+    // Restrict the printed page to the receipt paper only (scoped, no global CSS changes).
+    document.body.classList.add('print-receipt-mode');
+    const cleanup = () => {
+      document.body.classList.remove('print-receipt-mode');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup);
     window.print();
   };
 
@@ -35,18 +42,54 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
     setCancelError('');
   };
 
-  // Convert numbers to simple Pakistani Rupee words
-  const numberToWords = (num: number) => {
-    if (num === 8000) return 'Eight Thousand Rupees Only';
-    if (num === 5000) return 'Five Thousand Rupees Only';
-    if (num === 2000) return 'Two Thousand Rupees Only';
-    if (num === 12000) return 'Twelve Thousand Rupees Only';
-    if (num === 3500) return 'Three Thousand Five Hundred Rupees Only';
-    if (num === 500) return 'Five Hundred Rupees Only';
-    return `${num.toLocaleString()} Rupees Only`;
+  // Convert numbers to Pakistani Rupee words (lakh / crore numbering).
+  const numberToWords = (num: number): string => {
+    const ones = [
+      '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+      'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const twoDigits = (n: number) =>
+      n < 20 ? ones[n] : `${tens[Math.floor(n / 10)]}${n % 10 ? ` ${ones[n % 10]}` : ''}`;
+    const threeDigits = (n: number) =>
+      `${n >= 100 ? `${ones[Math.floor(n / 100)]} Hundred${n % 100 ? ' ' : ''}` : ''}${n % 100 ? twoDigits(n % 100) : ''}`;
+
+    const n = Math.floor(Math.abs(num));
+    if (n === 0) return 'Zero Rupees Only';
+    const parts: string[] = [];
+    let rest = n;
+    const crore = Math.floor(rest / 10000000);
+    rest %= 10000000;
+    const lakh = Math.floor(rest / 100000);
+    rest %= 100000;
+    const thousand = Math.floor(rest / 1000);
+    rest %= 1000;
+    if (crore > 0) parts.push(`${threeDigits(crore)} Crore`);
+    if (lakh > 0) parts.push(`${twoDigits(lakh)} Lakh`);
+    if (thousand > 0) parts.push(`${twoDigits(thousand)} Thousand`);
+    if (rest > 0) parts.push(threeDigits(rest));
+    return `${parts.join(' ')} Rupees Only`;
   };
 
   return (
+    <>
+      {/* Scoped print rules: only the receipt paper prints, one clean page. */}
+      <style>{`
+        @media print {
+          body.print-receipt-mode * { visibility: hidden; }
+          body.print-receipt-mode #printable-receipt,
+          body.print-receipt-mode #printable-receipt * { visibility: visible; }
+          body.print-receipt-mode #printable-receipt {
+            position: absolute !important;
+            left: 0; top: 0;
+            width: 100%;
+            margin: 0 !important;
+            padding: 12mm !important;
+            page-break-inside: avoid;
+          }
+        }
+      `}</style>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-2xl overflow-hidden my-6">
         {/* Modal Top Actions */}
@@ -295,5 +338,6 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
         </div>
       </div>
     </div>
+    </>
   );
 };

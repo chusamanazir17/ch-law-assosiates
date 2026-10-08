@@ -38,6 +38,8 @@ export const ExpensesView: React.FC = () => {
   const [amount, setAmount] = useState<number | ''>('');
   const [account, setAccount] = useState<'cash' | 'hbl' | 'meezan' | 'petty'>('cash');
   const [description, setDescription] = useState('');
+  const [expenseError, setExpenseError] = useState('');
+  const [expenseBusy, setExpenseBusy] = useState(false);
 
   // Filter only OUT transactions
   const expenseTransactions = transactions.filter(t => t.type === 'OUT');
@@ -88,20 +90,43 @@ export const ExpensesView: React.FC = () => {
 
   const handleRecordExpense = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!payee.trim() || !amount) return;
+    if (expenseBusy) return;
+    setExpenseError('');
 
-    recordCashOut({
-      category,
-      payeeDescription: payee,
-      amount: Number(amount),
-      account,
-      staff: 'Usama (Admin)',
-      notes: description || `${category} paid to ${payee}`
-    });
+    const amt = Number(amount);
+    if (!payee.trim()) {
+      setExpenseError('Please enter the payee / vendor name.');
+      return;
+    }
+    if (amount === '' || Number.isNaN(amt) || amt <= 0) {
+      setExpenseError('Please enter a valid expense amount greater than zero.');
+      return;
+    }
+    if (!account) {
+      setExpenseError('Please select the account to deduct from.');
+      return;
+    }
 
-    setPayee('');
-    setAmount('');
-    setDescription('');
+    setExpenseBusy(true);
+    try {
+      recordCashOut({
+        category,
+        payeeDescription: payee.trim(),
+        amount: amt,
+        account,
+        staff: 'Usama (Admin)',
+        notes: description || `${category} paid to ${payee.trim()}`
+      });
+
+      setPayee('');
+      setAmount('');
+      setDescription('');
+      setExpenseError('');
+    } catch (err) {
+      setExpenseError(err instanceof Error ? err.message : 'Could not record the expense.');
+    } finally {
+      setExpenseBusy(false);
+    }
   };
 
 
@@ -198,6 +223,11 @@ export const ExpensesView: React.FC = () => {
             </div>
 
             <form onSubmit={handleRecordExpense} className="space-y-3">
+              {expenseError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+                  {expenseError}
+                </div>
+              )}
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Payee / Vendor Name *</label>
                 <input
@@ -281,10 +311,11 @@ export const ExpensesView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-2 bg-[#F43F5E] hover:bg-[#E11D48] text-white font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                disabled={expenseBusy}
+                className="w-full py-2 bg-[#F43F5E] hover:bg-[#E11D48] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
                 <Minus className="w-4 h-4" />
-                <span>Record Expense in Central Ledger</span>
+                <span>{expenseBusy ? 'Recording…' : 'Record Expense in Central Ledger'}</span>
               </button>
             </form>
           </div>

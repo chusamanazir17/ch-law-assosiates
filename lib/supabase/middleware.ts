@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database.types";
 import { getSupabasePublicConfig } from "@/config/env";
-import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/auth/adminAuth";
+import { ADMIN_COOKIE_NAME, isAdminSessionActive } from "@/lib/auth/adminAuth";
 
 function loginRedirect(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
@@ -33,9 +33,17 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  // 1. Check verified local admin cookie session (grants super_admin privileges)
+  // 1. Check live local admin cookie session (signature + TTL + revocation).
+  // A revoked/logged-out token fails closed here, not just at the API layer.
+  // Wrapped defensively: a registry outage must deny the admin gate, never
+  // crash the middleware.
   const adminCookie = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
-  const isLocalAdmin = await verifyAdminToken(adminCookie);
+  let isLocalAdmin = false;
+  try {
+    isLocalAdmin = await isAdminSessionActive(adminCookie);
+  } catch {
+    isLocalAdmin = false;
+  }
 
   if (isLocalAdmin) {
     // Local admin is super_admin and can access both portals
@@ -91,6 +99,18 @@ export async function updateSession(request: NextRequest) {
     .maybeSingle();
 
   let userRole = (profile?.role as string) || "staff";
+
+  // H14: suspended/inactive profiles are denied everywhere, including CMS
+  // pages (the API layer enforces this independently via getUnifiedSession).
+  if (profile?.status && profile.status !== "active") {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, error: "Account is not active. Contact an administrator." },
+        { status: 401 }
+      );
+    }
+    return loginRedirect(request, "suspended");
+  }
 
   // Fallback check on legacy is_admin RPC
   if (!profile?.role) {

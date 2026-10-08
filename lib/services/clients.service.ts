@@ -20,7 +20,11 @@ export interface CreateClientDTO {
 
 export async function listClients(searchTerm?: string): Promise<Client[]> {
   const supabase = await getAdminDatabaseClient();
-  let query = supabase.from("clients").select("*").order("created_at", { ascending: false });
+  let query = supabase
+    .from("clients")
+    .select("*")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
 
   if (searchTerm && searchTerm.trim()) {
     const term = `%${searchTerm.trim()}%`;
@@ -47,6 +51,7 @@ export async function getClientById(id: string): Promise<(Client & { contacts?: 
       notes:client_notes(*)
     `)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {
@@ -59,13 +64,18 @@ export async function getClientById(id: string): Promise<(Client & { contacts?: 
 
 export async function createClientRecord(dto: CreateClientDTO): Promise<Client> {
   const supabase = await getAdminDatabaseClient();
+
+  // SEC-06: never persist the 'XXXXXXX' placeholder as real identity data.
+  const rawCnic = dto.cnic ? dto.cnic.trim() : "";
+  const cnic = rawCnic && !/[xX]/.test(rawCnic) ? rawCnic : null;
+
   const { data, error } = await supabase
     .from("clients")
     .insert({
       full_name: dto.full_name.trim(),
       business_name: dto.business_name ? dto.business_name.trim() : null,
       client_type: dto.client_type || "individual",
-      cnic: dto.cnic ? dto.cnic.trim() : null,
+      cnic,
       ntn: dto.ntn ? dto.ntn.trim() : null,
       mobile: dto.mobile ? dto.mobile.trim() : "N/A",
       phone: dto.phone ? dto.phone.trim() : null,
@@ -85,31 +95,78 @@ export async function createClientRecord(dto: CreateClientDTO): Promise<Client> 
   return data as Client;
 }
 
-export async function updateClientRecord(id: string, updates: Partial<CreateClientDTO>): Promise<Client | null> {
+export async function updateClientRecord(
+  id: string,
+  updates: Partial<CreateClientDTO>,
+  opts?: { allowedFields?: readonly string[] }
+): Promise<Client | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
+
+  // Mass-assignment guard: only explicitly allowed fields reach the DB.
+  const allowed = new Set(opts?.allowedFields || []);
+  const picked: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined && (allowed.size === 0 || allowed.has(key))) {
+      picked[key] = value;
+    }
+  }
+  // SEC-06 on update as well.
+  if (typeof picked.cnic === "string") {
+    const c = picked.cnic.trim();
+    picked.cnic = c && !/[xX]/.test(c) ? c : null;
+  }
+
   const { data, error } = await supabase
     .from("clients")
     .update({
-      ...updates,
+      ...picked,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .is("deleted_at", null)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[ClientsService] updateClientRecord error:", error);
     throw new Error(`Failed to update client: ${error.message}`);
   }
 
-  return data as Client;
+  return (data as Client) || null;
 }
 
 export async function deleteClientRecord(id: string): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase.from("clients").delete().eq("id", id);
+
+  // A client with live (non-deleted) cases cannot be deleted — 409, not a
+  // silent FK 500. Historical clients should be archived (status) instead.
+  const { data: liveCases, error: casesError } = await supabase
+    .from("case_clients")
+    .select("case_id, cases!inner(id, deleted_at)")
+    .eq("client_id", id)
+    .is("cases.deleted_at", null)
+    .limit(1);
+
+  if (casesError) {
+    throw new Error(`Failed to check client cases: ${casesError.message}`);
+  }
+  if (liveCases && liveCases.length > 0) {
+    const err = new Error(
+      "Cannot delete this client: they have active cases. Archive the client instead."
+    );
+    (err as any).statusCode = 409;
+    throw err;
+  }
+
+  // Soft delete: hidden from lists, retained for financial history (invoices
+  // and payments reference clients with ON DELETE RESTRICT).
+  const { error } = await supabase
+    .from("clients")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
   if (error) {
     throw new Error(`Failed to delete client: ${error.message}`);
   }

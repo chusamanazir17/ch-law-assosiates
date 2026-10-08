@@ -32,6 +32,7 @@ export async function listStampProducts(): Promise<StampProduct[]> {
     .from("stamp_products")
     .select("*")
     .eq("active", true)
+    .is("deleted_at", null)
     .order("denomination", { ascending: true });
 
   if (error) {
@@ -44,6 +45,15 @@ export async function listStampProducts(): Promise<StampProduct[]> {
 
 export async function createStampProduct(dto: CreateStampProductDTO): Promise<StampProduct> {
   const supabase = await getAdminDatabaseClient();
+  if (!dto.name || !dto.name.trim()) throw new Error("Product name is required.");
+  if (!Number.isInteger(dto.denomination) || dto.denomination <= 0) {
+    throw new Error("Denomination must be a positive integer.");
+  }
+  for (const [label, v] of [["Purchase price", dto.purchase_price], ["Sale price", dto.sale_price]] as const) {
+    if (typeof v !== "number" || !Number.isFinite(v) || v < 0) {
+      throw new Error(`${label} cannot be negative.`);
+    }
+  }
   const { data, error } = await supabase
     .from("stamp_products")
     .insert({
@@ -69,22 +79,52 @@ export async function createStampProduct(dto: CreateStampProductDTO): Promise<St
 export async function updateStampProduct(id: string, updates: Partial<CreateStampProductDTO>): Promise<StampProduct | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
+
+  // Allowlist + guards: only pricing/stock-floor/name fields are mutable here.
+  const payload: Record<string, unknown> = {};
+  if (updates.name !== undefined) {
+    if (!String(updates.name).trim()) throw new Error("Product name is required.");
+    payload.name = String(updates.name).trim();
+  }
+  for (const key of ["purchase_price", "sale_price", "minimum_stock"] as const) {
+    const v = updates[key];
+    if (v !== undefined) {
+      if (typeof v !== "number" || !Number.isFinite(v) || v < 0) {
+        throw new Error(`${key} cannot be negative.`);
+      }
+      payload[key] = v;
+    }
+  }
+
   const { data, error } = await supabase
     .from("stamp_products")
     .update({
-      ...updates,
+      ...payload,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .is("deleted_at", null)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[StampsService] updateStampProduct error:", error);
     throw new Error(`Failed to update stamp product: ${error.message}`);
   }
 
-  return data as StampProduct;
+  return (data as StampProduct) || null;
+}
+
+/** Soft delete a stamp product (no hard deletes on inventory masters). */
+export async function deleteStampProduct(id: string): Promise<void> {
+  if (!isUuid(id)) return;
+  const supabase = await getAdminDatabaseClient();
+  const { error } = await supabase
+    .from("stamp_products")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
+  if (error) throw new Error(`Failed to delete stamp product: ${error.message}`);
 }
 
 export async function listStampMovements(filter?: {
@@ -101,6 +141,7 @@ export async function listStampMovements(filter?: {
       client:clients(full_name),
       user:profiles(full_name)
     `)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (filter?.stampProductId && isUuid(filter.stampProductId)) {
@@ -132,18 +173,35 @@ export async function listStampMovements(filter?: {
 export async function recordStampMovement(dto: RecordStampMovementDTO): Promise<void> {
   const supabase = await getAdminDatabaseClient();
 
+  // API-2: quantity must be a non-zero integer. The sign is normalized from
+  // movement_type below (the DB trigger applies ABS() symmetrically), so a
+  // zero quantity is the only rejected case — it would be a no-op row.
+  if (!Number.isInteger(dto.quantity) || dto.quantity === 0) {
+    throw new Error("Quantity must be a non-zero integer.");
+  }
+
   // Resolve target stamp product
   let targetProductId = dto.stampProductId;
   let targetProduct: any = null;
 
   if (isUuid(targetProductId)) {
-    const { data } = await supabase.from("stamp_products").select("*").eq("id", targetProductId).maybeSingle();
+    const { data } = await supabase
+      .from("stamp_products")
+      .select("*")
+      .eq("id", targetProductId)
+      .is("deleted_at", null)
+      .maybeSingle();
     targetProduct = data;
   } else {
-    // Try resolving by numeric denomination or fallback
+    // Try resolving by numeric denomination
     const numericDenom = parseInt(targetProductId.replace(/[^0-9]/g, ""), 10);
     if (!isNaN(numericDenom)) {
-      const { data } = await supabase.from("stamp_products").select("*").eq("denomination", numericDenom).maybeSingle();
+      const { data } = await supabase
+        .from("stamp_products")
+        .select("*")
+        .eq("denomination", numericDenom)
+        .is("deleted_at", null)
+        .maybeSingle();
       if (data) {
         targetProductId = data.id;
         targetProduct = data;
@@ -151,14 +209,12 @@ export async function recordStampMovement(dto: RecordStampMovementDTO): Promise<
     }
   }
 
+  // H4: an unresolvable product must fail loudly — never record a stock
+  // movement against a random product.
   if (!targetProduct || !isUuid(targetProductId)) {
-    const { data: fallback } = await supabase.from("stamp_products").select("*").limit(1).maybeSingle();
-    if (fallback) {
-      targetProductId = fallback.id;
-      targetProduct = fallback;
-    } else {
-      throw new Error("No stamp product found for this movement.");
-    }
+    throw new Error(
+      `No stamp product found for '${dto.stampProductId}'. Provide a valid product id or denomination.`
+    );
   }
 
   const sanitizedClientId = dto.clientId && isUuid(dto.clientId) ? dto.clientId : null;

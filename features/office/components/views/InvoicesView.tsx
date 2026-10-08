@@ -20,6 +20,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 import type { Invoice } from '@/types/office';
+import { pkIsoDate, formatIsoDatePk } from '../utils/pkDates';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export const InvoicesView: React.FC = () => {
   const { clients } = useOffice();
@@ -35,12 +37,14 @@ export const InvoicesView: React.FC = () => {
 
   // New Invoice form state
   const [clientId, setClientId] = useState('');
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0]);
+  const [dueDate, setDueDate] = useState(pkIsoDate(new Date(Date.now() + 15 * 86400000)));
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState([
     { description: 'Legal Drafting & Court Appearance Fee', quantity: 1, unit_price: 25000 }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [invoiceError, setInvoiceError] = useState('');
+  const [paymentError, setPaymentError] = useState('');
 
   // Payment form state
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
@@ -49,7 +53,7 @@ export const InvoicesView: React.FC = () => {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch('/api/office/invoices');
+        const res = await apiFetch('/api/office/invoices');
         const resJson = await res.json();
         if (resJson.success && resJson.invoices) {
           setInvoices(resJson.invoices);
@@ -87,14 +91,23 @@ export const InvoicesView: React.FC = () => {
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
+    setInvoiceError('');
     if (!clientId) {
-      alert('Please select a client.');
+      setInvoiceError('Please select a client.');
+      return;
+    }
+    if (items.some(i => !i.description.trim())) {
+      setInvoiceError('Every line item needs a description.');
+      return;
+    }
+    if (items.some(i => Number(i.quantity) <= 0 || Number(i.unit_price) < 0)) {
+      setInvoiceError('Line items need a quantity of at least 1 and a non-negative amount.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/office/invoices', {
+      const res = await apiFetch('/api/office/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,8 +124,9 @@ export const InvoicesView: React.FC = () => {
       setInvoices(prev => [resJson.invoice, ...prev]);
       setIsNewInvoiceModalOpen(false);
       setNotes('');
+      setInvoiceError('');
     } catch (err: any) {
-      alert(err.message || 'Failed to create invoice.');
+      setInvoiceError(err.message || 'Failed to create invoice.');
     } finally {
       setIsSubmitting(false);
     }
@@ -126,11 +140,12 @@ export const InvoicesView: React.FC = () => {
 
   const handleRecordPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPaymentError('');
     if (!selectedInvoice || paymentAmount <= 0) return;
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/office/invoices', {
+      const res = await apiFetch('/api/office/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -157,9 +172,10 @@ export const InvoicesView: React.FC = () => {
 
       setIsPaymentModalOpen(false);
       setSelectedInvoice(null);
+      setPaymentError('');
 
     } catch (err: any) {
-      alert(err.message || 'Failed to record payment.');
+      setPaymentError(err.message || 'Failed to record payment.');
     } finally {
       setIsSubmitting(false);
     }
@@ -301,7 +317,7 @@ export const InvoicesView: React.FC = () => {
                           <span>{inv.invoice_number}</span>
                         </div>
                         <div className="text-[11px] text-slate-500 mt-0.5">
-                          Issued: {inv.issue_date} (Due: {inv.due_date})
+                          Issued: {formatIsoDatePk(inv.issue_date)} (Due: {formatIsoDatePk(inv.due_date)})
                         </div>
                       </td>
 
@@ -378,6 +394,11 @@ export const InvoicesView: React.FC = () => {
             </div>
 
             <form onSubmit={handleCreateInvoice} className="mt-4 space-y-4 text-xs">
+              {invoiceError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+                  {invoiceError}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -539,6 +560,11 @@ export const InvoicesView: React.FC = () => {
             </div>
 
             <form onSubmit={handleRecordPayment} className="mt-4 space-y-3.5 text-xs">
+              {paymentError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+                  {paymentError}
+                </div>
+              )}
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Payment Amount (Rs.) *

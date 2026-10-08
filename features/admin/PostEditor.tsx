@@ -12,7 +12,9 @@ import {
   Save,
 } from "lucide-react";
 import { slugify } from "@/lib/validation/post";
+import MediaPicker from "@/components/admin/MediaPicker";
 import type { Post } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 type EditorStatus = Post["status"];
 
@@ -49,10 +51,60 @@ export default function PostEditor() {
   const [authorName, setAuthorName] = useState(EMPTY_FORM.authorName);
   const [status, setStatus] = useState<EditorStatus>(EMPTY_FORM.status);
   const [slugTouched, setSlugTouched] = useState(Boolean(identifier));
+  const [seoTitle, setSeoTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState("");
+  const [ogImage, setOgImage] = useState("");
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(identifier));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCategories() {
+      try {
+        const response = await apiFetch("/api/admin/categories", { cache: "no-store" });
+        const data = (await response.json()) as {
+          success?: boolean;
+          categories?: { id: string; name: string; active: boolean }[];
+        };
+        if (!cancelled && response.ok && data.success) {
+          setCategories((data.categories ?? []).filter((c) => c.active));
+        }
+      } catch {
+        // Category list is a convenience — free-text entry still works.
+      }
+    }
+    void loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Live slug uniqueness check (debounced) against the posts table.
+  useEffect(() => {
+    const normalizedSlug = slugify(slug || title);
+    if (!normalizedSlug) {
+      setSlugAvailable(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ checkSlug: normalizedSlug });
+        if (postId) params.set("excludeId", postId);
+        const response = await apiFetch(`/api/admin/posts?${params.toString()}`, { cache: "no-store" });
+        const data = (await response.json()) as { success?: boolean; available?: boolean };
+        setSlugAvailable(response.ok && data.success ? Boolean(data.available) : null);
+      } catch {
+        setSlugAvailable(null);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [slug, title, postId]);
 
   useEffect(() => {
     if (!identifier) return;
@@ -66,7 +118,7 @@ export default function PostEditor() {
 
       try {
         const queryKey = idParam ? "id" : "slug";
-        const response = await fetch(`/api/admin/posts?${queryKey}=${encodeURIComponent(requestedIdentifier)}`, {
+        const response = await apiFetch(`/api/admin/posts?${queryKey}=${encodeURIComponent(requestedIdentifier)}`, {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -85,6 +137,10 @@ export default function PostEditor() {
         setCategory(post.category);
         setAuthorName(post.author_name);
         setStatus(post.status);
+        setSeoTitle(post.seo_title ?? "");
+        setMetaDescription(post.meta_description ?? "");
+        setCanonicalUrl(post.canonical_url ?? "");
+        setOgImage(post.og_image ?? "");
       } catch (loadError) {
         if (loadError instanceof DOMException && loadError.name === "AbortError") return;
         setError(loadError instanceof Error ? loadError.message : "Unable to load the post.");
@@ -127,7 +183,7 @@ export default function PostEditor() {
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/admin/posts", {
+      const response = await apiFetch("/api/admin/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -140,6 +196,10 @@ export default function PostEditor() {
           category: category.trim() || "Guides",
           author_name: authorName.trim() || "Admin",
           status: nextStatus,
+          seo_title: seoTitle.trim() || null,
+          meta_description: metaDescription.trim() || null,
+          canonical_url: canonicalUrl.trim() || null,
+          og_image: ogImage.trim() || null,
         }),
       });
       const data = (await response.json()) as PostResponse;
@@ -157,6 +217,10 @@ export default function PostEditor() {
       setCategory(saved.category);
       setAuthorName(saved.author_name);
       setStatus(saved.status);
+      setSeoTitle(saved.seo_title ?? "");
+      setMetaDescription(saved.meta_description ?? "");
+      setCanonicalUrl(saved.canonical_url ?? "");
+      setOgImage(saved.og_image ?? "");
       setSlugTouched(true);
       setNotice(saved.status === "published" ? "Post published successfully." : "Draft saved successfully.");
 
@@ -273,6 +337,14 @@ export default function PostEditor() {
                 className="min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-[#0B1F36] outline-none placeholder:text-[#94A3B8]"
               />
             </div>
+            {slug && slugAvailable === false && (
+              <p className="mt-1.5 text-[11px] font-semibold text-rose-600">
+                This slug is already used by another post — saving will fail until it is unique.
+              </p>
+            )}
+            {slug && slugAvailable === true && (
+              <p className="mt-1.5 text-[11px] font-semibold text-emerald-700">Slug is available.</p>
+            )}
           </div>
 
           <div>
@@ -330,10 +402,20 @@ export default function PostEditor() {
                 <input
                   id="post-category"
                   value={category}
+                  list="post-category-options"
                   onChange={(event) => setCategory(event.target.value)}
                   maxLength={100}
+                  placeholder="Start typing or pick a managed category"
                   className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
                 />
+                <datalist id="post-category-options">
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.name} />
+                  ))}
+                </datalist>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[#94A3B8]">
+                  Managed in <Link href="/admin/categories" className="font-semibold text-[#96641E] underline underline-offset-2">Article categories</Link>.
+                </p>
               </div>
 
               <div>
@@ -366,6 +448,15 @@ export default function PostEditor() {
                 </button>
               )}
             </div>
+
+            <button
+              type="button"
+              onClick={() => setMediaPickerOpen(true)}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[#C8973D]/60 bg-[#FDF8EE] px-3 py-2.5 text-xs font-semibold text-[#96641E] transition hover:border-[#C8973D] hover:bg-[#FDF3E0]"
+            >
+              <ImageIcon className="h-4 w-4" />
+              Browse media library / upload
+            </button>
 
             <label htmlFor="cover-image-url" className="mt-4 mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
               Image URL (Custom or Preset)
@@ -452,8 +543,72 @@ export default function PostEditor() {
               </div>
             )}
           </section>
+
+          <section className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-xs">
+            <h2 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36]">SEO &amp; social</h2>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-[#94A3B8]">
+              Leave blank to fall back to the title, excerpt, and cover image.
+            </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label htmlFor="post-seo-title" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">SEO title</label>
+                <input
+                  id="post-seo-title"
+                  value={seoTitle}
+                  maxLength={180}
+                  onChange={(event) => setSeoTitle(event.target.value)}
+                  placeholder="Custom search-result title"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
+                />
+              </div>
+              <div>
+                <div className="mb-1.5 flex items-center justify-between gap-4">
+                  <label htmlFor="post-meta-description" className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Meta description</label>
+                  <span className="text-[11px] tabular-nums text-[#94A3B8]">{metaDescription.length}/500</span>
+                </div>
+                <textarea
+                  id="post-meta-description"
+                  value={metaDescription}
+                  maxLength={500}
+                  rows={3}
+                  onChange={(event) => setMetaDescription(event.target.value)}
+                  placeholder="Search-result description (defaults to the excerpt)."
+                  className="w-full resize-y rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs leading-relaxed text-[#334155] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
+                />
+              </div>
+              <div>
+                <label htmlFor="post-canonical" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">Canonical URL (optional)</label>
+                <input
+                  id="post-canonical"
+                  type="url"
+                  value={canonicalUrl}
+                  onChange={(event) => setCanonicalUrl(event.target.value)}
+                  placeholder="https://chcomposing.pk/updates/your-slug"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
+                />
+              </div>
+              <div>
+                <label htmlFor="post-og-image" className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">OG image URL (optional)</label>
+                <input
+                  id="post-og-image"
+                  type="url"
+                  value={ogImage}
+                  onChange={(event) => setOgImage(event.target.value)}
+                  placeholder="Defaults to the cover image"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#0B1F36] outline-none transition placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:ring-2 focus:ring-[#C8973D]/20"
+                />
+              </div>
+            </div>
+          </section>
         </aside>
       </div>
+
+      <MediaPicker
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        title="Choose cover image"
+        onSelect={(url) => setCoverImageUrl(url)}
+      />
     </div>
   );
 }
