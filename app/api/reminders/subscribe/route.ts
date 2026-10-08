@@ -86,59 +86,102 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + CONFIRMATION_TOKEN_TTL_MS).toISOString();
 
     const supabase = createServiceClient();
-    // The subscription RPCs are not in the generated Database types, so call
-    // through a locally typed wrapper instead of an untyped `any`.
-    const callPrepareSubscription = (
-      supabase.rpc as unknown as (
-        fn: "prepare_subscription_request",
-        args: {
-          p_name: string;
-          p_email: string;
-          p_category_ids: string[];
-          p_token_hash: string;
-          p_expires_at: string;
-        }
-      ) => Promise<{
-        data: PrepareSubscriptionResult[] | null;
-        error: { message: string } | null;
-      }>
-    ).bind(supabase);
-    const { data: rpcRows, error: rpcError } = await callPrepareSubscription(
-      "prepare_subscription_request",
-      {
-        p_name: name,
-        p_email: email,
-        p_category_ids: categoryIds,
-        p_token_hash: tokenHash,
-        p_expires_at: expiresAt,
-      }
-    );
 
-    if (rpcError) {
-      const message = rpcError.message || "";
-      console.error("[Reminder Subscribe] prepare_subscription_request failed:", message);
-      if (message.includes("INVALID_CATEGORY_SELECTION")) {
-        return NextResponse.json(
-          { success: false, error: "Please select at least one valid reminder category." },
-          { status: 400 }
-        );
-      }
-      if (message.includes("INVALID_SUBSCRIPTION_INPUT")) {
-        return NextResponse.json(
-          { success: false, error: "Invalid subscription request." },
-          { status: 400 }
-        );
-      }
-      throw new Error(`Failed to register subscription: ${message}`);
+    // NOTE: the `prepare_subscription_request` RPC was never deployed to the
+    // live database, so the same atomic logic is implemented here with direct
+    // service-client queries (service role bypasses RLS).
+    const nowIso = new Date().toISOString();
+
+    // 1. Categories must exist and be active.
+    const { data: validCats, error: catError } = await supabase
+      .from("tax_categories")
+      .select("id")
+      .in("id", categoryIds)
+      .eq("is_active", true);
+    if (catError) throw new Error(`Category lookup failed: ${catError.message}`);
+    if (!validCats || validCats.length !== categoryIds.length) {
+      return NextResponse.json(
+        { success: false, error: "Please select at least one valid reminder category." },
+        { status: 400 }
+      );
     }
 
-    const result = (Array.isArray(rpcRows) ? rpcRows[0] : rpcRows) as
-      | PrepareSubscriptionResult
-      | undefined;
-    if (!result?.subscriber_id) {
-      throw new Error("Subscription request returned no subscriber.");
+    // 2. Find existing subscriber (case-insensitive email match).
+    const { data: existing, error: findError } = await supabase
+      .from("subscribers")
+      .select("id, status")
+      .ilike("email", email)
+      .maybeSingle();
+    if (findError) throw new Error(`Subscriber lookup failed: ${findError.message}`);
+
+    let subscriberId: string;
+    let isSuppressed = false;
+
+    if (existing) {
+      if (existing.status === "suppressed") {
+        isSuppressed = true;
+        subscriberId = existing.id;
+      } else {
+        // Fresh consent on every submission; active stays active until the
+        // new category set is confirmed.
+        const { data: updated, error: updError } = await supabase
+          .from("subscribers")
+          .update({
+            ...(existing.status === "pending" || existing.status === "unsubscribed"
+              ? { name }
+              : {}),
+            consent_at: nowIso,
+            consent_text_version: "v1.0",
+            updated_at: nowIso,
+          })
+          .eq("id", existing.id)
+          .select("id")
+          .single();
+        if (updError) throw new Error(`Subscriber update failed: ${updError.message}`);
+        subscriberId = updated.id;
+      }
+    } else {
+      const { data: inserted, error: insError } = await supabase
+        .from("subscribers")
+        .insert({
+          name,
+          email,
+          status: "pending",
+          consent_at: nowIso,
+          consent_text_version: "v1.0",
+        })
+        .select("id")
+        .single();
+      if (insError) throw new Error(`Subscriber insert failed: ${insError.message}`);
+      subscriberId = inserted.id;
     }
 
+    // 3. Revoke any outstanding confirmation tokens, then issue a fresh one.
+    if (!isSuppressed) {
+      const { error: revokeError } = await supabase
+        .from("subscription_tokens")
+        .update({ revoked_at: nowIso })
+        .eq("subscriber_id", subscriberId)
+        .eq("purpose", "confirmation")
+        .is("used_at", null)
+        .is("revoked_at", null);
+      if (revokeError) throw new Error(`Token revoke failed: ${revokeError.message}`);
+
+      const { error: tokenError } = await supabase.from("subscription_tokens").insert({
+        subscriber_id: subscriberId,
+        token_hash: tokenHash,
+        purpose: "confirmation",
+        metadata: { category_ids: categoryIds, proposed_name: name },
+        expires_at: expiresAt,
+      });
+      if (tokenError) throw new Error(`Token insert failed: ${tokenError.message}`);
+    }
+
+    const result: PrepareSubscriptionResult = {
+      subscriber_id: subscriberId,
+      should_send: !isSuppressed,
+      is_suppressed: isSuppressed,
+    };
     console.log(
       `[Subscription Request] Email: ${email}, Name: ${name}, ` +
         `Categories: ${categoryIds.join(", ")}, suppressed=${result.is_suppressed}`
