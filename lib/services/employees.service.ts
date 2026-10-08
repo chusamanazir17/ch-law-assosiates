@@ -31,12 +31,21 @@ export async function getEmployeeById(id: string): Promise<Profile | null> {
   return (data as Profile) || null;
 }
 
-export async function updateEmployee(id: string, updates: Partial<Profile>): Promise<Profile> {
+export async function updateEmployee(
+  id: string,
+  updates: Partial<Profile>,
+  opts?: { allowPrivilegedFields?: boolean }
+): Promise<Profile> {
   const supabase = await getAdminDatabaseClient();
+  // Privilege guard: `role` and `status` are never taken from an untrusted
+  // update body. A caller must explicitly opt in (super_admin only) to change
+  // them, otherwise they are stripped here as defense in depth.
+  const { role: _role, status: _status, ...safeUpdates } = updates;
+  const payload = opts?.allowPrivilegedFields ? updates : safeUpdates;
   const { data, error } = await supabase
     .from("profiles")
     .update({
-      ...updates,
+      ...payload,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)

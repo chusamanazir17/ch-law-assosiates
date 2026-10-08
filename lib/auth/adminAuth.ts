@@ -1,31 +1,35 @@
+import "server-only";
+
+// Non-secret identifiers may fall back to defaults, but the password and the
+// session signing secret MUST come from the environment. There are no
+// hardcoded fallbacks: missing values fail closed (throw) instead of shipping
+// with publicly known credentials.
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@chcomposing.pk";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin2026";
 
-const DEFAULT_SECRET = "ch-law-admin-secret-key-2026-sahiwal-chamber121";
-const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || DEFAULT_SECRET;
-
-if (process.env.NODE_ENV === "production") {
-  if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === "admin2026") {
-    console.warn(
-      "[Security Warning] ADMIN_PASSWORD is using the default value. Set a strong ADMIN_PASSWORD in your production environment variables."
+function requiredEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `[adminAuth] ${name} is not set. Refusing to authenticate with a default ` +
+        `value — set ${name} in your environment variables.`
     );
   }
-  if (!process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET === DEFAULT_SECRET) {
-    console.warn(
-      "[Security Warning] ADMIN_SESSION_SECRET is using the default fallback. Set a unique 32+ character ADMIN_SESSION_SECRET in your production environment variables."
-    );
-  }
+  return value;
+}
+
+function getAdminPassword(): string {
+  return requiredEnv("ADMIN_PASSWORD");
+}
+
+function getSessionSecret(): string {
+  return requiredEnv("ADMIN_SESSION_SECRET");
 }
 
 export const ADMIN_COOKIE_NAME = "ch_admin_session";
 
 function constantTimeEquals(a: string, b: string): boolean {
   if (a.length !== b.length) {
-    let diff = 0;
-    for (let i = 0; i < a.length; i++) {
-      diff |= a.charCodeAt(i) ^ a.charCodeAt(i);
-    }
     return false;
   }
   let diff = 0;
@@ -47,7 +51,7 @@ export function validateAdminCredentials(
     constantTimeEquals(normalized, ADMIN_EMAIL.toLowerCase()) ||
     constantTimeEquals(normalized, "admin@ch-law.pk");
 
-  const isPassValid = constantTimeEquals(pass.trim(), ADMIN_PASSWORD);
+  const isPassValid = constantTimeEquals(pass.trim(), getAdminPassword());
 
   return isValidUser && isPassValid;
 }
@@ -56,7 +60,7 @@ async function getCryptoKey(): Promise<CryptoKey> {
   const enc = new TextEncoder();
   return await crypto.subtle.importKey(
     "raw",
-    enc.encode(SESSION_SECRET),
+    enc.encode(getSessionSecret()),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"]

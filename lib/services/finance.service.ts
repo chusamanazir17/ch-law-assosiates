@@ -343,32 +343,38 @@ export async function recordExpense(data: {
     throw new Error(`Failed to record expense: ${error.message}`);
   }
 
-  // Deduct from account balance and record ledger entry
-  const newBalance = targetAccount.current_balance - data.amount;
+  // Record the ledger entry.
+  // NOTE: the account balance is debited by the DB trigger
+  // `handle_expense_created` (single source of truth). Do NOT update it here
+  // — doing so debits the same expense twice.
+  // Re-read the balance AFTER the expense insert so `balance_after` reflects
+  // the trigger-applied debit.
+  const { data: refreshedAccount } = await supabase
+    .from("payment_accounts")
+    .select("current_balance")
+    .eq("id", accountId)
+    .maybeSingle();
+  const balanceAfter = Number(
+    refreshedAccount?.current_balance ?? targetAccount.current_balance - data.amount
+  );
+
   const txNo = `TXN-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
-  await Promise.all([
-    supabase
-      .from("payment_accounts")
-      .update({
-        current_balance: newBalance,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", accountId),
-    supabase
-      .from("financial_ledger")
-      .insert({
-        transaction_number: txNo,
-        account_id: accountId,
-        entry_type: "debit",
-        amount: data.amount,
-        balance_after: newBalance,
-        category: data.category.trim(),
-        description: data.description?.trim() || `Expense paid to ${data.payee.trim()}`,
-        reference_type: "expense",
-        reference_id: exp.id,
-      })
-  ]);
+  const { error: ledgerError } = await supabase.from("financial_ledger").insert({
+    transaction_number: txNo,
+    account_id: accountId,
+    entry_type: "debit",
+    amount: data.amount,
+    balance_after: balanceAfter,
+    category: data.category.trim(),
+    description: data.description?.trim() || `Expense paid to ${data.payee.trim()}`,
+    reference_type: "expense",
+    reference_id: exp.id,
+  });
+
+  if (ledgerError) {
+    console.warn("[FinanceService] ledger insert error:", ledgerError.message);
+  }
 
   return {
     ...exp,
