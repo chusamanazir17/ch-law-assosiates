@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import ServicePageTemplate from "@/components/services/ServicePageTemplate";
 import { getServiceBySlug, getAllServices } from "@/lib/db/servicesStore";
 import { getSiteUrl } from "@/config/env";
+import { BreadcrumbJsonLd } from "@/components/seo/JsonLd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -37,14 +38,35 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
       canonical,
     },
     openGraph: {
+      type: "website",
+      siteName: "Ch Composing Estamp and Tax Advisor",
+      locale: "en_PK",
       title: service.seoTitle?.trim() || service.name,
       description,
       images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: service.seoTitle?.trim() || service.name,
+      description,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
 
 export default async function DynamicServicePage({ params }: ServicePageProps) {
   const { slug } = await params;
-  return <ServicePageTemplate slug={slug} />;
+  const service = await getServiceBySlug(slug);
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Services", url: "/services" },
+          { name: service?.name || "Service" },
+        ]}
+      />
+      <ServicePageTemplate slug={slug} />
+    </>
+  );
 }

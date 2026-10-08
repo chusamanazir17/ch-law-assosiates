@@ -9,14 +9,9 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  transpilePackages: [
-    "@mui/material",
-    "@mui/material-nextjs",
-    "@emotion/react",
-    "@emotion/styled",
-  ],
+  transpilePackages: [],
   images: {
-    formats: ["image/webp"],
+    formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
@@ -27,7 +22,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "*.supabase.co",
       },
     ],
   },
@@ -44,6 +39,7 @@ const nextConfig = {
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      "object-src 'none'",
     ].join("; ");
 
     const securityHeaders = [
@@ -77,6 +73,11 @@ const nextConfig = {
       {
         source: "/api/:path*",
         headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" }],
+      },
+      {
+        // Hashed public assets (images, fonts) — safe to cache long-term.
+        source: "/images/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
     ];
   },

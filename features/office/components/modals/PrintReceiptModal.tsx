@@ -179,12 +179,12 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-lg bg-[#05162B] border-2 border-amber-400 flex items-center justify-center p-1 shrink-0">
-                  <span className="font-['Playfair_Display',serif] font-black text-xl text-amber-400">
+                  <span className="font-serif font-black text-xl text-amber-400">
                     CH
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-[15px] font-black tracking-tight uppercase text-[#0B1B2C] font-['Playfair_Display',serif]">
+                  <h1 className="text-[15px] font-black tracking-tight uppercase text-[#0B1B2C] font-serif">
                     CH Composing E-Stamp & Tax Advisor
                   </h1>
                   <div className="text-[11px] font-bold text-[#B8832A] uppercase tracking-wider">
@@ -327,7 +327,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
 
             <div className="text-center">
               <div className="w-40 border-b border-slate-400 mb-1">
-                <span className="font-['Playfair_Display',serif] italic font-bold text-blue-900 text-xs">
+                <span className="font-serif italic font-bold text-blue-900 text-xs">
                   Usama Ali
                 </span>
               </div>
