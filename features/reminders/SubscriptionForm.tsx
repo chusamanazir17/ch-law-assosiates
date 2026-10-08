@@ -25,7 +25,7 @@ export default function SubscriptionForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [consent, setConsent] = useState(true);
+  const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState(""); // Hidden spam honeypot
 
   // Form states
@@ -40,7 +40,8 @@ export default function SubscriptionForm() {
       const data = await getActiveTaxCategories();
       const loadedCats = data && data.length > 0 ? data : FALLBACK_CATEGORIES;
       setCategories(loadedCats);
-      setSelectedCategories(loadedCats.slice(0, 2).map((c) => c.id));
+      // Leave categories unselected — the visitor must actively choose.
+      setSelectedCategories([]);
       setIsLoadingCategories(false);
     }
     load();

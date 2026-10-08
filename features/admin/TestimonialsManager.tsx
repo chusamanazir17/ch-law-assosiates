@@ -167,6 +167,10 @@ export default function TestimonialsManager() {
     return matchesSearch && matchesFeatured;
   });
 
+  // Reordering moves items in the unfiltered list, so arrows are disabled
+  // while a search/filter is active to avoid moving the wrong item.
+  const isFiltered = searchQuery.trim() !== "" || filterFeatured !== "all";
+
   return (
     <div className="space-y-6">
       {/* Header bar */}
@@ -296,16 +300,16 @@ export default function TestimonialsManager() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleMove(index, "up")}
-                      disabled={index === 0}
-                      title="Move Up"
+                      disabled={isFiltered || index === 0}
+                      title={isFiltered ? "Clear search/filter to reorder reviews" : "Move Up"}
                       className="p-1 rounded text-slate-400 hover:text-navy-950 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none"
                     >
                       <ArrowUp className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => handleMove(index, "down")}
-                      disabled={index === testimonials.length - 1}
-                      title="Move Down"
+                      disabled={isFiltered || index === filtered.length - 1}
+                      title={isFiltered ? "Clear search/filter to reorder reviews" : "Move Down"}
                       className="p-1 rounded text-slate-400 hover:text-navy-950 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none"
                     >
                       <ArrowDown className="h-3.5 w-3.5" />

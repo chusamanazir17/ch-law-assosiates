@@ -39,6 +39,13 @@ import { OwnerAvatar } from "@/components/ui/OwnerAvatar";
 const BUILDING_IMG =
   "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=70";
 
+/** Fallback hero stats (M4) — mirrors getDefaultHeroStats() in the CMS store. */
+const FALLBACK_HERO_STATS = [
+  { value: "500+", label: "Satisfied Clients", labelUrdu: "مطمئن کلائنٹس" },
+  { value: "99%", label: "Success Rate", labelUrdu: "کامیابی کی شرح" },
+  { value: "38+", label: "Years of Experience", labelUrdu: "سال کا تجربہ (1988 سے)" },
+];
+
 function Hero() {
   const { isUrdu, t } = useLanguage();
   const { getPageContent, settings, homeSections } = useCms();
@@ -153,46 +160,26 @@ function Hero() {
               </div>
             </div>
 
-            {/* Stats Row */}
+            {/* Stats Row — CMS-driven via Homepage Sections → Hero (M4) */}
             <div className="mt-10 pt-8 border-t border-white/10 flex flex-wrap items-center gap-6 sm:gap-10">
-              {/* Stat 1 */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
-                  <Users className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">500+</div>
-                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
-                    {isUrdu ? "مطمئن کلائنٹس" : "Satisfied Clients"}
+              {(heroSec?.stats?.length ? heroSec.stats : FALLBACK_HERO_STATS).map((stat, i) => {
+                const StatIcon = [Users, BadgeCheck, Award][i % 3];
+                return (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
+                      <StatIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">
+                        {stat.value}
+                      </div>
+                      <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
+                        {isUrdu ? stat.labelUrdu : stat.label}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Stat 2 */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
-                  <BadgeCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">99%</div>
-                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
-                    {isUrdu ? "کامیابی کی شرح" : "Success Rate"}
-                  </div>
-                </div>
-              </div>
-
-              {/* Stat 3 */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold-400/15 border border-gold-400/40 text-gold-400 shadow-inner">
-                  <Award className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-xl sm:text-2xl font-bold text-white font-serif leading-none">35+</div>
-                  <div className="text-[11.5px] sm:text-xs text-[#8792A1] mt-1 font-normal">
-                    {isUrdu ? "سال کا تجربہ (1988 سے)" : "Years of Experience"}
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </motion.div>
 

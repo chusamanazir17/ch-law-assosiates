@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { X, ArrowDownLeft, CheckCircle2, User, FileText, Wallet } from 'lucide-react';
 import { AccountType } from '../../types';
 
 export const CashInModal: React.FC = () => {
-  const { isQuickCashInOpen, setIsQuickCashInOpen, recordCashIn, clients } = useOffice();
+  const { isQuickCashInOpen, setIsQuickCashInOpen, recordCashIn, clients, clientAction, setClientAction } = useOffice();
+  const { staffOptions, resolveStaff } = useStaffAttribution();
 
   const [clientName, setClientName] = useState('');
   const [clientId, setClientId] = useState('');
@@ -13,9 +15,18 @@ export const CashInModal: React.FC = () => {
   const [account, setAccount] = useState<AccountType | string>('cash');
   const [notes, setNotes] = useState('');
   const [generateReceipt, setGenerateReceipt] = useState(true);
-  const [staff, setStaff] = useState('Usama');
+  const [staff, setStaff] = useState('');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Prefill when opened via a client quick action ("Record Pay").
+  useEffect(() => {
+    if (isQuickCashInOpen && clientAction?.action === 'cash-in') {
+      setClientId(clientAction.clientId);
+      setClientName(clientAction.clientName);
+      setClientAction(null);
+    }
+  }, [isQuickCashInOpen, clientAction, setClientAction]);
 
   if (!isQuickCashInOpen) return null;
 
@@ -55,7 +66,7 @@ export const CashInModal: React.FC = () => {
         amount: amt,
         account,
         notes,
-        staff,
+        staff: resolveStaff(staff),
         createReceipt: generateReceipt
       });
 
@@ -189,13 +200,13 @@ export const CashInModal: React.FC = () => {
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Received By Staff</label>
               <select
-                value={staff}
+                value={staff || staffOptions[0] || 'Staff'}
                 onChange={e => setStaff(e.target.value)}
                 className="w-full h-9 px-3 bg-white border border-[#DCE6F1] rounded-lg text-slate-900"
               >
-                <option value="Usama">Usama (Admin)</option>
-                <option value="Chaudhry H.">Chaudhry H. (Lead)</option>
-                <option value="Staff Member">Staff Member</option>
+                {staffOptions.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -222,7 +233,7 @@ export const CashInModal: React.FC = () => {
               className="w-4 h-4 text-[#B8832A] rounded border-slate-300"
             />
             <label htmlFor="autoReceipt" className="text-slate-800 font-medium cursor-pointer">
-              Auto-generate official office receipt (REC-2025-XXXXXX)
+              Auto-generate official office receipt (REC-2026-XXXXXX)
             </label>
           </div>
 

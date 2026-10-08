@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { PageHeader } from '../layout/PageHeader';
 import { KpiCard } from '../common/KpiCard';
 import { StatusBadge } from '../common/StatusBadge';
@@ -17,6 +18,7 @@ import { OfficeTask } from '../../types';
 
 export const TasksDeadlinesView: React.FC = () => {
   const { tasks, addTask, toggleTaskStatus } = useOffice();
+  const { staffOptions, resolveStaff } = useStaffAttribution();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
@@ -26,7 +28,7 @@ export const TasksDeadlinesView: React.FC = () => {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('25-09-2025');
   const [priority, setPriority] = useState<OfficeTask['priority']>('High');
-  const [assignedTo, setAssignedTo] = useState('Usama');
+  const [assignedTo, setAssignedTo] = useState('');
 
   const filteredTasks = tasks.filter(t => {
     const q = searchQuery.toLowerCase();
@@ -50,7 +52,7 @@ export const TasksDeadlinesView: React.FC = () => {
       dueDate,
       priority,
       status: 'Pending',
-      assignedStaff: assignedTo
+      assignedStaff: resolveStaff(assignedTo)
     });
 
     setIsNewTaskModalOpen(false);
@@ -235,13 +237,13 @@ export const TasksDeadlinesView: React.FC = () => {
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Assigned Person</label>
                 <select
-                  value={assignedTo}
+                  value={assignedTo || staffOptions[0] || 'Staff'}
                   onChange={e => setAssignedTo(e.target.value)}
                   className="w-full h-9 px-3 bg-white border border-[#DCE6F1] rounded-lg"
                 >
-                  <option value="Usama">Usama (Admin / Tax Consultant)</option>
-                  <option value="Chaudhry H.">Chaudhry H. (Lead Advocate)</option>
-                  <option value="Staff">Composing / Counter Staff</option>
+                  {staffOptions.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
                 </select>
               </div>
 

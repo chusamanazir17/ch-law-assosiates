@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { X, FileCheck2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { AccountType } from '../../types';
 
 export const StampSaleModal: React.FC = () => {
   const { isStampSaleModalOpen, setIsStampSaleModalOpen, stampStock, recordStampSale, clients } = useOffice();
+  const { resolveStaff } = useStaffAttribution();
 
   const [denomination, setDenomination] = useState<number>(100);
   const [quantity, setQuantity] = useState<number | ''>(2);
@@ -57,7 +59,7 @@ export const StampSaleModal: React.FC = () => {
         clientId: clientId || undefined,
         paymentAccount: account,
         notes: notes || `Sale of ${qty}x Rs. ${denomination} stamps`,
-        staff: 'Usama'
+        staff: resolveStaff()
       });
 
       setIsStampSaleModalOpen(false);

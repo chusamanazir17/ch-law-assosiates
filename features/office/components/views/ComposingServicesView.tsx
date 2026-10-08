@@ -376,7 +376,7 @@ export const ComposingServicesView: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => alert(`Printing drafting job chit for Order #${selectedOrder.orderNo}`)}
+                    onClick={() => window.print()}
                     className="py-1.5 bg-slate-50 hover:bg-slate-100 border border-[#DCE6F1] text-slate-700 font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" />
@@ -459,20 +459,18 @@ export const ComposingServicesView: React.FC = () => {
           </div>
 
           <div className="space-y-2 text-xs">
-            {[
-              { title: 'Sale Deed 5-Marla Printed', time: '10 mins ago', user: 'Composing Desk 1' },
-              { title: 'Affidavit for Court Verified', time: '25 mins ago', user: 'Usama (Admin)' },
-              { title: 'Partnership Agreement Drafted', time: '1 hour ago', user: 'Legal Drafter' },
-              { title: 'Rent Agreement Delivered to Mian Aslam', time: '2 hours ago', user: 'Front Office' }
-            ].map((feed, idx) => (
-              <div key={idx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
-                <div className="font-semibold text-[#0D2344] text-[11px]">{feed.title}</div>
+            {serviceOrders.slice(0, 4).map((order) => (
+              <div key={order.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="font-semibold text-[#0D2344] text-[11px]">{order.serviceName} — {order.orderNo}</div>
                 <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
-                  <span>{feed.user}</span>
-                  <span>{feed.time}</span>
+                  <span>{order.staff || order.customer || 'Staff'}</span>
+                  <span>{order.status}</span>
                 </div>
               </div>
             ))}
+            {serviceOrders.length === 0 && (
+              <div className="p-3 text-center text-slate-400 text-[11px]">No composing jobs yet.</div>
+            )}
           </div>
         </div>
       </div>

@@ -17,7 +17,8 @@ import {
   AlertCircle,
   Building,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  X
 } from 'lucide-react';
 import type { LegalCase } from '@/types/office';
 import { apiFetch } from "@/lib/client/apiFetch";
@@ -30,6 +31,7 @@ export const CasesView: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [isNewCaseModalOpen, setIsNewCaseModalOpen] = useState(false);
+  const [detailCase, setDetailCase] = useState<LegalCase | null>(null);
 
   // New Case Form state
   const [caseNumber, setCaseNumber] = useState('');
@@ -291,7 +293,7 @@ export const CasesView: React.FC = () => {
 
                     <td className="text-right">
                       <button
-                        onClick={() => alert(`Case ${c.case_number}: ${c.title}\n\nCourt: ${c.court_name}\nStage: ${c.stage}\n\nDescription: ${c.description || 'None'}`)}
+                        onClick={() => setDetailCase(c)}
                         className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                       >
                         <span>Details</span>
@@ -469,6 +471,76 @@ export const CasesView: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Read-only Case Detail Modal */}
+      {detailCase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#0E1A2E] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#0B1F36] flex items-center justify-center">
+                  <Scale className="w-4 h-4 text-[#D39D3D]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Case Details</h3>
+                  <p className="text-xs text-slate-500">{detailCase.case_number}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailCase(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Close details"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 text-xs">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Title / Parties</div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{detailCase.title}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Court</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailCase.court_name}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Judge</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailCase.judge_name || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Case Type</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailCase.case_type}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Current Stage</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailCase.stage}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Filing Date</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailCase.filing_date}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Status</div>
+                  <StatusBadge status={detailCase.status === 'active' ? 'Active' : detailCase.status === 'decided' ? 'Completed' : 'Pending'} />
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Description</div>
+                <div className="font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{detailCase.description || 'No description recorded.'}</div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setDetailCase(null)}
+                  className="px-5 py-2 bg-[#0B1F36] hover:bg-[#12294a] text-white text-xs font-semibold rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

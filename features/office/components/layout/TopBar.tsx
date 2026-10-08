@@ -44,8 +44,17 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
     receipts,
     transactions,
     tasks,
-    serviceOrders
+    serviceOrders,
+    sessionUser
   } = useOffice();
+
+  // Identity comes from the live session — never hardcoded names.
+  const displayName = sessionUser?.name?.trim() || 'Admin';
+  const displayEmail = sessionUser?.email?.trim() || '';
+  const displayRole = sessionUser?.role
+    ? sessionUser.role.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : 'Staff';
+  const initials = displayName.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase() || 'A';
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -337,11 +346,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             className="flex items-center gap-2 sm:gap-2.5 pl-1.5 sm:pl-2 pr-1.5 sm:pr-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-full bg-[#B8832A] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
-              UA
+              {initials}
             </div>
             <div className="hidden sm:block text-left leading-tight">
-              <div className="font-bold text-sm text-slate-900 dark:text-slate-100">Usama</div>
-              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Admin</div>
+              <div className="font-bold text-sm text-slate-900 dark:text-slate-100">{displayName}</div>
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">{displayRole}</div>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
           </button>
@@ -350,9 +359,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           {isProfileOpen && (
             <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-[#0E1A2E] rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 text-xs">
               <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800">
-                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">Usama Ali</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">usama@ch.com</div>
-                <div className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Role: Administrator</div>
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">{displayName}</div>
+                {displayEmail && (
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{displayEmail}</div>
+                )}
+                <div className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Role: {displayRole}</div>
               </div>
 
               <div className="py-1">

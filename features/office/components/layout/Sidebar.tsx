@@ -40,7 +40,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse
 }) => {
-  const { activeSection, setActiveSection, activeSubSection, setActiveSubSection } = useOffice();
+  const {
+    activeSection,
+    setActiveSection,
+    activeSubSection,
+    setActiveSubSection,
+    setIsQuickCashInOpen,
+    setIsQuickCashOutOpen,
+    setIsCloseDayModalOpen,
+    setIsStampSaleModalOpen,
+  } = useOffice();
 
   // Collapsible accordion states
   const [isOfficeExpanded, setIsOfficeExpanded] = useState(true);
@@ -52,6 +61,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleNav = (section: string, subSection = '') => {
     setActiveSection(section);
     setActiveSubSection(subSection);
+    // Sub-items that map to a primary action open its modal — every
+    // sidebar click does something real instead of only highlighting.
+    if (section === 'cash' && subSection === 'cash-in') setIsQuickCashInOpen(true);
+    if (section === 'cash' && subSection === 'cash-out') setIsQuickCashOutOpen(true);
+    if (section === 'cash' && subSection === 'daily-closing') setIsCloseDayModalOpen(true);
+    if (section === 'stamps' && subSection === 'sales') setIsStampSaleModalOpen(true);
     if (typeof window !== 'undefined') {
       const targetUrl = section === 'dashboard' ? '/office/dashboard' : `/office/${section}`;
       if (window.location.pathname !== targetUrl) {

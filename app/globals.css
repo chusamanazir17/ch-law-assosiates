@@ -1329,4 +1329,25 @@ html[lang="ur"] textarea {
     padding-top: var(--section-y);
     padding-bottom: var(--section-y);
   }
+
+  /* Office data table: full-width, styled header row, padded cells, row
+     dividers and hover — matches the hand-rolled office tables. */
+  .table-base {
+    @apply w-full text-left text-xs;
+  }
+  .table-base thead {
+    @apply border-b border-[#DCE6F1] bg-[#F8FAFC] dark:border-slate-700 dark:bg-slate-800/60;
+  }
+  .table-base thead th {
+    @apply whitespace-nowrap px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[#60728D] dark:text-slate-400;
+  }
+  .table-base tbody {
+    @apply divide-y divide-slate-100 dark:divide-slate-800;
+  }
+  .table-base tbody td {
+    @apply px-3 py-3 align-middle;
+  }
+  .table-base tbody tr {
+    @apply transition-colors hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40;
+  }
 }

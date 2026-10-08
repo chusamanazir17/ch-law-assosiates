@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { PageHeader } from '../layout/PageHeader';
 import { KpiCard } from '../common/KpiCard';
 import { StatusBadge } from '../common/StatusBadge';
@@ -28,6 +29,7 @@ export const ExpensesView: React.FC = () => {
     recordCashOut,
     setIsQuickCashOutOpen
   } = useOffice();
+  const { sessionUserName } = useStaffAttribution();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
@@ -114,7 +116,7 @@ export const ExpensesView: React.FC = () => {
         payeeDescription: payee.trim(),
         amount: amt,
         account,
-        staff: 'Usama (Admin)',
+        staff: sessionUserName || 'Admin',
         notes: description || `${category} paid to ${payee.trim()}`
       });
 
@@ -292,7 +294,7 @@ export const ExpensesView: React.FC = () => {
                   <input
                     type="text"
                     disabled
-                    value="Usama (Admin)"
+                    value={sessionUserName || 'Admin'}
                     className="w-full h-9 px-3 bg-slate-100 border border-[#DCE6F1] rounded-lg text-slate-600 font-medium"
                   />
                 </div>

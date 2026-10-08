@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Script from "next/script";
 import { Poppins, DM_Serif_Display, Alex_Brush, Noto_Nastaliq_Urdu, Inter } from "next/font/google";
 import AppProviders from "@/providers/AppProviders";
 import Header from "@/components/layout/Header";
+import AnnouncementBanner from "@/components/layout/AnnouncementBanner";
 import Footer from "@/components/layout/Footer";
 import ScrollProgress from "@/components/motion/ScrollProgress";
 import JsonLd from "@/components/seo/JsonLd";
@@ -104,6 +106,9 @@ export default function RootLayout({
         <JsonLd />
         <AppProviders>
           <ScrollProgress />
+          <Suspense fallback={null}>
+            <AnnouncementBanner />
+          </Suspense>
           <Header />
           <main id="main-content">{children}</main>
           <Footer />

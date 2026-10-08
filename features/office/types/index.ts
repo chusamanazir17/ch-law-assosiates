@@ -2,6 +2,13 @@ export type AccountType = 'cash' | 'bank' | 'jazzcash' | 'easypaisa' | 'cheque' 
 
 export type UserRole = 'Admin' | 'Tax Consultant' | 'Stamp Vendor' | 'Accountant' | 'Staff';
 
+/** Cross-view "do X for this client" intent (quick actions with prefill). */
+export interface ClientActionIntent {
+  action: 'cash-in' | 'invoice' | 'tax-case' | 'new-tax-case';
+  clientId: string;
+  clientName: string;
+}
+
 export interface LedgerTransaction {
   id: string;
   dateTime: string;

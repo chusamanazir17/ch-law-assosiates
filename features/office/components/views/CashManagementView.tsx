@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { PageHeader } from '../layout/PageHeader';
 import { exportToCsv } from '../../lib/csv';
 import type { LedgerTransaction } from '../../types';
@@ -35,6 +36,7 @@ export const CashManagementView: React.FC = () => {
     clients,
     dailyClosing
   } = useOffice();
+  const { resolveStaff } = useStaffAttribution();
 
   // Live daily metrics (from the Supabase-backed ledger).
   // WF-27 fix: "today" is the Asia/Karachi business day; ledger strings are
@@ -111,7 +113,7 @@ export const CashManagementView: React.FC = () => {
         account: cashInAccount as any,
         referenceNo: cashInRef,
         notes: cashInNotes,
-        staff: 'Usama (Admin)',
+        staff: resolveStaff(),
         createReceipt: true
       });
 
@@ -158,7 +160,7 @@ export const CashManagementView: React.FC = () => {
         account: cashOutAccount as any,
         referenceNo: cashOutRef,
         notes: cashOutNotes,
-        staff: 'Usama (Admin)'
+        staff: resolveStaff()
       });
 
       setCashOutAmount('');
@@ -804,7 +806,7 @@ export const CashManagementView: React.FC = () => {
                       {tx.amount.toLocaleString()}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{tx.staff || 'Usama'}</td>
+                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400">{tx.staff || 'Staff'}</td>
                   <td className="py-3 px-3 text-center">
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">
                       Completed

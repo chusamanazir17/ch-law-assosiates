@@ -28,7 +28,7 @@ import { CopyableText } from '../common/CopyableText';
 import { exportToCsv } from '../../lib/csv';
 
 export const ClientsView: React.FC = () => {
-  const { clients, serviceOrders, receipts, tasks, setIsNewClientModalOpen, setIsQuickCashInOpen, setActiveSection } = useOffice();
+  const { clients, serviceOrders, receipts, tasks, setIsNewClientModalOpen, setIsQuickCashInOpen, setActiveSection, setClientAction } = useOffice();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClientIndex, setSelectedClientIndex] = useState(0);
@@ -506,19 +506,28 @@ export const ClientsView: React.FC = () => {
                 <Plus className="w-3.5 h-3.5" /> Add Client
               </button>
               <button
-                onClick={() => setIsQuickCashInOpen(true)}
+                onClick={() => {
+                  setClientAction({ action: 'cash-in', clientId: selected.id, clientName: selected.name });
+                  setIsQuickCashInOpen(true);
+                }}
                 className="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5"
               >
                 <CreditCard className="w-3.5 h-3.5" /> Record Pay
               </button>
               <button
-                onClick={() => setActiveSection('invoices')}
+                onClick={() => {
+                  setClientAction({ action: 'invoice', clientId: selected.id, clientName: selected.name });
+                  setActiveSection('invoices');
+                }}
                 className="py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5"
               >
                 <FileText className="w-3.5 h-3.5" /> New Invoice
               </button>
               <button
-                onClick={() => setActiveSection('tax')}
+                onClick={() => {
+                  setClientAction({ action: 'tax-case', clientId: selected.id, clientName: selected.name });
+                  setActiveSection('tax');
+                }}
                 className="py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5"
               >
                 <Coins className="w-3.5 h-3.5" /> New Tax Case
@@ -537,7 +546,12 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Top Outstanding Clients</h3>
-            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
+            <button
+              onClick={() => setActiveSection('invoices')}
+              className="text-[10px] text-[#B8832A] font-semibold hover:underline cursor-pointer"
+            >
+              View All
+            </button>
           </div>
           <div className="space-y-2 text-xs">
             {topOutstanding.length === 0 ? (
@@ -560,7 +574,12 @@ export const ClientsView: React.FC = () => {
         <div className="bg-white dark:bg-[#0D1829] rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Client Activity</h3>
-            <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
+            <button
+              onClick={() => setActiveSection('audit')}
+              className="text-[10px] text-[#B8832A] font-semibold hover:underline cursor-pointer"
+            >
+              View All
+            </button>
           </div>
           <div className="space-y-2.5 text-xs">
             <div className="flex items-start gap-2">

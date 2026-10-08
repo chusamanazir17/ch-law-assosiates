@@ -35,6 +35,12 @@ export const SITE = {
     weekdays: "Monday - Friday: 9:00 AM - 6:00 PM",
     saturday: "Saturday: 9:00 AM - 3:00 PM",
     sunday: "Sunday: Closed",
+    // Machine-readable 24h times for structured data (M3) — must match the
+    // display strings above.
+    weekdayOpens: "09:00",
+    weekdayCloses: "18:00",
+    saturdayOpens: "09:00",
+    saturdayCloses: "15:00",
   },
   coordinates: {
     lat: 30.665373,

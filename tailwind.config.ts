@@ -94,7 +94,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
   future: {
     hoverOnlyWhenSupported: true,
   },

@@ -221,6 +221,27 @@ export default function PostsManager() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.length} selected posts permanently?`)) return;
+
+    setActionError(null);
+    setPendingId("bulk");
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          apiFetch(`/api/admin/posts?id=${encodeURIComponent(id)}`, { method: "DELETE" })
+        )
+      );
+      setPosts((current) => current.filter((post) => !selectedIds.includes(post.id)));
+      setSelectedIds([]);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Unable to delete the selected posts.");
+    } finally {
+      setPendingId(null);
+    }
+  };
+
   const toggleSelectAll = () => {
     const visibleIds = filteredPosts.map((post) => post.id);
     const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
@@ -342,15 +363,12 @@ export default function PostsManager() {
             <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Total Readership</p>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
-                {counts.totalViews > 1000 ? `${(counts.totalViews / 1000).toFixed(1)}k` : counts.totalViews || "1.2k"}
-              </span>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                ↑ +28%
+                {counts.totalViews > 1000 ? `${(counts.totalViews / 1000).toFixed(1)}k` : counts.totalViews}
               </span>
             </div>
             <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Article views</p>
           </div>
-          <MiniSparkline points={[350, 480, 620, 810, 950, 1200]} color="#9333ea" />
+
         </div>
       </div>
 
@@ -466,7 +484,7 @@ export default function PostsManager() {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 font-medium text-[#0B1F36] dark:text-slate-200 text-xs">
                     <Eye className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
-                    <span>{art.views_count || 120}</span>
+                    <span>{art.views_count ?? 0}</span>
                   </div>
                 </div>
               ))
@@ -566,6 +584,30 @@ export default function PostsManager() {
 
       {/* 5. Posts Table (Screen 1) */}
       <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] shadow-sm transition-colors">
+        {/* Bulk actions bar (appears when rows are selected) */}
+        {selectedIds.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] dark:border-slate-800 bg-blue-50/60 dark:bg-blue-950/20 px-4 py-2.5 text-xs">
+            <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
+              {selectedIds.length} selected
+            </span>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={pendingId === "bulk"}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#0f172a] px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition disabled:opacity-50"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>{pendingId === "bulk" ? "Deleting…" : "Delete selected"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="text-xs font-medium text-[#64748B] dark:text-slate-400 hover:underline"
+            >
+              Clear
+            </button>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>

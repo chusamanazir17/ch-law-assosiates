@@ -9,7 +9,7 @@ interface PrintReceiptModalProps {
 }
 
 export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId, onClose }) => {
-  const { receipts, cancelReceipt } = useOffice();
+  const { receipts, cancelReceipt, sessionUser } = useOffice();
   const [isCancelMode, setIsCancelMode] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelError, setCancelError] = useState('');
@@ -18,6 +18,9 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
 
   const receipt = receipts.find(r => r.id === receiptId || r.receiptNo === receiptId);
   if (!receipt) return null;
+
+  // Signatory: the logged-in session user's name; never a hardcoded name.
+  const signatoryName = sessionUser?.name?.trim() ? sessionUser.name : 'Authorized Signatory';
 
   const handlePrint = () => {
     // Restrict the printed page to the receipt paper only (scoped, no global CSS changes).
@@ -328,7 +331,7 @@ export const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ receiptId,
             <div className="text-center">
               <div className="w-40 border-b border-slate-400 mb-1">
                 <span className="font-serif italic font-bold text-blue-900 text-xs">
-                  Usama Ali
+                  {signatoryName}
                 </span>
               </div>
               <div className="text-[11px] font-bold text-[#0D2344]">Authorized Signatory</div>

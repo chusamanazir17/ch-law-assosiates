@@ -15,7 +15,8 @@ import {
   FileText,
   Scale,
   CalendarDays,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import type { Hearing, LegalCase } from '@/types/office';
 import { apiFetch } from "@/lib/client/apiFetch";
@@ -27,6 +28,7 @@ export const HearingsView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [isNewHearingModalOpen, setIsNewHearingModalOpen] = useState(false);
+  const [detailHearing, setDetailHearing] = useState<Hearing | null>(null);
 
   // New Hearing form state
   const [selectedCaseId, setSelectedCaseId] = useState('');
@@ -289,7 +291,7 @@ export const HearingsView: React.FC = () => {
 
                     <td className="text-right">
                       <button
-                        onClick={() => alert(`Hearing on ${h.hearing_date}\n\nCase: ${h.case_number}\nCourt: ${h.court_room}\nJudge: ${h.judge_name || 'N/A'}\n\nPurpose: ${h.purpose}\n\nProceedings: ${h.proceedings_summary || 'None'}\n\nNext Hearing: ${h.next_hearing_date || 'None'} (${h.next_purpose || ''})`)}
+                        onClick={() => setDetailHearing(h)}
                         className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
                       >
                         <span>View Order</span>
@@ -440,6 +442,81 @@ export const HearingsView: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Read-only Hearing Detail Modal */}
+      {detailHearing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#0E1A2E] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#0B1F36] flex items-center justify-center">
+                  <Gavel className="w-4 h-4 text-[#D39D3D]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Hearing Details</h3>
+                  <p className="text-xs text-slate-500">{detailHearing.hearing_date}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDetailHearing(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Close details"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Case</div>
+                  <div className="font-semibold text-slate-900 dark:text-slate-100">{detailHearing.case_number || detailHearing.case_id}</div>
+                  {detailHearing.case_title && (
+                    <div className="text-slate-500 mt-0.5">{detailHearing.case_title}</div>
+                  )}
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Status</div>
+                  <StatusBadge status={detailHearing.status === 'scheduled' ? 'Pending' : detailHearing.status === 'completed' ? 'Completed' : 'Overdue'} />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Court Room</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailHearing.court_room || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Judge</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailHearing.judge_name || '—'}</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Purpose</div>
+                <div className="font-medium text-slate-700 dark:text-slate-200">{detailHearing.purpose}</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Proceedings Summary</div>
+                <div className="font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{detailHearing.proceedings_summary || 'No proceedings recorded yet.'}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Next Hearing</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailHearing.next_hearing_date || 'Not scheduled'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Next Purpose</div>
+                  <div className="font-medium text-slate-700 dark:text-slate-200">{detailHearing.next_purpose || '—'}</div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setDetailHearing(null)}
+                  className="px-5 py-2 bg-[#0B1F36] hover:bg-[#12294a] text-white text-xs font-semibold rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

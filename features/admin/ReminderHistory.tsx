@@ -118,7 +118,8 @@ export default function ReminderHistory() {
     }
   };
 
-  // Send Test Email via send-test-reminder Edge function
+  // Send Test Email via the server-side admin route (cookie-session admins
+  // lack the Supabase Auth JWT the Edge Function requires).
   const handleSendTestEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDeadlineId) return;
@@ -127,23 +128,17 @@ export default function ReminderHistory() {
     setTestResult(null);
 
     try {
-      // The send-test-reminder Edge Function requires a real Supabase Auth
-      // session (it checks is_admin on the caller's JWT).
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { data, error } = await supabase.functions.invoke("send-test-reminder", {
-        body: {
+      const res = await apiFetch("/api/admin/reminders/send-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           deadline_id: selectedDeadlineId,
           reminder_interval: selectedInterval,
-        },
+        }),
       });
+      const data = await res.json().catch(() => ({}));
 
-      if (error) {
-        setTestResult({
-          success: false,
-          message: error.message || "Failed to trigger test email.",
-        });
-      } else if (data?.success) {
+      if (res.ok && data?.success) {
         setTestResult({
           success: true,
           message: data.message || "Test email sent to your administrator address.",

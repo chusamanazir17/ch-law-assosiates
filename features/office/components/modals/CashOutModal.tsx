@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { X, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { AccountType } from '../../types';
 
 export const CashOutModal: React.FC = () => {
   const { isQuickCashOutOpen, setIsQuickCashOutOpen, recordCashOut } = useOffice();
+  const { staffOptions, resolveStaff } = useStaffAttribution();
 
   const [category, setCategory] = useState('Printing & Stationery');
   const [payeeDescription, setPayeeDescription] = useState('');
   const [amount, setAmount] = useState<number | ''>(1200);
   const [account, setAccount] = useState<AccountType | string>('cash');
   const [notes, setNotes] = useState('');
-  const [staff, setStaff] = useState('Usama');
+  const [staff, setStaff] = useState('');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,7 +46,7 @@ export const CashOutModal: React.FC = () => {
         amount: amt,
         account,
         notes,
-        staff
+        staff: resolveStaff(staff)
       });
 
       setIsQuickCashOutOpen(false);
@@ -174,12 +176,13 @@ export const CashOutModal: React.FC = () => {
           <div>
             <label className="block text-slate-700 font-semibold mb-1">Authorized By</label>
             <select
-              value={staff}
+              value={staff || staffOptions[0] || 'Staff'}
               onChange={e => setStaff(e.target.value)}
               className="w-full h-9 px-3 bg-white border border-[#DCE6F1] rounded-lg text-slate-900"
             >
-              <option value="Usama">Usama (Admin)</option>
-              <option value="Chaudhry H.">Chaudhry H. (Lead)</option>
+              {staffOptions.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
             </select>
           </div>
 

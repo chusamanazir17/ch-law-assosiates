@@ -43,6 +43,18 @@ const PRESET_IMAGES = [
   { label: "Banking & Loan Desk", url: "https://images.unsplash.com/photo-1556742049-0a67c5574f73?auto=format&fit=crop&w=1200&q=80" },
 ];
 
+/** Fallback practice categories used until services provide their own. */
+const FALLBACK_CATEGORIES = [
+  "Court Document Services",
+  "Taxation",
+  "Corporate Services",
+  "Revenue & Land Services",
+  "Legal Documentation",
+  "Civil & Family Law",
+  "Intellectual Property",
+  "Financial Legal Services",
+];
+
 export default function ServicesCatalogManager() {
   const [services, setServices] = useState<CmsService[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -69,8 +81,12 @@ export default function ServicesCatalogManager() {
       const res = await apiFetch("/api/admin/services");
       const data = await res.json();
       if (res.ok && data.success) {
-        setServices(data.services || []);
-        setCategories(data.categories || []);
+        const loaded: CmsService[] = data.services || [];
+        setServices(loaded);
+        // The route returns no `categories` field, so derive them from the
+        // loaded services (falling back to a sensible default list).
+        const derived = [...new Set(loaded.map((s) => s.category).filter(Boolean))] as string[];
+        setCategories(derived.length > 0 ? derived : FALLBACK_CATEGORIES);
       } else {
         throw new Error(data.error || "Failed to load services");
       }
@@ -163,7 +179,9 @@ export default function ServicesCatalogManager() {
     setSaveError(null);
 
     try {
-      const method = isCreatingNew ? "POST" : "PUT";
+      // The /api/admin/services route upserts on POST (id/slug lookup), so both
+      // create and edit go through POST.
+      const method = "POST";
       const payload = isCreatingNew
         ? {
             ...formData,
@@ -202,7 +220,7 @@ export default function ServicesCatalogManager() {
     setLoadError(null);
     try {
       const res = await apiFetch("/api/admin/services", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: service.id,
@@ -221,6 +239,31 @@ export default function ServicesCatalogManager() {
       }
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : "Unable to update the service status.");
+    }
+  };
+
+  const handleDeleteService = async (service: CmsService) => {
+    const confirmed = window.confirm(
+      `Delete "${service.name}"? This will remove its page from the website. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setLoadError(null);
+    try {
+      const res = await apiFetch(
+        `/api/admin/services?id=${encodeURIComponent(service.id)}`,
+        { method: "DELETE" }
+      );
+      const result = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string };
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Unable to delete the service.");
+      }
+      setServices((prev) => prev.filter((s) => s.id !== service.id));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Unable to delete the service.");
     }
   };
 
@@ -542,6 +585,15 @@ export default function ServicesCatalogManager() {
                     >
                       <Edit3 className="h-3.5 w-3.5 text-[#64748B]" />
                       <span>Edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteService(service)}
+                      title="Delete service"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-2xs transition hover:border-rose-300 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Delete</span>
                     </button>
                     <Link
                       href={`/services/${service.slug}`}

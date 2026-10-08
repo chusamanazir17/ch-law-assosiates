@@ -43,6 +43,12 @@ export type SectionId =
   | "office"
   | "finalCta";
 
+export interface HeroStat {
+  value: string;
+  label: string;
+  labelUrdu: string;
+}
+
 export interface HomeSectionsData {
   hero: {
     badge: string;
@@ -52,6 +58,8 @@ export interface HomeSectionsData {
     primaryBtn: { text: string; href: string; enabled: boolean };
     secondaryBtn: { text: string; message: string; enabled: boolean };
     trustBadges: Array<{ id: string; label: string; enabled: boolean }>;
+    /** Stats row under the hero CTAs (M4: was hardcoded "500+"/"99%"/"35+") */
+    stats: HeroStat[];
   };
   servicesSection: {
     enabled: boolean;
@@ -126,6 +134,15 @@ export interface HomeSectionsData {
   updatedAt: string;
 }
 
+/** Default hero stats row (M4). Values match the firm's previous hardcoded claims. */
+export function getDefaultHeroStats(): HeroStat[] {
+  return [
+    { value: "500+", label: "Satisfied Clients", labelUrdu: "مطمئن کلائنٹس" },
+    { value: "99%", label: "Success Rate", labelUrdu: "کامیابی کی شرح" },
+    { value: "38+", label: "Years of Experience", labelUrdu: "سال کا تجربہ (1988 سے)" },
+  ];
+}
+
 export function getDefaultHomeSections(): HomeSectionsData {
   return {
     hero: {
@@ -149,6 +166,7 @@ export function getDefaultHomeSections(): HomeSectionsData {
         { id: "2", label: "Same-Day Issuance", enabled: true },
         { id: "3", label: "100% Confidential", enabled: true },
       ],
+      stats: getDefaultHeroStats(),
     },
     servicesSection: {
       enabled: true,
@@ -380,6 +398,12 @@ export async function getHomeSections(): Promise<HomeSectionsData> {
     }
 
     const sections: HomeSectionsData = { ...defaults, ...(data.value as Partial<HomeSectionsData>) };
+    // Backfill newer hero fields for rows seeded before they existed
+    // (the merge above is shallow, so a stored `hero` object replaces the
+    // default one wholesale and would drop `stats`).
+    if (!Array.isArray(sections.hero?.stats)) {
+      sections.hero = { ...sections.hero, stats: defaults.hero.stats };
+    }
     cmsCacheSet(CACHE_KEY, sections);
     return sections;
   } catch (err) {

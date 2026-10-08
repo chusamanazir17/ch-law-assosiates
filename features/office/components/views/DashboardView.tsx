@@ -48,8 +48,10 @@ export const DashboardView: React.FC = () => {
     setIsTransferModalOpen,
     setIsCloseDayModalOpen,
     setIsStampSaleModalOpen,
+    setIsNewClientModalOpen,
     setActiveSection,
-    setSelectedReceiptId
+    setSelectedReceiptId,
+    setClientAction
   } = useOffice();
 
   // 1. Live Dynamic Calculations for Large Cards
@@ -677,7 +679,7 @@ export const DashboardView: React.FC = () => {
               <Minus className="w-4 h-4" /> Cash Out
             </button>
             <button
-              onClick={() => setActiveSection('clients')}
+              onClick={() => setIsNewClientModalOpen(true)}
               className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <Users className="w-4 h-4" /> New Client
@@ -689,7 +691,10 @@ export const DashboardView: React.FC = () => {
               <FileCheck2 className="w-4 h-4" /> Stamp Sale
             </button>
             <button
-              onClick={() => setActiveSection('tax')}
+              onClick={() => {
+                setClientAction({ action: 'new-tax-case', clientId: '', clientName: '' });
+                setActiveSection('tax');
+              }}
               className="p-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all active:scale-95 whitespace-nowrap"
             >
               <FileText className="w-4 h-4" /> New Tax Case

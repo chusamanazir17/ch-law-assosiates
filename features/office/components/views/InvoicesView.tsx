@@ -24,7 +24,7 @@ import { pkIsoDate, formatIsoDatePk } from '../utils/pkDates';
 import { apiFetch } from "@/lib/client/apiFetch";
 
 export const InvoicesView: React.FC = () => {
-  const { clients } = useOffice();
+  const { clients, clientAction, setClientAction } = useOffice();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +34,15 @@ export const InvoicesView: React.FC = () => {
   const [isNewInvoiceModalOpen, setIsNewInvoiceModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+
+  // Open prefilled when arriving via a client quick action ("New Invoice").
+  useEffect(() => {
+    if (clientAction?.action === 'invoice') {
+      if (clientAction.clientId) setClientId(clientAction.clientId);
+      setIsNewInvoiceModalOpen(true);
+      setClientAction(null);
+    }
+  }, [clientAction, setClientAction]);
 
   // New Invoice form state
   const [clientId, setClientId] = useState('');

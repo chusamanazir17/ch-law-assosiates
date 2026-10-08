@@ -31,6 +31,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useAdminSidebar } from "./AdminSidebarContext";
 import { apiFetch } from "@/lib/client/apiFetch";
+import { useAdminSession } from "./useAdminSession";
 
 interface AdminSidebarProps {
   mobileOpen?: boolean;
@@ -44,6 +45,15 @@ export default function AdminSidebar({
   const pathname = usePathname() || "";
   const router = useRouter();
   const { isCollapsed, toggleCollapsed, mobileOpen: ctxMobileOpen, setMobileOpen, isReady } = useAdminSidebar();
+  const session = useAdminSession();
+  const sessionInitials = (session.name || "Administrator")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const sessionRoleLabel = (session.role || "Administrator").replace(/_/g, " ");
 
   const isMobileDrawerOpen = propMobileOpen !== undefined ? propMobileOpen : ctxMobileOpen;
   const handleCloseMobile = propOnCloseMobile || (() => setMobileOpen(false));
@@ -292,14 +302,14 @@ export default function AdminSidebar({
           <div className="group relative flex flex-col items-center">
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30 shadow-2xs cursor-pointer"
-              title="Muhammad Usama (Principal Advocate & Tax Consultant)"
+              title={`${session.name} (${sessionRoleLabel})`}
             >
-              MU
+              {sessionInitials}
             </div>
             {/* Tooltip with Sign Out */}
             <div className="pointer-events-none absolute left-full ml-3 bottom-0 hidden w-48 rounded-lg bg-white dark:bg-[#0b1329] p-2 text-[#334155] dark:text-slate-200 shadow-xl border border-[#E2E8F0] dark:border-slate-800 z-50 group-hover:pointer-events-auto group-hover:block">
-              <div className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">Muhammad Usama</div>
-              <div className="text-xs text-[#64748B] dark:text-slate-400 mb-2 font-medium">Principal Advocate & Tax Consultant</div>
+              <div className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">{session.name}</div>
+              <div className="text-xs text-[#64748B] dark:text-slate-400 mb-2 font-medium capitalize">{sessionRoleLabel}</div>
               <button
                 type="button"
                 onClick={handleSignOut}
@@ -314,14 +324,14 @@ export default function AdminSidebar({
           <div className="flex items-center justify-between rounded-lg p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30">
-                MU
+                {sessionInitials}
               </div>
               <div className="min-w-0">
                 <span className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100 block leading-tight truncate">
-                  Muhammad Usama
+                  {session.name}
                 </span>
-                <span className="text-xs text-[#64748B] dark:text-slate-400 font-medium block leading-tight mt-0.5 truncate">
-                  Principal Advocate & Tax Consultant
+                <span className="text-xs text-[#64748B] dark:text-slate-400 font-medium block leading-tight mt-0.5 truncate capitalize">
+                  {sessionRoleLabel}
                 </span>
               </div>
             </div>

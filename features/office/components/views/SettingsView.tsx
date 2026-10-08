@@ -169,13 +169,13 @@ export const SettingsView: React.FC = () => {
 
               <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
                 <div className="font-bold text-slate-800">JazzCash Merchant Account</div>
-                <div className="text-[11px] text-slate-500">0300-1234567 (Chaudhry H.)</div>
+                <div className="text-[11px] text-slate-500">0300-1234567</div>
                 <div className="text-emerald-600 font-bold mt-1">Status: Active & Linked</div>
               </div>
 
               <div className="p-3 rounded-lg border border-slate-200 bg-slate-50">
                 <div className="font-bold text-slate-800">EasyPaisa Digital Account</div>
-                <div className="text-[11px] text-slate-500">0345-7654321 (Usama Ali)</div>
+                <div className="text-[11px] text-slate-500">0345-7654321</div>
                 <div className="text-emerald-600 font-bold mt-1">Status: Active & Linked</div>
               </div>
 

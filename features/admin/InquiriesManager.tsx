@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MessageSquareText,
   Search,
@@ -14,25 +15,17 @@ import {
   X,
   Check,
   FileText,
-  Users,
-  CheckCircle2,
-  TrendingUp,
-  AlertCircle,
-  ExternalLink,
-  ChevronRight,
   PieChart,
   Flag,
-  Calendar,
   Mail,
   MapPin,
   Send,
   MoreHorizontal,
   Sun,
-  ChevronDown,
-  UserCheck,
 } from "lucide-react";
 import type { ConsultationInquiry } from "@/types/cms";
 import { apiFetch } from "@/lib/client/apiFetch";
+import { useAdminSession } from "./useAdminSession";
 
 type InquiryStatus = ConsultationInquiry["status"];
 
@@ -45,6 +38,13 @@ interface ExtendedInquiry extends ConsultationInquiry {
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+function timeOfDayGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 // Mini Sparkline Component
@@ -90,15 +90,38 @@ function MiniSparkline({
 
 
 export default function InquiriesManager() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 text-center text-xs text-[#64748B] dark:text-slate-400">
+          Loading inquiries…
+        </div>
+      }
+    >
+      <InquiriesManagerInner />
+    </Suspense>
+  );
+}
+
+function InquiriesManagerInner() {
+  const searchParams = useSearchParams();
+  const session = useAdminSession();
   const [inquiries, setInquiries] = useState<ExtendedInquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | InquiryStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Pagination (client-side over the filtered list)
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+
+  // Session-local annotations (no backend model exists for these yet)
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [activityLog, setActivityLog] = useState<Record<string, { text: string; at: string }[]>>({});
 
   // Selected inquiries checkboxes
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
@@ -149,16 +172,18 @@ export default function InquiriesManager() {
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.inquiries) {
-          const mapped: ExtendedInquiry[] = json.inquiries.map((inq: any, idx: number) => ({
+          const mapped: ExtendedInquiry[] = json.inquiries.map((inq: any) => ({
             ...inq,
-            priority: inq.priority || (idx % 3 === 0 ? "High" : idx % 3 === 1 ? "Medium" : "Low"),
-            assignedTo: inq.assignedTo || {
-              name: ["Zain Ahmed", "Sara Malik", "Ali Raza", "Fatima Tariq", "Hassan Khan"][idx % 5],
-            },
-            location: inq.location || "Sahiwal, Punjab",
-            source: inq.source || "Website Contact Form",
+            // Priority is a local annotation only — never invented per-row.
+            priority: (["High", "Medium", "Low"] as const).includes(inq.priority)
+              ? inq.priority
+              : undefined,
+            assignedTo: undefined,
+            location: inq.location || undefined,
+            source: inq.source || undefined,
           }));
           setInquiries(mapped);
+          setPage(1);
           if (!selectedInquiry) setSelectedInquiry(mapped[0]);
         } else {
           setInquiries([]);
@@ -178,6 +203,17 @@ export default function InquiriesManager() {
     loadInquiries();
   }, []);
 
+  // H5: honor the header search (?q=) by seeding the table's search filter.
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
+  // Reset to first page whenever the result set changes.
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, categoryFilter, priorityFilter]);
+
   const handleStatusChange = async (id: string, newStatus: InquiryStatus) => {
     setActionLoading(id);
 
@@ -192,6 +228,13 @@ export default function InquiriesManager() {
         setInquiries((prev) =>
           prev.map((inq) => (inq.id === id ? { ...inq, status: newStatus } : inq))
         );
+        setActivityLog((prev) => ({
+          ...prev,
+          [id]: [
+            ...(prev[id] || []),
+            { text: `Status changed to ${newStatus.replace("_", " ")}`, at: new Date().toISOString() },
+          ],
+        }));
         setMessage({ type: "success", text: `Status updated to ${newStatus}.` });
         if (selectedInquiry && selectedInquiry.id === id) {
           setSelectedInquiry((prev) => (prev ? { ...prev, status: newStatus } : null));
@@ -241,11 +284,11 @@ export default function InquiriesManager() {
 
   const handleAddConsultation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!newName.trim() || !newPhone.trim()) return;
 
     const name = newName.trim();
-    const phone = newPhone.trim() || "+92 300 0000000";
-    const email = newEmail.trim() || "client@example.com";
+    const phone = newPhone.trim();
+    const email = newEmail.trim() || undefined;
     const service = newService;
     const msg = newMessage.trim() || "In-chamber consultation inquiry recorded.";
     const prio = newPriority;
@@ -264,18 +307,20 @@ export default function InquiriesManager() {
         }),
       });
       const data = await res.json();
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || "Failed to record consultation.");
+      }
+      const created = data.inquiry;
       const newInq: ExtendedInquiry = {
-        id: data?.inquiry?.id || `inq-${Date.now()}`,
-        name,
-        phone,
-        email,
-        service_needed: service,
-        message: msg,
-        created_at: new Date().toISOString(),
+        id: created?.id || `inq-${Date.now()}`,
+        name: created?.name || name,
+        phone: created?.phone || phone,
+        email: created?.email || email,
+        service_needed: created?.service_needed || service,
+        message: created?.message || msg,
+        created_at: created?.created_at || new Date().toISOString(),
         status: "new",
         priority: prio,
-        assignedTo: { name: "Zain Ahmed" },
-        location: "Sahiwal, Punjab",
         source: "In-Chamber Desk",
       };
 
@@ -283,24 +328,8 @@ export default function InquiriesManager() {
       setSelectedInquiry(newInq);
       setAddSuccess(true);
     } catch (err) {
-      console.error("[Add Consultation]", err);
-      const newInq: ExtendedInquiry = {
-        id: `inq-${Date.now()}`,
-        name,
-        phone,
-        email,
-        service_needed: service,
-        message: msg,
-        created_at: new Date().toISOString(),
-        status: "new",
-        priority: prio,
-        assignedTo: { name: "Zain Ahmed" },
-        location: "Sahiwal, Punjab",
-        source: "In-Chamber Desk",
-      };
-      setInquiries((prev) => [newInq, ...prev]);
-      setSelectedInquiry(newInq);
-      setAddSuccess(true);
+      setMessage({ type: "error", text: getErrorMessage(err, "Failed to record consultation.") });
+      return;
     }
 
     setTimeout(() => {
@@ -331,28 +360,60 @@ export default function InquiriesManager() {
       const matchesPriority =
         priorityFilter === "all" || inq.priority === priorityFilter;
 
-      const matchesAssignee =
-        assigneeFilter === "all" || inq.assignedTo?.name === assigneeFilter;
-
-      return matchesSearch && matchesStatus && matchesCategory && matchesPriority && matchesAssignee;
+      return matchesSearch && matchesStatus && matchesCategory && matchesPriority;
     });
-  }, [inquiries, searchQuery, statusFilter, categoryFilter, priorityFilter, assigneeFilter]);
+  }, [inquiries, searchQuery, statusFilter, categoryFilter, priorityFilter]);
 
-  // Derived metrics matching Screen 4
-  const totalCount = inquiries.length || 248;
-  const newCount = inquiries.filter((i) => i.status === "new").length || 62;
-  const completedCount = inquiries.filter((i) => i.status === "completed").length || 186;
-  const highPriorityCount = inquiries.filter((i) => i.priority === "High").length || 28;
+  // Derived metrics — real counts only, 0 when empty.
+  const totalCount = inquiries.length;
+  const newCount = inquiries.filter((i) => i.status === "new").length;
+  const completedCount = inquiries.filter((i) => i.status === "completed").length;
+  const highPriorityCount = inquiries.filter((i) => i.priority === "High").length;
+  const responseRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+  const newShare = totalCount > 0 ? Math.round((newCount / totalCount) * 100) : 0;
+  const highShare = totalCount > 0 ? Math.round((highPriorityCount / totalCount) * 100) : 0;
+  const thisWeekCount = inquiries.filter((i) => {
+    const ts = new Date(i.created_at).getTime();
+    return !Number.isNaN(ts) && Date.now() - ts < 7 * 24 * 60 * 60 * 1000;
+  }).length;
 
-  // Category breakdown for Donut Chart (Screen 4)
-  const categoryChartData = [
-    { label: "Income Tax & Returns", pct: 32, count: 80, color: "#2563EB" },
-    { label: "E-Stamp & Property Deeds", pct: 24, count: 60, color: "#8B5CF6" },
-    { label: "Business & NTN Registration", pct: 18, count: 45, color: "#10B981" },
-    { label: "Legal & Corporate Advisory", pct: 12, count: 30, color: "#F59E0B" },
-    { label: "FBR & PRA Sales Tax", pct: 8, count: 20, color: "#EC4899" },
-    { label: "Other Legal Matters", pct: 6, count: 13, color: "#64748B" },
-  ];
+  // Per-day counts for the last 6 days (honest sparklines).
+  const sparkFor = (pred: (i: ExtendedInquiry) => boolean) => {
+    const days = 6;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const counts = new Array<number>(days).fill(0);
+    for (const inq of inquiries) {
+      if (!pred(inq)) continue;
+      const ts = new Date(inq.created_at).getTime();
+      if (Number.isNaN(ts)) continue;
+      const dayIdx = Math.floor((ts - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+      if (dayIdx <= 0 && dayIdx >= -days + 1) counts[days - 1 + dayIdx] += 1;
+    }
+    return counts;
+  };
+  const sparkCounts = useMemo(() => sparkFor(() => true), [inquiries]);
+  const sparkNew = useMemo(() => sparkFor((i) => i.status === "new"), [inquiries]);
+  const sparkCompleted = useMemo(() => sparkFor((i) => i.status === "completed"), [inquiries]);
+  const sparkHigh = useMemo(() => sparkFor((i) => i.priority === "High"), [inquiries]);
+
+  // Category breakdown derived from REAL inquiries (top services by volume).
+  const CATEGORY_PALETTE = ["#2563EB", "#8B5CF6", "#10B981", "#F59E0B", "#EC4899", "#64748B"];
+  const categoryChartData = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const inq of inquiries) {
+      const svc = (inq.service_needed || "General Consultation").trim() || "General Consultation";
+      counts.set(svc, (counts.get(svc) || 0) + 1);
+    }
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const total = sorted.reduce((acc, [, c]) => acc + c, 0) || 1;
+    return sorted.map(([label, count], idx) => ({
+      label,
+      count,
+      pct: Math.round((count / total) * 100),
+      color: CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length],
+    }));
+  }, [inquiries]);
 
   // Helper for priority badges
   const getPriorityBadge = (prio?: string) => {
@@ -372,11 +433,16 @@ export default function InquiriesManager() {
           </span>
         );
       case "Low":
-      default:
         return (
           <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-400">
             <Flag className="h-3 w-3 text-slate-400" />
             Low
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium text-[#94A3B8] dark:text-slate-500">
+            Not set
           </span>
         );
     }
@@ -435,6 +501,72 @@ export default function InquiriesManager() {
     );
   };
 
+  // Client-side pagination over the filtered list.
+  const totalPages = Math.max(1, Math.ceil(filteredInquiries.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedInquiries = useMemo(
+    () => filteredInquiries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredInquiries, safePage]
+  );
+  const pageStart = filteredInquiries.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(safePage * PAGE_SIZE, filteredInquiries.length);
+  const pageNumbers = useMemo(() => {
+    const nums: number[] = [];
+    const from = Math.max(1, Math.min(safePage - 2, totalPages - 4));
+    for (let n = from; n <= Math.min(totalPages, from + 4); n++) nums.push(n);
+    return nums;
+  }, [safePage, totalPages]);
+
+  const handleBulkDelete = async () => {
+    if (selectedRowIds.length === 0) return;
+    if (!confirm(`Delete ${selectedRowIds.length} selected inquiries? This cannot be undone.`)) return;
+    setActionLoading("bulk");
+    try {
+      await Promise.all(
+        selectedRowIds.map((id) =>
+          apiFetch("/api/admin/inquiries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, action: "delete" }),
+          })
+        )
+      );
+      setInquiries((prev) => prev.filter((i) => !selectedRowIds.includes(i.id)));
+      if (selectedInquiry && selectedRowIds.includes(selectedInquiry.id)) setSelectedInquiry(null);
+      setMessage({ type: "success", text: `${selectedRowIds.length} inquiries deleted.` });
+      setSelectedRowIds([]);
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Bulk delete failed.") });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleBulkStatus = async (newStatus: InquiryStatus) => {
+    if (selectedRowIds.length === 0) return;
+    setActionLoading("bulk");
+    try {
+      await Promise.all(
+        selectedRowIds.map((id) =>
+          apiFetch("/api/admin/inquiries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status: newStatus }),
+          })
+        )
+      );
+      setInquiries((prev) =>
+        prev.map((inq) => (selectedRowIds.includes(inq.id) ? { ...inq, status: newStatus } : inq))
+      );
+      setMessage({ type: "success", text: `${selectedRowIds.length} inquiries marked as ${newStatus}.` });
+      setSelectedRowIds([]);
+    } catch (error) {
+      setMessage({ type: "error", text: getErrorMessage(error, "Bulk status update failed.") });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-admin pb-12">
       {/* 1. Top Executive Banner & Action Bar (Screen 4 Header) */}
@@ -454,12 +586,12 @@ export default function InquiriesManager() {
             <div className="hidden md:flex items-center gap-3 pr-4 border-r border-[#E2E8F0] dark:border-slate-800 text-right">
               <div>
                 <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium">
-                  {currentTime || "Mon, Sep 21, 2026 09:14 AM"}
+                  {currentTime}
                 </p>
                 <div className="flex items-center justify-end gap-1.5 mt-0.5">
                   <Sun className="h-4 w-4 text-amber-500 animate-pulse" />
                   <span className="text-sm font-semibold text-[#0B1F36] dark:text-slate-200">
-                    Good morning, Muhammad Usama!
+                    {timeOfDayGreeting()}, {session.name}!
                   </span>
                 </div>
               </div>
@@ -487,13 +619,10 @@ export default function InquiriesManager() {
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {totalCount}
               </span>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                ↑ 12%
-              </span>
             </div>
-            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">+26 this week</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">+{thisWeekCount} this week</p>
           </div>
-          <MiniSparkline points={[8, 12, 14, 18, 22, 26]} color="#2563EB" />
+          <MiniSparkline points={sparkCounts} color="#2563EB" />
         </div>
 
         {/* Card 2: Unresolved */}
@@ -504,13 +633,10 @@ export default function InquiriesManager() {
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {newCount}
               </span>
-              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
-                ↑ 8%
-              </span>
             </div>
-            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">25% of total</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">{newShare}% of total</p>
           </div>
-          <MiniSparkline points={[12, 14, 13, 16, 15, 18]} color="#EA580C" />
+          <MiniSparkline points={sparkNew} color="#EA580C" />
         </div>
 
         {/* Card 3: Responded */}
@@ -521,13 +647,10 @@ export default function InquiriesManager() {
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {completedCount}
               </span>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                ↑ 18%
-              </span>
             </div>
-            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">75% response rate</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">{responseRate}% response rate</p>
           </div>
-          <MiniSparkline points={[14, 18, 22, 25, 29, 34]} color="#10B981" />
+          <MiniSparkline points={sparkCompleted} color="#10B981" />
         </div>
 
         {/* Card 4: High Priority */}
@@ -538,20 +661,17 @@ export default function InquiriesManager() {
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
                 {highPriorityCount}
               </span>
-              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md">
-                ↓ 27%
-              </span>
             </div>
-            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">11% of total</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">{highShare}% of total</p>
           </div>
-          <MiniSparkline points={[6, 8, 7, 5, 4, 3]} color="#F43F5E" />
+          <MiniSparkline points={sparkHigh} color="#F43F5E" />
         </div>
       </div>
 
-      {/* 3. Middle Row: Inquiry Categories Donut Chart & Response Performance (Screen 4) */}
+      {/* 3. Inquiry Categories Donut Chart (real distribution) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left: Inquiry Categories Donut Chart (6 cols) */}
-        <div className="lg:col-span-6 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+        {/* Inquiry Categories Donut Chart (real distribution) */}
+        <div className="lg:col-span-12 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
           <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
@@ -575,6 +695,15 @@ export default function InquiriesManager() {
             </button>
           </div>
 
+          {categoryChartData.length === 0 ? (
+            <div className="mt-4 py-10 text-center">
+              <PieChart className="mx-auto h-8 w-8 text-[#CBD5E1] dark:text-slate-600 mb-2" />
+              <p className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">No inquiries yet</p>
+              <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">
+                The category breakdown will appear once inquiries arrive.
+              </p>
+            </div>
+          ) : (
           <div className="mt-4 flex flex-col sm:flex-row items-center gap-6">
             {/* SVG Donut Chart */}
             <div className="relative shrink-0 flex items-center justify-center">
@@ -642,101 +771,9 @@ export default function InquiriesManager() {
               ))}
             </div>
           </div>
+          )}
         </div>
 
-        {/* Right: Response Performance (6 cols - Screen 4) */}
-        <div className="lg:col-span-6 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
-          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400">
-                <Clock className="h-4.5 w-4.5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
-                  Response Performance
-                </h3>
-                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
-                  Average response time and trend
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs text-[#64748B] dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-[#E2E8F0] dark:border-slate-700">
-              <span>Last 30 Days</span>
-              <ChevronDown className="h-3.5 w-3.5" />
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
-                4h 32m
-              </span>
-              <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
-                ↓ 28%
-              </span>
-              <span className="text-xs text-[#64748B] dark:text-slate-400">
-                Average response time
-              </span>
-            </div>
-
-            {/* Performance Timeline SVG Chart */}
-            <div className="mt-4 relative pt-2">
-              <svg viewBox="0 0 460 120" className="w-full h-28 overflow-visible">
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0284c7" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Horizontal Guide lines */}
-                <line x1="0" y1="20" x2="460" y2="20" stroke="currentColor" strokeOpacity="0.08" />
-                <line x1="0" y1="60" x2="460" y2="60" stroke="currentColor" strokeOpacity="0.08" />
-                <line x1="0" y1="100" x2="460" y2="100" stroke="currentColor" strokeOpacity="0.08" />
-
-                {/* Y-axis labels */}
-                <text x="5" y="24" className="text-[9px] fill-slate-400 dark:fill-slate-500 font-mono">12h</text>
-                <text x="5" y="64" className="text-[9px] fill-slate-400 dark:fill-slate-500 font-mono">8h</text>
-                <text x="5" y="104" className="text-[9px] fill-slate-400 dark:fill-slate-500 font-mono">4h</text>
-
-                {/* Smooth Curve */}
-                <path
-                  d="M 30,70 Q 70,68 110,65 T 190,62 T 270,72 T 330,48 T 390,68 T 450,60"
-                  fill="none"
-                  stroke="#0284c7"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M 30,70 Q 70,68 110,65 T 190,62 T 270,72 T 330,48 T 390,68 T 450,60 L 450,110 L 30,110 Z"
-                  fill="url(#areaGrad)"
-                />
-
-                {/* Tooltip on Sep 11 point */}
-                <circle cx="330" cy="48" r="4.5" fill="#0284c7" stroke="#ffffff" strokeWidth="2" />
-                <g transform="translate(295, 12)">
-                  <rect width="70" height="24" rx="6" fill="#0B1F36" className="dark:fill-slate-800 shadow-md" />
-                  <text x="35" y="16" textAnchor="middle" fill="#ffffff" className="text-[10px] font-semibold">
-                    6h 12m
-                  </text>
-                </g>
-              </svg>
-
-              {/* X-axis date labels */}
-              <div className="flex justify-between text-[10px] font-mono text-[#94A3B8] dark:text-slate-500 mt-1 px-4">
-                <span>Aug 22</span>
-                <span>Aug 26</span>
-                <span>Aug 30</span>
-                <span>Sep 03</span>
-                <span>Sep 07</span>
-                <span className="text-blue-600 dark:text-blue-400 font-bold">Sep 11</span>
-                <span>Sep 15</span>
-                <span>Sep 19</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Alert / Notification Feedback */}
@@ -814,20 +851,6 @@ export default function InquiriesManager() {
             <option value="archived">Closed</option>
           </select>
 
-          {/* Assignee Filter */}
-          <select
-            value={assigneeFilter}
-            onChange={(e) => setAssigneeFilter(e.target.value)}
-            className="rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3 py-2.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none transition shadow-2xs"
-          >
-            <option value="all">All Assignees</option>
-            <option value="Zain Ahmed">Zain Ahmed</option>
-            <option value="Sara Malik">Sara Malik</option>
-            <option value="Ali Raza">Ali Raza</option>
-            <option value="Fatima Tariq">Fatima Tariq</option>
-            <option value="Hassan Khan">Hassan Khan</option>
-          </select>
-
           <button
             type="button"
             onClick={() => {
@@ -835,7 +858,6 @@ export default function InquiriesManager() {
               setCategoryFilter("all");
               setPriorityFilter("all");
               setStatusFilter("all");
-              setAssigneeFilter("all");
             }}
             className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-3 py-2.5 text-xs font-medium text-[#64748B] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-2xs"
           >
@@ -881,14 +903,13 @@ export default function InquiriesManager() {
                     <th className="py-3.5 px-3.5 font-semibold">Category</th>
                     <th className="py-3.5 px-3.5 font-semibold">Message Preview</th>
                     <th className="py-3.5 px-3.5 font-semibold">Priority</th>
-                    <th className="py-3.5 px-3.5 font-semibold">Assigned To</th>
                     <th className="py-3.5 px-3.5 font-semibold">Date</th>
                     <th className="py-3.5 px-3.5 font-semibold">Status</th>
                     <th className="py-3.5 px-3.5 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800/60">
-                  {filteredInquiries.map((inq) => {
+                  {pagedInquiries.map((inq) => {
                     const isSelected = selectedInquiry?.id === inq.id;
                     const cleanPhone = inq.phone.replace(/[^0-9]/g, "");
                     const waNumber = cleanPhone.startsWith("0")
@@ -953,17 +974,6 @@ export default function InquiriesManager() {
                           {getPriorityBadge(inq.priority)}
                         </td>
 
-                        {/* Assigned To */}
-                        <td className="py-3.5 px-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-700 items-center justify-center text-[10px] font-semibold text-slate-700 dark:text-slate-300">
-                              {getInitials(inq.assignedTo?.name || "Zain")}
-                            </div>
-                            <span className="text-xs font-medium text-[#334155] dark:text-slate-300">
-                              {inq.assignedTo?.name || "Zain Ahmed"}
-                            </span>
-                          </div>
-                        </td>
 
                         {/* Date */}
                         <td className="py-3.5 px-3.5 whitespace-nowrap text-xs text-[#64748B] dark:text-slate-400">
@@ -1009,31 +1019,86 @@ export default function InquiriesManager() {
             </div>
           )}
 
-          {/* Table Pagination Footer matching Screen 4 */}
+          {/* Bulk actions bar (appears when rows are selected) */}
+          {selectedRowIds.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] dark:border-slate-800 bg-blue-50/60 dark:bg-blue-950/20 px-4 py-2.5 text-xs">
+              <span className="font-semibold text-[#0B1F36] dark:text-slate-100">
+                {selectedRowIds.length} selected
+              </span>
+              <select
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value) handleBulkStatus(e.target.value as InquiryStatus);
+                  e.target.value = "";
+                }}
+                disabled={actionLoading === "bulk"}
+                className="rounded-lg border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-2 py-1.5 text-xs font-medium text-[#0B1F36] dark:text-slate-200 focus:border-[#C8973D] focus:outline-none"
+                aria-label="Set status for selected inquiries"
+              >
+                <option value="" disabled>
+                  Set status…
+                </option>
+                <option value="new">New</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Responded</option>
+                <option value="archived">Closed</option>
+              </select>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={actionLoading === "bulk"}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-white dark:bg-[#0f172a] px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition disabled:opacity-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>{actionLoading === "bulk" ? "Working…" : "Delete selected"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRowIds([])}
+                className="text-xs font-medium text-[#64748B] dark:text-slate-400 hover:underline"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {/* Working table pagination */}
           <div className="flex items-center justify-between border-t border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] px-4 py-3 text-xs text-[#64748B] dark:text-slate-400">
-            <span>Showing 1–{filteredInquiries.length} of {totalCount} inquiries</span>
+            <span>
+              Showing {pageStart}–{pageEnd} of {filteredInquiries.length} inquiries
+            </span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                className="h-7 w-7 rounded-lg border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                aria-label="Previous page"
+                className="h-7 w-7 rounded-lg border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ‹
               </button>
+              {pageNumbers.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setPage(n)}
+                  aria-label={`Page ${n}`}
+                  aria-current={n === safePage ? "page" : undefined}
+                  className={`h-7 w-7 rounded-lg font-semibold flex items-center justify-center ${
+                    n === safePage
+                      ? "bg-blue-600 text-white"
+                      : "border border-[#E2E8F0] dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
               <button
                 type="button"
-                className="h-7 w-7 rounded-lg bg-blue-600 text-white font-semibold flex items-center justify-center"
-              >
-                1
-              </button>
-              <button
-                type="button"
-                className="h-7 w-7 rounded-lg border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800"
-              >
-                2
-              </button>
-              <button
-                type="button"
-                className="h-7 w-7 rounded-lg border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                aria-label="Next page"
+                className="h-7 w-7 rounded-lg border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ›
               </button>
@@ -1123,6 +1188,8 @@ export default function InquiriesManager() {
 
             {/* Drawer Body Content */}
             <div className="mt-4 space-y-4">
+              {activeDrawerTab === "details" && (
+                <>
               {/* Card 1: Contact Information */}
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
@@ -1133,7 +1200,7 @@ export default function InquiriesManager() {
                   <div className="flex items-center gap-2.5">
                     <Mail className="h-3.5 w-3.5 text-[#94A3B8]" />
                     <span className="text-[#334155] dark:text-slate-300 font-medium">
-                      {selectedInquiry.email || "client@example.com"}
+                      {selectedInquiry.email || "Not provided"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -1142,12 +1209,14 @@ export default function InquiriesManager() {
                       {selectedInquiry.phone}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="h-3.5 w-3.5 text-[#94A3B8]" />
-                    <span className="text-[#334155] dark:text-slate-300">
-                      {selectedInquiry.location || "Sahiwal, Punjab"}
-                    </span>
-                  </div>
+                  {selectedInquiry.location && (
+                    <div className="flex items-center gap-2.5">
+                      <MapPin className="h-3.5 w-3.5 text-[#94A3B8]" />
+                      <span className="text-[#334155] dark:text-slate-300">
+                        {selectedInquiry.location}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1173,17 +1242,6 @@ export default function InquiriesManager() {
                     <div>{getStatusBadge(selectedInquiry.status)}</div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#64748B] dark:text-slate-400 font-medium">Assigned To</span>
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex h-5 w-5 rounded-full bg-slate-300 dark:bg-slate-700 items-center justify-center text-[9px] font-bold">
-                        {getInitials(selectedInquiry.assignedTo?.name || "Zain")}
-                      </div>
-                      <span className="font-semibold text-[#0B1F36] dark:text-slate-200">
-                        {selectedInquiry.assignedTo?.name || "Zain Ahmed"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
                     <span className="text-[#64748B] dark:text-slate-400 font-medium">Date Received</span>
                     <span className="text-[#334155] dark:text-slate-300">
                       {new Date(selectedInquiry.created_at).toLocaleString("en-US", {
@@ -1198,7 +1256,7 @@ export default function InquiriesManager() {
                   <div className="flex items-center justify-between">
                     <span className="text-[#64748B] dark:text-slate-400 font-medium">Source</span>
                     <span className="text-[#334155] dark:text-slate-300 font-medium">
-                      {selectedInquiry.source || "Website Contact Form"}
+                      {selectedInquiry.source || "Website"}
                     </span>
                   </div>
                 </div>
@@ -1214,6 +1272,104 @@ export default function InquiriesManager() {
                   &ldquo;{selectedInquiry.message}&rdquo;
                 </div>
               </div>
+
+                </>
+              )}
+
+              {activeDrawerTab === "conversation" && (
+                <div className="rounded-xl border border-dashed border-[#CBD5E1] dark:border-slate-700 p-8 text-center">
+                  <MessageCircle className="mx-auto h-8 w-8 text-[#CBD5E1] dark:text-slate-600 mb-2" />
+                  <p className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">
+                    No in-app conversation yet
+                  </p>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1 max-w-xs mx-auto">
+                    Replies to this client happen over WhatsApp or phone — there is no in-app
+                    messaging thread to show.
+                  </p>
+                  {selectedInquiry.phone && (
+                    <a
+                      href={`https://wa.me/${selectedInquiry.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                        `Assalam-o-Alaikum ${selectedInquiry.name}, Chamber 121 responding regarding your inquiry on ${selectedInquiry.service_needed || "legal services"}.`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white px-4 py-2 text-xs font-semibold transition"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      <span>Open WhatsApp Chat</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {activeDrawerTab === "notes" && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                      Private Notes
+                    </p>
+                    <span className="text-[10px] text-[#94A3B8] dark:text-slate-500">
+                      Saved on this device only
+                    </span>
+                  </div>
+                  <textarea
+                    rows={6}
+                    value={notes[selectedInquiry.id] || ""}
+                    onChange={(e) =>
+                      setNotes((prev) => ({ ...prev, [selectedInquiry.id]: e.target.value }))
+                    }
+                    placeholder="Add an internal note about this inquiry — follow-ups, context, reminders…"
+                    className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-[#0f172a] px-3.5 py-2.5 text-sm text-[#0B1F36] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 focus:border-[#C8973D] focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20"
+                  />
+                </div>
+              )}
+
+              {activeDrawerTab === "activity" && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">
+                    Activity
+                  </p>
+                  {(activityLog[selectedInquiry.id] || []).length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-[#CBD5E1] dark:border-slate-700 p-6 text-center">
+                      <Clock className="mx-auto h-6 w-6 text-[#CBD5E1] dark:text-slate-600 mb-2" />
+                      <p className="text-xs text-[#64748B] dark:text-slate-400">
+                        No recorded activity yet. Status changes you make will appear here.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {(activityLog[selectedInquiry.id] || [])
+                        .slice()
+                        .reverse()
+                        .map((entry, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-xs">
+                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                            <div className="min-w-0">
+                              <p className="font-medium text-[#1E293B] dark:text-slate-200">{entry.text}</p>
+                              <p className="text-[11px] text-[#94A3B8] dark:text-slate-500">
+                                {new Date(entry.at).toLocaleString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-[#94A3B8] dark:text-slate-500">
+                    Received{" "}
+                    {new Date(selectedInquiry.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                    {" "}via {selectedInquiry.source || "website"}
+                  </p>
+                </div>
+              )}
 
               {/* Action Buttons matching Screen 4 */}
               <div className="pt-2 flex items-center gap-2">
@@ -1316,10 +1472,11 @@ export default function InquiriesManager() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
-                      Phone Number
+                      Phone Number *
                     </label>
                     <input
                       type="text"
+                      required
                       value={newPhone}
                       onChange={(e) => setNewPhone(e.target.value)}
                       placeholder="+92 300 1234567"

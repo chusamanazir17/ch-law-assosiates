@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOffice } from '../../context/OfficeContext';
+import { useStaffAttribution } from '../../hooks/useStaffAttribution';
 import { PageHeader } from '../layout/PageHeader';
 import { KpiCard } from '../common/KpiCard';
 import { StatusBadge } from '../common/StatusBadge';
@@ -31,8 +32,12 @@ export const TaxManagementView: React.FC = () => {
     taxCases,
     updateTaxCaseStatus,
     addTaxCase,
-    clients
+    clients,
+    tasks,
+    clientAction,
+    setClientAction
   } = useOffice();
+  const { staffOptions, resolveStaff } = useStaffAttribution();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCaseId, setSelectedCaseId] = useState<string>(taxCases[0]?.id || '');
@@ -45,7 +50,16 @@ export const TaxManagementView: React.FC = () => {
   const [taxYear, setTaxYear] = useState('2024');
   const [dueDate, setDueDate] = useState('30-09-2025');
   const [fee, setFee] = useState<number | ''>(6000);
-  const [assignedTo, setAssignedTo] = useState('Usama (Admin)');
+  const [assignedTo, setAssignedTo] = useState('');
+
+  // Open prefilled when arriving via a quick action ("New Tax Case").
+  useEffect(() => {
+    if (clientAction?.action === 'tax-case' || clientAction?.action === 'new-tax-case') {
+      if (clientAction.clientName) setClientName(clientAction.clientName);
+      setIsNewCaseModalOpen(true);
+      setClientAction(null);
+    }
+  }, [clientAction, setClientAction]);
 
   // Selected case state
   const selectedCase = taxCases.find(tc => tc.id === selectedCaseId) || taxCases[0];
@@ -95,8 +109,8 @@ export const TaxManagementView: React.FC = () => {
       outstanding: Number(fee) || 0,
       fee: Number(fee) || 0,
       paymentStatus: 'Unpaid',
-      assignedStaff: assignedTo,
-      assignedTo,
+      assignedStaff: resolveStaff(assignedTo),
+      assignedTo: resolveStaff(assignedTo),
       notes: `Tax Year ${taxYear} compliance file`
     });
 
@@ -367,7 +381,7 @@ export const TaxManagementView: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 font-semibold block">Assigned Consultant</span>
-                    <span className="font-semibold text-slate-700">{selectedCase.assignedStaff || selectedCase.assignedTo || 'Usama (Admin)'}</span>
+                    <span className="font-semibold text-slate-700">{selectedCase.assignedStaff || selectedCase.assignedTo || 'Staff'}</span>
                   </div>
                 </div>
 
@@ -418,19 +432,21 @@ export const TaxManagementView: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => alert(`Printing Tax Return CPR for ${selectedCase.clientName}`)}
+                      onClick={() => window.print()}
                       className="py-1.5 bg-slate-50 hover:bg-slate-100 border border-[#DCE6F1] text-slate-700 font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       <span>Print CPR</span>
                     </button>
-                    <button
-                      onClick={() => alert('Opening FBR Iris Portal (iris.fbr.gov.pk)')}
+                    <a
+                      href="https://iris.fbr.gov.pk"
+                      target="_blank"
+                      rel="noreferrer"
                       className="py-1.5 bg-slate-50 hover:bg-slate-100 border border-[#DCE6F1] text-slate-700 font-semibold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>FBR Iris</span>
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -481,7 +497,7 @@ export const TaxManagementView: React.FC = () => {
                     <td className="py-3 px-3 text-right whitespace-nowrap font-bold text-[#0D2344]">
                       Rs. {(tc.fee ?? tc.amountFee ?? 6000).toLocaleString()}
                     </td>
-                    <td className="py-3 px-3 whitespace-nowrap text-slate-600">{tc.assignedStaff || tc.assignedTo || 'Usama (Admin)'}</td>
+                    <td className="py-3 px-3 whitespace-nowrap text-slate-600">{tc.assignedStaff || tc.assignedTo || 'Staff'}</td>
                     <td className="py-3 px-3 text-center whitespace-nowrap">
                       <StatusBadge status={tc.status} />
                     </td>
@@ -537,24 +553,23 @@ export const TaxManagementView: React.FC = () => {
               <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
               <span>Staff Tasks Assigned</span>
             </h4>
-            <span className="text-[10px] text-slate-400 font-semibold">4 Active</span>
+            <span className="text-[10px] text-slate-400 font-semibold">{tasks.filter(t => t.status !== 'Completed').length} Active</span>
           </div>
           <div className="space-y-2 text-xs">
-            {[
-              { staff: 'Usama (Admin)', task: 'Reconcile Bank Chits', due: 'Today' },
-              { staff: 'Chaudhry H.', task: 'FBR Audit Hearing Draft', due: 'Tomorrow' },
-              { staff: 'Legal Associate', task: 'Upload CPR Challans', due: '26 Sep' }
-            ].map(task => (
-              <div key={task.task} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+            {tasks.filter(t => t.status !== 'Completed').slice(0, 3).map(task => (
+              <div key={task.id} className="p-2 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-[#0D2344]">{task.task}</div>
-                  <div className="text-[10px] text-slate-500">{task.staff}</div>
+                  <div className="font-bold text-[#0D2344]">{task.title}</div>
+                  <div className="text-[10px] text-slate-500">{task.assignedStaff || task.assignedTo || 'Staff'}</div>
                 </div>
                 <span className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                  {task.due}
+                  {task.dueDate}
                 </span>
               </div>
             ))}
+            {tasks.filter(t => t.status !== 'Completed').length === 0 && (
+              <div className="p-2 text-center text-slate-400 text-[11px]">No pending staff tasks.</div>
+            )}
           </div>
         </div>
 
@@ -700,13 +715,13 @@ export const TaxManagementView: React.FC = () => {
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">Assigned Consultant</label>
                 <select
-                  value={assignedTo}
+                  value={assignedTo || staffOptions[0] || 'Staff'}
                   onChange={e => setAssignedTo(e.target.value)}
                   className="w-full h-9 px-3 bg-white border border-[#DCE6F1] rounded-lg"
                 >
-                  <option value="Usama (Admin)">Usama (Admin)</option>
-                  <option value="Chaudhry H.">Chaudhry H. (Lead)</option>
-                  <option value="Staff Consultant">Staff Consultant</option>
+                  {staffOptions.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
                 </select>
               </div>
 

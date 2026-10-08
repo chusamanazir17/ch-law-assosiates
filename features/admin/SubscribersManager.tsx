@@ -27,7 +27,6 @@ import {
   X,
   Check,
   PieChart,
-  TrendingUp,
 } from "lucide-react";
 import type { SubscriberWithCategories, TaxCategory } from "@/types/reminders";
 import { apiFetch } from "@/lib/client/apiFetch";
@@ -150,6 +149,50 @@ export default function SubscribersManager() {
     () => allSubscribers.filter((s) => s.status === "unsubscribed").length,
     [allSubscribers]
   );
+  const activePct = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
+  const churnPct = totalCount > 0 ? Math.round((unsubscribedCount / totalCount) * 100) : 0;
+
+  // Honest per-day signup counts for the last 6 days (real sparklines).
+  const sparkFor = (pred: (s: SubscriberWithCategories) => boolean) => {
+    const days = 6;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const counts = new Array<number>(days).fill(0);
+    for (const s of allSubscribers) {
+      if (!pred(s)) continue;
+      const ts = new Date(s.created_at).getTime();
+      if (Number.isNaN(ts)) continue;
+      const dayIdx = Math.floor((ts - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+      if (dayIdx <= 0 && dayIdx >= -days + 1) counts[days - 1 + dayIdx] += 1;
+    }
+    return counts;
+  };
+  const sparkTotal = useMemo(() => sparkFor(() => true), [allSubscribers]);
+  const sparkActive = useMemo(() => sparkFor((s) => s.status === "active"), [allSubscribers]);
+  const sparkPending = useMemo(() => sparkFor((s) => s.status === "pending"), [allSubscribers]);
+  const sparkUnsub = useMemo(() => sparkFor((s) => s.status === "unsubscribed"), [allSubscribers]);
+
+  // Real segment distribution: subscriber counts per category (top 4).
+  const SEGMENT_COLORS = ["#059669", "#0284c7", "#ea580c", "#9333ea"];
+  const segmentData = useMemo(() => {
+    const counts = new Map<string, { name: string; count: number }>();
+    for (const s of allSubscribers) {
+      for (const cat of s.categories || []) {
+        const key = cat.id || cat.name;
+        const entry = counts.get(key) || { name: cat.name, count: 0 };
+        entry.count += 1;
+        counts.set(key, entry);
+      }
+    }
+    const sorted = [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 4);
+    const total = sorted.reduce((acc, s) => acc + s.count, 0) || 1;
+    return sorted.map((s, idx) => ({
+      name: s.name,
+      count: s.count,
+      pct: Math.round((s.count / total) * 100),
+      color: SEGMENT_COLORS[idx % SEGMENT_COLORS.length],
+    }));
+  }, [allSubscribers]);
 
   const statusTabs: Array<{ key: SubscriberTab; label: string; count: number }> = [
     { key: "all", label: "All subscribers", count: totalCount },
@@ -226,7 +269,10 @@ export default function SubscribersManager() {
         body: JSON.stringify({
           name: newName.trim() || "Client",
           email: newEmail.trim(),
-          categoryIds: selectedCats.length > 0 ? selectedCats : categories.map((c) => c.id),
+          // The /api/reminders/subscribe route expects snake_case category_ids
+          // and requires explicit consent.
+          category_ids: selectedCats.length > 0 ? selectedCats : categories.map((c) => c.id),
+          consent: true,
         }),
       });
 
@@ -390,7 +436,7 @@ export default function SubscribersManager() {
             </div>
             <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Opted-in clients</p>
           </div>
-          <MiniSparkline points={[2, 3, 3, 4, 4, totalCount || 4]} color="#0284c7" />
+          <MiniSparkline points={sparkTotal} color="#0284c7" />
         </div>
 
         {/* Card 2: Active Subscribers */}
@@ -402,29 +448,26 @@ export default function SubscribersManager() {
                 {activeCount}
               </span>
               <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                100% active
+                {activePct}% active
               </span>
             </div>
             <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Receiving reminders</p>
           </div>
-          <MiniSparkline points={[2, 2, 3, 3, 4, activeCount || 4]} color="#059669" />
+          <MiniSparkline points={sparkActive} color="#059669" />
         </div>
 
-        {/* Card 3: Avg. Open Rate */}
+        {/* Card 3: Pending Confirmation (real — open rates are not tracked) */}
         <div className="rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-4 sm:p-5 shadow-2xs hover:border-[#CBD5E1] dark:hover:border-slate-700 transition flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Avg. Open Rate</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#64748B] dark:text-slate-400">Pending Confirmation</p>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-[#0B1F36] dark:text-slate-100">
-                42.8%
-              </span>
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                ↑ +4.2%
+                {pendingCount}
               </span>
             </div>
-            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Audience engagement</p>
+            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Awaiting confirmation</p>
           </div>
-          <MiniSparkline points={[35, 38, 40, 39, 41, 43]} color="#d97706" />
+          <MiniSparkline points={sparkPending} color="#d97706" />
         </div>
 
         {/* Card 4: Unsubscribed */}
@@ -436,19 +479,19 @@ export default function SubscribersManager() {
                 {unsubscribedCount}
               </span>
               <span className="text-xs font-semibold text-[#64748B] dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                0% churn
+                {churnPct}% churn
               </span>
             </div>
             <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Clean opt-out rate</p>
           </div>
-          <MiniSparkline points={[0, 0, 0, 0, 0, unsubscribedCount]} color="#94a3b8" />
+          <MiniSparkline points={sparkUnsub} color="#94a3b8" />
         </div>
       </div>
 
       {/* 3. Acquisition Sources & Subscriber Segments (Screen 2: Subscribers) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left Column: Subscriber Segments Breakdown (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
+        {/* Subscriber Segments Breakdown (real category distribution) */}
+        <div className="lg:col-span-12 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
           <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
@@ -469,68 +512,34 @@ export default function SubscribersManager() {
           </div>
 
           <div className="space-y-3.5 mt-4">
-            {categories.slice(0, 4).map((cat, idx) => {
-              const colors = ["#059669", "#0284c7", "#ea580c", "#9333ea"];
-              const pcts = [38, 25, 25, 12];
-              const color = colors[idx % colors.length];
-              const pct = pcts[idx % pcts.length];
-
-              return (
-                <div key={cat.id} className="flex items-center gap-4 text-xs">
+            {segmentData.length === 0 ? (
+              <p className="text-xs text-[#64748B] dark:text-slate-400 py-4 text-center">
+                No category subscriptions yet — segments will appear once subscribers opt in.
+              </p>
+            ) : (
+              segmentData.map((seg) => (
+                <div key={seg.name} className="flex items-center gap-4 text-xs">
                   <span className="w-56 shrink-0 font-medium text-[#334155] dark:text-slate-300 truncate">
-                    {cat.name}
+                    {seg.name}
                   </span>
                   <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%`, backgroundColor: color }}
+                      style={{ width: `${seg.pct}%`, backgroundColor: seg.color }}
                     />
                   </div>
                   <span className="w-10 text-right font-semibold text-[#0B1F36] dark:text-slate-100 shrink-0">
-                    {pct}%
+                    {seg.pct}%
+                  </span>
+                  <span className="w-8 text-right text-[#64748B] dark:text-slate-400 shrink-0">
+                    ({seg.count})
                   </span>
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
         </div>
 
-        {/* Right Column: Acquisition Sources (5 cols - Screen 2) */}
-        <div className="lg:col-span-5 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-5 shadow-sm transition-colors">
-          <div className="flex items-center justify-between pb-4 border-b border-[#F1F5F9] dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-slate-200">
-                <TrendingUp className="h-4.5 w-4.5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold tracking-[-0.01em] text-[#0B1F36] dark:text-slate-100 leading-tight">
-                  Acquisition Sources
-                </h3>
-                <p className="text-xs text-[#52627A] dark:text-slate-400 mt-0.5">
-                  Where subscribers opted in.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3.5 mt-4 text-xs">
-            {[
-              { label: "Website Reminder Popup", share: "62%", count: "2.1k", color: "bg-blue-500" },
-              { label: "In-Chamber Client Intake", share: "24%", count: "820", color: "bg-emerald-500" },
-              { label: "Direct Email Invitation", share: "14%", count: "480", color: "bg-amber-500" },
-            ].map((src) => (
-              <div key={src.label} className="space-y-1.5">
-                <div className="flex items-center justify-between text-[#334155] dark:text-slate-300">
-                  <span className="font-medium">{src.label}</span>
-                  <span className="font-semibold text-[#0B1F36] dark:text-slate-100">{src.share}</span>
-                </div>
-                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div className={`h-full ${src.color} rounded-full`} style={{ width: src.share }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Action feedback */}

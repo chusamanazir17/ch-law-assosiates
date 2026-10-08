@@ -310,3 +310,76 @@ function logEmailDispatch(entry: {
     console.error("[EmailService] Failed to write email log:", e);
   }
 }
+
+export interface RawEmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}
+
+/**
+ * Send a pre-rendered email via Resend (server-side only).
+ * Used by admin tooling such as the test-reminder endpoint.
+ */
+export async function sendRawEmail(options: RawEmailOptions): Promise<EmailResult> {
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (!resendApiKey) {
+    console.warn(
+      `[EmailService] RESEND_API_KEY is not configured. Email to ${options.to} was not sent.`
+    );
+    return {
+      success: false,
+      reason: "missing_api_key",
+      error: "RESEND_API_KEY is not configured. Add it in Vercel or .env.local to enable email delivery.",
+    };
+  }
+
+  try {
+    const fromEmail =
+      process.env.RESEND_FROM_EMAIL || "Ch Composing Reminders <onboarding@resend.dev>";
+
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [options.to],
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+      }),
+    });
+
+    const data = (await resp.json()) as { id?: string; message?: string };
+
+    if (resp.ok && data?.id) {
+      logEmailDispatch({
+        to: options.to,
+        name: "",
+        categories: [],
+        subject: options.subject,
+        status: "delivered",
+        provider: "resend",
+        messageId: data.id,
+      });
+      return { success: true, provider: "resend", messageId: data.id };
+    }
+
+    return {
+      success: false,
+      reason: "api_error",
+      error: data?.message || `Resend returned HTTP ${resp.status}`,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      reason: "network_error",
+      error: err instanceof Error ? err.message : "Network error contacting Resend API",
+    };
+  }
+}

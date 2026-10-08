@@ -45,6 +45,18 @@ import {
 } from "lucide-react";
 import type { SubscriberAnalytics, SiteAnnouncement, Post } from "@/types/cms";
 import { apiFetch } from "@/lib/client/apiFetch";
+import { useAdminSession } from "./useAdminSession";
+
+type InquiryStatus = "new" | "in_progress" | "completed" | "archived";
+
+const INQUIRY_STATUS_LABELS: Record<InquiryStatus, string> = {
+  new: "New",
+  in_progress: "In Progress",
+  completed: "Completed",
+  archived: "Archived",
+};
+
+const INQUIRY_STATUSES: InquiryStatus[] = ["new", "in_progress", "completed", "archived"];
 
 interface InquiryItem {
   id: string;
@@ -53,7 +65,31 @@ interface InquiryItem {
   service_needed: string;
   message: string;
   created_at: string;
-  status: "New" | "In Progress" | "Replied" | "Closed";
+  /** Raw ISO timestamp (when available) for accurate relative-time display. */
+  createdAtIso?: string;
+  status: InquiryStatus;
+}
+
+/** Time-of-day greeting for the dashboard header (computed, never hardcoded). */
+function timeOfDayGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+/** Human relative time for activity feeds. Falls back to a date when unparseable. */
+function timeAgo(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "Recently";
+  const mins = Math.max(0, Math.floor((Date.now() - then) / 60000));
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 interface ActivityItem {
@@ -66,7 +102,16 @@ interface ActivityItem {
 
 type Timeframe = "daily" | "weekly" | "monthly" | "yearly";
 
-interface CategoryData {
+const TIMEFRAME_LABELS: Record<Timeframe, string> = {
+  daily: "Daily (Today)",
+  weekly: "Weekly (Last 7 Days)",
+  monthly: "Monthly (Last 30 Days)",
+  yearly: "Yearly (Year to Date)",
+};
+
+const CHART_PALETTE = ["#059669", "#0284c7", "#ea580c", "#9333ea", "#64748b"];
+
+interface ChartCategory {
   name: string;
   count: number;
   percentage: number;
@@ -74,48 +119,129 @@ interface CategoryData {
   points: number[];
 }
 
-const TIMEFRAME_DATA: Record<Timeframe, { label: string; xLabels: string[]; categories: CategoryData[] }> = {
-  daily: {
-    label: "Daily (Today)",
-    xLabels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
-    categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 1, percentage: 50, color: "#059669", points: [0, 0, 1, 1, 1, 1] },
-      { name: "Property & Capital Value Tax", count: 1, percentage: 50, color: "#0284c7", points: [0, 0, 0, 0, 1, 1] },
-      { name: "Business & Corporate Tax", count: 0, percentage: 0, color: "#ea580c", points: [0, 0, 0, 0, 0, 0] },
-      { name: "Sales Tax (Federal & PRA)", count: 0, percentage: 0, color: "#9333ea", points: [0, 0, 0, 0, 0, 0] },
-    ],
-  },
-  weekly: {
-    label: "Weekly (Last 7 Days)",
-    xLabels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 3, percentage: 38, color: "#059669", points: [1, 1, 2, 2, 3, 3, 3] },
-      { name: "Property & Capital Value Tax", count: 2, percentage: 25, color: "#0284c7", points: [0, 1, 1, 1, 2, 2, 2] },
-      { name: "Business & Corporate Tax", count: 2, percentage: 25, color: "#ea580c", points: [1, 1, 1, 2, 2, 2, 2] },
-      { name: "Sales Tax (Federal & PRA)", count: 1, percentage: 12, color: "#9333ea", points: [0, 0, 1, 1, 1, 1, 1] },
-    ],
-  },
-  monthly: {
-    label: "Monthly (Last 30 Days)",
-    xLabels: ["Aug 25", "Sep 01", "Sep 07", "Sep 13", "Sep 19"],
-    categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 3, percentage: 38, color: "#059669", points: [1, 2, 2, 3, 3] },
-      { name: "Property & Capital Value Tax", count: 2, percentage: 25, color: "#0284c7", points: [1, 1, 2, 2, 2] },
-      { name: "Business & Corporate Tax", count: 2, percentage: 25, color: "#ea580c", points: [0, 1, 1, 2, 2] },
-      { name: "Sales Tax (Federal & PRA)", count: 1, percentage: 12, color: "#9333ea", points: [0, 0, 1, 1, 1] },
-    ],
-  },
-  yearly: {
-    label: "Yearly (Year to Date)",
-    xLabels: ["Jan", "Mar", "May", "Jul", "Sep"],
-    categories: [
-      { name: "Income Tax - Individuals & AOPs", count: 12, percentage: 35, color: "#059669", points: [2, 5, 8, 10, 12] },
-      { name: "Property & Capital Value Tax", count: 8, percentage: 24, color: "#0284c7", points: [1, 3, 5, 7, 8] },
-      { name: "Business & Corporate Tax", count: 9, percentage: 26, color: "#ea580c", points: [2, 4, 6, 8, 9] },
-      { name: "Sales Tax (Federal & PRA)", count: 5, percentage: 15, color: "#9333ea", points: [1, 2, 3, 4, 5] },
-    ],
-  },
-};
+interface PracticeAreaChart {
+  label: string;
+  xLabels: string[];
+  categories: ChartCategory[];
+}
+
+interface RawInquiryPoint {
+  service_needed: string;
+  created_at: string;
+  status: string;
+}
+
+/**
+ * Builds the practice-area chart from REAL inquiry records.
+ * Buckets inquiries into time slots per timeframe and tracks cumulative
+ * counts per service area. Returns no categories when there is no data.
+ */
+function buildPracticeAreaChart(allInquiries: RawInquiryPoint[], timeframe: Timeframe): PracticeAreaChart {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let bucketCount = 0;
+  let bucketMs = 0;
+  let rangeStart = startOfToday;
+  const xLabels: string[] = [];
+
+  if (timeframe === "daily") {
+    bucketCount = 6;
+    bucketMs = 4 * 60 * 60 * 1000;
+    rangeStart = startOfToday;
+    for (let i = 0; i < bucketCount; i++) {
+      xLabels.push(`${String(i * 4).padStart(2, "0")}:00`);
+    }
+  } else if (timeframe === "weekly") {
+    bucketCount = 7;
+    bucketMs = 24 * 60 * 60 * 1000;
+    rangeStart = new Date(startOfToday.getTime() - 6 * bucketMs);
+    for (let i = 0; i < bucketCount; i++) {
+      xLabels.push(
+        new Date(rangeStart.getTime() + i * bucketMs).toLocaleDateString("en-US", { weekday: "short" })
+      );
+    }
+  } else if (timeframe === "monthly") {
+    bucketCount = 5;
+    bucketMs = 6 * 24 * 60 * 60 * 1000;
+    rangeStart = new Date(startOfToday.getTime() - 29 * 24 * 60 * 60 * 1000);
+    for (let i = 0; i < bucketCount; i++) {
+      xLabels.push(
+        new Date(rangeStart.getTime() + i * bucketMs).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })
+      );
+    }
+  } else {
+    bucketCount = 6;
+    bucketMs = 2 * 30.44 * 24 * 60 * 60 * 1000; // ~2 months per bucket
+    rangeStart = new Date(now.getFullYear(), 0, 1);
+    for (let i = 0; i < bucketCount; i++) {
+      xLabels.push(
+        new Date(rangeStart.getTime() + i * bucketMs).toLocaleDateString("en-US", { month: "short" })
+      );
+    }
+  }
+
+  const rangeEnd = rangeStart.getTime() + bucketCount * bucketMs;
+  const parsed = allInquiries
+    .map((inq) => ({
+      service: (inq.service_needed || "General Inquiry").trim() || "General Inquiry",
+      ts: new Date(inq.created_at).getTime(),
+    }))
+    .filter((p) => !Number.isNaN(p.ts) && p.ts >= rangeStart.getTime() && p.ts < rangeEnd);
+
+  const totals = new Map<string, number>();
+  for (const p of parsed) totals.set(p.service, (totals.get(p.service) || 0) + 1);
+  const topServices = [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name]) => name);
+  const grandTotal = parsed.length || 1;
+
+  const categories: ChartCategory[] = topServices.map((service, idx) => {
+    const bucketHits = new Array<number>(bucketCount).fill(0);
+    for (const p of parsed) {
+      if (p.service !== service) continue;
+      const b = Math.min(bucketCount - 1, Math.floor((p.ts - rangeStart.getTime()) / bucketMs));
+      bucketHits[b] += 1;
+    }
+    // Cumulative curve, matching the chart's visual language.
+    const points: number[] = [];
+    let running = 0;
+    for (const h of bucketHits) {
+      running += h;
+      points.push(running);
+    }
+    const count = running;
+    return {
+      name: service,
+      count,
+      percentage: Math.round((count / grandTotal) * 100),
+      color: CHART_PALETTE[idx % CHART_PALETTE.length],
+      points,
+    };
+  });
+
+  return { label: TIMEFRAME_LABELS[timeframe], xLabels, categories };
+}
+
+/** Sparkline points: raw counts per day for the last `days` days from ISO timestamps. */
+function dailyCounts(isoDates: string[], days: number): number[] {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const counts = new Array<number>(days).fill(0);
+  for (const iso of isoDates) {
+    const ts = new Date(iso).getTime();
+    if (Number.isNaN(ts)) continue;
+    const dayIdx = Math.floor((ts - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+    if (dayIdx <= 0 && dayIdx >= -days + 1) {
+      counts[days - 1 + dayIdx] += 1;
+    }
+  }
+  return counts;
+}
 
 // Mini Sparkline Component
 function MiniSparkline({
@@ -257,192 +383,79 @@ export default function AdminOverview() {
     activeNotice: null as SiteAnnouncement | null,
   });
 
-  // Default Initial Posts
-  const INITIAL_POSTS: Post[] = [
-    {
-      id: "post-e-stamp-guide",
-      title: "E-Stamping & 32-A Challan Procedure in Punjab: Complete Step-by-Step Guide",
-      slug: "e-stamp-punjab-procedure-guide",
-      excerpt: "Comprehensive guide to generating 32-A Challans, verifying e-stamp paper authenticity, and calculating DC valuation rates across Punjab districts.",
-      content: "",
-      cover_image_url: null,
-      category: "E-Stamping & Property",
-      author_name: "Chaudhry Muhammad Asghar",
-      status: "published",
-      views_count: 1420,
-      published_at: "2026-02-15T09:00:00Z",
-      created_at: "2026-02-15T09:00:00Z",
-      updated_at: "2026-02-15T09:00:00Z",
-      seo_title: null,
-      meta_description: null,
-      canonical_url: null,
-      og_image: null,
-    },
-    {
-      id: "post-fbr-atl-guide",
-      title: "FBR Active Taxpayer List (ATL) Benefits & Return Filing Deadlines 2026",
-      slug: "fbr-active-taxpayer-list-atl-guide",
-      excerpt: "Why maintaining ATL status is crucial for businesses and individuals: 100% withholding tax reduction, banking transaction benefits, and late filing surcharges.",
-      content: "",
-      cover_image_url: null,
-      category: "Income Tax",
-      author_name: "Muhammad Usama Nazir",
-      status: "published",
-      views_count: 980,
-      published_at: "2026-03-01T10:00:00Z",
-      created_at: "2026-03-01T10:00:00Z",
-      updated_at: "2026-03-01T10:00:00Z",
-      seo_title: null,
-      meta_description: null,
-      canonical_url: null,
-      og_image: null,
-    },
-    {
-      id: "post-property-registry-transfer",
-      title: "Property Registry & Inteqal Transfer Checklist at District Court Sahiwal",
-      slug: "punjab-property-registry-inteqal-transfer",
-      excerpt: "Essential documents, Fard-e-Malkiat verification, biometric verification, and Sub-Registrar endorsement procedures for residential and commercial land transfers.",
-      content: "",
-      cover_image_url: null,
-      category: "E-Stamping & Property",
-      author_name: "Chaudhry Muhammad Asghar",
-      status: "published",
-      views_count: 1150,
-      published_at: "2026-03-08T11:00:00Z",
-      created_at: "2026-03-08T11:00:00Z",
-      updated_at: "2026-03-08T11:00:00Z",
-      seo_title: null,
-      meta_description: null,
-      canonical_url: null,
-      og_image: null,
-    },
-    {
-      id: "post-secp-company-incorporation",
-      title: "SECP Company Registration: Step-by-Step Incorporation Guide for 2026",
-      slug: "secp-company-registration-pakistan-guide",
-      excerpt: "How to register a Private Limited Company or Single Member Company with SECP eZpay portal: name reservation, digital signatures, and Form II/A compliance.",
-      content: "",
-      cover_image_url: null,
-      category: "Corporate & NTN",
-      author_name: "Muhammad Usama Nazir",
-      status: "published",
-      views_count: 730,
-      published_at: "2026-03-12T14:30:00Z",
-      created_at: "2026-03-12T14:30:00Z",
-      updated_at: "2026-03-12T14:30:00Z",
-      seo_title: null,
-      meta_description: null,
-      canonical_url: null,
-      og_image: null,
-    },
-    {
-      id: "post-pra-sales-tax-services",
-      title: "Punjab Revenue Authority (PRA) Sales Tax on Services: Filing Guide & Withholding",
-      slug: "pra-punjab-sales-tax-services-compliance",
-      excerpt: "Obligations for service providers under Punjab Sales Tax on Services Act: e-filing returns, withholding agent obligations, and monthly compliance deadlines.",
-      content: "",
-      cover_image_url: null,
-      category: "Sales Tax (Federal & PRA)",
-      author_name: "Muhammad Usama Nazir",
-      status: "published",
-      views_count: 610,
-      published_at: "2026-03-15T08:00:00Z",
-      created_at: "2026-03-15T08:00:00Z",
-      updated_at: "2026-03-15T08:00:00Z",
-      seo_title: null,
-      meta_description: null,
-      canonical_url: null,
-      og_image: null,
-    },
-  ];
+  // Real posts loaded from the CMS API; empty until the first fetch completes.
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  // Raw timestamp collections for honest derived widgets (charts, sparklines).
+  const [allInquiriesRaw, setAllInquiriesRaw] = useState<RawInquiryPoint[]>([]);
+  const [allSubscriberTimestamps, setAllSubscriberTimestamps] = useState<string[]>([]);
+  const [allPostTimestamps, setAllPostTimestamps] = useState<string[]>([]);
+  const [deadlines, setDeadlines] = useState<
+    { id: string; title: string; filing_deadline: string; is_active: boolean }[]
+  >([]);
+  const [totalPages, setTotalPages] = useState(0);
+  // True only when the overview API actually answered — gates "live" badges.
+  const [isLive, setIsLive] = useState(false);
 
-  const [recentPosts, setRecentPosts] = useState<Post[]>(INITIAL_POSTS);
 
-  // Recent Inquiries State
-  const [inquiries, setInquiries] = useState<InquiryItem[]>([
-    {
-      id: "inq-1",
-      name: "Ali Khan",
-      phone: "0300 9876543",
-      service_needed: "Income Tax Filing",
-      message: "Need guidance on salaried tax filing and wealth statement reconciliation.",
-      created_at: "Sep 19, 2026",
-      status: "New",
-    },
-    {
-      id: "inq-2",
-      name: "Sara Ahmed",
-      phone: "0321 4567890",
-      service_needed: "Property Tax",
-      message: "Property tax calculation for commercial plot transfer in Sahiwal.",
-      created_at: "Sep 18, 2026",
-      status: "In Progress",
-    },
-    {
-      id: "inq-3",
-      name: "Bilal Hussain",
-      phone: "0333 1122334",
-      service_needed: "E-Stamp Services",
-      message: "Need help with e-stamp Challan 32-A generation for registry.",
-      created_at: "Sep 17, 2026",
-      status: "Replied",
-    },
-    {
-      id: "inq-4",
-      name: "Ayesha Malik",
-      phone: "0345 9988776",
-      service_needed: "Corporate Tax",
-      message: "Looking for consultation on business tax registration and PRA compliance.",
-      created_at: "Sep 16, 2026",
-      status: "Closed",
-    },
-  ]);
+  // Recent Inquiries State — real records only; empty until the API answers.
+  const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
 
-  // Recent Activity Items
-  const activities: ActivityItem[] = [
-    {
-      id: "act-1",
-      title: "New subscriber registered",
-      subtitle: "from website reminder form",
-      time: "2 hours ago",
-      dotColor: "bg-emerald-500",
-    },
-    {
-      id: "act-2",
-      title: "Page content updated",
-      subtitle: "Services catalog updated",
-      time: "4 hours ago",
-      dotColor: "bg-blue-500",
-    },
-    {
-      id: "act-3",
-      title: "Media file uploaded",
-      subtitle: "Chamber legal photography banner",
-      time: "6 hours ago",
-      dotColor: "bg-blue-500",
-    },
-    {
-      id: "act-4",
-      title: "New inquiry received",
-      subtitle: "From Ali Khan - Income Tax Filing",
-      time: "9 hours ago",
-      dotColor: "bg-amber-500",
-    },
-    {
-      id: "act-5",
-      title: "Statutory deadline confirmed",
-      subtitle: "FBR Income Tax Filing (Sep 30)",
-      time: "1 day ago",
-      dotColor: "bg-purple-500",
-    },
-  ];
+  // Activity feed derived from REAL events (inquiries, signups, posts). Empty when nothing happened.
+  const activities: ActivityItem[] = React.useMemo(() => {
+    const items: ActivityItem[] = [];
+    for (const inq of inquiries.slice(0, 3)) {
+      items.push({
+        id: `inq-${inq.id}`,
+        title: "New inquiry received",
+        subtitle: `From ${inq.name} — ${inq.service_needed}`,
+        time: timeAgo(inq.createdAtIso || inq.created_at),
+        dotColor: "bg-amber-500",
+        ts: new Date(inq.createdAtIso || inq.created_at).getTime() || 0,
+      } as ActivityItem & { ts: number });
+    }
+    for (const sub of subscriberAnalytics.recentSignups.slice(0, 3)) {
+      items.push({
+        id: `sub-${sub.id}`,
+        title: "New subscriber registered",
+        subtitle: `${sub.name || sub.email} — ${sub.categories?.[0] || "Tax reminders"}`,
+        time: timeAgo(sub.created_at),
+        dotColor: "bg-emerald-500",
+        ts: new Date(sub.created_at).getTime() || 0,
+      } as ActivityItem & { ts: number });
+    }
+    for (const post of recentPosts.slice(0, 2)) {
+      items.push({
+        id: `post-${post.id}`,
+        title: post.status === "published" ? "Article published" : "Draft saved",
+        subtitle: post.title,
+        time: timeAgo(post.published_at || post.created_at),
+        dotColor: "bg-blue-500",
+        ts: new Date(post.published_at || post.created_at).getTime() || 0,
+      } as ActivityItem & { ts: number });
+    }
+    return (items as (ActivityItem & { ts: number })[])
+      .sort((a, b) => b.ts - a.ts)
+      .slice(0, 6)
+      .map(({ ts: _ts, ...rest }) => rest);
+  }, [inquiries, subscriberAnalytics.recentSignups, recentPosts]);
 
   const loadData = async () => {
     try {
-      const res = await apiFetch("/api/admin/overview");
+      const [overviewRes, inquiriesRes, subscribersRes, postsRes, deadlinesRes, pagesRes] =
+        await Promise.all([
+          apiFetch("/api/admin/overview"),
+          apiFetch("/api/admin/inquiries").catch(() => null),
+          apiFetch("/api/admin/subscribers").catch(() => null),
+          apiFetch("/api/admin/posts").catch(() => null),
+          apiFetch("/api/admin/deadlines").catch(() => null),
+          apiFetch("/api/admin/pages").catch(() => null),
+        ]);
+
+      const res = overviewRes;
       if (res.ok) {
         const json = await res.json();
         if (json.success) {
+          setIsLive(true);
           if (json.subscriberAnalytics) {
             setSubscriberAnalytics((prev) => ({
               ...prev,
@@ -466,12 +479,12 @@ export default function AdminOverview() {
               newInquiries: json.cmsStats.newInquiries ?? 0,
             }));
           }
-          if (json.recentInquiries && json.recentInquiries.length > 0) {
+          if (Array.isArray(json.recentInquiries)) {
             const mapped: InquiryItem[] = json.recentInquiries.map((inq: any) => ({
               id: inq.id,
               name: inq.name || "Client",
-              phone: inq.phone || "0300 0000000",
-              service_needed: inq.service_needed || "Tax Filing",
+              phone: inq.phone || "",
+              service_needed: inq.service_needed || "General Inquiry",
               message: inq.message || "Consultation request submitted.",
               created_at: inq.created_at
                 ? new Date(inq.created_at).toLocaleDateString("en-US", {
@@ -480,24 +493,71 @@ export default function AdminOverview() {
                     year: "numeric",
                   })
                 : "Recently",
-              status:
-                inq.status === "new"
-                  ? "New"
-                  : inq.status === "in_progress"
-                  ? "In Progress"
-                  : inq.status === "replied"
-                  ? "Replied"
-                  : "Closed",
+              createdAtIso: inq.created_at || undefined,
+              status: (["new", "in_progress", "completed", "archived"] as const).includes(inq.status)
+                ? (inq.status as InquiryStatus)
+                : "new",
             }));
             setInquiries(mapped);
           }
-          if (json.recentPosts && Array.isArray(json.recentPosts) && json.recentPosts.length > 0) {
+          if (json.recentPosts && Array.isArray(json.recentPosts)) {
             setRecentPosts(json.recentPosts);
+            setAllPostTimestamps(
+              json.recentPosts
+                .map((p: any) => p.published_at || p.created_at)
+                .filter((d: any) => typeof d === "string")
+            );
           }
         }
       }
+
+      // Full collections for honest derived widgets (charts, pipeline, sparklines).
+      if (inquiriesRes && inquiriesRes.ok) {
+        const json = await inquiriesRes.json().catch(() => null);
+        const list = Array.isArray(json?.inquiries) ? json.inquiries : [];
+        setAllInquiriesRaw(
+          list.map((inq: any) => ({
+            service_needed: inq.service_needed || "General Inquiry",
+            created_at: inq.created_at || "",
+            status: typeof inq.status === "string" ? inq.status : "new",
+          }))
+        );
+      }
+      if (subscribersRes && subscribersRes.ok) {
+        const json = await subscribersRes.json().catch(() => null);
+        const list = Array.isArray(json?.subscribers) ? json.subscribers : [];
+        setAllSubscriberTimestamps(
+          list.map((s: any) => s.created_at).filter((d: any) => typeof d === "string")
+        );
+      }
+      if (postsRes && postsRes.ok) {
+        const json = await postsRes.json().catch(() => null);
+        const list = Array.isArray(json?.posts) ? json.posts : [];
+        if (list.length > 0) {
+          setAllPostTimestamps(
+            list.map((p: any) => p.published_at || p.created_at).filter((d: any) => typeof d === "string")
+          );
+        }
+      }
+      if (deadlinesRes && deadlinesRes.ok) {
+        const json = await deadlinesRes.json().catch(() => null);
+        const list = Array.isArray(json?.deadlines) ? json.deadlines : [];
+        setDeadlines(
+          list.map((d: any) => ({
+            id: String(d.id),
+            title: String(d.title || "Deadline"),
+            filing_deadline: String(d.filing_deadline || ""),
+            is_active: d.is_active === true,
+          }))
+        );
+      }
+      if (pagesRes && pagesRes.ok) {
+        const json = await pagesRes.json().catch(() => null);
+        const list = Array.isArray(json?.pages) ? json.pages : [];
+        setTotalPages(list.length);
+      }
     } catch {
-      // Retain baseline visual mock data if fetch fails
+      // Honest empty states stay in place when the fetch fails — never mock data.
     } finally {
       setIsLoading(false);
     }
@@ -509,10 +569,10 @@ export default function AdminOverview() {
 
   const handleAddConsultationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newClientName.trim()) return;
+    if (!newClientName.trim() || !newClientPhone.trim()) return;
 
     const name = newClientName.trim();
-    const phone = newClientPhone.trim() || "0300 0000000";
+    const phone = newClientPhone.trim();
     const service = newClientService;
     const message = newClientMessage.trim() || "In-chamber consultation inquiry recorded.";
 
@@ -529,33 +589,23 @@ export default function AdminOverview() {
         }),
       });
       const data = await res.json();
+      const created = data?.inquiry;
       const newInq: InquiryItem = {
-        id: data?.inquiry?.id || `inq-${Date.now()}`,
-        name,
-        phone,
-        service_needed: service,
-        message,
+        id: created?.id || `inq-${Date.now()}`,
+        name: created?.name || name,
+        phone: created?.phone || phone,
+        service_needed: created?.service_needed || service,
+        message: created?.message || message,
         created_at: "Just now",
-        status: "New",
+        createdAtIso: new Date().toISOString(),
+        status: "new",
       };
 
       setInquiries((prev) => [newInq, ...prev]);
-      setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
+      setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1, totalInquiries: prev.totalInquiries + 1 }));
       setAddConsultationSuccess(true);
     } catch (err) {
       console.error("[Add Consultation]", err);
-      const newInq: InquiryItem = {
-        id: `inq-${Date.now()}`,
-        name,
-        phone,
-        service_needed: service,
-        message,
-        created_at: "Just now",
-        status: "New",
-      };
-      setInquiries((prev) => [newInq, ...prev]);
-      setCmsStats((prev) => ({ ...prev, newInquiries: prev.newInquiries + 1 }));
-      setAddConsultationSuccess(true);
     }
 
     setTimeout(() => {
@@ -567,73 +617,127 @@ export default function AdminOverview() {
     }, 1000);
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: "New" | "In Progress" | "Replied" | "Closed") => {
+  const handleUpdateStatus = async (id: string, newStatus: InquiryStatus) => {
     setInquiries((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
     );
     setActiveInquiryAction(null);
 
-    const mappedStatus =
-      newStatus === "New"
-        ? "new"
-        : newStatus === "In Progress"
-        ? "in_progress"
-        : newStatus === "Replied"
-        ? "replied"
-        : "closed";
-
     try {
       await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "status", id, status: mappedStatus }),
+        body: JSON.stringify({ action: "status", id, status: newStatus }),
       });
     } catch (err) {
       console.error("[Inquiry Status Update]", err);
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: InquiryStatus) => {
     switch (status) {
-      case "New":
+      case "new":
         return (
           <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 dark:text-emerald-300">
             New
           </span>
         );
-      case "In Progress":
+      case "in_progress":
         return (
           <span className="inline-flex items-center rounded-md bg-sky-50 dark:bg-sky-950/40 border border-sky-200/70 dark:border-sky-800/60 px-2 py-0.5 text-[10.5px] font-semibold text-sky-700 dark:text-sky-300">
             In Progress
           </span>
         );
-      case "Replied":
+      case "completed":
         return (
           <span className="inline-flex items-center rounded-md bg-[#0B1F36]/8 dark:bg-[#C8973D]/15 border border-[#0B1F36]/15 dark:border-[#C8973D]/30 px-2 py-0.5 text-[10.5px] font-semibold text-[#0B1F36] dark:text-[#C8973D]">
-            Replied
+            Completed
           </span>
         );
-      case "Closed":
+      case "archived":
       default:
         return (
           <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 text-[10.5px] font-medium text-[#64748B] dark:text-slate-400">
-            Closed
+            Archived
           </span>
         );
     }
   };
 
-  const currentChartData = TIMEFRAME_DATA[chartTimeframe];
+  // Chart data derived from REAL inquiries (empty categories when there is no data).
+  const currentChartData: PracticeAreaChart = React.useMemo(
+    () => buildPracticeAreaChart(allInquiriesRaw, chartTimeframe),
+    [allInquiriesRaw, chartTimeframe]
+  );
 
-  // Pipeline Stages Data (Aligned with Consultation Mockup Screen 3)
-  const pipelineStages = [
-    { label: "New Requests", count: 12, color: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400", width: "12%" },
-    { label: "Assigned", count: 8, color: "bg-sky-500", textColor: "text-sky-600 dark:text-sky-400", width: "8%" },
-    { label: "Scheduled", count: 14, color: "bg-blue-600", textColor: "text-blue-600 dark:text-blue-400", width: "14%" },
-    { label: "In Progress", count: 6, color: "bg-amber-500", textColor: "text-amber-600 dark:text-amber-400", width: "6%" },
-    { label: "Follow-up", count: 18, color: "bg-purple-500", textColor: "text-purple-600 dark:text-purple-400", width: "18%" },
-    { label: "Closed / Resolved", count: 226, color: "bg-slate-400 dark:bg-slate-600", textColor: "text-slate-600 dark:text-slate-400", width: "42%" },
-  ];
+  // Pipeline stages computed from REAL inquiry statuses — no invented stages.
+  const pipelineStages = React.useMemo(() => {
+    const counts: Record<InquiryStatus, number> = { new: 0, in_progress: 0, completed: 0, archived: 0 };
+    const source = allInquiriesRaw.length > 0 ? allInquiriesRaw : inquiries;
+    for (const inq of source) {
+      const st = inq.status as string;
+      if (st === "new" || st === "in_progress" || st === "completed" || st === "archived") {
+        counts[st] += 1;
+      }
+    }
+    const total = counts.new + counts.in_progress + counts.completed + counts.archived;
+    const pct = (n: number) => (total > 0 ? `${Math.max(2, Math.round((n / total) * 100))}%` : "0%");
+    return [
+      { label: "New Requests", count: counts.new, color: "bg-emerald-500", textColor: "text-emerald-600 dark:text-emerald-400", width: pct(counts.new) },
+      { label: "In Progress", count: counts.in_progress, color: "bg-amber-500", textColor: "text-amber-600 dark:text-amber-400", width: pct(counts.in_progress) },
+      { label: "Completed", count: counts.completed, color: "bg-blue-600", textColor: "text-blue-600 dark:text-blue-400", width: pct(counts.completed) },
+      { label: "Archived", count: counts.archived, color: "bg-slate-400 dark:bg-slate-600", textColor: "text-slate-600 dark:text-slate-400", width: pct(counts.archived) },
+    ];
+  }, [allInquiriesRaw, inquiries]);
+
+  // Honest sparklines: real per-day counts for the last 6 days (flat when no data).
+  const inquirySpark = React.useMemo(
+    () => dailyCounts(allInquiriesRaw.map((i) => i.created_at), 6),
+    [allInquiriesRaw]
+  );
+  const subscriberSpark = React.useMemo(() => dailyCounts(allSubscriberTimestamps, 6), [allSubscriberTimestamps]);
+  const postSpark = React.useMemo(() => dailyCounts(allPostTimestamps, 6), [allPostTimestamps]);
+
+  // Real deadlines: active count + nearest upcoming filing date.
+  const deadlineSummary = React.useMemo(() => {
+    const active = deadlines.filter((d) => d.is_active);
+    const upcoming = active
+      .map((d) => ({ ...d, ts: new Date(d.filing_deadline).getTime() }))
+      .filter((d) => !Number.isNaN(d.ts))
+      .sort((a, b) => a.ts - b.ts)[0];
+    return {
+      activeCount: active.length,
+      nearest: upcoming
+        ? {
+            title: upcoming.title,
+            label: new Date(upcoming.ts).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          }
+        : null,
+    };
+  }, [deadlines]);
+
+  // Honest sparkline: active deadlines falling due in each of the next 6 weeks.
+  const deadlineSpark = React.useMemo(() => {
+    const counts = new Array<number>(6).fill(0);
+    const now = Date.now();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    for (const d of deadlines) {
+      if (!d.is_active) continue;
+      const ts = new Date(d.filing_deadline).getTime();
+      if (Number.isNaN(ts)) continue;
+      const w = Math.floor((ts - now) / weekMs);
+      if (w >= 0 && w < 6) counts[w] += 1;
+    }
+    return counts;
+  }, [deadlines]);
+
+  const subscriberActivePct = React.useMemo(() => {
+    const total = subscriberAnalytics.totalEmails;
+    if (!total) return 0;
+    return Math.round((subscriberAnalytics.activeCount / total) * 100);
+  }, [subscriberAnalytics]);
+
+  const session = useAdminSession();
 
   // Helper to render SVG line paths for chart
   const renderSvgChart = () => {
@@ -852,7 +956,7 @@ export default function AdminOverview() {
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100">
-              Good morning, Muhammad Usama!
+              {timeOfDayGreeting()}, {session.name}!
             </h1>
             <p className="text-sm text-[#52627A] dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
               Here is your chamber&apos;s real-time executive overview across client consultation requests, statutory tax reminder subscriptions, and legal content publications.
@@ -870,7 +974,7 @@ export default function AdminOverview() {
                 aria-expanded={showGlobalDropdown}
               >
                 <Calendar className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-400" />
-                <span>{TIMEFRAME_DATA[globalTimeframe].label}</span>
+                <span>{TIMEFRAME_LABELS[globalTimeframe]}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] dark:text-slate-500 ml-0.5" />
               </button>
 
@@ -891,7 +995,7 @@ export default function AdminOverview() {
                           : "text-[#334155] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                       }`}
                     >
-                      <span>{TIMEFRAME_DATA[tf].label}</span>
+                      <span>{TIMEFRAME_LABELS[tf]}</span>
                       {globalTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
                     </button>
                   ))}
@@ -941,10 +1045,12 @@ export default function AdminOverview() {
                 <Building2 className="h-3.5 w-3.5" />
                 Chamber 121 Core Operational Suite
               </span>
-              <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live Database Connected
-              </span>
+              {isLive && (
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Live Database Connected
+                </span>
+              )}
             </div>
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
               Office Management & Practice Accounts System
@@ -1012,7 +1118,7 @@ export default function AdminOverview() {
               </div>
             </div>
             {/* Sparkline */}
-            <MiniSparkline points={[12, 14, 18, 16, 21, 24]} color="#0284c7" />
+            <MiniSparkline points={inquirySpark} color="#0284c7" />
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>{cmsStats.newInquiries} pending review</span>
@@ -1036,13 +1142,13 @@ export default function AdminOverview() {
                     {subscriberAnalytics.activeCount}
                   </span>
                   <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded font-admin">
-                    100% active
+                    {subscriberActivePct}% active
                   </span>
                 </div>
               </div>
             </div>
             {/* Sparkline */}
-            <MiniSparkline points={[2, 3, 3, 4, 4, 4]} color="#d97706" />
+            <MiniSparkline points={subscriberSpark} color="#d97706" />
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>Automated dispatches on</span>
@@ -1072,7 +1178,7 @@ export default function AdminOverview() {
               </div>
             </div>
             {/* Sparkline */}
-            <MiniSparkline points={[3, 4, 4, 5, 5, 5]} color="#059669" />
+            <MiniSparkline points={postSpark} color="#059669" />
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400 font-admin">
             <span>{cmsStats.publishedPosts} published • {cmsStats.draftPosts} draft</span>
@@ -1093,19 +1199,21 @@ export default function AdminOverview() {
                 <p className="text-xs font-semibold text-[#64748B] dark:text-slate-400 font-admin">Statutory Deadlines</p>
                 <div className="flex items-baseline gap-2 mt-0.5">
                   <span className="text-2xl font-bold tracking-tight text-[#0B1F36] dark:text-slate-100 font-admin tabular-nums">
-                    2 Active
+                    {deadlineSummary.activeCount} Active
                   </span>
-                  <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-admin">
-                    Sep 30 Due
-                  </span>
+                  {deadlineSummary.nearest && (
+                    <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded font-admin">
+                      {deadlineSummary.nearest.label} Due
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
             {/* Sparkline */}
-            <MiniSparkline points={[1, 1, 2, 2, 2, 2]} color="#9333ea" />
+            <MiniSparkline points={deadlineSpark} color="#9333ea" />
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#64748B] dark:text-slate-400">
-            <span>FBR Income Tax Filing (TY2026)</span>
+            <span className="truncate mr-2">{deadlineSummary.nearest ? deadlineSummary.nearest.title : "No deadlines scheduled"}</span>
             <Link href="/admin/deadlines" className="text-[#C8973D] hover:underline font-medium">
               Calendar →
             </Link>
@@ -1143,7 +1251,7 @@ export default function AdminOverview() {
                 <Boxes className="h-4 w-4" />
               </span>
               <span className="text-base font-bold text-slate-800 dark:text-slate-100">
-                {cmsStats.totalServices || 9}
+                {cmsStats.totalServices}
               </span>
             </div>
             <div>
@@ -1161,7 +1269,7 @@ export default function AdminOverview() {
                 <UserCheck className="h-4 w-4" />
               </span>
               <span className="text-base font-bold text-slate-800 dark:text-slate-100">
-                {cmsStats.totalTeam || 3}
+                {cmsStats.totalTeam}
               </span>
             </div>
             <div>
@@ -1179,7 +1287,7 @@ export default function AdminOverview() {
                 <Star className="h-4 w-4" />
               </span>
               <span className="text-base font-bold text-slate-800 dark:text-slate-100">
-                {cmsStats.totalTestimonials || 3}
+                {cmsStats.totalTestimonials}
               </span>
             </div>
             <div>
@@ -1197,7 +1305,7 @@ export default function AdminOverview() {
                 <HelpCircle className="h-4 w-4" />
               </span>
               <span className="text-base font-bold text-slate-800 dark:text-slate-100">
-                {cmsStats.totalFaqs || 8}
+                {cmsStats.totalFaqs}
               </span>
             </div>
             <div>
@@ -1233,7 +1341,7 @@ export default function AdminOverview() {
                 <FileText className="h-4 w-4" />
               </span>
               <span className="text-base font-bold text-slate-800 dark:text-slate-100">
-                12
+                {totalPages}
               </span>
             </div>
             <div>
@@ -1377,7 +1485,7 @@ export default function AdminOverview() {
                     onClick={() => setShowChartDropdown((prev) => !prev)}
                     className="flex items-center gap-1 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-[#0f172a] px-2.5 py-1 text-xs font-medium text-[#334155] dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                   >
-                    <span>{TIMEFRAME_DATA[chartTimeframe].label}</span>
+                    <span>{currentChartData.label}</span>
                     <ChevronDown className="h-3.5 w-3.5 text-[#94A3B8] dark:text-slate-500" />
                   </button>
 
@@ -1397,7 +1505,7 @@ export default function AdminOverview() {
                               : "text-[#334155] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
                           }`}
                         >
-                          <span>{TIMEFRAME_DATA[tf].label}</span>
+                          <span>{TIMEFRAME_LABELS[tf]}</span>
                           {chartTimeframe === tf && <Check className="h-3.5 w-3.5 text-[#C8973D]" />}
                         </button>
                       ))}
@@ -1407,8 +1515,16 @@ export default function AdminOverview() {
               </div>
             </div>
 
-            {/* Render Selected View */}
-            {chartView === "donut" ? (
+            {/* Render Selected View — honest empty state when there is no inquiry data */}
+            {currentChartData.categories.length === 0 ? (
+              <div className="mt-5 flex flex-col items-center justify-center gap-2 py-10 text-center">
+                <BarChart2 className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+                <p className="text-sm font-semibold text-[#334155] dark:text-slate-200">No inquiry data yet</p>
+                <p className="text-xs text-[#64748B] dark:text-slate-400 max-w-xs">
+                  Inquiries submitted through the website will appear here, broken down by practice area.
+                </p>
+              </div>
+            ) : chartView === "donut" ? (
               renderDonutChart()
             ) : chartView === "bars" ? (
               <div className="mt-5 space-y-3.5">
@@ -1646,7 +1762,7 @@ export default function AdminOverview() {
                             Update Status
                           </p>
 
-                          {(["New", "In Progress", "Replied", "Closed"] as const).map((st) => (
+                          {(INQUIRY_STATUSES).map((st) => (
                             <button
                               key={st}
                               type="button"
@@ -1657,7 +1773,7 @@ export default function AdminOverview() {
                                   : "text-[#64748B] dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                               }`}
                             >
-                              <span>{st}</span>
+                              <span>{INQUIRY_STATUS_LABELS[st]}</span>
                               {inq.status === st && <Check className="h-3 w-3 text-[#C8973D]" />}
                             </button>
                           ))}
@@ -1666,6 +1782,16 @@ export default function AdminOverview() {
                     </td>
                   </tr>
                 ))}
+                {inquiries.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center">
+                      <p className="text-sm font-semibold text-[#334155] dark:text-slate-200">No inquiries yet</p>
+                      <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">
+                        Consultation requests submitted through the website will appear here.
+                      </p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -1699,6 +1825,14 @@ export default function AdminOverview() {
 
             {/* Activity List */}
             <div className="mt-4 space-y-3.5">
+              {activities.length === 0 && (
+                <div className="py-8 text-center">
+                  <p className="text-sm font-semibold text-[#334155] dark:text-slate-200">No recent activity</p>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">
+                    Inquiries, signups, and publications will show up here.
+                  </p>
+                </div>
+              )}
               {activities.map((act) => (
                 <div key={act.id} className="flex items-start justify-between gap-3 text-xs">
                   <div className="flex items-start gap-2.5 min-w-0">
@@ -1823,6 +1957,16 @@ export default function AdminOverview() {
                   </td>
                 </tr>
               ))}
+              {recentPosts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center">
+                    <p className="text-sm font-semibold text-[#334155] dark:text-slate-200">No posts yet</p>
+                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">
+                      Publish your first article to see it listed here.
+                    </p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -1878,10 +2022,11 @@ export default function AdminOverview() {
 
                 <div>
                   <label className="block font-semibold text-[#334155] dark:text-slate-300 mb-1">
-                    Phone Number
+                    Phone Number *
                   </label>
                   <input
                     type="text"
+                    required
                     value={newClientPhone}
                     onChange={(e) => setNewClientPhone(e.target.value)}
                     placeholder="e.g. 0300 1234567"

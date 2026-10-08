@@ -72,6 +72,7 @@ export default function CategoriesManager() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const checkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadAll = useCallback(async () => {
@@ -271,14 +272,8 @@ export default function CategoriesManager() {
   };
 
   const handleDelete = async (category: Category) => {
-    const postsInCategory = postCounts[category.name.trim().toLowerCase()] ?? 0;
-    const confirmed = window.confirm(
-      postsInCategory > 0
-        ? `Delete "${category.name}"? Its ${postsInCategory} post(s) will be moved to the "Guides" category.`
-        : `Delete the category "${category.name}" permanently?`
-    );
-    if (!confirmed) return;
-
+    // Two-step inline confirmation (deleteConfirmId) replaces window.confirm.
+    setDeleteConfirmId(null);
     setPendingId(category.id);
     setError(null);
     try {
@@ -424,16 +419,41 @@ export default function CategoriesManager() {
                           >
                             {category.active ? "Deactivate" : "Activate"}
                           </button>
-                          <button
-                            type="button"
-                            disabled={isPending}
-                            onClick={() => void handleDelete(category)}
-                            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
-                            title="Delete category"
-                            aria-label={`Delete ${category.name}`}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {deleteConfirmId === category.id ? (
+                            <span className="flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/60 p-1">
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => void handleDelete(category)}
+                                className="rounded bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-red-700"
+                                title={
+                                  (postCounts[category.name.trim().toLowerCase()] ?? 0) > 0
+                                    ? `Delete "${category.name}"? Its posts will be moved to the "Guides" category.`
+                                    : `Delete "${category.name}" permanently?`
+                                }
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="px-1 text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                              >
+                                Cancel
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={isPending}
+                              onClick={() => setDeleteConfirmId(category.id)}
+                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                              title="Delete category"
+                              aria-label={`Delete ${category.name}`}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

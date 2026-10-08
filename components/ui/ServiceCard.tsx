@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
@@ -48,6 +49,7 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const { isUrdu } = useLanguage();
+  const router = useRouter();
 
   const isRealLink = linkHref && (linkHref.startsWith("/") || linkHref.startsWith("http")) && !linkHref.startsWith("/#");
 
@@ -58,10 +60,18 @@ export default function ServiceCard({
       return;
     }
 
-    if (!isRealLink) {
-      e.preventDefault();
-      setModalOpen(true);
+    if (isRealLink && linkHref) {
+      // Buttons don't navigate on their own — route explicitly.
+      if (linkHref.startsWith("http")) {
+        window.open(linkHref, "_blank", "noopener,noreferrer");
+      } else {
+        router.push(linkHref);
+      }
+      return;
     }
+
+    e.preventDefault();
+    setModalOpen(true);
   };
 
   const whatsappInquiryUrl = `${SITE.whatsappHref}?text=${encodeURIComponent(

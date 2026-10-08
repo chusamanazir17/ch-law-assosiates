@@ -79,14 +79,14 @@ export default async function JsonLd() {
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "08:00",
-        closes: "20:00",
+        opens: SITE.hours.weekdayOpens,
+        closes: SITE.hours.weekdayCloses,
       },
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: "Saturday",
-        opens: "08:00",
-        closes: "18:00",
+        opens: SITE.hours.saturdayOpens,
+        closes: SITE.hours.saturdayCloses,
       },
     ],
     areaServed: {

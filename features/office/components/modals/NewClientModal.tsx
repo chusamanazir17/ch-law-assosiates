@@ -25,6 +25,12 @@ export const NewClientModal: React.FC = () => {
       alert('Please fill out client name and mobile number');
       return;
     }
+    // Validate CNIC format only when a value is entered; empty is allowed.
+    const cnicValue = cnic.trim();
+    if (cnicValue && !/^\d{5}-\d{7}-\d$/.test(cnicValue)) {
+      alert('CNIC must be in the format XXXXX-XXXXXXX-X (e.g. 36502-1234567-1), or left empty.');
+      return;
+    }
 
     addClient({
       name,
@@ -32,7 +38,7 @@ export const NewClientModal: React.FC = () => {
       mobile: phone,
       phone,
       email: email || '',
-      cnic: cnic || '36502-XXXXXXX-X',
+      cnic: cnicValue,
       ntn: ntn || '',
       businessType: (type as Client['businessType']) || 'Individual',
       type,

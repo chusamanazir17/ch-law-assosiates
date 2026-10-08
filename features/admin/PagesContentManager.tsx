@@ -43,10 +43,18 @@ import type {
   SectionId,
   TestimonialItem,
   FaqItem,
+  HeroStat,
 } from "@/lib/db/homeSectionsStore";
 
+/** Local fallback for hero stats (M4) — mirrors getDefaultHeroStats() in the CMS store. */
+const DEFAULT_HERO_STATS: HeroStat[] = [
+  { value: "500+", label: "Satisfied Clients", labelUrdu: "مطمئن کلائنٹس" },
+  { value: "99%", label: "Success Rate", labelUrdu: "کامیابی کی شرح" },
+  { value: "38+", label: "Years of Experience", labelUrdu: "سال کا تجربہ (1988 سے)" },
+];
+
 const DEFAULT_SECTION_ORDER: { id: SectionId; name: string; desc: string }[] = [
-  { id: "hero", name: "Hero Header", desc: "Top headline, badge, call & WhatsApp action buttons, and trust badges" },
+  { id: "hero", name: "Hero Header", desc: "Top headline, badge, call & WhatsApp action buttons, trust badges, and stats row" },
   { id: "services", name: "Services Grid", desc: "Cards for all official legal, tax, and property services" },
   { id: "about", name: "About & Visiting Guide", desc: "Chamber profile, step-by-step visit process, and consultant details" },
   { id: "whyTrust", name: "Why Choose Us", desc: "Practice stats, key benefits, and credentials" },
@@ -273,13 +281,18 @@ export default function PagesContentManager() {
       });
       const data = await res.json();
 
-      // If SEO was also changed in formData, save page content too
+      // If SEO was also changed in formData, save page content too. Its result
+      // is checked so a failure surfaces instead of the success banner.
       if (formData.id) {
-        await apiFetch("/api/admin/pages", {
+        const pageRes = await apiFetch("/api/admin/pages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
+        const pageData = await pageRes.json();
+        if (!pageRes.ok || !pageData.success) {
+          throw new Error(pageData.error || "Failed to save page SEO/content");
+        }
       }
 
       if (res.ok && data.success) {
@@ -1049,6 +1062,81 @@ export default function PagesContentManager() {
                               />
                             </div>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Hero Stats Row (M4) */}
+                      <div className="border-t border-slate-200 pt-4">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">
+                          Hero Stats Row
+                        </h4>
+                        <div className="grid sm:grid-cols-3 gap-4">
+                          {(homeSections.hero.stats && homeSections.hero.stats.length > 0
+                            ? homeSections.hero.stats
+                            : DEFAULT_HERO_STATS
+                          ).map((stat, idx) => (
+                            <div key={idx} className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-2">
+                              <span className="text-xs font-bold text-slate-800">Stat {idx + 1}</span>
+                              <div>
+                                <label className="text-[11px] text-slate-500 font-medium">Value</label>
+                                <input
+                                  type="text"
+                                  value={stat.value}
+                                  onChange={(e) => {
+                                    const base =
+                                      homeSections.hero.stats && homeSections.hero.stats.length > 0
+                                        ? [...homeSections.hero.stats]
+                                        : [...DEFAULT_HERO_STATS];
+                                    base[idx] = { ...base[idx], value: e.target.value };
+                                    setHomeSections({
+                                      ...homeSections,
+                                      hero: { ...homeSections.hero, stats: base },
+                                    });
+                                  }}
+                                  className="w-full rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] text-slate-500 font-medium">Label (English)</label>
+                                <input
+                                  type="text"
+                                  value={stat.label}
+                                  onChange={(e) => {
+                                    const base =
+                                      homeSections.hero.stats && homeSections.hero.stats.length > 0
+                                        ? [...homeSections.hero.stats]
+                                        : [...DEFAULT_HERO_STATS];
+                                    base[idx] = { ...base[idx], label: e.target.value };
+                                    setHomeSections({
+                                      ...homeSections,
+                                      hero: { ...homeSections.hero, stats: base },
+                                    });
+                                  }}
+                                  className="w-full rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] text-slate-500 font-medium">Label (Urdu)</label>
+                                <input
+                                  type="text"
+                                  dir="rtl"
+                                  value={stat.labelUrdu}
+                                  onChange={(e) => {
+                                    const base =
+                                      homeSections.hero.stats && homeSections.hero.stats.length > 0
+                                        ? [...homeSections.hero.stats]
+                                        : [...DEFAULT_HERO_STATS];
+                                    base[idx] = { ...base[idx], labelUrdu: e.target.value };
+                                    setHomeSections({
+                                      ...homeSections,
+                                      hero: { ...homeSections.hero, stats: base },
+                                    });
+                                  }}
+                                  className="w-full rounded border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs text-slate-800"
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>

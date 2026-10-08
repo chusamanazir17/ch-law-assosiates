@@ -6,7 +6,6 @@ import { CopyableText } from '../common/CopyableText';
 import { StatusBadge } from '../common/StatusBadge';
 import {
   ShieldCheck,
-  UserPlus,
   Search,
   Key,
   Mail,
@@ -20,16 +19,14 @@ import {
   AlertTriangle,
   Sliders,
   CheckSquare,
-  Edit2,
   RefreshCw
 } from 'lucide-react';
 import { StaffUser } from '../../types';
 import { apiFetch } from "@/lib/client/apiFetch";
 
 export const StaffUsersView: React.FC = () => {
-  const { auditLogs, systemUsers } = useOffice();
+  const { auditLogs, systemUsers, sessionUser } = useOffice();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
 
   // Staff directory — populated live from Supabase profiles via the
   // employees API below. No built-in dummy rows.
@@ -89,15 +86,7 @@ export const StaffUsersView: React.FC = () => {
         subtitle="Manage chamber consultants, composing operators, cash drawer limits, and audit rights."
         breadcrumb={['Office Management', 'Staff, Roles & Controls']}
         quote="“Segregation of Duties, Protected Authority”"
-      >
-        <button
-          onClick={() => setIsNewUserModalOpen(true)}
-          className="px-3.5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Add System User</span>
-        </button>
-      </PageHeader>
+      />
 
       {/* 6 Top KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
@@ -114,8 +103,8 @@ export const StaffUsersView: React.FC = () => {
         <KpiCard
           label="Active Session"
           value="1"
-          subValue="Active — Usama Ali (Admin)"
-          change="Logged in (Counter)"
+          subValue={sessionUser ? `Active — ${sessionUser.name}` : 'Active session'}
+          change="Logged in"
           changeType="positive"
           icon={<Key className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
@@ -194,7 +183,6 @@ export const StaffUsersView: React.FC = () => {
                   <th className="py-2.5 px-3">Contact</th>
                   <th className="py-2.5 px-3">Module Permissions</th>
                   <th className="py-2.5 px-3 text-center">Status</th>
-                  <th className="py-2.5 px-3 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -227,15 +215,6 @@ export const StaffUsersView: React.FC = () => {
                     </td>
                     <td className="py-3 px-3 text-center whitespace-nowrap">
                       <StatusBadge status={member.status} />
-                    </td>
-                    <td className="py-3 px-3 text-center whitespace-nowrap">
-                      <button
-                        onClick={() => alert(`Editing permissions for ${member.name}`)}
-                        className="p-1 hover:bg-slate-100 text-slate-600 rounded transition-colors"
-                        title="Edit Permissions"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -366,76 +345,6 @@ export const StaffUsersView: React.FC = () => {
           </table>
         </div>
       </div>
-
-      {/* Modal: Add System User */}
-      {isNewUserModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl border border-[#DCE6F1] shadow-2xl w-full max-w-md p-5 space-y-4 text-xs animate-in zoom-in-95">
-            <h3 className="text-base font-bold text-[#0D2344]">Add Chamber System User</h3>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              setIsNewUserModalOpen(false);
-              alert('New staff member added with restricted counter permissions.');
-            }} className="space-y-3">
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Asad Ullah Khan"
-                  className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Assigned Role</label>
-                <select className="w-full h-8.5 px-3 bg-white border border-[#DCE6F1] rounded-lg">
-                  <option value="Tax Filing Assistant">Tax Filing Assistant</option>
-                  <option value="Composing & Registry Operator">Composing & Registry Operator</option>
-                  <option value="Lead Advocate">Lead Advocate & Stamp Licensee</option>
-                  <option value="Super Admin">Super Admin</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    placeholder="0300-1234567"
-                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg tabular-nums"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Chamber PIN</label>
-                  <input
-                    type="password"
-                    maxLength={4}
-                    placeholder="4-digit PIN"
-                    className="w-full h-8.5 px-3 border border-[#DCE6F1] rounded-lg tabular-nums text-center tracking-widest"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsNewUserModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg"
-                >
-                  Create User
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

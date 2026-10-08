@@ -19,7 +19,8 @@ import {
   OfficeTask,
   LedgerTransaction,
   BusinessSettings,
-  AccountType
+  AccountType,
+  ClientActionIntent
 } from '../types';
 import { initialBusinessSettings } from '../data/seedData';
 import { apiFetch } from "@/lib/client/apiFetch";
@@ -68,6 +69,14 @@ interface OfficeContextType {
   auditLogs: AuditLog[];
   businessSettings: BusinessSettings;
 
+  // Authenticated session user (from /api/admin/session). Used as the
+  // source of truth for "who is logged in" instead of hardcoded names.
+  sessionUser: { name: string; email: string; role: string } | null;
+
+  // Cross-view "do X for this client" intent (quick actions with prefill).
+  clientAction: ClientActionIntent | null;
+  setClientAction: (a: ClientActionIntent | null) => void;
+
   // Supabase State
   isLoading: boolean;
   refreshData: () => Promise<void>;
@@ -93,10 +102,6 @@ interface OfficeContextType {
   setIsStampSaleModalOpen: (open: boolean) => void;
   isStampProductModalOpen: boolean;
   setIsStampProductModalOpen: (open: boolean) => void;
-  isNewServiceOrderModalOpen: boolean;
-  setIsNewServiceOrderModalOpen: (open: boolean) => void;
-  isNewTaxReturnModalOpen: boolean;
-  setIsNewTaxReturnModalOpen: (open: boolean) => void;
   isNewTaskModalOpen: boolean;
   setIsNewTaskModalOpen: (open: boolean) => void;
   
@@ -210,6 +215,15 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>('so-1');
   const [selectedTaxCaseId, setSelectedTaxCaseId] = useState<string | null>('tc-1');
+
+  // Authenticated session user — populated from /api/admin/session on mount.
+  const [sessionUser, setSessionUser] = useState<{ name: string; email: string; role: string } | null>(null);
+
+  // Staff attribution for new records and fallbacks: session user, else neutral.
+  const currentStaffName = sessionUser?.name?.trim() || "Staff";
+
+  // Cross-view "do X for this client" intent (quick actions with prefill).
+  const [clientAction, setClientAction] = useState<ClientActionIntent | null>(null);
 
   // Loading State
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -419,7 +433,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             serviceOrCategory: t.category || 'General',
             account: t.account_name || 'Cash in Hand',
             amount: Number(t.amount || 0),
-            staff: 'Usama (Admin)',
+            staff: 'Staff',
             status: 'Completed',
             referenceNo: t.transaction_number
           })));
@@ -434,7 +448,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             vendorPayee: e.payee,
             account: e.account_name || 'Cash Office',
             amount: Number(e.amount || 0),
-            staff: 'Usama',
+            staff: 'Staff',
             status: 'Paid',
             receiptUrl: e.receipt_url
           })));
@@ -470,7 +484,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             balance: 0,
             clientOrSupplier: m.client_name || 'Counter Sale',
             amount: Math.abs(Number(m.quantity || 0) * Number(m.denomination || 0)),
-            user: m.user || 'Usama',
+            user: m.user || 'Staff',
             notes: m.notes
           })));
         }
@@ -485,7 +499,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             clientId: tc.client_id,
             taxYear: tc.tax_year || '2024',
             returnType: tc.return_type || 'Income Tax Return',
-            assignedStaff: tc.assigned_staff_name || 'Usama (Admin)',
+            assignedStaff: tc.assigned_staff_name || 'Staff',
             fee: Number(tc.fee || 0),
             amountFee: Number(tc.fee || 0),
             amountPaid: Number(tc.fee || 0),
@@ -652,6 +666,16 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // header on mutations instead of every POST/PATCH/DELETE 403ing.
   useEffect(() => {
     apiFetch("/api/admin/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.authenticated && data.user) {
+          setSessionUser({
+            name: data.user.name || "Admin",
+            email: data.user.email || "",
+            role: data.role || "",
+          });
+        }
+      })
       .catch(() => {})
       .finally(() => refreshData());
   }, [refreshData]);
@@ -684,8 +708,6 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
   const [isStampSaleModalOpen, setIsStampSaleModalOpen] = useState(false);
   const [isStampProductModalOpen, setIsStampProductModalOpen] = useState(false);
-  const [isNewServiceOrderModalOpen, setIsNewServiceOrderModalOpen] = useState(false);
-  const [isNewTaxReturnModalOpen, setIsNewTaxReturnModalOpen] = useState(false);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
 
   const addAuditLog = (entry: Omit<AuditLog, 'id' | 'dateTime'>) => {
@@ -735,7 +757,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     account,
     referenceNo,
     notes,
-    staff = 'Usama',
+    staff = currentStaffName,
     createReceipt: shouldCreateReceipt = true
   }: {
     clientName: string;
@@ -753,7 +775,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     if (shouldCreateReceipt && !receiptNo) {
       const nextNum = receipts.length + 126;
-      receiptNo = `REC-2025-${nextNum.toString().padStart(6, '0')}`;
+      receiptNo = `REC-2026-${nextNum.toString().padStart(6, '0')}`;
       
       const newRec: Receipt = {
         id: `rec-${Date.now()}`,
@@ -880,7 +902,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     account,
     referenceNo,
     notes,
-    staff = 'Usama'
+    staff = currentStaffName
   }: {
     category: string;
     payeeDescription: string;
@@ -972,7 +994,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toAccount,
     amount,
     notes,
-    staff = 'Usama'
+    staff = currentStaffName
   }: {
     fromAccount: AccountType | string;
     toAccount: AccountType | string;
@@ -1040,7 +1062,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     clientId,
     paymentAccount = 'cash',
     notes,
-    staff = 'Usama'
+    staff = currentStaffName
   }: {
     denomination: number;
     quantity: number;
@@ -1131,7 +1153,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     purchasePricePerUnit,
     paymentAccount = 'cash',
     notes,
-    staff = 'Usama'
+    staff = currentStaffName
   }: {
     denomination: number;
     quantity: number;
@@ -1202,7 +1224,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     denomination,
     adjustedStock,
     reason,
-    staff = 'Usama'
+    staff = currentStaffName
   }: {
     denomination: number;
     adjustedStock: number;
@@ -1277,7 +1299,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setClients(prev => [newClient, ...prev]);
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Create',
       module: 'Client',
       record: newClient.name,
@@ -1317,7 +1339,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateClient = (id: string, clientData: Partial<Client>) => {
     setClients(prev => prev.map(c => c.id === id ? { ...c, ...clientData } : c));
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Update',
       module: 'Client',
       record: `Client ${id}`,
@@ -1347,7 +1369,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Receipts
   const createReceipt = (receiptData: Omit<Receipt, 'id' | 'receiptNo' | 'dateTime' | 'status' | 'authorizedBy'>) => {
     const nextNum = receipts.length + 126;
-    const receiptNo = `REC-2025-${nextNum.toString().padStart(6, '0')}`;
+    const receiptNo = `REC-2026-${nextNum.toString().padStart(6, '0')}`;
     const newRec: Receipt = {
       id: `rec-${Date.now()}`,
       receiptNo,
@@ -1359,7 +1381,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setReceipts(prev => [newRec, ...prev]);
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Create',
       module: 'Receipt',
       record: receiptNo,
@@ -1401,7 +1423,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           status: 'Cancelled',
           cancelledReason: reason,
           cancelledAt: formatDateTime(),
-          cancelledBy: 'Usama'
+          cancelledBy: currentStaffName
         };
       }
       return t;
@@ -1412,7 +1434,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Cancel',
       module: 'Receipt',
       record: rec.receiptNo,
@@ -1440,7 +1462,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       payeeDescription: expenseData.description,
       amount: expenseData.amount,
       account: expenseData.account,
-      staff: 'Usama'
+      staff: currentStaffName
     });
   };
 
@@ -1455,7 +1477,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }));
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Update',
       module: 'Tax',
       record: `Case ${id}`,
@@ -1483,7 +1505,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setTaxCases(prev => [newCase, ...prev]);
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Create',
       module: 'Tax',
       record: newCase.clientName,
@@ -1540,7 +1562,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Create',
       module: 'Service',
       record: `Order #${orderNo}`,
@@ -1577,7 +1599,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateServiceOrderStatus = (id: string, newStatus: ServiceOrder['status']) => {
     setServiceOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Update',
       module: 'Service',
       record: `Order ${id}`,
@@ -1608,13 +1630,13 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       discrepancyReason: diff !== 0 ? discrepancyReason : undefined,
       isClosed: true,
       closedAt: formatDateTime(),
-      closedBy: 'Usama (Admin)'
+      closedBy: currentStaffName
     };
     setDailyClosing(closedClosing);
     setDailyClosingHistory(prev => [closedClosing, ...prev]);
 
     addAuditLog({
-      user: 'Usama (Admin)',
+      user: currentStaffName,
       action: 'Close Day',
       module: 'Cash',
       record: `Closing Date: ${closedClosing.date}`,
@@ -1646,12 +1668,12 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...prev,
       isClosed: false,
       reopenedAt: formatDateTime(),
-      reopenedBy: 'Usama (Admin)',
+      reopenedBy: currentStaffName,
       reopenReason: reason
     }));
 
     addAuditLog({
-      user: 'Usama (Admin)',
+      user: currentStaffName,
       action: 'Update',
       module: 'Cash',
       record: `Reopen Day`,
@@ -1717,7 +1739,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateBusinessSettings = (settings: Partial<BusinessSettings>) => {
     setBusinessSettings(prev => ({ ...prev, ...settings }));
     addAuditLog({
-      user: 'Usama',
+      user: currentStaffName,
       action: 'Update',
       module: 'Settings',
       record: 'Business Settings',
@@ -1770,6 +1792,9 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         systemUsers,
         auditLogs,
         businessSettings,
+        sessionUser,
+        clientAction,
+        setClientAction,
         isLoading,
         refreshData,
         isDarkMode,
@@ -1792,10 +1817,6 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsStampSaleModalOpen,
         isStampProductModalOpen,
         setIsStampProductModalOpen,
-        isNewServiceOrderModalOpen,
-        setIsNewServiceOrderModalOpen,
-        isNewTaxReturnModalOpen,
-        setIsNewTaxReturnModalOpen,
         isNewTaskModalOpen,
         setIsNewTaskModalOpen,
         recordCashIn,

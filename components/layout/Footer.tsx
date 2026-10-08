@@ -41,12 +41,10 @@ export default function Footer() {
   }
 
 
-  const quickLinks =
-    settings?.navigationMenu && settings.navigationMenu.length > 0
-      ? settings.navigationMenu
-          .filter((item) => item.enabled)
-          .map((item) => ({ label: item.label, href: item.href }))
-      : [
+  // Footer quick links are a fixed, stable list (the header navigation menu is
+  // CMS-driven and loads async — reusing it here caused the footer links to
+  // flicker between two different sets depending on load timing).
+  const quickLinks = [
           { label: t.common.home, href: "/" },
           { label: isUrdu ? "ای سٹامپنگ سروسز" : "E-Stamping", href: "/services/e-stamping" },
           { label: isUrdu ? "پراپرٹی رجسٹری و انتقال" : "Property Registry", href: "/services/property-land" },

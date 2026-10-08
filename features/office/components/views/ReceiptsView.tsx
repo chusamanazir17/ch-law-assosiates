@@ -396,7 +396,7 @@ export const ReceiptsView: React.FC = () => {
                   className="py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold flex items-center justify-center gap-1 cursor-pointer text-[11px]"
                 >
                   <Download className="w-3 h-3" />
-                  <span>PDF</span>
+                  <span>Print / Preview</span>
                 </button>
                 <button
                   onClick={() => setSelectedReceiptId(selectedReceipt.id)}

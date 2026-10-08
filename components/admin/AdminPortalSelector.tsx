@@ -76,15 +76,23 @@ export default function AdminPortalSelector() {
     setAuthError(null);
     setSelectedPortal(portal);
 
+    // Honor a safe post-login redirect target when one was provided.
+    const safeRedirect =
+      redirectedFrom &&
+      (redirectedFrom.startsWith("/admin") || redirectedFrom.startsWith("/office")) &&
+      !redirectedFrom.startsWith("//")
+        ? redirectedFrom
+        : null;
+
     // If already authenticated, check role
     if (session?.authenticated && session.role) {
       if (session.role === "super_admin") {
-        router.push(portal === "office" ? "/office/dashboard" : "/admin/dashboard");
+        router.push(safeRedirect || (portal === "office" ? "/office/dashboard" : "/admin/dashboard"));
         return;
       }
       if (portal === "cms") {
         if (["website_admin", "office_admin"].includes(session.role)) {
-          router.push("/admin/dashboard");
+          router.push(safeRedirect && safeRedirect.startsWith("/admin") ? safeRedirect : "/admin/dashboard");
           return;
         }
         setAuthError(`Your role (${session.role}) is not permitted to access Website CMS.`);
@@ -93,7 +101,7 @@ export default function AdminPortalSelector() {
       }
       if (portal === "office") {
         if (["office_admin", "lawyer", "staff", "accountant", "receptionist"].includes(session.role)) {
-          router.push("/office/dashboard");
+          router.push(safeRedirect && safeRedirect.startsWith("/office") ? safeRedirect : "/office/dashboard");
           return;
         }
         setAuthError(`Your role (${session.role}) is not permitted to access Office Management.`);
@@ -129,8 +137,17 @@ export default function AdminPortalSelector() {
         return;
       }
 
-      // Success: redirect to designated dashboard
-      const targetUrl = data.redirect || (selectedPortal === "office" ? "/office/dashboard" : "/admin/dashboard");
+      // Success: redirect to designated dashboard (honoring a safe redirectedFrom first)
+      const safeRedirect =
+        redirectedFrom &&
+        (redirectedFrom.startsWith("/admin") || redirectedFrom.startsWith("/office")) &&
+        !redirectedFrom.startsWith("//")
+          ? redirectedFrom
+          : null;
+      const targetUrl =
+        safeRedirect ||
+        data.redirect ||
+        (selectedPortal === "office" ? "/office/dashboard" : "/admin/dashboard");
       window.location.href = targetUrl;
     } catch {
       setAuthError("Network connection error. Please try again.");

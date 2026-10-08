@@ -81,6 +81,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/reminders",
+        destination: "/#reminders",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -8,9 +8,6 @@ import {
   Settings,
   ExternalLink,
   LogOut,
-  MessageSquare,
-  Users,
-  CheckCircle2,
   ChevronDown,
   LayoutDashboard,
   Sun,
@@ -26,6 +23,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useAppTheme } from "@/providers/ThemeProvider";
 import { apiFetch } from "@/lib/client/apiFetch";
+import { useAdminSession } from "./useAdminSession";
 
 function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
@@ -34,19 +32,17 @@ function AdminShellInner({ children }: { children: ReactNode }) {
   const { isDark, toggleTheme, mode, setMode } = useAppTheme();
 
   // Dropdown States
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // Real unread inquiry count for the bell badge (0 when none / unavailable).
+  const [unreadCount, setUnreadCount] = useState(0);
+  const session = useAdminSession();
 
-  const notifRef = useRef<HTMLDivElement>(null);
   const adminMenuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
       if (adminMenuRef.current && !adminMenuRef.current.contains(event.target as Node)) {
         setShowAdminMenu(false);
       }
@@ -54,7 +50,6 @@ function AdminShellInner({ children }: { children: ReactNode }) {
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setShowNotifications(false);
         setShowAdminMenu(false);
       }
     }
@@ -66,6 +61,32 @@ function AdminShellInner({ children }: { children: ReactNode }) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Real unread ("new") inquiry count — never fabricated.
+  useEffect(() => {
+    let live = true;
+    apiFetch("/api/admin/inquiries")
+      .then(async (res) => {
+        if (!res.ok) return;
+        const json = await res.json().catch(() => null);
+        const list = Array.isArray(json?.inquiries) ? json.inquiries : [];
+        if (live) setUnreadCount(list.filter((i: any) => i.status === "new").length);
+      })
+      .catch(() => {
+        // Badge stays hidden when the count cannot be determined.
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const sessionInitials = (session.name || "Administrator")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   // Sync secondary office_cms_theme key with AppThemeProvider
   useEffect(() => {
@@ -179,112 +200,20 @@ function AdminShellInner({ children }: { children: ReactNode }) {
               )}
             </button>
 
-            {/* Notification Bell with interactive dropdown & count badge */}
-            <div ref={notifRef} className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowNotifications((prev) => !prev);
-                  setShowAdminMenu(false);
-                }}
-                className={`relative rounded-xl p-2 transition focus:outline-none ${
-                  showNotifications
-                    ? "bg-[#F1F5F9] dark:bg-slate-800 text-[#0B1F36] dark:text-slate-100"
-                    : "text-[#64748B] dark:text-slate-400 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 hover:text-[#0B1F36] dark:hover:text-slate-100"
-                }`}
-                title="Notifications"
-                aria-label="Notifications"
-                aria-expanded={showNotifications}
-              >
-                <Bell className="h-4.5 w-4.5" />
-                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#0b1329]">
-                  1
+            {/* Notification bell — real unread inquiry count, opens the inbox */}
+            <Link
+              href="/admin/inquiries"
+              className="relative rounded-xl p-2 transition focus:outline-none text-[#64748B] dark:text-slate-400 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 hover:text-[#0B1F36] dark:hover:text-slate-100"
+              title={unreadCount > 0 ? `${unreadCount} unread inquiries` : "No unread inquiries"}
+              aria-label={unreadCount > 0 ? `${unreadCount} unread inquiries` : "Inquiries inbox"}
+            >
+              <Bell className="h-4.5 w-4.5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#0b1329]">
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
-              </button>
-
-              {/* Notification Dropdown Panel */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-88 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-3 shadow-xl z-50">
-                  <div className="flex items-center justify-between pb-2.5 border-b border-[#F1F5F9] dark:border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100">Notifications</span>
-                      <span className="rounded-full bg-[#0B1F36]/8 dark:bg-gold-400/15 px-2 py-0.5 text-xs font-semibold text-[#0B1F36] dark:text-gold-300">
-                        3 new
-                      </span>
-                    </div>
-                    <Link
-                      href="/admin/inquiries"
-                      onClick={() => setShowNotifications(false)}
-                      className="text-xs font-semibold text-[#B8832A] dark:text-gold-400 hover:text-[#91651E] dark:hover:text-gold-300 hover:underline"
-                    >
-                      View all
-                    </Link>
-                  </div>
-
-                  <div className="mt-2 divide-y divide-[#F1F5F9] dark:divide-slate-800">
-                    {/* Item 1 */}
-                    <Link
-                      href="/admin/inquiries"
-                      onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] dark:hover:bg-slate-800/70 rounded-lg px-2 transition -mx-1"
-                    >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0B1F36]/8 dark:bg-slate-800 text-[#0B1F36] dark:text-gold-400 mt-0.5">
-                        <MessageSquare className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[13.5px] font-semibold text-[#0B1F36] dark:text-slate-100 truncate">
-                          New consultation inquiry
-                        </p>
-                        <p className="text-xs text-[#52627A] dark:text-slate-400 line-clamp-1 mt-0.5">
-                          Ali Khan: Income Tax Filing guidance
-                        </p>
-                        <span className="text-[11.5px] text-[#94A3B8] dark:text-slate-500 mt-0.5 block">9 hours ago</span>
-                      </div>
-                    </Link>
-
-                    {/* Item 2 */}
-                    <Link
-                      href="/admin/subscribers"
-                      onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] dark:hover:bg-slate-800/70 rounded-lg px-2 transition -mx-1"
-                    >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#C8973D]/15 dark:bg-gold-500/20 text-[#B8832A] dark:text-gold-400 mt-0.5">
-                        <Users className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[13.5px] font-semibold text-[#0B1F36] dark:text-slate-100 truncate">
-                          New subscriber opted-in
-                        </p>
-                        <p className="text-xs text-[#52627A] dark:text-slate-400 line-clamp-1 mt-0.5">
-                          Chaudhry Usama: Property & Capital Tax
-                        </p>
-                        <span className="text-[11.5px] text-[#94A3B8] dark:text-slate-500 mt-0.5 block">2 hours ago</span>
-                      </div>
-                    </Link>
-
-                    {/* Item 3 */}
-                    <Link
-                      href="/admin/deadlines"
-                      onClick={() => setShowNotifications(false)}
-                      className="flex items-start gap-2.5 py-2.5 hover:bg-[#F8FAFC] dark:hover:bg-slate-800/70 rounded-lg px-2 transition -mx-1"
-                    >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-[#475569] dark:text-slate-300 mt-0.5">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[13.5px] font-semibold text-[#0B1F36] dark:text-slate-100 truncate">
-                          System Status: Operational
-                        </p>
-                        <p className="text-xs text-[#52627A] dark:text-slate-400 line-clamp-1 mt-0.5">
-                          Tax reminders and dispatches synchronized
-                        </p>
-                        <span className="text-[11.5px] text-[#94A3B8] dark:text-slate-500 mt-0.5 block">1 day ago</span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
               )}
-            </div>
+            </Link>
 
             {/* Profile Info with interactive dropdown menu */}
             <div ref={adminMenuRef} className="relative pl-2 border-l border-[#E2E8F0] dark:border-slate-800">
@@ -292,21 +221,22 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => {
                   setShowAdminMenu((prev) => !prev);
-                  setShowNotifications(false);
                 }}
                 className="flex items-center gap-2.5 rounded-lg p-1 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 transition focus:outline-none"
                 aria-expanded={showAdminMenu}
                 title="Admin Account Menu"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B1F36] dark:bg-slate-800 text-xs font-bold text-[#D39D3D] ring-2 ring-[#D39D3D]/30 shadow-2xs">
-                  MU
+                  {sessionInitials}
                 </div>
                 <div className="hidden sm:block text-left">
                   <div className="flex items-center gap-1">
-                    <p className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">Muhammad Usama</p>
+                    <p className="text-sm font-semibold text-[#0B1F36] dark:text-slate-100 leading-tight">{session.name}</p>
                     <ChevronDown className="h-3 w-3 text-[#94A3B8] dark:text-slate-500" />
                   </div>
-                  <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium leading-tight mt-0.5">Principal Advocate & Tax Consultant</p>
+                  <p className="text-xs text-[#64748B] dark:text-slate-400 font-medium leading-tight mt-0.5">
+                    {session.role ? session.role.replace(/_/g, " ") : "Administrator"}
+                  </p>
                 </div>
               </button>
 
@@ -315,10 +245,12 @@ function AdminShellInner({ children }: { children: ReactNode }) {
                 <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-[#0b1329] p-2 shadow-xl z-50 text-sm">
                   {/* User info banner */}
                   <div className="p-2.5 border-b border-[#F1F5F9] dark:border-slate-800 mb-1">
-                    <p className="font-semibold text-sm text-[#0B1F36] dark:text-slate-100">Muhammad Usama</p>
-                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 font-medium">usama@ch-law.pk</p>
-                    <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 dark:bg-gold-500/15 border border-[#0B1F36]/10 dark:border-gold-500/30 px-2 py-0.5 text-xs font-semibold text-[#0B1F36] dark:text-gold-300">
-                      Principal Practitioner
+                    <p className="font-semibold text-sm text-[#0B1F36] dark:text-slate-100">{session.name}</p>
+                    {session.email && (
+                      <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5 font-medium">{session.email}</p>
+                    )}
+                    <span className="inline-block mt-1.5 rounded bg-[#0B1F36]/8 dark:bg-gold-500/15 border border-[#0B1F36]/10 dark:border-gold-500/30 px-2 py-0.5 text-xs font-semibold text-[#0B1F36] dark:text-gold-300 capitalize">
+                      {(session.role || "Administrator").replace(/_/g, " ")}
                     </span>
                   </div>
 

@@ -248,27 +248,27 @@ export const initialStampStock: StampStockItem[] = [
 ];
 
 export const initialStampMovements: StampMovement[] = [
-  { id: 'sm-1', dateTime: '22-09-2025 11:45 AM', type: 'Sale', denomination: 100, qty: -10, balance: 230, clientOrSupplier: 'Asad Khan', amount: 1000, user: 'Usama' },
+  { id: 'sm-1', dateTime: '22-09-2025 11:45 AM', type: 'Sale', denomination: 100, qty: -10, balance: 230, clientOrSupplier: 'Asad Khan', amount: 1000, user: 'Staff' },
   { id: 'sm-2', dateTime: '22-09-2025 10:20 AM', type: 'Purchase', denomination: 500, qty: 50, balance: 130, clientOrSupplier: 'State Bank', amount: 21000, user: 'Staff' },
-  { id: 'sm-3', dateTime: '21-09-2025 03:10 PM', type: 'Adjustment', denomination: 50, qty: -20, balance: 80, clientOrSupplier: 'Internal Audit', amount: 1000, user: 'Usama', notes: 'Damaged stamps (torn edges)' },
+  { id: 'sm-3', dateTime: '21-09-2025 03:10 PM', type: 'Adjustment', denomination: 50, qty: -20, balance: 80, clientOrSupplier: 'Internal Audit', amount: 1000, user: 'Staff', notes: 'Damaged stamps (torn edges)' },
   { id: 'sm-4', dateTime: '22-09-2025 12:45 PM', type: 'Sale', denomination: 1000, qty: -5, balance: 80, clientOrSupplier: 'Hassan & Co.', amount: 5000, user: 'Admin' },
-  { id: 'sm-5', dateTime: '19-09-2025 09:15 AM', type: 'Purchase', denomination: 100, qty: 100, balance: 240, clientOrSupplier: 'State Bank', amount: 8500, user: 'Usama' }
+  { id: 'sm-5', dateTime: '19-09-2025 09:15 AM', type: 'Purchase', denomination: 100, qty: 100, balance: 240, clientOrSupplier: 'State Bank', amount: 8500, user: 'Staff' }
 ];
 
 export const initialStampAdjustments: StampAdjustment[] = [
-  { id: 'sa-1', dateTime: '21-09-2025 03:10 PM', denomination: 50, previousStock: 100, adjustedStock: 80, difference: -20, reason: 'Damaged stamps (torn edges)', adjustedBy: 'Usama' },
+  { id: 'sa-1', dateTime: '21-09-2025 03:10 PM', denomination: 50, previousStock: 100, adjustedStock: 80, difference: -20, reason: 'Damaged stamps (torn edges)', adjustedBy: 'Staff' },
   { id: 'sa-2', dateTime: '17-09-2025 11:25 AM', denomination: 1000, previousStock: 85, adjustedStock: 80, difference: -5, reason: 'Physical count adjustment', adjustedBy: 'Admin' },
-  { id: 'sa-3', dateTime: '12-09-2025 09:40 AM', denomination: 500, previousStock: 120, adjustedStock: 130, difference: 10, reason: 'Excess found in physical count', adjustedBy: 'Usama' }
+  { id: 'sa-3', dateTime: '12-09-2025 09:40 AM', denomination: 500, previousStock: 120, adjustedStock: 130, difference: 10, reason: 'Excess found in physical count', adjustedBy: 'Staff' }
 ];
 
 export const initialTransactions: LedgerTransaction[] = [
-  { id: 'tx-1', dateTime: '22-09-2025 11:45 AM', type: 'IN', description: 'Tax Return Fee', clientOrPayee: 'Muhammad Ali', serviceOrCategory: 'Income Tax Return', account: 'cash', amount: 5000, staff: 'Usama', status: 'Completed', receiptNo: 'REC-2025-000125' },
+  { id: 'tx-1', dateTime: '22-09-2025 11:45 AM', type: 'IN', description: 'Tax Return Fee', clientOrPayee: 'Muhammad Ali', serviceOrCategory: 'Income Tax Return', account: 'cash', amount: 5000, staff: 'Staff', status: 'Completed', receiptNo: 'REC-2025-000125' },
   { id: 'tx-2', dateTime: '22-09-2025 11:20 AM', type: 'IN', description: 'Stamp Sale', clientOrPayee: 'Cash Sale', serviceOrCategory: 'Stamp Paper', account: 'cash', amount: 2800, staff: 'Staff', status: 'Completed' },
-  { id: 'tx-3', dateTime: '22-09-2025 10:55 AM', type: 'OUT', description: 'Office Tea', clientOrPayee: 'Office Expense', serviceOrCategory: 'Refreshment', account: 'cash', amount: 300, staff: 'Usama', status: 'Completed' },
+  { id: 'tx-3', dateTime: '22-09-2025 10:55 AM', type: 'OUT', description: 'Office Tea', clientOrPayee: 'Office Expense', serviceOrCategory: 'Refreshment', account: 'cash', amount: 300, staff: 'Staff', status: 'Completed' },
   { id: 'tx-4', dateTime: '22-09-2025 10:30 AM', type: 'IN', description: 'Composing Charges', clientOrPayee: 'Ahsan Traders', serviceOrCategory: 'Composing', account: 'bank', amount: 12000, staff: 'Staff', status: 'Completed' },
-  { id: 'tx-5', dateTime: '22-09-2025 09:50 AM', type: 'OUT', description: 'Internet Bill', clientOrPayee: 'Jazz Telecom', serviceOrCategory: 'Utilities', account: 'jazzcash', amount: 4500, staff: 'Usama', status: 'Completed' },
+  { id: 'tx-5', dateTime: '22-09-2025 09:50 AM', type: 'OUT', description: 'Internet Bill', clientOrPayee: 'Jazz Telecom', serviceOrCategory: 'Utilities', account: 'jazzcash', amount: 4500, staff: 'Staff', status: 'Completed' },
   { id: 'tx-6', dateTime: '22-09-2025 09:10 AM', type: 'IN', description: 'Stamp Purchase (Client)', clientOrPayee: 'Zara Enterprises', serviceOrCategory: 'Stamp Purchase', account: 'cash', amount: 3200, staff: 'Staff', status: 'Completed' },
-  { id: 'tx-7', dateTime: '22-09-2025 09:00 AM', type: 'OUT', description: 'Stationery Purchase', clientOrPayee: 'Al-Faisal Stationers', serviceOrCategory: 'Stationery', account: 'cash', amount: 1200, staff: 'Usama', status: 'Completed' },
+  { id: 'tx-7', dateTime: '22-09-2025 09:00 AM', type: 'OUT', description: 'Stationery Purchase', clientOrPayee: 'Al-Faisal Stationers', serviceOrCategory: 'Stationery', account: 'cash', amount: 1200, staff: 'Staff', status: 'Completed' },
   { id: 'tx-8', dateTime: '22-09-2025 08:45 AM', type: 'IN', description: 'NTN Registration Fee', clientOrPayee: 'Bilal Ahmed', serviceOrCategory: 'NTN Registration', account: 'bank', amount: 8500, staff: 'Staff', status: 'Completed' }
 ];
 
@@ -280,7 +280,7 @@ export const initialTaxCases: TaxCase[] = [
     clientType: 'Individual Client',
     taxYear: '2024 - 2025',
     returnType: 'Income Tax Return',
-    assignedStaff: 'Usama (Admin)',
+    assignedStaff: 'Staff',
     amountFee: 12500,
     amountPaid: 5000,
     outstanding: 7500,
@@ -323,7 +323,7 @@ export const initialTaxCases: TaxCase[] = [
     clientType: 'Sole Proprietorship',
     taxYear: '2024 - 2025',
     returnType: 'Income Tax Return',
-    assignedStaff: 'Usama',
+    assignedStaff: 'Staff',
     amountFee: 25000,
     amountPaid: 25000,
     outstanding: 0,
@@ -358,7 +358,7 @@ export const initialTaxCases: TaxCase[] = [
     clientType: 'Individual',
     taxYear: '2024 - 2025',
     returnType: 'Income Tax Return',
-    assignedStaff: 'Usama',
+    assignedStaff: 'Staff',
     amountFee: 18500,
     amountPaid: 18500,
     outstanding: 0,
@@ -390,7 +390,7 @@ export const initialTaxCases: TaxCase[] = [
     clientType: 'Partnership',
     taxYear: '2024 - 2025',
     returnType: 'Income Tax Return',
-    assignedStaff: 'Usama',
+    assignedStaff: 'Staff',
     amountFee: 21000,
     amountPaid: 21000,
     outstanding: 0,
@@ -424,7 +424,7 @@ export const initialTaxCases: TaxCase[] = [
     clientType: 'Commercial',
     taxYear: '2024 - 2025',
     returnType: 'Income Tax Return',
-    assignedStaff: 'Usama',
+    assignedStaff: 'Staff',
     amountFee: 10000,
     amountPaid: 10000,
     outstanding: 0,
@@ -454,16 +454,16 @@ export const initialTaxCases: TaxCase[] = [
 ];
 
 export const initialServiceOrders: ServiceOrder[] = [
-  { id: 'so-1', orderNo: '001', dateTime: '22-09-2025 11:45 AM', serviceName: 'Composing', customer: 'Muhammad Ali', fileReference: 'CMP-2025-001', pages: 12, turnaroundTime: '2 Hours', amount: 1500, payment: 'Paid', staff: 'Usama', status: 'In Progress', contact: '0300-1234567', specialInstructions: 'Format in legal style, add client logo and prepare final PDF.' },
+  { id: 'so-1', orderNo: '001', dateTime: '22-09-2025 11:45 AM', serviceName: 'Composing', customer: 'Muhammad Ali', fileReference: 'CMP-2025-001', pages: 12, turnaroundTime: '2 Hours', amount: 1500, payment: 'Paid', staff: 'Staff', status: 'In Progress', contact: '0300-1234567', specialInstructions: 'Format in legal style, add client logo and prepare final PDF.' },
   { id: 'so-2', orderNo: '002', dateTime: '22-09-2025 11:20 AM', serviceName: 'Affidavit', customer: 'Sara Khan', fileReference: 'AFF-2025-072', pages: 3, turnaroundTime: '1 Hour', amount: 800, payment: 'Paid', staff: 'Asad', status: 'Completed', contact: '0301-7654321', specialInstructions: 'Affidavit regarding property declaration.' },
   { id: 'so-3', orderNo: '003', dateTime: '22-09-2025 10:55 AM', serviceName: 'Agreement', customer: 'Zara Enterprises', fileReference: 'AGR-2025-014', pages: 8, turnaroundTime: '4 Hours', amount: 2500, payment: 'Unpaid', staff: 'Bilal', status: 'Pending', contact: '0302-9988776', specialInstructions: 'Commercial partnership draft.' },
-  { id: 'so-4', orderNo: '004', dateTime: '22-09-2025 10:30 AM', serviceName: 'E-Stamp', customer: 'Asif Traders', fileReference: 'EST-2025-221', pages: 2, turnaroundTime: '30 Min', amount: 400, payment: 'Paid', staff: 'Usama', status: 'Completed', contact: '0303-1122334', specialInstructions: 'Generate 32-A challan for property sale.' },
+  { id: 'so-4', orderNo: '004', dateTime: '22-09-2025 10:30 AM', serviceName: 'E-Stamp', customer: 'Asif Traders', fileReference: 'EST-2025-221', pages: 2, turnaroundTime: '30 Min', amount: 400, payment: 'Paid', staff: 'Staff', status: 'Completed', contact: '0303-1122334', specialInstructions: 'Generate 32-A challan for property sale.' },
   { id: 'so-5', orderNo: '005', dateTime: '22-09-2025 10:05 AM', serviceName: 'Printing', customer: 'Ali Raza', fileReference: 'PRT-2025-109', pages: 25, turnaroundTime: '1 Hour', amount: 1250, payment: 'Paid', staff: 'Ahsan', status: 'In Progress', contact: '0304-4455667', specialInstructions: 'Color prints on 80gsm paper.' },
   { id: 'so-6', orderNo: '006', dateTime: '22-09-2025 09:40 AM', serviceName: 'Photocopy', customer: 'Commission Agent', fileReference: 'PC-2025-076', pages: 40, turnaroundTime: '30 Min', amount: 600, payment: 'Paid', staff: 'Asad', status: 'Completed', contact: '0305-6677889' },
-  { id: 'so-7', orderNo: '007', dateTime: '22-09-2025 09:15 AM', serviceName: 'NTN Registration', customer: 'Bilal Ahmed', fileReference: 'NTN-2025-018', pages: 5, turnaroundTime: '2 Hours', amount: 1800, payment: 'Unpaid', staff: 'Usama', status: 'Pending', contact: '0303-4445566' },
+  { id: 'so-7', orderNo: '007', dateTime: '22-09-2025 09:15 AM', serviceName: 'NTN Registration', customer: 'Bilal Ahmed', fileReference: 'NTN-2025-018', pages: 5, turnaroundTime: '2 Hours', amount: 1800, payment: 'Unpaid', staff: 'Staff', status: 'Pending', contact: '0303-4445566' },
   { id: 'so-8', orderNo: '008', dateTime: '22-09-2025 08:50 AM', serviceName: 'Return Filing', customer: 'Hassan & Co.', fileReference: 'RET-2025-091', pages: 18, turnaroundTime: '6 Hours', amount: 3000, payment: 'Paid', staff: 'Bilal', status: 'In Progress', contact: '0306-8899001' },
   { id: 'so-9', orderNo: '009', dateTime: '22-09-2025 08:20 AM', serviceName: 'Stamp Paper', customer: 'Farhan Malik', fileReference: 'SP-2025-063', pages: 1, turnaroundTime: '30 Min', amount: 300, payment: 'Paid', staff: 'Ahsan', status: 'Delivered', contact: '0307-1239874' },
-  { id: 'so-10', orderNo: '010', dateTime: '22-09-2025 08:10 AM', serviceName: 'Other (Letter)', customer: 'Walk-in Client', fileReference: 'OTH-2025-045', pages: 4, turnaroundTime: '1 Hour', amount: 500, payment: 'Paid', staff: 'Usama', status: 'Completed', contact: '0308-5544332' }
+  { id: 'so-10', orderNo: '010', dateTime: '22-09-2025 08:10 AM', serviceName: 'Other (Letter)', customer: 'Walk-in Client', fileReference: 'OTH-2025-045', pages: 4, turnaroundTime: '1 Hour', amount: 500, payment: 'Paid', staff: 'Staff', status: 'Completed', contact: '0308-5544332' }
 ];
 
 export const initialReceipts: Receipt[] = [
@@ -480,15 +480,15 @@ export const initialReceipts: Receipt[] = [
 ];
 
 export const initialExpenses: Expense[] = [
-  { id: 'exp-1', date: '22-09-2025', category: 'Electricity', description: 'Electricity Bill - September 2025', vendorPayee: 'LESCO', account: 'Meezan Bank', amount: 12400, staff: 'Usama', status: 'Paid' },
+  { id: 'exp-1', date: '22-09-2025', category: 'Electricity', description: 'Electricity Bill - September 2025', vendorPayee: 'LESCO', account: 'Meezan Bank', amount: 12400, staff: 'Staff', status: 'Paid' },
   { id: 'exp-2', date: '21-09-2025', category: 'Tea & Refreshment', description: 'Tea for Clients', vendorPayee: 'Chaudhry Tea Stall', account: 'Cash', amount: 850, staff: 'Ali Traders', status: 'Paid' },
-  { id: 'exp-3', date: '20-09-2025', category: 'Stationery', description: 'Printer Paper & Files', vendorPayee: 'Computer Zone', account: 'Cash', amount: 2300, staff: 'Usama', status: 'Paid' },
+  { id: 'exp-3', date: '20-09-2025', category: 'Stationery', description: 'Printer Paper & Files', vendorPayee: 'Computer Zone', account: 'Cash', amount: 2300, staff: 'Staff', status: 'Paid' },
   { id: 'exp-4', date: '19-09-2025', category: 'Transport', description: 'Fuel for Office Vehicle', vendorPayee: 'PSO', account: 'Cash', amount: 5000, staff: 'Asad Khan', status: 'Paid' },
-  { id: 'exp-5', date: '18-09-2025', category: 'Internet', description: 'Monthly Internet Bill', vendorPayee: 'PTCL', account: 'Meezan Bank', amount: 8000, staff: 'Usama', status: 'Paid' },
+  { id: 'exp-5', date: '18-09-2025', category: 'Internet', description: 'Monthly Internet Bill', vendorPayee: 'PTCL', account: 'Meezan Bank', amount: 8000, staff: 'Staff', status: 'Paid' },
   { id: 'exp-6', date: '17-09-2025', category: 'Maintenance', description: 'AC Servicing', vendorPayee: 'Cool Tech Services', account: 'Cash', amount: 4500, staff: 'Bilal Ahmed', status: 'Pending' },
-  { id: 'exp-7', date: '16-09-2025', category: 'Stamp Purchase', description: 'E-Stamp Purchase (Bulk)', vendorPayee: 'SBP', account: 'Cash', amount: 10000, staff: 'Usama', status: 'Paid' },
+  { id: 'exp-7', date: '16-09-2025', category: 'Stamp Purchase', description: 'E-Stamp Purchase (Bulk)', vendorPayee: 'SBP', account: 'Cash', amount: 10000, staff: 'Staff', status: 'Paid' },
   { id: 'exp-8', date: '15-09-2025', category: 'Rent', description: 'Office Rent - September 2025', vendorPayee: 'Malik Estate', account: 'Meezan Bank', amount: 80000, staff: 'Admin', status: 'Pending' },
-  { id: 'exp-9', date: '14-09-2025', category: 'Government Fee', description: 'Professional Tax', vendorPayee: 'FBR', account: 'Bank Alfalah', amount: 3500, staff: 'Usama', status: 'Paid' },
+  { id: 'exp-9', date: '14-09-2025', category: 'Government Fee', description: 'Professional Tax', vendorPayee: 'FBR', account: 'Bank Alfalah', amount: 3500, staff: 'Staff', status: 'Paid' },
   { id: 'exp-10', date: '12-09-2025', category: 'Salary', description: 'Staff Salary - September 2025', vendorPayee: 'Office Staff', account: 'Cash', amount: 60000, staff: 'Admin', status: 'Paid' }
 ];
 
@@ -509,7 +509,7 @@ export const initialUtilityBills: UtilityBill[] = [
 ];
 
 export const initialSystemUsers: SystemUser[] = [
-  { id: 'u-1', name: 'Usama Ali', email: 'usama@ch.com', role: 'Admin', status: 'Online', lastLogin: '22-09-2025 11:45 AM', avatarInitials: 'UA', phone: '0300-1234567' },
+  { id: 'u-1', name: 'Administrator', email: '', role: 'Admin', status: 'Online', lastLogin: '22-09-2025 11:45 AM', avatarInitials: 'AD', phone: '' },
   { id: 'u-2', name: 'Asad Khan', email: 'asad@ch.com', role: 'Tax Consultant', status: 'Online', lastLogin: '22-09-2025 10:32 AM', avatarInitials: 'AK', phone: '0302-3334455' },
   { id: 'u-3', name: 'Zara Enterprises', email: 'zara@ch.com', role: 'Stamp Vendor', status: 'Offline', lastLogin: '22-09-2025 09:15 AM', avatarInitials: 'ZE', phone: '0301-2223344' },
   { id: 'u-4', name: 'Bilal Ahmed', email: 'bilal@ch.com', role: 'Accountant', status: 'Online', lastLogin: '22-09-2025 11:20 AM', avatarInitials: 'BA', phone: '0303-4445566' },
@@ -518,7 +518,7 @@ export const initialSystemUsers: SystemUser[] = [
 ];
 
 export const initialAuditLogs: AuditLog[] = [
-  { id: 'al-1', dateTime: '22-09-2025 11:46 AM', user: 'Usama Ali', action: 'Login', module: 'System', beforePrevious: '-', afterNew: 'User logged in', ipAddress: '192.168.1.10', sessionStatus: 'Success' },
+  { id: 'al-1', dateTime: '22-09-2025 11:46 AM', user: 'Administrator', action: 'Login', module: 'System', beforePrevious: '-', afterNew: 'User logged in', ipAddress: '192.168.1.10', sessionStatus: 'Success' },
   { id: 'al-2', dateTime: '22-09-2025 11:32 AM', user: 'Asad Khan', action: 'Update', module: 'Client', beforePrevious: 'Phone: 0300-1234567', afterNew: 'Phone: 0300-7654321', ipAddress: '192.168.1.11', sessionStatus: 'Success' },
   { id: 'al-3', dateTime: '22-09-2025 11:20 AM', user: 'Bilal Ahmed', action: 'Create', module: 'Receipt', beforePrevious: '-', afterNew: 'Receipt #R-2025-000125', ipAddress: '192.168.1.14', sessionStatus: 'Success' },
   { id: 'al-4', dateTime: '22-09-2025 10:58 AM', user: 'Faiza Noor', action: 'Login', module: 'System', beforePrevious: '-', afterNew: 'User logged in', ipAddress: '192.168.1.20', sessionStatus: 'Success' },
@@ -528,10 +528,10 @@ export const initialAuditLogs: AuditLog[] = [
 
 export const initialTasks: OfficeTask[] = [
   { id: 't-1', title: 'Collect bank statements - Muhammad Ali', client: 'Muhammad Ali', assignedStaff: 'Hamza', dueDate: '22 Sep 2025', priority: 'High', status: 'Pending', description: 'Need original bank stamped statements for tax year 2025.' },
-  { id: 't-2', title: 'Prepare ITR draft - Asad Khan', client: 'Asad Khan', assignedStaff: 'Usama', dueDate: '23 Sep 2025', priority: 'High', status: 'In Progress', description: 'Finalize wealth statement reconciliation.' },
+  { id: 't-2', title: 'Prepare ITR draft - Asad Khan', client: 'Asad Khan', assignedStaff: 'Staff', dueDate: '23 Sep 2025', priority: 'High', status: 'In Progress', description: 'Finalize wealth statement reconciliation.' },
   { id: 't-3', title: 'Verify sales invoices - Zara Enterprises', client: 'Zara Enterprises', assignedStaff: 'Ayesha', dueDate: '24 Sep 2025', priority: 'Medium', status: 'Pending', description: 'Reconcile sales tax invoices with buyer declarations.' },
   { id: 't-4', title: 'Prepare withholding statement', client: 'Hassan & Co.', assignedStaff: 'Hamza', dueDate: '26 Sep 2025', priority: 'Medium', status: 'Pending', description: 'Monthly CPR and section 149 calculation.' },
-  { id: 't-5', title: 'Client follow-up - Bilal Ahmed', client: 'Bilal Ahmed', assignedStaff: 'Usama', dueDate: '27 Sep 2025', priority: 'Low', status: 'Waiting Client', description: 'Request missing electricity bill copies.' }
+  { id: 't-5', title: 'Client follow-up - Bilal Ahmed', client: 'Bilal Ahmed', assignedStaff: 'Staff', dueDate: '27 Sep 2025', priority: 'Low', status: 'Waiting Client', description: 'Request missing electricity bill copies.' }
 ];
 
 export const initialDailyClosing: DailyClosing = {
