@@ -541,6 +541,9 @@ export default function Header() {
                 borderRadius: 2,
                 py: 1.2,
                 mb: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
                 bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(11,29,56,0.05)",
                 color: isDark ? "#ffffff" : "#0b1d38",
               }}
@@ -549,6 +552,7 @@ export default function Header() {
               <ListItemText
                 primary={isUrdu ? "تمام خدمات اور فہرست" : "All Services & Categories"}
                 primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }}
+                sx={{ flex: "0 1 auto" }}
               />
               <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${
@@ -580,7 +584,7 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={() => toggleMobileCategory(category.id)}
-                        className="flex w-full items-center justify-between p-3 text-left transition hover:bg-gold-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 dark:hover:bg-white/5"
+                        className="flex w-full items-center gap-1 p-3 text-left transition hover:bg-gold-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 dark:hover:bg-white/5"
                         aria-expanded={isExpanded}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
