@@ -102,6 +102,9 @@ export async function DELETE(request: NextRequest) {
 
     revalidatePath("/");
     revalidatePath("/#services");
+    // The deleted slug is unknown here (id only) — revalidate the whole
+    // /services tree so the removed page drops out of ISR cache.
+    revalidatePath("/services", "layout");
 
     return NextResponse.json({ success: true, message: "Service deleted successfully." });
   } catch (error) {

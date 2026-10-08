@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getSiteUrl } from "@/config/env";
+import { BreadcrumbJsonLd } from "@/components/seo/JsonLd";
 import {
   ArrowLeft,
   Calendar,
@@ -17,8 +18,7 @@ import { getPublishedPostBySlug } from "@/lib/cms/publicPosts";
 import type { Post } from "@/types/cms";
 import { SITE } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -50,9 +50,18 @@ export async function generateMetadata({
       canonical,
     },
     openGraph: {
+      type: "article",
+      siteName: "Ch Composing Estamp and Tax Advisor",
+      locale: "en_PK",
       title: post.seo_title?.trim() || post.title,
       description: post.meta_description?.trim() || post.excerpt || undefined,
       images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.seo_title?.trim() || post.title,
+      description: post.meta_description?.trim() || post.excerpt || undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -72,6 +81,14 @@ export default async function PostReaderPage({
   const post = postData as Post;
 
   return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Legal Updates", url: "/updates" },
+          { name: post.title },
+        ]}
+      />
     <article className="min-h-screen bg-slate-50 dark:bg-[#071328] text-navy-950 dark:text-slate-100 transition-colors">
       {/* Top Header Section */}
       <header className="relative overflow-hidden bg-[#040c18] text-white py-12 lg:py-16 border-b border-navy-900/10 dark:border-white/10">
@@ -279,5 +296,6 @@ export default async function PostReaderPage({
         </div>
       </div>
     </article>
+    </>
   );
 }

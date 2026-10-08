@@ -3,17 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  AppBar,
-  Collapse,
-  Container,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
-} from "@mui/material";
 import { AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -35,6 +24,31 @@ import { getCategoryHeaderIcon, getSubServiceIcon } from "@/lib/icon-map";
 import Logo from "./Logo";
 import { CategoryDropdownPanel, LegalGroupDropdownPanel } from "./NavDropdown";
 import { useCms } from "@/lib/hooks/useCms";
+
+/**
+ * Lightweight slide-down/up region replacing MUI's Collapse.
+ * Animates height via the grid-template-rows trick; content stays mounted
+ * (mobile nav is small) but is hidden from assistive tech when closed.
+ */
+function SlideDown({
+  open,
+  children,
+  className = "",
+}: {
+  open: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} ${className}`}
+    >
+      <div className="overflow-hidden" aria-hidden={!open}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 type DropdownAlign = "left" | "right" | "center";
 
@@ -171,6 +185,21 @@ export default function Header() {
     setActiveDropdown(null);
   }, [pathname]);
 
+  // Mobile drawer: Escape closes it and body scroll locks while open.
+  React.useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [drawerOpen]);
+
   React.useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -251,29 +280,18 @@ export default function Header() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          background: scrolled
+      <header
+        className={`fixed inset-x-0 top-0 z-[1100] backdrop-blur-[14px] transition-[background-color,box-shadow] duration-200 ${
+          scrolled
             ? isDark
-              ? "rgba(5, 22, 43, 0.96)"
-              : "rgba(255, 255, 255, 0.96)"
+              ? "bg-[rgba(5,22,43,0.96)] shadow-[0_8px_30px_rgba(0,0,0,0.28)]"
+              : "bg-[rgba(255,255,255,0.96)] shadow-[0_8px_30px_rgba(5,22,43,0.06)]"
             : isDark
-            ? "#05162B"
-            : "#FFFFFF",
-          backdropFilter: "blur(14px)",
-          borderBottom: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #E3E7EC",
-          boxShadow: scrolled
-            ? isDark
-              ? "0 8px 30px rgba(0,0,0,0.28)"
-              : "0 8px 30px rgba(5,22,43,0.06)"
-            : "none",
-          transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-          zIndex: 1100,
-        }}
+              ? "bg-[#05162B]"
+              : "bg-white"
+        } ${isDark ? "border-b border-white/[0.08]" : "border-b border-[#E3E7EC]"}`}
       >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-[72px] items-center justify-between gap-4">
             <Logo isUrdu={isUrdu} isDark={isDark} />
 
@@ -434,50 +452,55 @@ export default function Header() {
                 <span>{isUrdu ? "English" : "اردو"}</span>
               </button>
 
-              <IconButton
-                edge="end"
+              <button
+                type="button"
                 onClick={() => setDrawerOpen(true)}
-                sx={{
-                  display: { xs: "inline-flex", lg: "none" },
-                  color: isDark ? "#ffffff" : "#0b1d38",
-                  ml: 0.25,
-                }}
-                className="lg:!hidden"
                 aria-label="Open navigation menu"
+                className={`ml-1 inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 lg:hidden ${
+                  isDark ? "text-white hover:bg-white/10" : "text-[#0b1d38] hover:bg-navy-900/5"
+                }`}
               >
                 <MenuIcon className="h-5 w-5" />
-              </IconButton>
+              </button>
             </div>
           </div>
-        </Container>
-      </AppBar>
+        </div>
+      </header>
 
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{
-          sx: {
-            width: "90%",
-            maxWidth: 390,
-            bgcolor: isDark ? "#071224" : "#f8fafc",
-            color: isDark ? "#f1f5f9" : "#0b1d38",
-          },
-        }}
+      {/* Mobile navigation drawer (Tailwind slide-over; replaces MUI Drawer) */}
+      <div
+        className={`fixed inset-0 z-[1200] lg:hidden ${drawerOpen ? "" : "pointer-events-none"}`}
+        aria-hidden={!drawerOpen}
+        inert={!drawerOpen}
       >
+        <div
+          className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${drawerOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setDrawerOpen(false)}
+        />
+        <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+          className={`absolute inset-y-0 right-0 flex w-[90%] max-w-[390px] flex-col shadow-2xl transition-transform duration-300 ease-out ${
+            drawerOpen ? "translate-x-0" : "translate-x-full"
+          } ${isDark ? "bg-[#071224] text-[#f1f5f9]" : "bg-[#f8fafc] text-[#0b1d38]"}`}
+        >
         <div
           className={`flex items-center justify-between border-b p-4 ${
             isDark ? "border-white/10 bg-[#0a1830]" : "border-navy-900/10 bg-white"
           }`}
         >
           <Logo isUrdu={isUrdu} isDark={isDark} />
-          <IconButton
+          <button
+            type="button"
             onClick={() => setDrawerOpen(false)}
             aria-label="Close navigation menu"
-            sx={{ color: isDark ? "#ffffff" : "#0b1d38" }}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+              isDark ? "text-white hover:bg-white/10" : "text-[#0b1d38] hover:bg-navy-900/5"
+            }`}
           >
             <X className="h-5 w-5" />
-          </IconButton>
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-3">
@@ -509,49 +532,46 @@ export default function Header() {
             {isUrdu ? "قانونی و دستاویزی خدمات" : "Legal & Documentation Services"}
           </div>
 
-          <List component="nav" aria-label="Mobile navigation" disablePadding>
-            <ListItemButton
-              component={Link}
-              href="/"
-              onClick={() => setDrawerOpen(false)}
-              sx={{
-                borderRadius: 2,
-                py: 1.2,
-                mb: 1,
-                bgcolor: pathname === "/" ? (isDark ? "rgba(212,164,76,0.18)" : "rgba(200,151,61,0.12)") : "transparent",
-                color: pathname === "/" ? "#c8973d" : isDark ? "#ffffff" : "#0b1d38",
-              }}
-            >
-              <ListItemText primary={t.nav.home} primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }} />
-            </ListItemButton>
+          <nav aria-label="Mobile navigation">
+            <ul className="space-y-1">
+            <li>
+              <Link
+                href="/"
+                onClick={() => setDrawerOpen(false)}
+                aria-current={pathname === "/" ? "page" : undefined}
+                className={`flex items-center rounded-lg px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                  pathname === "/"
+                    ? "bg-[rgba(200,151,61,0.12)] text-[#c8973d] dark:bg-[rgba(212,164,76,0.18)]"
+                    : isDark
+                      ? "text-white hover:bg-white/5"
+                      : "text-[#0b1d38] hover:bg-navy-900/5"
+                }`}
+              >
+                {t.nav.home}
+              </Link>
+            </li>
 
-            <ListItemButton
-              onClick={() => setMobileServicesRootOpen((current) => !current)}
-              sx={{
-                borderRadius: 2,
-                py: 1.2,
-                mb: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(11,29,56,0.05)",
-                color: isDark ? "#ffffff" : "#0b1d38",
-              }}
-              aria-expanded={mobileServicesRootOpen}
-            >
-              <ListItemText
-                primary={isUrdu ? "تمام خدمات اور فہرست" : "All Services & Categories"}
-                primaryTypographyProps={{ fontWeight: 700, fontSize: 14 }}
-                sx={{ flex: "0 1 auto" }}
-              />
+            <li>
+              <button
+                type="button"
+                onClick={() => setMobileServicesRootOpen((current) => !current)}
+                aria-expanded={mobileServicesRootOpen}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                  isDark ? "bg-white/[0.06] text-white" : "bg-[rgba(11,29,56,0.05)] text-[#0b1d38]"
+                }`}
+              >
+                <span className="flex-1 text-left text-sm font-bold">
+                  {isUrdu ? "تمام خدمات اور فہرست" : "All Services & Categories"}
+                </span>
               <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${
                   mobileServicesRootOpen ? "rotate-180 text-gold-500" : "text-navy-500"
                 }`}
               />
-            </ListItemButton>
+            </button>
+            </li>
 
-            <Collapse in={mobileServicesRootOpen} timeout="auto" unmountOnExit>
+            <SlideDown open={mobileServicesRootOpen}>
               <div className="space-y-1.5 pl-1">
                 {SERVICE_CATEGORIES.map((category) => {
                   const isExpanded = Boolean(expandedMobileServices[category.id]);
@@ -593,7 +613,7 @@ export default function Header() {
                         />
                       </button>
 
-                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                      <SlideDown open={isExpanded}>
                         <div
                           className={`space-y-1 border-t p-2 ${
                             isDark ? "border-white/10 bg-black/20" : "border-navy-900/5 bg-slate-50/70"
@@ -636,72 +656,77 @@ export default function Header() {
                             </Link>
                           </div>
                         </div>
-                      </Collapse>
+                      </SlideDown>
                     </div>
                   );
                 })}
               </div>
-            </Collapse>
+            </SlideDown>
 
-            <Divider sx={{ my: 2, borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
+            <div className={`my-2 border-t ${isDark ? "border-white/10" : "border-navy-900/10"}`} />
 
             {aboutVisible && (
-              <ListItemButton
-                component={Link}
-                href={aboutHref}
-                onClick={() => setDrawerOpen(false)}
-                selected={pathname.startsWith("/about")}
-                sx={{ borderRadius: 2, py: 1.2 }}
-              >
-                <ListItemText
-                  primary={aboutLabel}
-                  secondary={isUrdu ? "بانی و چیمبر 121 کی تاریخ" : "Our Founder, Story & Leadership"}
-                  primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-                  secondaryTypographyProps={{ fontSize: 11 }}
-                />
-              </ListItemButton>
+              <li>
+                <Link
+                  href={aboutHref}
+                  onClick={() => setDrawerOpen(false)}
+                  aria-current={pathname.startsWith("/about") ? "page" : undefined}
+                  className={`block rounded-lg px-3 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                    pathname.startsWith("/about")
+                      ? "bg-[rgba(200,151,61,0.12)] text-[#c8973d] dark:bg-[rgba(212,164,76,0.18)]"
+                      : isDark
+                        ? "text-white hover:bg-white/5"
+                        : "text-[#0b1d38] hover:bg-navy-900/5"
+                  }`}
+                >
+                  <span className="block text-sm font-semibold">{aboutLabel}</span>
+                  <span className={`mt-0.5 block text-[11px] ${isDark ? "text-slate-400" : "text-navy-500"}`}>
+                    {isUrdu ? "بانی و چیمبر 121 کی تاریخ" : "Our Founder, Story & Leadership"}
+                  </span>
+                </Link>
+              </li>
             )}
             {updatesVisible && (
-              <ListItemButton component={Link} href={updatesHref} onClick={() => setDrawerOpen(false)} sx={{ borderRadius: 2, py: 1.2 }}>
-                <ListItemText
-                  primary={updatesLabel}
-                  primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-                />
-              </ListItemButton>
+              <li>
+                <Link
+                  href={updatesHref}
+                  onClick={() => setDrawerOpen(false)}
+                  aria-current={pathname.startsWith("/updates") ? "page" : undefined}
+                  className={`block rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                    pathname.startsWith("/updates")
+                      ? "bg-[rgba(200,151,61,0.12)] text-[#c8973d] dark:bg-[rgba(212,164,76,0.18)]"
+                      : isDark
+                        ? "text-white hover:bg-white/5"
+                        : "text-[#0b1d38] hover:bg-navy-900/5"
+                  }`}
+                >
+                  {updatesLabel}
+                </Link>
+              </li>
             )}
             {settings?.navigationMenu
               ?.filter((item) => item.enabled && !["home", "services", "about", "updates", "reminders", "contact"].includes(item.id))
               .map((item) => (
-                <ListItemButton
-                  key={item.id}
-                  component={Link}
-                  href={item.href}
-                  target={item.isExternal ? "_blank" : undefined}
-                  rel={item.isExternal ? "noreferrer noopener" : undefined}
-                  onClick={() => setDrawerOpen(false)}
-                  sx={{ borderRadius: 2, py: 1.2 }}
-                >
-                  <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
-                  />
-                </ListItemButton>
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    target={item.isExternal ? "_blank" : undefined}
+                    rel={item.isExternal ? "noreferrer noopener" : undefined}
+                    onClick={() => setDrawerOpen(false)}
+                    className={`block rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+                      isDark ? "text-white hover:bg-white/5" : "text-[#0b1d38] hover:bg-navy-900/5"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
               ))}
-          </List>
+            </ul>
+          </nav>
         </div>
 
-        <Divider sx={{ borderColor: isDark ? "rgba(255,255,255,0.1)" : undefined }} />
+        <div className={`border-t ${isDark ? "border-white/10" : "border-navy-900/10"}`} />
         <div className={`p-3 space-y-2 ${isDark ? "bg-[#0a1830]" : "bg-white"}`}>
-          {settings?.headerSettings?.primaryCtaEnabled !== false && (
-            <Link
-              href={settings?.headerSettings?.primaryCtaHref || "/#contact"}
-              onClick={() => setDrawerOpen(false)}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#C8973D] text-navy-950 font-bold py-2.5 text-xs shadow-sm transition hover:bg-[#b8862f]"
-            >
-              <Phone className="h-3.5 w-3.5" />
-              <span>{settings?.headerSettings?.primaryCtaText || (isUrdu ? "مشاورت بک کریں" : "Book Consultation")}</span>
-            </Link>
-          )}
           <div className="grid grid-cols-2 gap-2">
             <a
               href={settings?.phone ? `tel:${settings.phone.replace(/[^\d+]/g, "")}` : SITE.phoneHref}
@@ -729,7 +754,8 @@ export default function Header() {
             </a>
           </div>
         </div>
-      </Drawer>
+        </aside>
+      </div>
 
       <div style={{ height: 72 }} aria-hidden="true" />
     </>

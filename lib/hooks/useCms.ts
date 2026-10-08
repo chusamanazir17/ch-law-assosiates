@@ -28,7 +28,20 @@ export function notifyCmsUpdated(state: CmsState) {
   listeners.forEach((listener) => listener(state));
 }
 
-export function refreshCms(): Promise<void> {
+let lastCmsRefreshAt = 0;
+const CMS_REFRESH_TTL_MS = 60_000;
+
+/**
+ * Re-fetch CMS content. Background triggers (window focus) are TTL-gated
+ * (M7/FE-20: stops the focus refetch storm); pass { force: true } for
+ * mount and explicit admin-edit signals, which always fetch.
+ */
+export function refreshCms(options?: { force?: boolean }): Promise<void> {
+  const now = Date.now();
+  if (!options?.force && now - lastCmsRefreshAt < CMS_REFRESH_TTL_MS) {
+    return Promise.resolve();
+  }
+  lastCmsRefreshAt = now;
   return fetch("/api/cms/content", { cache: "no-store" })
     .then((res) => res.json())
     .then((data) => {
@@ -81,20 +94,25 @@ export function useCms(initialData?: Partial<CmsState>) {
   useEffect(() => {
     listeners.add(setState);
 
-    // Always fetch fresh in background so admin edits show immediately
-    refreshCms();
+    // Fetch fresh on mount so admin edits show immediately. The
+    // cms-updated event (dispatched after admin saves) always forces;
+    // window focus revalidates only when the cache is stale.
+    refreshCms({ force: true });
 
-    const handleCmsEvent = () => {
+    const handleCmsUpdated = () => {
+      refreshCms({ force: true });
+    };
+    const handleFocus = () => {
       refreshCms();
     };
 
-    window.addEventListener("cms-updated", handleCmsEvent);
-    window.addEventListener("focus", handleCmsEvent);
+    window.addEventListener("cms-updated", handleCmsUpdated);
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       listeners.delete(setState);
-      window.removeEventListener("cms-updated", handleCmsEvent);
-      window.removeEventListener("focus", handleCmsEvent);
+      window.removeEventListener("cms-updated", handleCmsUpdated);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 

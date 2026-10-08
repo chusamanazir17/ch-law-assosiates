@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 import {
   Client,
@@ -323,7 +323,13 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   // Full Refresh from Supabase Database
+  // Staleness gate (FE-20): background re-syncs (window focus, section
+  // navigation) skip when data is fresh. Mount and explicit user actions
+  // always fetch via refreshData().
+  const lastRefreshAtRef = useRef(0);
+  const REFRESH_TTL_MS = 60_000;
   const refreshData = useCallback(async () => {    try {
+      lastRefreshAtRef.current = Date.now();
       setIsLoading(true);
 
       const [
@@ -631,6 +637,14 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
+  // TTL-gated variant for background re-syncs: no-op when the last refresh
+  // was less than REFRESH_TTL_MS ago (stops the focus/section-change
+  // refetch storm without changing what a refresh does).
+  const refreshDataIfStale = useCallback(async () => {
+    if (Date.now() - lastRefreshAtRef.current < REFRESH_TTL_MS) return;
+    await refreshData();
+  }, [refreshData]);
+
   // Hydrate on mount. First hit /api/admin/session (GET, CSRF-exempt): it
   // ensures the readable `ch_csrf_token` double-submit cookie is issued for
   // cookie-authenticated office users (Supabase Auth sessions never pass
@@ -647,7 +661,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // (client-generated IDs/numbers) reconciled with Supabase.
   useEffect(() => {
     if (activeSection !== 'dashboard' || typeof window === 'undefined') {
-      refreshData();
+      refreshDataIfStale();
       return;
     }
     // Dashboard is the landing section; mount already refreshed it.
@@ -656,10 +670,10 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const handleFocus = () => refreshData();
+    const handleFocus = () => refreshDataIfStale();
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [refreshData]);
+  }, [refreshDataIfStale]);
 
   // Modals state
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
