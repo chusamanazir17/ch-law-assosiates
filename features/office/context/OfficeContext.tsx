@@ -1322,7 +1322,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         phone: newClient.phone,
         email: newClient.email,
         address: newClient.address,
-        client_type: newClient.type || 'individual',
+        client_type: (newClient.type || "individual").toLowerCase(),
         status: newClient.status?.toLowerCase() || 'active'
       })
     })

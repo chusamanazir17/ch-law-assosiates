@@ -3,12 +3,26 @@ import { getAdminSession } from "@/lib/auth/admin";
 import { getAllSubscribers } from "@/lib/db/subscribersStore";
 import { getAllInquiries } from "@/lib/db/inquiriesStore";
 import { listAllPosts } from "@/lib/services/posts.service";
-import { getAllServices } from "@/lib/db/servicesStore";
+import { getAdminDatabaseClient } from "@/lib/supabase/service";
 import { getAllTeamMembers } from "@/lib/db/teamMembersStore";
 import { getAllTestimonials } from "@/lib/db/testimonialsStore";
 import { getAllFaqs } from "@/lib/db/faqsStore";
 import { listMediaAssets } from "@/lib/services/media.service";
 import { listAnnouncements } from "@/lib/repositories/announcementsRepository";
+
+/** Direct service count — bypasses the CMS in-memory cache which can go stale. */
+async function countServices(): Promise<number> {
+  try {
+    const supabase = await getAdminDatabaseClient();
+    const { count, error } = await supabase
+      .from("cms_services")
+      .select("id", { count: "exact", head: true });
+    if (error) throw error;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +39,7 @@ export async function GET() {
       subscribers,
       inquiries,
       posts,
-      services,
+      serviceCount,
       teamMembers,
       testimonials,
       faqs,
@@ -35,7 +49,7 @@ export async function GET() {
       getAllSubscribers().catch(() => []),
       getAllInquiries().catch(() => []),
       listAllPosts().catch(() => []),
-      getAllServices().catch(() => []),
+      countServices().catch(() => 0),
       getAllTeamMembers().catch(() => []),
       getAllTestimonials().catch(() => []),
       getAllFaqs().catch(() => []),
@@ -97,7 +111,7 @@ export async function GET() {
         publishedPosts,
         draftPosts,
         totalMedia: mediaAssets.length,
-        totalServices: services.length,
+        totalServices: serviceCount,
         totalTeam: teamMembers.length,
         totalTestimonials: testimonials.length,
         totalFaqs: faqs.length,

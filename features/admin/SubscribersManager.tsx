@@ -736,7 +736,11 @@ export default function SubscribersManager() {
                         )
                       ) : (
                         <span className="text-xs text-[#94A3B8] dark:text-slate-500">
-                          Opted out
+                          {sub.status === "pending"
+                            ? "Awaiting confirmation"
+                            : sub.status === "suppressed"
+                              ? "Suppressed"
+                              : "Unsubscribed"}
                         </span>
                       )}
                     </td>
