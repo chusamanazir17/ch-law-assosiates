@@ -46,6 +46,7 @@ export const TaxManagementView: React.FC = () => {
 
   // New Case Form
   const [clientName, setClientName] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState('');
   const [returnType, setReturnType] = useState('Income Tax Return');
   const [taxYear, setTaxYear] = useState('2024');
   const [dueDate, setDueDate] = useState('30-09-2025');
@@ -97,9 +98,16 @@ export const TaxManagementView: React.FC = () => {
   const handleCreateCase = (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName.trim()) return;
+    const linked = clients.find(x => x.id === selectedClientId);
+    const isUuid = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+    if (!linked || !isUuid(linked.id)) {
+      alert('Please select an existing client from the dropdown (or add them under Clients first). Tax files must be linked to a client record.');
+      return;
+    }
 
     addTaxCase({
-      clientName,
+      clientId: linked.id,
+      clientName: linked.name,
       returnType: returnType as any,
       taxYear,
       dueDate,
@@ -116,6 +124,7 @@ export const TaxManagementView: React.FC = () => {
 
     setIsNewCaseModalOpen(false);
     setClientName('');
+    setSelectedClientId('');
   };
 
   const kanbanColumns: { status: TaxCase['status']; title: string; color: string; border: string; bg: string }[] = [
@@ -643,17 +652,22 @@ export const TaxManagementView: React.FC = () => {
                     type="text"
                     required
                     value={clientName}
-                    onChange={e => setClientName(e.target.value)}
+                    onChange={e => { setClientName(e.target.value); setSelectedClientId(''); }}
                     placeholder="Enter taxpayer name..."
                     className="flex-1 h-9 px-3 border border-[#DCE6F1] rounded-lg"
                   />
                   <select
-                    onChange={e => setClientName(e.target.value)}
+                    value={selectedClientId}
+                    onChange={e => {
+                      const c = clients.find(x => x.id === e.target.value);
+                      setSelectedClientId(e.target.value);
+                      if (c) setClientName(c.name);
+                    }}
                     className="w-32 h-9 px-2 bg-slate-50 border border-[#DCE6F1] rounded-lg"
                   >
                     <option value="">Select</option>
                     {clients.map(c => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
+                      <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
