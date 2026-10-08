@@ -218,22 +218,14 @@ export async function recordPaymentRecord(data: {
     throw new Error(`Failed to record payment: ${error.message}`);
   }
 
-  // Sync Invoice status and paid_amount
-  if (targetInvoice) {
-    const newPaid = Number(targetInvoice.paid_amount || 0) + Number(data.amount);
-    const newStatus = newPaid >= Number(targetInvoice.total_amount) ? "paid" : "partial";
-    await supabase
-      .from("invoices")
-      .update({
-        paid_amount: newPaid,
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", targetInvoice.id);
-  }
+  // NOTE: invoice paid_amount/status and the payment account balance are
+  // maintained by the DB trigger `handle_payment_applied` (single source of
+  // truth). Do NOT update them here — doing so applies the same money twice.
 
-  // Sync Financial Ledger & Account Balance
+  // Record Financial Ledger entry
   if (targetAccountId && isUuid(targetAccountId)) {
+    // Re-read the balance AFTER the payment insert so `balance_after`
+    // reflects the trigger-applied credit.
     const { data: acc } = await supabase
       .from("payment_accounts")
       .select("current_balance")
@@ -241,9 +233,7 @@ export async function recordPaymentRecord(data: {
       .maybeSingle();
 
     if (acc) {
-      const currentBal = Number(acc.current_balance || 0);
-      const newBal = currentBal + Number(data.amount);
-      await supabase.from("payment_accounts").update({ current_balance: newBal }).eq("id", targetAccountId);
+      const balanceAfter = Number(acc.current_balance || 0);
 
       const txNum = `TX-REC-${Date.now().toString().slice(-6)}`;
       const { error: ledgerError } = await supabase.from("financial_ledger").insert({
@@ -251,7 +241,7 @@ export async function recordPaymentRecord(data: {
         entry_type: "credit",
         account_id: targetAccountId,
         amount: data.amount,
-        balance_after: newBal,
+        balance_after: balanceAfter,
         category: "Legal Fee",
         description: `Payment for Invoice ${targetInvoice?.invoice_number || receiptNo}`,
         client_id: clientId,

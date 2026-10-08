@@ -93,8 +93,19 @@ export function renderConfirmationEmail(options: SendEmailOptions) {
               </h2>
 
               <p style="margin: 0 0 18px 0; font-size: 15px; line-height: 1.6; color: #334155;">
-                Thank you for subscribing to statutory tax deadline reminders from <strong>${BUSINESS.fullName}</strong>. You will receive statutory notifications before key cutoff dates to ensure timely compliance and prevent late surcharges or penalties.
+                Thank you for subscribing to statutory tax deadline reminders from <strong>${BUSINESS.fullName}</strong>.${options.confirmUrl ? " Please confirm your subscription by clicking the button below — your reminders activate only after confirmation." : " You will receive statutory notifications before key cutoff dates to ensure timely compliance and prevent late surcharges or penalties."}
               </p>
+
+              ${options.confirmUrl ? `<!-- Double opt-in confirmation CTA -->
+              <div style="margin: 24px 0; text-align: center;">
+                <a href="${escapeHtml(options.confirmUrl)}" style="display: inline-block; padding: 14px 32px; font-size: 15px; font-weight: 700; color: #ffffff; text-decoration: none; border-radius: 8px; background-color: #c8973d;">
+                  Confirm My Subscription
+                </a>
+                <p style="margin: 12px 0 0 0; font-size: 12px; color: #64748b;">
+                  This confirmation link expires in 48 hours. If the button does not work, copy and paste this link into your browser:<br>
+                  <span style="word-break: break-all; color: #0b1d38;">${escapeHtml(options.confirmUrl)}</span>
+                </p>
+              </div>` : ""}
 
               <!-- Selected Categories Card -->
               <div style="background-color: #f8fafc; border-left: 4px solid #c8973d; padding: 16px 20px; margin: 24px 0; border-radius: 6px;">
@@ -158,7 +169,7 @@ export function renderConfirmationEmail(options: SendEmailOptions) {
 Hello ${clientName},
 
 Thank you for subscribing to statutory tax deadline reminders from ${BUSINESS.fullName}.
-
+${options.confirmUrl ? "\nPlease confirm your subscription by opening this link (expires in 48 hours):\n" + options.confirmUrl + "\n" : ""}
 Subscribed Categories:
 ${categoriesText}
 

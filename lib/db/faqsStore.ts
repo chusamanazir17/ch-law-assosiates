@@ -22,7 +22,10 @@ export interface CmsFaq {
 }
 
 const CACHE_KEY = "cms:faqs";
-const SETTINGS_KEY = "faqs";
+// Legacy key: older versions persisted FAQs as JSON under site_settings.
+// The `public.faqs` table is the single source of truth; this key is only
+// read once to backfill the table, then never written again.
+const LEGACY_SETTINGS_KEY = "faqs";
 
 const INITIAL_FAQS: CmsFaq[] = [
   {
@@ -81,6 +84,44 @@ const INITIAL_FAQS: CmsFaq[] = [
   },
 ];
 
+function mapRowToFaq(row: any): CmsFaq {
+  return {
+    id: row.id,
+    question: row.question,
+    answer: row.answer,
+    category: row.category || "General",
+    page: row.page || "home",
+    displayOrder: row.display_order ?? 0,
+    isPublished: row.is_published ?? true,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapFaqToRow(faq: CmsFaq): Record<string, unknown> {
+  return {
+    id: faq.id,
+    question: faq.question,
+    answer: faq.answer,
+    category: faq.category || "General",
+    page: faq.page || "home",
+    display_order: faq.displayOrder ?? 0,
+    is_published: faq.isPublished !== false,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function canWrite(): boolean {
+  return !!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+}
+
+/**
+ * Single source of truth: `public.faqs`.
+ *
+ * Reads come from the table. If the table is empty, a one-time backfill runs:
+ * legacy FAQs stored under the old `site_settings` key are migrated into the
+ * table; otherwise the built-in defaults are seeded into the table.
+ */
 export async function getAllFaqs(): Promise<CmsFaq[]> {
   const cached = cmsCacheGet<CmsFaq[]>(CACHE_KEY);
   if (cached) return cached;
@@ -91,7 +132,6 @@ export async function getAllFaqs(): Promise<CmsFaq[]> {
     const client = await getCmsClient();
     if (!client) return INITIAL_FAQS;
 
-    // 1. Try public.faqs table first
     const { data: tableData, error: tableError } = await (client as any)
       .from("faqs")
       .select("*")
@@ -99,43 +139,39 @@ export async function getAllFaqs(): Promise<CmsFaq[]> {
       .order("created_at", { ascending: true });
 
     if (!tableError && tableData && tableData.length > 0) {
-      const items: CmsFaq[] = tableData.map((row: any) => ({
-        id: row.id,
-        question: row.question,
-        answer: row.answer,
-        category: row.category || "General",
-        page: row.page || "home",
-        displayOrder: row.display_order ?? 0,
-        isPublished: row.is_published ?? true,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      }));
+      const items: CmsFaq[] = tableData.map(mapRowToFaq);
       cmsCacheSet(CACHE_KEY, items);
       return items;
     }
 
-    // 2. Fall back to site_settings JSONB under key 'faqs'
-    const { data: settingsData, error: settingsError } = await (client as any)
-      .from("site_settings")
-      .select("value")
-      .eq("key", SETTINGS_KEY)
-      .maybeSingle();
-
-    if (!settingsError && settingsData?.value && Array.isArray(settingsData.value)) {
-      const items = settingsData.value as CmsFaq[];
-      cmsCacheSet(CACHE_KEY, items);
-      return items;
-    }
-
-    // Seed defaults into site_settings
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
-      await (client as any)
+    // Table is empty: one-time backfill from the legacy site_settings key,
+    // so previously saved FAQs are not lost.
+    let seedItems: CmsFaq[] = INITIAL_FAQS;
+    if (!tableError) {
+      const { data: legacyData } = await (client as any)
         .from("site_settings")
-        .upsert({ key: SETTINGS_KEY, value: INITIAL_FAQS }, { onConflict: "key" });
+        .select("value")
+        .eq("key", LEGACY_SETTINGS_KEY)
+        .maybeSingle();
+      if (legacyData?.value && Array.isArray(legacyData.value) && legacyData.value.length > 0) {
+        seedItems = legacyData.value as CmsFaq[];
+      }
     }
 
-    cmsCacheSet(CACHE_KEY, INITIAL_FAQS);
-    return INITIAL_FAQS;
+    if (canWrite()) {
+      const { error: seedError } = await (client as any)
+        .from("faqs")
+        .upsert(seedItems.map(mapFaqToRow), { onConflict: "id" });
+      if (!seedError) {
+        // Clear the legacy key now that the table owns the data.
+        await (client as any).from("site_settings").delete().eq("key", LEGACY_SETTINGS_KEY);
+      } else {
+        console.error("[FaqsStore] Failed to seed faqs table:", seedError.message);
+      }
+    }
+
+    cmsCacheSet(CACHE_KEY, seedItems);
+    return seedItems;
   } catch (err) {
     console.error("[FaqsStore] Exception fetching FAQs, using defaults:", err);
     return INITIAL_FAQS;
@@ -145,6 +181,35 @@ export async function getAllFaqs(): Promise<CmsFaq[]> {
 export async function getFaqById(id: string): Promise<CmsFaq | null> {
   const all = await getAllFaqs();
   return all.find((f) => f.id === id) || null;
+}
+
+/** Keep the denormalized homepage FAQ section in sync with the table. */
+async function syncHomeSectionsFaqs(client: any, items: CmsFaq[]): Promise<void> {
+  try {
+    const { data: homeData } = await client
+      .from("site_settings")
+      .select("value")
+      .eq("key", "home_sections")
+      .maybeSingle();
+
+    if (homeData?.value?.faqSection) {
+      const homeSections = homeData.value;
+      homeSections.faqSection.items = items
+        .filter((f) => f.page === "home")
+        .map((f) => ({
+          id: f.id,
+          question: f.question,
+          answer: f.answer,
+          order: f.displayOrder,
+          visible: f.isPublished,
+        }));
+      await client
+        .from("site_settings")
+        .upsert({ key: "home_sections", value: homeSections }, { onConflict: "key" });
+    }
+  } catch (syncErr) {
+    console.warn("[FaqsStore] Error syncing with home_sections:", syncErr);
+  }
 }
 
 export async function saveFaq(data: Partial<CmsFaq>): Promise<CmsFaq> {
@@ -195,57 +260,15 @@ export async function saveFaq(data: Partial<CmsFaq>): Promise<CmsFaq> {
     all.push(savedItem);
   }
 
-  // 1. Try update in public.faqs table if table exists
-  try {
-    const row = {
-      question: savedItem.question,
-      answer: savedItem.answer,
-      category: savedItem.category,
-      page: savedItem.page,
-      display_order: savedItem.displayOrder,
-      is_published: savedItem.isPublished,
-      updated_at: now,
-    };
-    if (savedItem.id.includes("-") && savedItem.id.length >= 30) {
-      await (client as any).from("faqs").upsert({ id: savedItem.id, ...row });
-    }
-  } catch {
-    // Non-fatal if table not created yet
+  // Persist to the single source of truth: the faqs table.
+  const { error: upsertError } = await (client as any)
+    .from("faqs")
+    .upsert(mapFaqToRow(savedItem), { onConflict: "id" });
+  if (upsertError) {
+    throw new Error(`Failed to save FAQ: ${upsertError.message}`);
   }
 
-  // 2. Always persist in site_settings key 'faqs' for guaranteed persistence
-  await (client as any)
-    .from("site_settings")
-    .upsert({ key: SETTINGS_KEY, value: all }, { onConflict: "key" });
-
-  // 3. Keep home_sections.faqSection in sync
-  try {
-    const { data: homeData } = await (client as any)
-      .from("site_settings")
-      .select("value")
-      .eq("key", "home_sections")
-      .maybeSingle();
-
-    if (homeData?.value) {
-      const homeSections = homeData.value;
-      if (homeSections.faqSection) {
-        homeSections.faqSection.items = all
-          .filter((f) => f.page === "home")
-          .map((f) => ({
-            id: f.id,
-            question: f.question,
-            answer: f.answer,
-            order: f.displayOrder,
-            visible: f.isPublished,
-          }));
-        await (client as any)
-          .from("site_settings")
-          .upsert({ key: "home_sections", value: homeSections }, { onConflict: "key" });
-      }
-    }
-  } catch (syncErr) {
-    console.warn("[FaqsStore] Error syncing with home_sections:", syncErr);
-  }
+  await syncHomeSectionsFaqs(client, all);
 
   invalidateCmsCache(CACHE_KEY);
   invalidateCmsCache("cms:home-sections");
@@ -258,49 +281,15 @@ export async function deleteFaq(id: string): Promise<boolean> {
     throw new Error("CMS backend is not configured: set NEXT_PUBLIC_SUPABASE_URL (and SUPABASE_SERVICE_ROLE_KEY for writes).");
   }
 
-  const all = await getAllFaqs();
-  const filtered = all.filter((f) => f.id !== id);
-
-  try {
-    await (client as any).from("faqs").delete().eq("id", id);
-  } catch {
-    // Non-fatal if table not created yet
+  const { error: deleteError } = await (client as any).from("faqs").delete().eq("id", id);
+  if (deleteError) {
+    throw new Error(`Failed to delete FAQ: ${deleteError.message}`);
   }
 
-  await (client as any)
-    .from("site_settings")
-    .upsert({ key: SETTINGS_KEY, value: filtered }, { onConflict: "key" });
-
-  // Sync with home_sections
-  try {
-    const { data: homeData } = await (client as any)
-      .from("site_settings")
-      .select("value")
-      .eq("key", "home_sections")
-      .maybeSingle();
-
-    if (homeData?.value) {
-      const homeSections = homeData.value;
-      if (homeSections.faqSection) {
-        homeSections.faqSection.items = filtered
-          .filter((f) => f.page === "home")
-          .map((f) => ({
-            id: f.id,
-            question: f.question,
-            answer: f.answer,
-            order: f.displayOrder,
-            visible: f.isPublished,
-          }));
-        await (client as any)
-          .from("site_settings")
-          .upsert({ key: "home_sections", value: homeSections }, { onConflict: "key" });
-      }
-    }
-  } catch {
-    // Non-fatal
-  }
-
+  const remaining = (await getAllFaqs()).filter((f) => f.id !== id);
   invalidateCmsCache(CACHE_KEY);
+  await syncHomeSectionsFaqs(client, remaining);
+
   invalidateCmsCache("cms:home-sections");
   return true;
 }
@@ -326,10 +315,18 @@ export async function reorderFaqs(orderedIds: string[]): Promise<void> {
   });
 
   const client = await getCmsClient();
-  if (client) {
-    await (client as any)
-      .from("site_settings")
-      .upsert({ key: SETTINGS_KEY, value: reordered }, { onConflict: "key" });
+  if (client && canWrite()) {
+    const now = new Date().toISOString();
+    for (const item of reordered) {
+      const { error } = await (client as any)
+        .from("faqs")
+        .update({ display_order: item.displayOrder, updated_at: now })
+        .eq("id", item.id);
+      if (error) {
+        throw new Error(`Failed to reorder FAQs: ${error.message}`);
+      }
+    }
+    await syncHomeSectionsFaqs(client, reordered);
   }
 
   invalidateCmsCache(CACHE_KEY);

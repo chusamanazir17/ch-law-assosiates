@@ -184,21 +184,8 @@ export async function recordStampMovement(dto: RecordStampMovementDTO): Promise<
     throw new Error(`Failed to record stamp movement: ${error.message}`);
   }
 
-  // Update real-time current_stock in stamp_products
-  const current = Number(targetProduct.current_stock || 0);
-  let nextStock = current;
-  if (dto.movementType === "sale" || dto.movementType === "adjustment_out") {
-    nextStock = Math.max(0, current - qty);
-  } else if (dto.movementType === "purchase" || dto.movementType === "opening" || dto.movementType === "adjustment_in") {
-    nextStock = current + qty;
-  }
-
-  const { error: stockUpdateError } = await supabase
-    .from("stamp_products")
-    .update({ current_stock: nextStock, updated_at: new Date().toISOString() })
-    .eq("id", targetProductId);
-
-  if (stockUpdateError) {
-    console.warn("[StampsService] current_stock update warning:", stockUpdateError.message);
-  }
+  // NOTE: `stamp_products.current_stock` is maintained by the DB trigger
+  // `handle_stamp_movement` (single source of truth). Do NOT recompute it
+  // here — doing so adjusts the same stock twice and can silently overwrite
+  // the trigger's value with a stale read.
 }

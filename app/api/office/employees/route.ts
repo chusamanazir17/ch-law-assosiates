@@ -31,7 +31,16 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Employee ID is required" }, { status: 400 });
     }
 
-    const updated = await updateEmployee(body.id, body);
+    // Only super_admin may change `role` or `status`. Strip them from the
+    // update for every other office role so a non-admin can never escalate
+    // their own (or anyone else's) privileges. The service layer strips them
+    // again unless explicitly allowed.
+    const { role: _role, status: _status, ...safeUpdates } = body;
+    const updates = session.role === "super_admin" ? body : safeUpdates;
+
+    const updated = await updateEmployee(body.id, updates, {
+      allowPrivilegedFields: session.role === "super_admin",
+    });
     return NextResponse.json({ success: true, employee: updated });
   } catch (error: any) {
     console.error("[API Office Employees PATCH]", error);
