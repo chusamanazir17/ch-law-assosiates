@@ -25,6 +25,7 @@ import {
 } from "@/features/admin/AdminSidebarContext";
 import { createClient } from "@/lib/supabase/client";
 import { useAppTheme } from "@/providers/ThemeProvider";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 function AdminShellInner({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "";
@@ -78,7 +79,7 @@ function AdminShellInner({ children }: { children: ReactNode }) {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await apiFetch("/api/admin/logout", { method: "POST" });
     } catch {
       // Ignore network errors on logout
     }

@@ -11,24 +11,23 @@ interface IncomeExpenseBarChartProps {
   height?: number;
 }
 
-const defaultData: BarDataPoint[] = [
-  { label: '1 Sep', income: 28000, expense: 8000 },
-  { label: '4 Sep', income: 32000, expense: 12000 },
-  { label: '7 Sep', income: 22000, expense: 9500 },
-  { label: '10 Sep', income: 38000, expense: 18000 },
-  { label: '13 Sep', income: 29000, expense: 11000 },
-  { label: '16 Sep', income: 39500, expense: 14000 },
-  { label: '19 Sep', income: 34000, expense: 16500 },
-  { label: '22 Sep', income: 42500, expense: 8200 }
-];
-
 export const IncomeExpenseBarChart: React.FC<IncomeExpenseBarChartProps> = ({
-  data = defaultData,
+  data = [],
   height = 200
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const maxVal = 50000;
+  // No fabricated demo data: an empty dataset renders an honest empty state.
+  if (data.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center text-xs text-slate-400" style={{ height: `${height}px` }}>
+        No data yet — figures will chart here from live records
+      </div>
+    );
+  }
+
+  // Scale from the live dataset, never a hardcoded ceiling.
+  const maxVal = Math.max(...data.flatMap(d => [d.income, d.expense]), 1);
   const chartHeight = height - 40;
 
   return (

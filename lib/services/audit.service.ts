@@ -29,11 +29,9 @@ export async function listAuditLogs(filter?: {
     query = query.eq("entity_type", filter.entityType);
   }
 
-  if (filter?.limit) {
-    query = query.limit(filter.limit);
-  } else {
-    query = query.limit(100);
-  }
+  // API-5: clamp the limit so the endpoint cannot become a full-table dump.
+  const limit = Math.min(Math.max(filter?.limit || 100, 1), 500);
+  query = query.limit(limit);
 
   const { data, error } = await query;
   if (error) {

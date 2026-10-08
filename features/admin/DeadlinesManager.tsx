@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { validateDeadlineForm, type DeadlineFormData } from "@/lib/validation/deadline";
 import type { DeadlineWithCategory, TaxCategory } from "@/types/reminders";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -47,7 +48,7 @@ export default function DeadlinesManager() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const res = await fetch("/api/admin/deadlines");
+        const res = await apiFetch("/api/admin/deadlines");
         const json = await res.json();
         if (!res.ok || !json.success) throw new Error(json.error || "Failed to load tax categories.");
         setCategories(json.categories || []);
@@ -65,7 +66,7 @@ export default function DeadlinesManager() {
   const fetchDeadlines = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/deadlines");
+      const res = await apiFetch("/api/admin/deadlines");
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Failed to load tax deadlines.");
       setDeadlines(json.deadlines || []);
@@ -123,7 +124,7 @@ export default function DeadlinesManager() {
     setFeedback(null);
 
     try {
-      const res = await fetch("/api/admin/deadlines", {
+      const res = await apiFetch("/api/admin/deadlines", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -159,7 +160,7 @@ export default function DeadlinesManager() {
     const isCurrentlyVerified = dl.verified_at !== null;
 
     try {
-      const res = await fetch("/api/admin/deadlines", {
+      const res = await apiFetch("/api/admin/deadlines", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "verify", id: dl.id, verified: !isCurrentlyVerified }),
@@ -182,7 +183,7 @@ export default function DeadlinesManager() {
   // Toggle Active
   const handleToggleActive = async (dl: DeadlineWithCategory) => {
     try {
-      const res = await fetch("/api/admin/deadlines", {
+      const res = await apiFetch("/api/admin/deadlines", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "toggle-active", id: dl.id, is_active: !dl.is_active }),

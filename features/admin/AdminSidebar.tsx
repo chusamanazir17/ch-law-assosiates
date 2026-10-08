@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAdminSidebar } from "./AdminSidebarContext";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 interface AdminSidebarProps {
   mobileOpen?: boolean;
@@ -49,7 +50,7 @@ export default function AdminSidebar({
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await apiFetch("/api/admin/logout", { method: "POST" });
     } catch {
       // Ignore network errors on logout
     }

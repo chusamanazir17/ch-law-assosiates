@@ -1,4 +1,5 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { nextDocumentNumber } from "@/lib/services/rpc";
 import type { ServiceOrderRecord } from "@/types/office";
 
 const isUuid = (str: any): boolean =>
@@ -32,6 +33,7 @@ export async function listServiceOrders(filter?: {
       *,
       client:clients(full_name)
     `)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -73,6 +75,7 @@ export async function getServiceOrderById(id: string): Promise<ServiceOrderRecor
       client:clients(full_name)
     `)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {
@@ -90,7 +93,12 @@ export async function getServiceOrderById(id: string): Promise<ServiceOrderRecor
 
 export async function createServiceOrderRecord(dto: CreateServiceOrderDTO): Promise<ServiceOrderRecord> {
   const supabase = await getAdminDatabaseClient();
-  const orderNumber = dto.order_number || `SO-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+  // Collision-safe order number from a DB sequence (FIN-12).
+  const orderNumber = dto.order_number || (await nextDocumentNumber(supabase, "service_order"));
+
+  if (dto.amount !== undefined && (typeof dto.amount !== "number" || !Number.isFinite(dto.amount) || dto.amount < 0)) {
+    throw new Error("Order amount cannot be negative.");
+  }
 
   let resolvedClientId = dto.client_id;
   if (resolvedClientId && !isUuid(resolvedClientId)) {
@@ -130,33 +138,48 @@ export async function createServiceOrderRecord(dto: CreateServiceOrderDTO): Prom
   } as ServiceOrderRecord;
 }
 
-export async function updateServiceOrderRecord(id: string, updates: Partial<CreateServiceOrderDTO>): Promise<ServiceOrderRecord | null> {
+export async function updateServiceOrderRecord(
+  id: string,
+  updates: Partial<CreateServiceOrderDTO>,
+  opts?: { allowedFields?: readonly string[] }
+): Promise<ServiceOrderRecord | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
 
+  // Mass-assignment guard: only explicitly allowed fields reach the DB.
+  const allowed = new Set(opts?.allowedFields || []);
+  const picked: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined && (allowed.size === 0 || allowed.has(key))) {
+      picked[key] = value;
+    }
+  }
+  // client_id can never be reassigned via PATCH.
+  delete picked.client_id;
+  delete picked.order_number;
+
   const sanitizedUpdates: any = {
-    ...updates,
+    ...picked,
     updated_at: new Date().toISOString(),
   };
-
-  if ("client_id" in sanitizedUpdates && !isUuid(sanitizedUpdates.client_id)) {
-    delete sanitizedUpdates.client_id;
-  }
 
   const { data, error } = await supabase
     .from("service_orders")
     .update(sanitizedUpdates)
     .eq("id", id)
+    .is("deleted_at", null)
     .select(`
       *,
       client:clients(full_name)
     `)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[ServicesService] updateServiceOrderRecord error:", error);
     throw new Error(`Failed to update service order: ${error.message}`);
   }
+
+  if (!data) return null;
 
   return {
     ...data,
@@ -167,7 +190,12 @@ export async function updateServiceOrderRecord(id: string, updates: Partial<Crea
 export async function deleteServiceOrderRecord(id: string): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase.from("service_orders").delete().eq("id", id);
+  // Soft delete: hidden from lists, retained for history.
+  const { error } = await supabase
+    .from("service_orders")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
   if (error) {
     throw new Error(`Failed to delete service order: ${error.message}`);
   }

@@ -138,6 +138,20 @@ export async function getAllFaqs(): Promise<CmsFaq[]> {
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true });
 
+    // Migration drift: if public.faqs was never created, fail LOUDLY instead
+    // of silently serving hard-coded defaults as if they were live content.
+    if (tableError) {
+      const code = (tableError as { code?: string }).code || "";
+      const msg = tableError.message || "";
+      if (code === "PGRST205" || /could not find the table/i.test(msg)) {
+        throw new Error(
+          "[FaqsStore] public.faqs table is missing (migration drift). " +
+            "Apply migration 20261008000003_table_backfill.sql in the Supabase SQL editor, " +
+            "then retry. Refusing to serve fallback content."
+        );
+      }
+    }
+
     if (!tableError && tableData && tableData.length > 0) {
       const items: CmsFaq[] = tableData.map(mapRowToFaq);
       cmsCacheSet(CACHE_KEY, items);

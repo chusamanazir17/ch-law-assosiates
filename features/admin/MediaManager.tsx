@@ -17,6 +17,7 @@ import {
   FileImage,
 } from "lucide-react";
 import type { MediaAsset } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export default function MediaManager() {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
@@ -38,7 +39,7 @@ export default function MediaManager() {
   const loadAssets = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/media");
+      const res = await apiFetch("/api/admin/media");
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Failed to load media assets.");
       setAssets(json.assets || []);
@@ -69,8 +70,7 @@ export default function MediaManager() {
 
     try {
       const params = new URLSearchParams({ id: asset.id });
-      if (asset.storage_path) params.set("storagePath", asset.storage_path);
-      const res = await fetch(`/api/admin/media?${params.toString()}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/admin/media?${params.toString()}`, { method: "DELETE" });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) throw new Error(json.error || "Failed to delete image asset.");
 
@@ -107,7 +107,7 @@ export default function MediaManager() {
         formData.set("name", assetTitle.trim());
         formData.set("altText", assetAlt.trim());
 
-        const res = await fetch("/api/admin/media", { method: "POST", body: formData });
+        const res = await apiFetch("/api/admin/media", { method: "POST", body: formData });
         const json = await res.json().catch(() => ({}));
         if (!res.ok || !json.success) throw new Error(json.error || "Image upload failed.");
         savedAsset = json.asset as MediaAsset;
@@ -117,7 +117,7 @@ export default function MediaManager() {
           throw new Error("Please enter a valid image URL.");
         }
 
-        const res = await fetch("/api/admin/media", {
+        const res = await apiFetch("/api/admin/media", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: assetTitle.trim(), altText: assetAlt.trim(), url: finalUrl }),

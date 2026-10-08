@@ -10,28 +10,41 @@ export const TransferModal: React.FC = () => {
   const [toAccount, setToAccount] = useState<AccountType | string>('bank');
   const [amount, setAmount] = useState<number | ''>(25000);
   const [notes, setNotes] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isTransferModalOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setFormError('');
+
     if (fromAccount === toAccount) {
-      alert('Source and destination accounts must be different');
+      setFormError('Source and destination accounts must be different.');
       return;
     }
-    if (!amount || Number(amount) <= 0) {
-      alert('Please enter a valid transfer amount');
+    if (amount === '' || Number.isNaN(Number(amount)) || Number(amount) <= 0) {
+      setFormError('Please enter a valid transfer amount greater than zero.');
       return;
     }
 
-    recordTransfer({
-      fromAccount,
-      toAccount,
-      amount: Number(amount),
-      notes: notes || `Internal account transfer from ${fromAccount} to ${toAccount}`
-    });
+    setIsSubmitting(true);
+    try {
+      recordTransfer({
+        fromAccount,
+        toAccount,
+        amount: Number(amount),
+        notes: notes || `Internal account transfer from ${fromAccount} to ${toAccount}`
+      });
 
-    setIsTransferModalOpen(false);
+      setIsTransferModalOpen(false);
+      setFormError('');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not complete the transfer.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,6 +71,11 @@ export const TransferModal: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {formError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+              {formError}
+            </div>
+          )}
           <div className="bg-[#F8FAFC] p-3 rounded-xl border border-slate-200">
             <div className="text-[11px] font-bold text-slate-600 mb-1">Current Account Balances:</div>
             <div className="grid grid-cols-2 gap-2 text-[11px]">
@@ -134,10 +152,11 @@ export const TransferModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              disabled={isSubmitting}
+              className="px-5 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Complete Transfer</span>
+              <span>{isSubmitting ? 'Transferring…' : 'Complete Transfer'}</span>
             </button>
           </div>
         </form>

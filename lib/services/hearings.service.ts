@@ -1,4 +1,5 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { pkTodayIso } from "@/lib/dates/pkDay";
 import type { Hearing } from "@/types/office";
 
 const isUuid = (str: any): boolean =>
@@ -24,6 +25,7 @@ export async function listHearings(filter?: { caseId?: string; upcomingOnly?: bo
       *,
       case:cases(case_number, title)
     `)
+    .is("deleted_at", null)
     .order("hearing_date", { ascending: true });
 
   if (filter?.caseId && isUuid(filter.caseId)) {
@@ -35,7 +37,7 @@ export async function listHearings(filter?: { caseId?: string; upcomingOnly?: bo
   }
 
   if (filter?.upcomingOnly) {
-    const today = new Date().toISOString().split("T")[0];
+    const today = pkTodayIso(); // hearing_date is a PK-calendar date
     query = query.gte("hearing_date", today);
   }
 
@@ -57,24 +59,24 @@ export async function createHearingRecord(dto: CreateHearingDTO): Promise<Hearin
 
   let resolvedCaseId = dto.case_id;
   if (!isUuid(resolvedCaseId)) {
-    // Attempt lookup by case_number or fallback to first available case
+    // Attempt lookup by case_number only — never fall back to an arbitrary case.
     const { data: matchedCase } = await supabase
       .from("cases")
       .select("id")
-      .or(`case_number.eq.${resolvedCaseId},id.eq.${resolvedCaseId}`)
+      .eq("case_number", resolvedCaseId)
+      .is("deleted_at", null)
       .limit(1)
       .maybeSingle();
 
     if (matchedCase?.id) {
       resolvedCaseId = matchedCase.id;
-    } else {
-      const { data: anyCase } = await supabase.from("cases").select("id").limit(1).maybeSingle();
-      if (anyCase?.id) resolvedCaseId = anyCase.id;
     }
   }
 
+  // H4: an unresolvable case reference must fail loudly, never attach the
+  // hearing to a random case.
   if (!resolvedCaseId || !isUuid(resolvedCaseId)) {
-    throw new Error("A valid Case is required to record a hearing.");
+    throw new Error("A valid case_id or case_number is required to record a hearing.");
   }
 
   const { data, error } = await supabase
@@ -108,26 +110,43 @@ export async function createHearingRecord(dto: CreateHearingDTO): Promise<Hearin
   } as Hearing;
 }
 
-export async function updateHearingRecord(id: string, updates: Partial<CreateHearingDTO>): Promise<Hearing | null> {
+export async function updateHearingRecord(
+  id: string,
+  updates: Partial<CreateHearingDTO>,
+  opts?: { allowedFields?: readonly string[] }
+): Promise<Hearing | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
+
+  // Mass-assignment guard (API-1): only explicitly allowed fields reach the
+  // DB. case_id moves are never allowed through the generic update path.
+  const allowed = new Set(opts?.allowedFields || []);
+  const { case_id: _caseId, ...rest } = updates as Record<string, unknown>;
+  const fields: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    if (allowed.size === 0 || allowed.has(key)) fields[key] = value;
+  }
+
   const { data, error } = await supabase
     .from("hearings")
     .update({
-      ...updates,
+      ...fields,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
+    .is("deleted_at", null)
     .select(`
       *,
       case:cases(case_number, title)
     `)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[HearingsService] updateHearingRecord error:", error);
     throw new Error(`Failed to update hearing: ${error.message}`);
   }
+
+  if (!data) return null;
 
   return {
     ...data,
@@ -139,6 +158,11 @@ export async function updateHearingRecord(id: string, updates: Partial<CreateHea
 export async function deleteHearingRecord(id: string): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase.from("hearings").delete().eq("id", id);
+  // Soft delete: hidden from lists, retained for history.
+  const { error } = await supabase
+    .from("hearings")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
   if (error) throw new Error(`Failed to delete hearing: ${error.message}`);
 }

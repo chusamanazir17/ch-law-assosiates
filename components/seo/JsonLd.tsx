@@ -1,12 +1,45 @@
 import { SITE } from "@/lib/site";
 import { getSiteUrl } from "@/config/env";
 import { getSiteSettings } from "@/lib/db/siteSettingsStore";
-import { getHomeSections } from "@/lib/db/homeSectionsStore";
+import { getAllFaqs } from "@/lib/db/faqsStore";
+import { createPublicClient } from "@/lib/supabase/public";
+
+/**
+ * Probe that `public.faqs` actually exists before trusting faqsStore output.
+ * The faqs migration was never applied on some projects (migration drift), in
+ * which case getAllFaqs() silently falls back to hard-coded defaults — we
+ * must NOT emit those as FAQPage structured data (schema/content mismatch).
+ * Fail loudly in the server log and omit the FAQ schema instead.
+ */
+async function getFaqsForSchema(): Promise<{ question: string; answer: string }[]> {
+  let probeError: { message: string; code?: string } | null = null;
+  try {
+    const supabase = createPublicClient();
+    const { error } = await supabase.from("faqs").select("id").limit(1);
+    if (error) probeError = { message: error.message, code: (error as { code?: string }).code };
+  } catch (error) {
+    probeError = { message: error instanceof Error ? error.message : String(error) };
+  }
+
+  if (probeError) {
+    console.error(
+      `[JsonLd] Cannot read public.faqs (${probeError.code ?? "unknown"}: ${probeError.message}). ` +
+        "The faqs migration may not have been applied (migration drift). " +
+        "FAQPage JSON-LD is omitted until the table exists — no fallback data is emitted."
+    );
+    return [];
+  }
+
+  const allFaqs = await getAllFaqs();
+  return allFaqs
+    .filter((f) => f.isPublished && f.question?.trim() && f.answer?.trim())
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+}
 
 export default async function JsonLd() {
   const siteUrl = getSiteUrl();
   let settings;
-  let homeSections;
+  let faqs: { question: string; answer: string }[] = [];
 
   try {
     settings = await getSiteSettings();
@@ -15,9 +48,15 @@ export default async function JsonLd() {
   }
 
   try {
-    homeSections = await getHomeSections();
-  } catch {
-    homeSections = null;
+    // CMS-002: the visible FAQ section renders from the unified `public.faqs`
+    // table, so the FAQPage schema must come from the same source.
+    faqs = await getFaqsForSchema();
+  } catch (error) {
+    console.error(
+      "[JsonLd] Failed to load FAQs for FAQPage schema:",
+      error instanceof Error ? error.message : error
+    );
+    faqs = [];
   }
 
   const legalServiceSchema = {
@@ -57,14 +96,14 @@ export default async function JsonLd() {
     priceRange: "$$",
   };
 
-  // Build FAQPage schema if FAQ items exist and are visible
-  const visibleFaqs = homeSections?.faqSection?.items?.filter((f) => f.visible) || [];
+  // Build FAQPage schema from the same unified faqs table the visible
+  // homepage FAQ section renders (CMS-002).
   const faqSchema =
-    visibleFaqs.length > 0
+    faqs.length > 0
       ? {
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: visibleFaqs.map((faq) => ({
+          mainEntity: faqs.map((faq) => ({
             "@type": "Question",
             name: faq.question,
             acceptedAnswer: {

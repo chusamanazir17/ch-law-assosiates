@@ -18,6 +18,15 @@ export async function getSiteSetting<T = unknown>(key: string): Promise<T | null
 }
 
 export async function updateSiteSetting(key: string, value: unknown): Promise<void> {
+  // SEC-07: the office settings endpoint must not be an arbitrary site_settings
+  // upsert (public-site defacement vector). Only office-namespaced keys are
+  // writable through this path; CMS keys stay behind the admin panel.
+  if (!key || !key.startsWith("office_")) {
+    throw new Error(
+      "Invalid setting key. Only keys starting with 'office_' may be changed here."
+    );
+  }
+
   const supabase = await getAdminDatabaseClient();
   const { error } = await supabase
     .from("site_settings")

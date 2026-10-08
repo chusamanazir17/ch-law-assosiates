@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import type { DeliveryWithDetails, ReminderDelivery } from "@/types/reminders";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 const PAGE_SIZE = 15;
 type DeliveryStatus = ReminderDelivery["status"];
@@ -48,7 +49,7 @@ export default function ReminderHistory() {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({ status: statusFilter, page: String(currentPage) });
-      const res = await fetch(`/api/admin/reminder-history?${params.toString()}`);
+      const res = await apiFetch(`/api/admin/reminder-history?${params.toString()}`);
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || "Failed to load reminder history.");
 
@@ -80,7 +81,7 @@ export default function ReminderHistory() {
   useEffect(() => {
     async function loadVerifiedDeadlines() {
       try {
-        const res = await fetch("/api/admin/reminder-history?status=all&page=1");
+        const res = await apiFetch("/api/admin/reminder-history?status=all&page=1");
         const json = await res.json();
         if (!res.ok || !json.success) throw new Error(json.error || "Failed to load verified deadlines.");
         const data = json.verifiedDeadlines || [];
@@ -100,7 +101,7 @@ export default function ReminderHistory() {
     setActionNotice(null);
 
     try {
-      const res = await fetch("/api/admin/reminder-history", {
+      const res = await apiFetch("/api/admin/reminder-history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deliveryId }),

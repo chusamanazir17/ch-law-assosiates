@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { getPublishedPosts } from "@/lib/cms/publicPosts";
+import { getPageSeoMetadata } from "@/lib/cms/pageSeo";
 import type { Post } from "@/types/cms";
 import { SITE } from "@/lib/site";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
@@ -19,11 +20,13 @@ import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Legal Updates, FBR Guides & E-Stamp Advice | Ch Composing Sahiwal",
-  description:
-    "Official legal articles, tax filing deadlines, e-stamping procedural guides, and Punjab property compliance documentation from Chamber 121, District Court Sahiwal.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageSeoMetadata("/updates", {
+    title: "Legal Updates, FBR Guides & E-Stamp Advice | Ch Composing Sahiwal",
+    description:
+      "Official legal articles, tax filing deadlines, e-stamping procedural guides, and Punjab property compliance documentation from Chamber 121, District Court Sahiwal.",
+  });
+}
 
 export default async function UpdatesPage({
   searchParams,

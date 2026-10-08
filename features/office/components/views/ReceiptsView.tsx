@@ -23,6 +23,7 @@ import {
   Phone
 } from 'lucide-react';
 import { Receipt as ReceiptType } from '../../types';
+import { ledgerToDate } from '../utils/pkDates';
 
 export const ReceiptsView: React.FC = () => {
   const {
@@ -50,15 +51,41 @@ export const ReceiptsView: React.FC = () => {
 
   const selectedReceipt = receipts.find(r => r.id === activeReceiptId) || receipts[0];
 
-  // 6 KPIs
+  // 6 KPIs — all from live receipt data; no fabricated floors or percentages.
   const totalReceipts = receipts.length;
   const totalValue = receipts
     .filter(r => r.status !== 'CANCELLED')
     .reduce((acc, r) => acc + r.paidAmount, 0);
   const paidCount = receipts.filter(r => r.status === 'PAID').length;
-  const partialCount = receipts.filter(r => r.status === 'PARTIAL').length || 1;
+  const partialCount = receipts.filter(r => r.status === 'PARTIAL').length;
   const cancelledCount = receipts.filter(r => r.status === 'CANCELLED').length;
   const avgValue = Math.round(totalValue / (totalReceipts || 1));
+  const settledPct = totalReceipts > 0 ? Math.round((paidCount / totalReceipts) * 100) : 0;
+  const partialPct = totalReceipts > 0 ? Math.round((partialCount / totalReceipts) * 100) : 0;
+  const cancelledPct = totalReceipts > 0 ? Math.round((cancelledCount / totalReceipts) * 100) : 0;
+  const thisWeekCount = receipts.filter(r => {
+    const d = ledgerToDate(r.dateTime);
+    return !!d && d.getTime() >= Date.now() - 7 * 86400000;
+  }).length;
+
+  // Payment-method share derived from live receipts.
+  const methodShare = (() => {
+    let cash = 0, bank = 0, wallets = 0, other = 0;
+    receipts.filter(r => r.status !== 'CANCELLED').forEach(r => {
+      const m = String(r.paymentMethod || '').toLowerCase();
+      const amt = Number(r.paidAmount || 0);
+      if (m.includes('cash')) cash += amt;
+      else if (m.includes('bank') || m.includes('transfer')) bank += amt;
+      else if (m.includes('jazz') || m.includes('easy') || m.includes('paisa') || m.includes('raast') || m.includes('wallet')) wallets += amt;
+      else other += amt;
+    });
+    const total = cash + bank + wallets + other;
+    const pct = (v: number) => (total > 0 ? Math.round((v / total) * 100) : 0);
+    return {
+      total,
+      cash: pct(cash + other), bank: pct(bank), wallets: pct(wallets),
+    };
+  })();
 
   return (
     <div className="space-y-6">
@@ -85,8 +112,8 @@ export const ReceiptsView: React.FC = () => {
           label="Total Receipts"
           value={totalReceipts}
           subValue="Sequential numbering"
-          change="+14 this week"
-          changeType="positive"
+          change={thisWeekCount > 0 ? `+${thisWeekCount} this week` : 'No receipts this week'}
+          changeType="neutral"
           icon={<Receipt className="w-4 h-4" />}
           iconBgColor="bg-blue-50 text-[#B8832A]"
         />
@@ -103,8 +130,8 @@ export const ReceiptsView: React.FC = () => {
           label="Paid in Full"
           value={paidCount}
           subValue="Zero pending balance"
-          change="92% settled"
-          changeType="positive"
+          change={totalReceipts > 0 ? `${settledPct}% settled` : 'No receipts yet'}
+          changeType="neutral"
           icon={<Check className="w-4 h-4" />}
           iconBgColor="bg-teal-50 text-teal-600"
         />
@@ -233,7 +260,7 @@ export const ReceiptsView: React.FC = () => {
               <h3 className="text-sm font-bold text-[#0D2344]">Chamber Official Cash Receipt</h3>
             </div>
             <button
-              onClick={() => window.print()}
+              onClick={() => selectedReceipt && setSelectedReceiptId(selectedReceipt.id)}
               className="px-3 py-1.5 bg-[#B8832A] hover:bg-[#96691B] text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -365,7 +392,7 @@ export const ReceiptsView: React.FC = () => {
                   <span>WhatsApp</span>
                 </button>
                 <button
-                  onClick={() => window.print()}
+                  onClick={() => setSelectedReceiptId(selectedReceipt.id)}
                   className="py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold flex items-center justify-center gap-1 cursor-pointer text-[11px]"
                 >
                   <Download className="w-3 h-3" />
@@ -401,30 +428,30 @@ export const ReceiptsView: React.FC = () => {
             <div>
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-slate-700">Paid in Full ({paidCount})</span>
-                <span className="text-emerald-600 font-bold">92%</span>
+                <span className="text-emerald-600 font-bold">{settledPct}%</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: '92%' }}></div>
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${settledPct}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-slate-700">Partial Balance Pending ({partialCount})</span>
-                <span className="text-amber-600 font-bold">6%</span>
+                <span className="text-amber-600 font-bold">{partialPct}%</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: '6%' }}></div>
+                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${partialPct}%` }}></div>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-slate-700">Cancelled / Voided ({cancelledCount})</span>
-                <span className="text-rose-600 font-bold">2%</span>
+                <span className="text-rose-600 font-bold">{cancelledPct}%</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-500 rounded-full" style={{ width: '2%' }}></div>
+                <div className="h-full bg-rose-500 rounded-full" style={{ width: `${cancelledPct}%` }}></div>
               </div>
             </div>
           </div>
@@ -437,25 +464,31 @@ export const ReceiptsView: React.FC = () => {
             <span className="text-[11px] text-slate-400">Collections share</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-200">
-              <span className="text-[10px] font-bold text-blue-700 uppercase">Cash at Desk</span>
-              <div className="text-base font-extrabold text-[#0D2344] mt-1">68%</div>
-              <span className="text-[10px] text-slate-500">Chamber counter</span>
+          {methodShare.total <= 0 ? (
+            <div className="py-6 text-center text-xs text-slate-400">
+              No collection data yet
             </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-200">
+                <span className="text-[10px] font-bold text-blue-700 uppercase">Cash at Desk</span>
+                <div className="text-base font-extrabold text-[#0D2344] mt-1">{methodShare.cash}%</div>
+                <span className="text-[10px] text-slate-500">Chamber counter</span>
+              </div>
 
-            <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200">
-              <span className="text-[10px] font-bold text-emerald-700 uppercase">Bank Transfer</span>
-              <div className="text-base font-extrabold text-[#0D2344] mt-1">24%</div>
-              <span className="text-[10px] text-slate-500">HBL / Meezan</span>
-            </div>
+              <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">Bank Transfer</span>
+                <div className="text-base font-extrabold text-[#0D2344] mt-1">{methodShare.bank}%</div>
+                <span className="text-[10px] text-slate-500">HBL / Meezan</span>
+              </div>
 
-            <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200">
-              <span className="text-[10px] font-bold text-purple-700 uppercase">JazzCash / Raast</span>
-              <div className="text-base font-extrabold text-[#0D2344] mt-1">8%</div>
-              <span className="text-[10px] text-slate-500">Instant digital</span>
+              <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200">
+                <span className="text-[10px] font-bold text-purple-700 uppercase">JazzCash / Raast</span>
+                <div className="text-base font-extrabold text-[#0D2344] mt-1">{methodShare.wallets}%</div>
+                <span className="text-[10px] text-slate-500">Instant digital</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

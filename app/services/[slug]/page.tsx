@@ -21,11 +21,25 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
     };
   }
 
+  // CMS-managed SEO fields take precedence; fall back to service fields.
+  const title = service.seoTitle?.trim() || `${service.name} | Ch Composing Estamp & Tax Advisor`;
+  const description =
+    service.metaDescription?.trim() ||
+    service.description ||
+    `Authorized ${service.name} services at Chamber 121, District Court Sahiwal.`;
+  const canonical = service.canonicalUrl?.trim() || `${getSiteUrl()}/services/${service.slug}`;
+  const ogImage = service.ogImage?.trim() || service.heroImage || undefined;
+
   return {
-    title: `${service.name} | Ch Composing Estamp & Tax Advisor`,
-    description: service.description || `Authorized ${service.name} services at Chamber 121, District Court Sahiwal.`,
+    title,
+    description,
     alternates: {
-      canonical: `${getSiteUrl()}/services/${service.slug}`,
+      canonical,
+    },
+    openGraph: {
+      title: service.seoTitle?.trim() || service.name,
+      description,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
   };
 }

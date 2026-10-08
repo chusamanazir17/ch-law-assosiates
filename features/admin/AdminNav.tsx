@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Users, Calendar, History, LogOut, Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SITE } from "@/lib/site";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export default function AdminNav() {
   const pathname = usePathname();
@@ -13,7 +14,7 @@ export default function AdminNav() {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await apiFetch("/api/admin/logout", { method: "POST" });
     } catch {
       // Ignore network errors on logout
     }

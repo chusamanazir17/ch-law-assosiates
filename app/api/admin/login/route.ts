@@ -2,12 +2,36 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   validateAdminCredentials,
   createAdminToken,
+  registerAdminSession,
+  getAdminSessionTtlHours,
   ADMIN_COOKIE_NAME,
 } from "@/lib/auth/adminAuth";
+import { CSRF_COOKIE_NAME, newCsrfToken } from "@/lib/auth/csrf";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+/** Cookie flags shared by the session and CSRF cookies. */
+function sessionCookieFlags(maxAgeSeconds: number) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: maxAgeSeconds,
+  };
+}
+
+/** Issue the double-submit CSRF cookie (readable by browser JS). */
+function setCsrfCookie(response: NextResponse) {
+  response.cookies.set(CSRF_COOKIE_NAME, newCsrfToken(), {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +77,20 @@ export async function POST(request: NextRequest) {
 
     if (isValidLocal) {
       const token = await createAdminToken();
+      // Register the session server-side so logout (or an admin) can revoke
+      // it. Fail closed: no registry row, no session cookie.
+      try {
+        await registerAdminSession(token, {
+          ip,
+          userAgent: request.headers.get("user-agent"),
+        });
+      } catch (regErr) {
+        console.error("[Admin Login] session registration failed:", regErr);
+        return NextResponse.json(
+          { success: false, error: "Login failed. Please try again." },
+          { status: 500 }
+        );
+      }
       const redirectUrl = targetPortal === "office" ? "/office/dashboard" : "/admin/dashboard";
 
       const response = NextResponse.json({
@@ -62,13 +100,9 @@ export async function POST(request: NextRequest) {
         redirect: redirectUrl,
       });
 
-      response.cookies.set(ADMIN_COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-      });
+      const ttlSeconds = Math.floor(getAdminSessionTtlHours() * 3600);
+      response.cookies.set(ADMIN_COOKIE_NAME, token, sessionCookieFlags(ttlSeconds));
+      setCsrfCookie(response);
 
       return response;
     }
@@ -112,12 +146,14 @@ export async function POST(request: NextRequest) {
           }
 
           const redirectUrl = targetPortal === "office" ? "/office/dashboard" : "/admin/dashboard";
-          return NextResponse.json({
+          const okResponse = NextResponse.json({
             success: true,
             role,
             message: "Authentication successful.",
             redirect: redirectUrl,
           });
+          setCsrfCookie(okResponse);
+          return okResponse;
         }
       } catch (sbErr) {
         console.warn("[Admin Login] Supabase auth attempt failed:", sbErr);

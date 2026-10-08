@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { CmsTestimonial } from "@/lib/db/testimonialsStore";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export default function TestimonialsManager() {
   const [testimonials, setTestimonials] = useState<CmsTestimonial[]>([]);
@@ -41,7 +42,7 @@ export default function TestimonialsManager() {
   const fetchTestimonials = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/testimonials");
+      const res = await apiFetch("/api/admin/testimonials");
       const data = await res.json();
       if (res.ok && data.success) {
         setTestimonials(data.testimonials || []);
@@ -91,7 +92,7 @@ export default function TestimonialsManager() {
 
     setIsSaving(true);
     try {
-      const res = await fetch("/api/admin/testimonials", {
+      const res = await apiFetch("/api/admin/testimonials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -116,7 +117,7 @@ export default function TestimonialsManager() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/testimonials?id=${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/admin/testimonials?id=${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete testimonial");
@@ -144,7 +145,7 @@ export default function TestimonialsManager() {
 
     try {
       const orderedIds = reordered.map((t) => t.id);
-      await fetch("/api/admin/testimonials", {
+      await apiFetch("/api/admin/testimonials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "reorder", orderedIds }),

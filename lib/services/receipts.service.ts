@@ -1,4 +1,5 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { nextDocumentNumber } from "@/lib/services/rpc";
 import type { ReceiptRecord } from "@/types/office";
 
 const isUuid = (val?: string | null): val is string =>
@@ -26,6 +27,7 @@ export async function listReceipts(filter?: {
   let query = supabase
     .from("receipts")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -52,7 +54,14 @@ export async function listReceipts(filter?: {
 
 export async function createReceiptRecord(dto: CreateReceiptDTO): Promise<ReceiptRecord> {
   const supabase = await getAdminDatabaseClient();
-  const receiptNo = dto.receipt_number || `REC-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+  // Money guard (API-2): a receipt must record a positive amount.
+  if (typeof dto.amount_paid !== "number" || !Number.isFinite(dto.amount_paid) || dto.amount_paid <= 0) {
+    throw new Error("Receipt amount must be a finite number greater than 0.");
+  }
+
+  // Collision-safe receipt number from a DB sequence (FIN-12).
+  const receiptNo = dto.receipt_number || (await nextDocumentNumber(supabase, "receipt"));
 
   let validClientId: string | null = null;
   if (isUuid(dto.client_id)) {
@@ -60,6 +69,7 @@ export async function createReceiptRecord(dto: CreateReceiptDTO): Promise<Receip
       .from("clients")
       .select("id")
       .eq("id", dto.client_id)
+      .is("deleted_at", null)
       .maybeSingle();
     if (clientExists) validClientId = clientExists.id;
   }
@@ -89,7 +99,7 @@ export async function createReceiptRecord(dto: CreateReceiptDTO): Promise<Receip
   return data as ReceiptRecord;
 }
 
-export async function updateReceiptStatus(id: string, status: "paid" | "partial" | "unpaid" | "cancelled", notes?: string): Promise<ReceiptRecord> {
+export async function updateReceiptStatus(id: string, status: "paid" | "partial" | "unpaid" | "cancelled", notes?: string): Promise<ReceiptRecord | null> {
   const supabase = await getAdminDatabaseClient();
   const { data, error } = await supabase
     .from("receipts")
@@ -98,14 +108,15 @@ export async function updateReceiptStatus(id: string, status: "paid" | "partial"
       notes: notes || undefined,
     })
     .eq("id", id)
+    .is("deleted_at", null)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[ReceiptsService] updateReceiptStatus error:", error);
     throw new Error(`Failed to update receipt: ${error.message}`);
   }
 
-  return data as ReceiptRecord;
+  return (data as ReceiptRecord) || null;
 }
 

@@ -39,6 +39,7 @@ import type {
   FooterSettings,
 } from "@/lib/db/siteSettingsStore";
 import { buildWhatsAppUrl } from "@/lib/site";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 export default function SiteSettingsManager() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -56,7 +57,7 @@ export default function SiteSettingsManager() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch("/api/admin/settings");
+      const res = await apiFetch("/api/admin/settings");
       const data = await res.json();
       if (res.ok && data.success) {
         setSettings(data.settings);
@@ -82,7 +83,7 @@ export default function SiteSettingsManager() {
     setSaveError(null);
 
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await apiFetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

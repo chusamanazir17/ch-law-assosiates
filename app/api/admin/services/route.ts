@@ -6,6 +6,7 @@ import {
   getServiceBySlug,
   saveService,
   deleteService,
+  isServiceSlugAvailable,
 } from "@/lib/db/servicesStore";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const slug = request.nextUrl.searchParams.get("slug");
+    const params = request.nextUrl.searchParams;
+
+    // Live slug-uniqueness check for the admin editor.
+    const checkSlug = params.get("checkSlug")?.trim().toLowerCase();
+    if (checkSlug) {
+      const excludeId = params.get("excludeId")?.trim() || undefined;
+      const available = await isServiceSlugAvailable(checkSlug, excludeId);
+      return NextResponse.json({ success: true, available });
+    }
+
+    const slug = params.get("slug");
     if (slug) {
       const service = await getServiceBySlug(slug);
       if (!service) {

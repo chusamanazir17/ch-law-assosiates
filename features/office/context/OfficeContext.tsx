@@ -22,6 +22,7 @@ import {
   AccountType
 } from '../types';
 import { initialBusinessSettings } from '../data/seedData';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 interface AccountBalances {
   cashOffice: number;
@@ -338,17 +339,17 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         settingsRes,
         employeesRes
       ] = await Promise.allSettled([
-        fetch('/api/office/clients').then(r => r.json()),
-        fetch('/api/office/finance').then(r => r.json()),
-        fetch('/api/office/stamps').then(r => r.json()),
-        fetch('/api/office/tax').then(r => r.json()),
-        fetch('/api/office/services').then(r => r.json()),
-        fetch('/api/office/receipts').then(r => r.json()),
-        fetch('/api/office/tasks').then(r => r.json()),
-        fetch('/api/office/daily-closing').then(r => r.json()),
-        fetch('/api/office/audit').then(r => r.json()),
-        fetch('/api/office/settings').then(r => r.json()),
-        fetch('/api/office/employees').then(r => r.json())
+        apiFetch('/api/office/clients').then(r => r.json()),
+        apiFetch('/api/office/finance').then(r => r.json()),
+        apiFetch('/api/office/stamps').then(r => r.json()),
+        apiFetch('/api/office/tax').then(r => r.json()),
+        apiFetch('/api/office/services').then(r => r.json()),
+        apiFetch('/api/office/receipts').then(r => r.json()),
+        apiFetch('/api/office/tasks').then(r => r.json()),
+        apiFetch('/api/office/daily-closing').then(r => r.json()),
+        apiFetch('/api/office/audit').then(r => r.json()),
+        apiFetch('/api/office/settings').then(r => r.json()),
+        apiFetch('/api/office/employees').then(r => r.json())
       ]);
 
       // 1. Sync Clients
@@ -630,9 +631,15 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
-  // Hydrate on mount
+  // Hydrate on mount. First hit /api/admin/session (GET, CSRF-exempt): it
+  // ensures the readable `ch_csrf_token` double-submit cookie is issued for
+  // cookie-authenticated office users (Supabase Auth sessions never pass
+  // through /api/admin/login), so apiFetch() can attach the x-csrf-token
+  // header on mutations instead of every POST/PATCH/DELETE 403ing.
   useEffect(() => {
-    refreshData();
+    apiFetch("/api/admin/session", { cache: "no-store" })
+      .catch(() => {})
+      .finally(() => refreshData());
   }, [refreshData]);
 
   // Re-sync canonical data from the database when the user navigates between
@@ -676,7 +683,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAuditLogs(prev => [newLog, ...prev]);
 
     // Async persist to Supabase
-    fetch('/api/office/audit', {
+    apiFetch('/api/office/audit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -752,7 +759,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setReceipts(prev => [newRec, ...prev]);
 
       // Persist receipt to Supabase
-      fetch('/api/office/receipts', {
+      apiFetch('/api/office/receipts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -826,7 +833,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     // Persist ledger transaction to Supabase
-    fetch('/api/office/finance', {
+    apiFetch('/api/office/finance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -924,7 +931,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     // Persist expense to Supabase
-    fetch('/api/office/finance', {
+    apiFetch('/api/office/finance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -990,7 +997,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     // Persist transfer to Supabase
-    fetch('/api/office/finance', {
+    apiFetch('/api/office/finance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1087,7 +1094,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // 4. Persist stamp sale movement to Supabase
     const stampItem = stampStock.find(s => s.denomination === denomination);
     if (stampItem?.id) {
-      fetch('/api/office/stamps', {
+      apiFetch('/api/office/stamps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1161,7 +1168,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const stampItem = stampStock.find(s => s.denomination === denomination);
     if (stampItem?.id) {
-      fetch('/api/office/stamps', {
+      apiFetch('/api/office/stamps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1267,7 +1274,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     // Persist to database API
-    fetch('/api/office/clients', {
+    apiFetch('/api/office/clients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1306,7 +1313,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/clients', {
+    apiFetch('/api/office/clients', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1348,7 +1355,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/receipts', {
+    apiFetch('/api/office/receipts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1401,7 +1408,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/receipts', {
+    apiFetch('/api/office/receipts', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1444,7 +1451,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/tax', {
+    apiFetch('/api/office/tax', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1472,7 +1479,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/tax', {
+    apiFetch('/api/office/tax', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1529,7 +1536,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/services', {
+    apiFetch('/api/office/services', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1566,7 +1573,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/services', {
+    apiFetch('/api/office/services', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1603,7 +1610,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/daily-closing', {
+    apiFetch('/api/office/daily-closing', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1649,7 +1656,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
     setTasks(prev => [newTask, ...prev]);
 
-    fetch('/api/office/tasks', {
+    apiFetch('/api/office/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1682,7 +1689,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return t;
     }));
 
-    fetch('/api/office/tasks', {
+    apiFetch('/api/office/tasks', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1706,7 +1713,7 @@ export const OfficeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sessionStatus: 'Success'
     });
 
-    fetch('/api/office/settings', {
+    apiFetch('/api/office/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

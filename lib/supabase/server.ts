@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import type { Database } from "@/types/database.types";
 import { getSupabasePublicConfig } from "@/config/env";
 
-import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/auth/adminAuth";
+import { ADMIN_COOKIE_NAME, isAdminSessionActive } from "@/lib/auth/adminAuth";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export async function createClient() {
@@ -14,12 +14,14 @@ export async function createClient() {
   const url = config?.url || "https://placeholder-project.supabase.co";
   const anonKey = config?.anonKey || "placeholder-anon-key";
 
-  // If request has verified admin session cookie and service role key is configured,
+  // If request has a live admin session cookie and service role key is configured,
   // use the service-role client so operations on the server bypass RLS safely.
+  // The check is isAdminSessionActive (signature + TTL + revocation registry),
+  // so a logged-out/revoked token can never escalate here.
   const adminCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
   if (adminCookie && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     try {
-      const isValid = await verifyAdminToken(adminCookie);
+      const isValid = await isAdminSessionActive(adminCookie);
       if (isValid) {
         return createServiceClient();
       }

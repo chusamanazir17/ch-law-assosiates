@@ -1,14 +1,23 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { pkTodayIso } from "@/lib/dates/pkDay";
 import type { Profile, AttendanceRecord } from "@/types/office";
 
 const isUuid = (val?: string | null): val is string =>
   typeof val === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
-export async function listEmployees(): Promise<Profile[]> {
+/**
+ * Staff directory listing.
+ * FIN-07: full PII (email/phone) is only returned when `fullPII` is true
+ * (super_admin / office_admin). Everyone else gets a directory-safe subset.
+ */
+export async function listEmployees(opts?: { fullPII?: boolean }): Promise<Profile[]> {
   const supabase = await getAdminDatabaseClient();
+  const columns = opts?.fullPII
+    ? "*"
+    : "id, full_name, role, designation, department, status, avatar_url, created_at, updated_at";
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(columns)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -16,7 +25,7 @@ export async function listEmployees(): Promise<Profile[]> {
     throw new Error(`Failed to load staff list: ${error.message}`);
   }
 
-  return (data || []) as Profile[];
+  return (data || []) as unknown as Profile[];
 }
 
 export async function getEmployeeById(id: string): Promise<Profile | null> {
@@ -82,7 +91,7 @@ function formatFromTimestamp(val?: string | null): string | null {
 
 export async function listAttendance(date?: string): Promise<AttendanceRecord[]> {
   const supabase = await getAdminDatabaseClient();
-  const targetDate = date || new Date().toISOString().split("T")[0];
+  const targetDate = date || pkTodayIso(); // attendance.date is a PK-calendar date
 
   const { data, error } = await supabase
     .from("attendance")
@@ -114,24 +123,16 @@ export async function recordAttendance(data: {
   notes?: string | null;
 }): Promise<AttendanceRecord> {
   const supabase = await getAdminDatabaseClient();
-  const targetDate = data.date || new Date().toISOString().split("T")[0];
+  const targetDate = data.date || pkTodayIso(); // attendance.date is a PK-calendar date
 
-  let resolvedEmpId = data.employee_id;
-
-  // If employee_id is not a valid UUID (e.g. mock ID 'emp-1'), resolve to an existing profile in profiles
-  if (!isUuid(resolvedEmpId)) {
-    const { data: firstProfile } = await supabase
-      .from("profiles")
-      .select("id")
-      .limit(1)
-      .maybeSingle();
-
-    if (firstProfile) {
-      resolvedEmpId = firstProfile.id;
-    } else {
-      throw new Error(`Cannot record attendance: Staff profile ID '${data.employee_id}' is not a valid UUID and no staff profiles exist in the database yet.`);
-    }
+  // H4 / FIN-16: an invalid employee_id must fail loudly — never record
+  // attendance against a random employee.
+  if (!isUuid(data.employee_id)) {
+    throw new Error(
+      `Invalid employee_id '${data.employee_id}'. Attendance must reference a valid staff profile.`
+    );
   }
+  const resolvedEmpId = data.employee_id;
 
   const isoCheckIn = formatToIsoTimestamp(targetDate, data.check_in_time);
   const isoCheckOut = formatToIsoTimestamp(targetDate, data.check_out_time);

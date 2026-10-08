@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useOffice } from '../../context/OfficeContext';
 import { PageHeader } from '../layout/PageHeader';
 import { exportToCsv } from '../../lib/csv';
+import { isLedgerDateToday, pkMonthKey, parseLedgerDate, pkIsoDate } from '../utils/pkDates';
 import {
   FileCheck2,
   ShoppingCart,
@@ -32,7 +33,8 @@ export const StampManagementView: React.FC = () => {
     recordStampAdjustment
   } = useOffice();
 
-  // Live stock overview derived from Supabase-backed stamp stock
+  // Live stock overview — server values only; stock is owned by DB triggers,
+  // never recomputed client-side.
   const stockTable = stampStock.map(s => {
     const remaining = Number(s.remaining || 0);
     const minLevel = Number(s.minimumLevel || 0);
@@ -44,7 +46,7 @@ export const StampManagementView: React.FC = () => {
       remaining,
       pPrice: Number(s.purchasePrice || 0),
       sPrice: Number(s.salePrice || 0),
-      val: Number(s.stockValue || remaining * Number(s.purchasePrice || 0)),
+      val: Number(s.stockValue || 0),
       status: s.status || (remaining <= minLevel / 2 ? 'Critical' : remaining <= minLevel ? 'Low' : 'OK'),
     };
   });
@@ -85,9 +87,8 @@ export const StampManagementView: React.FC = () => {
     user: a.adjustedBy || 'Admin',
   }));
 
-  // KPI metrics computed from live data
-  const todayKey = new Date().toLocaleDateString('en-GB');
-  const isToday = (t: string) => (t || '').startsWith(todayKey);
+  // KPI metrics computed from live data — "today" is the Asia/Karachi business day.
+  const isToday = (t: string) => isLedgerDateToday(t);
   const totalStockValue = stockTable.reduce((a, s) => a + s.val, 0);
   const todaySalesAmt = stampMovements.filter(m => m.type === 'Sale' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
   const todayPurchaseAmt = stampMovements.filter(m => m.type === 'Purchase' && isToday(m.dateTime)).reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
@@ -96,15 +97,20 @@ export const StampManagementView: React.FC = () => {
   const inventoryProfit = stockTable.reduce((a, s) => a + s.sold * Math.max(0, s.sPrice - s.pPrice), 0);
   const adjustmentCount = stampAdjustments.length;
 
-  // Monthly sales for the last 6 months, derived from the movement log
+  // Monthly sales for the last 6 months, derived from the movement log.
+  // Matched on month + year parsed from the ledger date (PK timezone).
   const monthlySales = Array.from({ length: 6 }, (_, idx) => {
     const d = new Date();
     d.setMonth(d.getMonth() - (5 - idx));
-    const key = d.toLocaleDateString('en-GB', { month: 'short' });
+    const targetKey = pkMonthKey(d);
     const total = stampMovements
-      .filter(m => m.type === 'Sale' && (m.dateTime || '').includes(key))
+      .filter(m => {
+        if (m.type !== 'Sale') return false;
+        const parsed = parseLedgerDate(m.dateTime);
+        return !!parsed && `${parsed.year}-${String(parsed.month).padStart(2, '0')}` === targetKey;
+      })
       .reduce((a, m) => a + Math.abs(Number(m.amount || 0)), 0);
-    return { m: key, val: total };
+    return { m: d.toLocaleDateString('en-GB', { month: 'short' }), val: total };
   });
   const maxMonthlySale = Math.max(...monthlySales.map(x => x.val), 1);
   const totalStockItems = stockTable.reduce((a, s) => a + s.remaining, 0);
@@ -252,7 +258,7 @@ export const StampManagementView: React.FC = () => {
           <button
             onClick={() =>
               exportToCsv(
-                `stamp-stock-${new Date().toISOString().split('T')[0]}.csv`,
+                `stamp-stock-${pkIsoDate()}.csv`,
                 ['Denomination', 'Opening', 'Purchased', 'Sold', 'Remaining', 'Purchase Price', 'Sale Price', 'Stock Value (PKR)', 'Status'],
                 filteredStockTable.map(s => [s.den, s.opening, s.purchased, s.sold, s.remaining, s.pPrice, s.sPrice, s.val, s.status])
               )
@@ -316,7 +322,7 @@ export const StampManagementView: React.FC = () => {
                   <td className="py-2.5 px-3 text-right font-bold">{filteredStockTable.reduce((a, s) => a + s.remaining, 0)}</td>
                   <td className="py-2.5 px-3 text-right">-</td>
                   <td className="py-2.5 px-3 text-right">-</td>
-                  <td className="py-2.5 px-3 text-right text-emerald-700 dark:text-emerald-400">Rs. 347,000</td>
+                  <td className="py-2.5 px-3 text-right text-emerald-700 dark:text-emerald-400">Rs. {filteredStockTable.reduce((a, s) => a + s.val, 0).toLocaleString()}</td>
                   <td className="py-2.5 px-3 text-center">-</td>
                 </tr>
               </tbody>
@@ -405,28 +411,26 @@ export const StampManagementView: React.FC = () => {
               <span className="text-[10px] text-[#B8832A] font-semibold">View All</span>
             </div>
             <div className="space-y-1.5 text-xs">
-              {lowStockItems.map(s => (
-                <div key={s.den} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
-                  <span className="font-bold">{s.den}</span>
-                  <span className="text-slate-500">Cur: {s.remaining}</span>
-                  <span className="text-rose-600 font-bold">{s.status}</span>
+              {lowStockItems.length === 0 ? (
+                <div className="py-3 text-center text-slate-400 font-medium">
+                  All denominations above minimum level
                 </div>
-              ))}
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
-                <span className="font-bold">Rs. 1,000</span>
-                <span className="text-slate-500">Cur: 80 / Min: 100</span>
-                <span className="text-rose-600 font-bold">Low</span>
-              </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
-                <span className="font-bold">Rs. 5,000</span>
-                <span className="text-slate-500">Cur: 35 / Min: 50</span>
-                <span className="text-rose-600 font-bold">Low</span>
-              </div>
+              ) : (
+                lowStockItems.map(s => (
+                  <div key={s.den} className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800 tabular-nums">
+                    <span className="font-bold">{s.den}</span>
+                    <span className="text-slate-500">Cur: {s.remaining}</span>
+                    <span className="text-rose-600 font-bold">{s.status}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-          <div className="mt-3 p-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl text-[10px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
-            ⚠️ 3 denominations are below minimum stock level. Please purchase to avoid stockout.
-          </div>
+          {lowStockCount > 0 && (
+            <div className="mt-3 p-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl text-[10px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
+              ⚠️ {lowStockCount} {lowStockCount === 1 ? 'denomination is' : 'denominations are'} below minimum stock level. Please purchase to avoid stockout.
+            </div>
+          )}
         </div>
 
         {/* Recent Stamp Sales */}

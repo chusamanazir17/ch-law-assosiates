@@ -12,29 +12,51 @@ export const CashOutModal: React.FC = () => {
   const [account, setAccount] = useState<AccountType | string>('cash');
   const [notes, setNotes] = useState('');
   const [staff, setStaff] = useState('Usama');
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isQuickCashOutOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!payeeDescription || !amount || Number(amount) <= 0) {
-      alert('Please fill out vendor/payee and valid amount');
+    if (isSubmitting) return;
+    setFormError('');
+
+    const amt = Number(amount);
+    if (!payeeDescription.trim()) {
+      setFormError('Please enter the vendor / payee description.');
+      return;
+    }
+    if (amount === '' || Number.isNaN(amt) || amt <= 0) {
+      setFormError('Please enter a valid amount greater than zero.');
+      return;
+    }
+    if (!account) {
+      setFormError('Please select the account to pay from.');
       return;
     }
 
-    recordCashOut({
-      category,
-      payeeDescription,
-      amount: Number(amount),
-      account,
-      notes,
-      staff
-    });
+    setIsSubmitting(true);
+    try {
+      recordCashOut({
+        category,
+        payeeDescription: payeeDescription.trim(),
+        amount: amt,
+        account,
+        notes,
+        staff
+      });
 
-    setIsQuickCashOutOpen(false);
-    setPayeeDescription('');
-    setAmount(1200);
-    setNotes('');
+      setIsQuickCashOutOpen(false);
+      setPayeeDescription('');
+      setAmount(1200);
+      setNotes('');
+      setFormError('');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not record the cash out entry.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -63,6 +85,11 @@ export const CashOutModal: React.FC = () => {
 
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {formError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+              {formError}
+            </div>
+          )}
           {/* Category & Account */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -167,10 +194,11 @@ export const CashOutModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#F43F5E] hover:bg-[#E11D48] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              disabled={isSubmitting}
+              className="px-5 py-2 bg-[#F43F5E] hover:bg-[#E11D48] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Record Cash Out</span>
+              <span>{isSubmitting ? 'Recording…' : 'Record Cash Out'}</span>
             </button>
           </div>
         </form>

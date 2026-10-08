@@ -20,6 +20,7 @@ import {
   Globe
 } from 'lucide-react';
 import { PWAInstallButton } from '../common/PWAInstallButton';
+import { apiFetch } from "@/lib/client/apiFetch";
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -38,6 +39,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
     auditLogs,
     unreadNotifications,
     markNotificationsRead,
+    setIsSearchModalOpen,
     clients,
     receipts,
     transactions,
@@ -48,6 +50,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -71,17 +74,32 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
   const overdueTax = taxCases.filter(t => t.status === 'Overdue' || t.status === 'Documents Required').length;
 
   return (
-    <header className="sticky top-0 z-30 h-[60px] bg-white dark:bg-[#0B1526] border-b border-slate-200/90 dark:border-slate-800 px-3 sm:px-4 flex items-center justify-between shadow-2xs select-none transition-colors duration-150">
+    <header className="sticky top-0 z-30 h-[60px] bg-white dark:bg-[#0B1526] border-b border-slate-200/90 dark:border-slate-800 px-3 sm:px-4 flex items-center justify-between shadow-2xs transition-colors duration-150">
       {/* Left: Sidebar Toggle (Mobile Hamburger) & Search Bar (Desktop) */}
       <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
         <button
           id="mobile-sidebar-hamburger-btn"
           onClick={onToggleSidebar}
-          className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 shrink-0"
+          className="lg:hidden flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 shrink-0"
           title="Open Navigation Menu"
           aria-label="Toggle navigation"
         >
           <Menu className="w-5 h-5" />
+        </button>
+
+        {/* Mobile: global-search entry point (FE-12). The search field is
+            hidden below `sm`; this button opens the GlobalSearchModal on all
+            viewports where the field is unreachable. Its title is matched by
+            the Ctrl+K handler in App.tsx (`button[title*="Search"]`), so the
+            keyboard shortcut now opens the modal too. */}
+        <button
+          type="button"
+          onClick={() => setIsSearchModalOpen(true)}
+          className="sm:hidden flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+          title="Search"
+          aria-label="Open global search"
+        >
+          <Search className="w-5 h-5" />
         </button>
 
         {/* Global Search — inline, stays in place while typing */}
@@ -98,6 +116,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={isSidebarCollapsed ? "Search clients, receipts..." : "Search clients, receipts..."}
+            aria-label="Search clients, receipts, transactions, tax cases and tasks"
             className="w-full h-9 pl-9 pr-3 bg-slate-50/90 dark:bg-[#0A1424] border border-slate-200/90 dark:border-slate-700/80 rounded-xl text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-[#B8832A] focus:bg-white dark:focus:bg-[#0E1A2E] transition-all shadow-2xs font-medium"
           />
 
@@ -195,7 +214,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
         <button
           id="theme-toggle-btn"
           onClick={toggleDarkMode}
-          className="p-2 sm:p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+          className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
           title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
@@ -207,7 +226,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
           <button
             id="notifications-btn"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="relative p-2 sm:p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+            aria-expanded={isNotifOpen}
+            aria-haspopup="true"
+            aria-label={`Notifications${unreadNotifications > 0 ? `, ${unreadNotifications} unread` : ''}`}
+            className="relative flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -223,19 +245,21 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
             <div className="absolute right-0 mt-2 w-80 sm:w-84 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-[#0E1A2E] rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2.5 z-50 text-xs">
               <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-100">Notifications</span>
-                <span
+                <button
+                  type="button"
                   onClick={() => { markNotificationsRead(); setIsNotifOpen(false); }}
-                  className="text-xs text-[#B8832A] dark:text-[#E3BA63] font-semibold cursor-pointer hover:underline"
+                  className="text-xs text-[#B8832A] dark:text-[#E3BA63] font-semibold cursor-pointer hover:underline rounded focus-visible:outline-none"
                 >
                   Mark all as read
-                </span>
+                </button>
               </div>
 
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {lowStockCount > 0 && (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => { setActiveSection('stamps'); setIsNotifOpen(false); }}
-                    className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                    className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
                   >
                     <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     <div>
@@ -244,13 +268,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                         {lowStockCount} denomination{lowStockCount > 1 ? 's are' : ' is'} below the minimum reorder level.
                       </div>
                     </div>
-                  </div>
+                  </button>
                 )}
 
                 {overdueTax > 0 && (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => { setActiveSection('tax'); setIsNotifOpen(false); }}
-                    className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                    className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
                   >
                     <Clock className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                     <div>
@@ -259,7 +284,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                         {overdueTax} tax case{overdueTax > 1 ? 's' : ''} overdue or missing documents.
                       </div>
                     </div>
-                  </div>
+                  </button>
                 )}
 
                 {auditLogs.slice(0, 7).map(log => {
@@ -278,10 +303,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                     Settings: <Sliders className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                   };
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={log.id}
                       onClick={() => { markNotificationsRead(); setIsNotifOpen(false); }}
-                      className="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
+                      className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer flex gap-3 items-start transition-colors"
                     >
                       {moduleIcon[log.module] || <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
                       <div className="min-w-0">
@@ -291,7 +317,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
                         </div>
                         <div className="text-[11px] text-slate-400 mt-1 font-medium">{time}</div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
 
@@ -374,13 +400,31 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarCollap
 
               <div className="border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
                 <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
+                  type="button"
+                  disabled={isSigningOut}
+                  onClick={async () => {
+                    // FE-17: Sign Out was a no-op. The office SPA shares the admin
+                    // session, so sign out through the existing logout API route
+                    // (POST /api/admin/logout is CSRF-exempt and clears both the
+                    // admin token and the Supabase session server-side; see the
+                    // route's own docs). Then send the user to the login page.
+                    if (isSigningOut) return;
+                    setIsSigningOut(true);
+                    try {
+                      await apiFetch('/api/admin/logout', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                      });
+                    } catch {
+                      // Best effort: the server still clears cookies on success;
+                      // always leave the app so a stale session can't linger.
+                    }
+                    window.location.href = '/admin/login';
                   }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer font-semibold transition-colors"
+                  className="w-full text-left px-3.5 py-2.5 min-h-[44px] flex items-center gap-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer font-semibold transition-colors disabled:opacity-60"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
+                  <span>{isSigningOut ? 'Signing out…' : 'Sign Out'}</span>
                 </button>
               </div>
             </div>

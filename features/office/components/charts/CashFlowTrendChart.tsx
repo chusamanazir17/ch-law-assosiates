@@ -11,22 +11,23 @@ interface CashFlowTrendChartProps {
   height?: number;
 }
 
-const defaultTrend: TrendDay[] = [
-  { date: '16 Sep', cashIn: 32000, cashOut: 6000 },
-  { date: '17 Sep', cashIn: 28000, cashOut: 9000 },
-  { date: '18 Sep', cashIn: 35000, cashOut: 11000 },
-  { date: '19 Sep', cashIn: 34000, cashOut: 15000 },
-  { date: '20 Sep', cashIn: 41000, cashOut: 7500 },
-  { date: '21 Sep', cashIn: 36000, cashOut: 13000 },
-  { date: '22 Sep', cashIn: 42500, cashOut: 8200 }
-];
-
 export const CashFlowTrendChart: React.FC<CashFlowTrendChartProps> = ({
-  data = defaultTrend,
+  data = [],
   height = 140
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const maxVal = 50000;
+
+  // No fabricated demo data: an empty dataset renders an honest empty state.
+  if (data.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center text-xs text-slate-400" style={{ height: `${height}px` }}>
+        No data yet — figures will chart here from live records
+      </div>
+    );
+  }
+
+  // Scale from the live dataset, never a hardcoded ceiling.
+  const maxVal = Math.max(...data.flatMap(d => [d.cashIn, d.cashOut]), 1);
   const chartHeight = height - 25;
 
   return (

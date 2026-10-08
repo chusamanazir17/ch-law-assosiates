@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:relative top-0 bottom-0 left-0 z-50 h-full bg-[#05162B] text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:transition-none border-r border-[#102943] shrink-0 select-none max-lg:overflow-x-hidden lg:overflow-visible ${
+        className={`fixed lg:relative top-0 bottom-0 left-0 z-50 h-full bg-[#05162B] text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:transition-none border-r border-[#102943] shrink-0 max-lg:overflow-x-hidden lg:overflow-visible ${
           isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         } w-[285px] max-w-[85vw] ${isCollapsed ? 'lg:w-[72px]' : 'lg:w-[265px]'}`}
       >
@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleNav('dashboard')}
               >
                 <div className="w-full h-full bg-[#05162B] rounded-[10px] flex items-center justify-center">
-                  <span className="font-['Playfair_Display',serif] font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
+                  <span className="font-heading font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
                     CH
                   </span>
                 </div>
@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer shrink-0 border border-slate-700/60"
+              className="lg:hidden flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-slate-300 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer shrink-0 border border-slate-700/60"
               title="Close Menu"
               aria-label="Close navigation menu"
             >
@@ -131,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onToggleCollapse}
                 title="Collapse sidebar (Ctrl + B)"
                 aria-label="Collapse sidebar"
-                className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer shrink-0"
+                className="hidden lg:flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg text-slate-400 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -146,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onToggleCollapse}
                 title="Expand sidebar (Ctrl + B)"
                 aria-label="Expand sidebar"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer"
+                className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg text-slate-400 hover:text-white hover:bg-[#1B2F4C] active:scale-95 transition-all cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -175,6 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {!isCollapsed ? (
                 <button
                   onClick={() => setIsOfficeExpanded(!isOfficeExpanded)}
+                  aria-expanded={isOfficeExpanded}
                   className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-[#122B42] text-white font-semibold cursor-pointer shadow-xs"
                 >
                   <div className="flex items-center gap-2.5">
@@ -204,7 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'dashboard'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -220,7 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'cases'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -236,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'hearings'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -252,7 +253,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'invoices'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -268,11 +269,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         if (!isCollapsed) setIsCashExpanded(!isCashExpanded);
                       }}
                       title="Cash Management"
+                      aria-expanded={isCashExpanded || activeSection === 'cash'}
                       className={`w-full flex items-center ${
                         isCollapsed ? 'justify-center py-2.5 px-0' : 'justify-between px-3 py-2'
                       } rounded-lg transition-colors cursor-pointer ${
                         activeSection === 'cash'
-                          ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                          ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                           : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                       }`}
                     >
@@ -319,11 +321,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         if (!isCollapsed) setIsStampExpanded(!isStampExpanded);
                       }}
                       title="Stamp Management"
+                      aria-expanded={isStampExpanded || activeSection === 'stamps'}
                       className={`w-full flex items-center ${
                         isCollapsed ? 'justify-center py-2.5 px-0' : 'justify-between px-3 py-2'
                       } rounded-lg transition-colors cursor-pointer ${
                         activeSection === 'stamps'
-                          ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                          ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                           : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                       }`}
                     >
@@ -370,7 +373,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'clients'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -386,11 +389,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         if (!isCollapsed) setIsTaxExpanded(!isTaxExpanded);
                       }}
                       title="Tax Management"
+                      aria-expanded={isTaxExpanded || activeSection === 'tax'}
                       className={`w-full flex items-center ${
                         isCollapsed ? 'justify-center py-2.5 px-0' : 'justify-between px-3 py-2'
                       } rounded-lg transition-colors cursor-pointer ${
                         activeSection === 'tax'
-                          ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                          ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                           : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                       }`}
                     >
@@ -437,7 +441,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'services' || activeSection === 'composing'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -453,7 +457,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'receipts'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -469,7 +473,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'expenses'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -485,7 +489,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'tasks'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -501,7 +505,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'reports'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -517,7 +521,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'users' || activeSection === 'staff'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -533,7 +537,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'attendance'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -549,7 +553,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'audit'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -565,7 +569,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       isCollapsed ? 'justify-center py-2.5 px-0' : 'gap-2.5 px-3 py-2'
                     } rounded-lg text-left transition-colors cursor-pointer ${
                       activeSection === 'settings'
-                        ? 'bg-[#B8832A] text-white font-semibold shadow-xs'
+                        ? 'bg-[#B8832A] text-[#05162B] font-semibold shadow-xs'
                         : 'text-slate-300 hover:bg-[#122B42] hover:text-white'
                     }`}
                   >
@@ -623,7 +627,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 target="_blank"
                 rel="noreferrer"
                 title="WhatsApp Support: +92 300 1234567"
-                className="w-10 h-10 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+                className="w-11 h-11 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white flex items-center justify-center shadow-xs transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4" />
               </a>

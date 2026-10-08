@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { pkTodayIso, pkAddDaysIso, pkDayRangeUtc } from "@/lib/dates/pkDay";
 
 export interface OfficeDashboardStats {
   totalClients: number;
@@ -21,12 +22,15 @@ export interface OfficeDashboardStats {
 
 export async function getOfficeDashboardStats(): Promise<OfficeDashboardStats> {
   const supabase = await createClient();
-  const today = new Date().toISOString().split("T")[0];
+  // Business day in Asia/Karachi (never UTC) — see lib/dates/pkDay.ts.
+  const today = pkTodayIso();
 
-  // 7 days from now
-  const nextWeekDate = new Date();
-  nextWeekDate.setDate(nextWeekDate.getDate() + 7);
-  const nextWeek = nextWeekDate.toISOString().split("T")[0];
+  // 7 days from today (PK calendar)
+  const nextWeek = pkAddDaysIso(today, 7);
+
+  // PK day boundaries as UTC instants for timestamptz filters.
+  const { startUtcIso: todayStartUtc, endUtcIso: todayEndUtc } =
+    pkDayRangeUtc(today);
 
   // Run queries in parallel
   const [
@@ -45,17 +49,17 @@ export async function getOfficeDashboardStats(): Promise<OfficeDashboardStats> {
     recentTxRes,
     recentCasesRes,
   ] = await Promise.all([
-    supabase.from("clients").select("id", { count: "exact", head: true }),
-    supabase.from("cases").select("id", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("hearings").select("id", { count: "exact", head: true }).eq("hearing_date", today),
-    supabase.from("hearings").select("id", { count: "exact", head: true }).gte("hearing_date", today).lte("hearing_date", nextWeek),
-    supabase.from("invoices").select("total_amount, paid_amount, status").neq("status", "paid"),
+    supabase.from("clients").select("id", { count: "exact", head: true }).is("deleted_at", null),
+    supabase.from("cases").select("id", { count: "exact", head: true }).eq("status", "active").is("deleted_at", null),
+    supabase.from("hearings").select("id", { count: "exact", head: true }).eq("hearing_date", today).is("deleted_at", null),
+    supabase.from("hearings").select("id", { count: "exact", head: true }).gte("hearing_date", today).lte("hearing_date", nextWeek).is("deleted_at", null),
+    supabase.from("invoices").select("total_amount, paid_amount, status").neq("status", "paid").is("deleted_at", null),
     supabase.from("payment_accounts").select("current_balance").eq("active", true),
-    supabase.from("financial_ledger").select("entry_type, amount").gte("created_at", `${today}T00:00:00.000Z`),
-    supabase.from("stamp_products").select("current_stock, minimum_stock").eq("active", true),
-    supabase.from("tasks").select("id", { count: "exact", head: true }).in("status", ["pending", "in_progress"]),
-    supabase.from("tax_cases").select("id", { count: "exact", head: true }).neq("status", "Completed"),
-    supabase.from("service_orders").select("id", { count: "exact", head: true }).in("status", ["Pending", "In Progress"]),
+    supabase.from("financial_ledger").select("entry_type, amount").gte("created_at", todayStartUtc).lt("created_at", todayEndUtc),
+    supabase.from("stamp_products").select("current_stock, minimum_stock").eq("active", true).is("deleted_at", null),
+    supabase.from("tasks").select("id", { count: "exact", head: true }).in("status", ["pending", "in_progress"]).is("deleted_at", null),
+    supabase.from("tax_cases").select("id", { count: "exact", head: true }).neq("status", "Completed").is("deleted_at", null),
+    supabase.from("service_orders").select("id", { count: "exact", head: true }).in("status", ["Pending", "In Progress"]).is("deleted_at", null),
     supabase
       .from("hearings")
       .select(`
@@ -63,6 +67,7 @@ export async function getOfficeDashboardStats(): Promise<OfficeDashboardStats> {
         case:cases(case_number, title)
       `)
       .gte("hearing_date", today)
+      .is("deleted_at", null)
       .order("hearing_date", { ascending: true })
       .limit(5),
     supabase
@@ -76,6 +81,7 @@ export async function getOfficeDashboardStats(): Promise<OfficeDashboardStats> {
     supabase
       .from("cases")
       .select("id, case_number, title, court_name, stage, status, filing_date")
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(5),
   ]);

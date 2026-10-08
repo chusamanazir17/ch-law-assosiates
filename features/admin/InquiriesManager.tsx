@@ -32,6 +32,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import type { ConsultationInquiry } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 type InquiryStatus = ConsultationInquiry["status"];
 
@@ -144,7 +145,7 @@ export default function InquiriesManager() {
   const loadInquiries = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/inquiries");
+      const res = await apiFetch("/api/admin/inquiries");
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.inquiries) {
@@ -181,7 +182,7 @@ export default function InquiriesManager() {
     setActionLoading(id);
 
     try {
-      const res = await fetch("/api/admin/inquiries", {
+      const res = await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: newStatus }),
@@ -213,7 +214,7 @@ export default function InquiriesManager() {
 
     setActionLoading(id);
     try {
-      const res = await fetch("/api/admin/inquiries", {
+      const res = await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, action: "delete" }),
@@ -250,7 +251,7 @@ export default function InquiriesManager() {
     const prio = newPriority;
 
     try {
-      const res = await fetch("/api/admin/inquiries", {
+      const res = await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

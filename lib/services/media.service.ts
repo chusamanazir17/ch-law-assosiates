@@ -21,18 +21,29 @@ export async function listMediaAssets(): Promise<MediaAsset[]> {
   return (data ?? []) as MediaAsset[];
 }
 
-export async function deleteMediaAsset(asset: { id: string; storage_path?: string | null }): Promise<{
+export async function deleteMediaAsset(asset: { id: string }): Promise<{
   storageWarning: string | null;
 }> {
   const supabase = await getAdminDatabaseClient();
 
+  // Resolve the storage path from the database row — never trust a
+  // client-supplied path (DOC-003: it could delete an unrelated object).
+  const { data: row, error: rowError } = await supabase
+    .from("media_assets")
+    .select("id, storage_path")
+    .eq("id", asset.id)
+    .maybeSingle();
+  if (rowError) throw new Error(rowError.message);
+  if (!row) throw new Error("Media asset not found.");
+
   const { error } = await supabase.from("media_assets").delete().eq("id", asset.id);
   if (error) throw new Error(error.message);
 
-  if (asset.storage_path) {
+  const storagePath = typeof row.storage_path === "string" ? row.storage_path : null;
+  if (storagePath) {
     const { error: storageError } = await supabase.storage
       .from(MEDIA_BUCKET)
-      .remove([asset.storage_path]);
+      .remove([storagePath]);
     if (storageError) {
       return { storageWarning: storageError.message };
     }

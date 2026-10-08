@@ -44,6 +44,7 @@ import {
   Settings,
 } from "lucide-react";
 import type { SubscriberAnalytics, SiteAnnouncement, Post } from "@/types/cms";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 interface InquiryItem {
   id: string;
@@ -265,6 +266,10 @@ export default function AdminOverview() {
       published_at: "2026-02-15T09:00:00Z",
       created_at: "2026-02-15T09:00:00Z",
       updated_at: "2026-02-15T09:00:00Z",
+      seo_title: null,
+      meta_description: null,
+      canonical_url: null,
+      og_image: null,
     },
     {
       id: "post-fbr-atl-guide",
@@ -280,6 +285,10 @@ export default function AdminOverview() {
       published_at: "2026-03-01T10:00:00Z",
       created_at: "2026-03-01T10:00:00Z",
       updated_at: "2026-03-01T10:00:00Z",
+      seo_title: null,
+      meta_description: null,
+      canonical_url: null,
+      og_image: null,
     },
     {
       id: "post-property-registry-transfer",
@@ -295,6 +304,10 @@ export default function AdminOverview() {
       published_at: "2026-03-08T11:00:00Z",
       created_at: "2026-03-08T11:00:00Z",
       updated_at: "2026-03-08T11:00:00Z",
+      seo_title: null,
+      meta_description: null,
+      canonical_url: null,
+      og_image: null,
     },
     {
       id: "post-secp-company-incorporation",
@@ -310,6 +323,10 @@ export default function AdminOverview() {
       published_at: "2026-03-12T14:30:00Z",
       created_at: "2026-03-12T14:30:00Z",
       updated_at: "2026-03-12T14:30:00Z",
+      seo_title: null,
+      meta_description: null,
+      canonical_url: null,
+      og_image: null,
     },
     {
       id: "post-pra-sales-tax-services",
@@ -325,6 +342,10 @@ export default function AdminOverview() {
       published_at: "2026-03-15T08:00:00Z",
       created_at: "2026-03-15T08:00:00Z",
       updated_at: "2026-03-15T08:00:00Z",
+      seo_title: null,
+      meta_description: null,
+      canonical_url: null,
+      og_image: null,
     },
   ];
 
@@ -411,7 +432,7 @@ export default function AdminOverview() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/admin/overview");
+      const res = await apiFetch("/api/admin/overview");
       if (res.ok) {
         const json = await res.json();
         if (json.success) {
@@ -489,7 +510,7 @@ export default function AdminOverview() {
     const message = newClientMessage.trim() || "In-chamber consultation inquiry recorded.";
 
     try {
-      const res = await fetch("/api/admin/inquiries", {
+      const res = await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -555,7 +576,7 @@ export default function AdminOverview() {
         : "closed";
 
     try {
-      await fetch("/api/admin/inquiries", {
+      await apiFetch("/api/admin/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "status", id, status: mappedStatus }),

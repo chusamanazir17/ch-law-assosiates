@@ -154,7 +154,7 @@ html[lang="ur"] textarea {
   }
 
   .form-input {
-    @apply w-full rounded-xl border border-surface-border bg-white px-4 py-2.5 text-sm text-navy-heading placeholder:text-content-muted focus:border-gold-primary focus:outline-none focus:ring-2 focus:ring-gold-primary/20 transition-colors duration-200 dark:border-white/15 dark:bg-[#05162B] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-gold-light dark:focus:ring-gold-light/20;
+    @apply w-full rounded-xl border border-surface-border bg-white px-4 py-2.5 text-sm text-navy-heading placeholder:text-[#5B6572] focus:border-gold-primary focus:outline-none focus:ring-2 focus:ring-gold-primary/20 transition-colors duration-200 dark:border-white/15 dark:bg-[#05162B] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-gold-light dark:focus:ring-gold-light/20;
   }
 
   .form-label {
@@ -1130,5 +1130,203 @@ html[lang="ur"] textarea {
     left: 0;
     top: 0;
     width: 100%;
+  }
+}
+
+/* ==========================================================================
+   Design-system foundation (Worker 4 — UX/UI remediation)
+   Shared primitives consumed by the office SPA and the Website CMS.
+   Class names are part of the cross-worker contract — DO NOT RENAME:
+     .btn-primary .btn-secondary .input-field .form-label .card .badge .table
+   ========================================================================== */
+
+:root {
+  /* ---- Type scale (base 16px; fluid display sizes) ---- */
+  --type-display: clamp(2.5rem, 1.8rem + 3.5vw, 3.75rem);
+  --type-h1: clamp(1.75rem, 1.4rem + 1.8vw, 2.375rem);
+  --type-h2: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --type-h3: 1.25rem;
+  --type-h4: 1.125rem;
+  --type-body: 1rem;
+  --type-small: 0.875rem;
+  --type-caption: 0.75rem;
+
+  /* ---- Status color system (drives .badge-* and the Badge primitive) ---- */
+  --status-success-bg: #ecfdf5;
+  --status-success-border: #a7f3d0;
+  --status-success-text: #047857;
+  --status-warning-bg: #fffbeb;
+  --status-warning-border: #fde68a;
+  --status-warning-text: #b45309;
+  --status-danger-bg: #fff1f2;
+  --status-danger-border: #fecdd3;
+  --status-danger-text: #be123c;
+  --status-info-bg: #eff6ff;
+  --status-info-border: #bfdbfe;
+  --status-info-text: #1d4ed8;
+
+  /* ---- Spacing rhythm: 4px base unit (Tailwind scale already follows this);
+         --section-y is the standard vertical rhythm for page sections. ---- */
+  --section-y: clamp(3rem, 6vw + 1rem, 5.5rem);
+}
+
+@layer base {
+  /* Visible keyboard focus everywhere. Individual components may layer their
+     own focus-visible ring on top; this is the global safety net (FE-08: the
+     dead `focus:outline-hidden` class never actually removed outlines, and
+     must not be reintroduced). */
+  :focus-visible {
+    outline: 2px solid #d39d3d;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ---------- Buttons ---------- */
+  /* Primary CTA: gold fill + navy text (7.3:1 contrast, AA). Compact office
+     density with a 44px minimum touch target. */
+  .btn-primary {
+    @apply inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl bg-gold-primary px-5 py-2.5 text-sm font-bold tracking-wide text-navy-primary shadow-md shadow-gold-primary/20 transition-all duration-200 hover:bg-gold-light hover:shadow-lg hover:shadow-gold-primary/30 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-primary disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  /* Secondary action: outline button, dark-mode aware. */
+  .btn-secondary {
+    @apply inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-surface-border bg-white px-5 py-2.5 text-sm font-semibold tracking-wide text-navy-heading transition-all duration-200 hover:border-navy-heading hover:bg-navy-heading hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-primary disabled:pointer-events-none disabled:opacity-60 dark:border-white/20 dark:bg-white/5 dark:text-slate-100 dark:hover:bg-white/10 dark:hover:text-white;
+  }
+
+  /* Compact destructive action for confirm dialogs. */
+  .btn-danger {
+    @apply inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold tracking-wide text-white shadow-md shadow-rose-600/20 transition-all duration-200 hover:bg-rose-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  /* ---------- Forms ---------- */
+  /* Alias of .form-input for the classes the office views were written
+     against (FE-01 / FE-06). Use either name. */
+  .input-field {
+    @apply form-input;
+  }
+
+  /* ---------- Cards ---------- */
+  .card {
+    @apply rounded-2xl border border-surface-border bg-white p-5 shadow-soft sm:p-6 dark:border-white/10 dark:bg-[#0B1F36];
+  }
+
+  .card-flat {
+    @apply rounded-2xl border border-surface-border bg-white p-5 sm:p-6 dark:border-white/10 dark:bg-[#0B1F36];
+  }
+
+  /* ---------- Badges / status ---------- */
+  .badge {
+    @apply inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase leading-tight tracking-wider;
+  }
+
+  .badge-success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400;
+  }
+
+  .badge-warning {
+    @apply border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-400;
+  }
+
+  .badge-danger {
+    @apply border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-400;
+  }
+
+  .badge-info {
+    @apply border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400;
+  }
+
+  .badge-neutral {
+    @apply border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300;
+  }
+
+  /* ---------- Tables ---------- */
+  /* Apply to the <table> element itself. Wrap in .table-wrap for the
+     standard mobile horizontal-scroll pattern (FE-11). */
+  .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-surface-border dark:border-white/10;
+  }
+
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .table thead th {
+    @apply border-b border-surface-border bg-surface-light px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-content-body dark:border-white/10 dark:bg-white/5 dark:text-slate-300;
+  }
+
+  .table tbody td {
+    @apply border-b border-surface-border/70 px-4 py-3 align-middle text-navy-heading/90 dark:border-white/5 dark:text-slate-200;
+  }
+
+  .table tbody tr {
+    @apply transition-colors hover:bg-surface-light/60 dark:hover:bg-white/5;
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* ---------- Type scale utilities ---------- */
+  .type-display {
+    font-size: var(--type-display);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+
+  .type-h1 {
+    font-size: var(--type-h1);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+  }
+
+  .type-h2 {
+    font-size: var(--type-h2);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+
+  .type-h3 {
+    font-size: var(--type-h3);
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .type-h4 {
+    font-size: var(--type-h4);
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .type-body {
+    font-size: var(--type-body);
+    line-height: 1.6;
+  }
+
+  .type-small {
+    font-size: var(--type-small);
+    line-height: 1.5;
+  }
+
+  .type-caption {
+    font-size: var(--type-caption);
+    line-height: 1.45;
+  }
+
+  .type-overline {
+    font-size: var(--type-caption);
+    line-height: 1.45;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  /* Standard vertical rhythm between page sections. */
+  .section-y {
+    padding-top: var(--section-y);
+    padding-bottom: var(--section-y);
   }
 }

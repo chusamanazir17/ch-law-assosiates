@@ -131,6 +131,26 @@ export async function getAdminPostBySlugOrId(slugOrId: string): Promise<Post | n
 }
 
 /**
+ * Check whether a slug is available (no other post uses it).
+ * Used by the admin editor's live uniqueness check.
+ */
+export async function isPostSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+  const client = await getAdminPostsClient();
+  if (!client) {
+    throw new Error("CMS backend is not configured.");
+  }
+  const { data, error } = await client
+    .from("posts")
+    .select("id")
+    .eq("slug", slug.trim().toLowerCase())
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`Unable to verify post slug uniqueness: ${error.message}`);
+  if (!data) return true;
+  return excludeId ? data.id === excludeId : false;
+}
+
+/**
  * Create or Update Post with complete validation, UUID generation, and Next.js revalidation
  */
 export async function savePost(input: ValidatedPostInput): Promise<Post> {
@@ -142,6 +162,27 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
 
   // Validate or generate slug
   const finalSlug = slugify(input.slug || input.title);
+
+  // Enforce slug uniqueness (excluding the row being edited)
+  const { data: slugConflict, error: slugCheckError } = await client
+    .from("posts")
+    .select("id")
+    .eq("slug", finalSlug)
+    .limit(1)
+    .maybeSingle();
+  if (slugCheckError) {
+    throw new Error(`Unable to verify post slug uniqueness: ${slugCheckError.message}`);
+  }
+  if (slugConflict && slugConflict.id !== input.id) {
+    throw new Error(`A post with the slug "${finalSlug}" already exists. Choose a different slug.`);
+  }
+
+  const seoPayload = {
+    seo_title: input.seo_title,
+    meta_description: input.meta_description,
+    canonical_url: input.canonical_url,
+    og_image: input.og_image,
+  };
 
   // Check if updating existing post
   if (input.id) {
@@ -161,6 +202,7 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
       status: input.status,
       views_count: input.views_count !== undefined ? input.views_count : 0,
       published_at: input.status === "published" ? (input.published_at || now) : null,
+      ...seoPayload,
       updated_at: now,
     };
 
@@ -197,6 +239,7 @@ export async function savePost(input: ValidatedPostInput): Promise<Post> {
     status: input.status,
     views_count: 0,
     published_at: input.status === "published" ? (input.published_at || now) : null,
+    ...seoPayload,
     created_at: now,
     updated_at: now,
   };

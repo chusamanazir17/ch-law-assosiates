@@ -24,6 +24,7 @@ import {
   Upload,
 } from "lucide-react";
 import type { CmsTeamMember } from "@/lib/db/teamMembersStore";
+import { apiFetch } from "@/lib/client/apiFetch";
 
 const PRESET_AVATARS = [
   { label: "Late Founder HFM", url: "/images/owners/haji-faqir-muhammad.jpg" },
@@ -56,7 +57,7 @@ export default function TeamManager() {
   const fetchMembers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/team");
+      const res = await apiFetch("/api/admin/team");
       const data = await res.json();
       if (res.ok && data.success) {
         setMembers(data.members || []);
@@ -112,7 +113,7 @@ export default function TeamManager() {
 
     setIsSaving(true);
     try {
-      const res = await fetch("/api/admin/team", {
+      const res = await apiFetch("/api/admin/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -137,7 +138,7 @@ export default function TeamManager() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/team?id=${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/admin/team?id=${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete team member");
@@ -165,7 +166,7 @@ export default function TeamManager() {
 
     try {
       const orderedIds = reordered.map((m) => m.id);
-      await fetch("/api/admin/team", {
+      await apiFetch("/api/admin/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "reorder", orderedIds }),

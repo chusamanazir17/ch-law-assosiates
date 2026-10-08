@@ -1,4 +1,5 @@
 import { getAdminDatabaseClient } from "@/lib/supabase/service";
+import { nextDocumentNumber } from "@/lib/services/rpc";
 import type { TaxCaseRecord } from "@/types/office";
 
 const isUuid = (str: any): boolean =>
@@ -33,6 +34,7 @@ export async function listTaxCases(filter?: {
       client:clients(full_name),
       staff:profiles(full_name)
     `)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (filter?.status && filter.status !== "ALL") {
@@ -76,6 +78,7 @@ export async function getTaxCaseById(id: string): Promise<TaxCaseRecord | null> 
       staff:profiles(full_name)
     `)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (error) {
@@ -94,16 +97,27 @@ export async function getTaxCaseById(id: string): Promise<TaxCaseRecord | null> 
 
 export async function createTaxCaseRecord(dto: CreateTaxCaseDTO): Promise<TaxCaseRecord> {
   const supabase = await getAdminDatabaseClient();
-  const caseNumber = dto.case_number || `TX-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+  // Collision-safe case number from a DB sequence (FIN-12).
+  const caseNumber = dto.case_number || (await nextDocumentNumber(supabase, "tax_case"));
 
-  let resolvedClientId: string | undefined = dto.client_id;
-  if (!isUuid(resolvedClientId)) {
-    const { data: cl } = await supabase.from("clients").select("id").limit(1).maybeSingle();
-    resolvedClientId = cl?.id;
+  // H4: an invalid client reference must fail loudly, never attach to a
+  // random client.
+  if (!isUuid(dto.client_id)) {
+    throw new Error("A valid client_id is required to create a tax case.");
   }
+  const { data: clientExists } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("id", dto.client_id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!clientExists) {
+    throw new Error("Client not found.");
+  }
+  const resolvedClientId = dto.client_id;
 
-  if (!resolvedClientId || !isUuid(resolvedClientId)) {
-    throw new Error("A valid Client is required to create a tax case.");
+  if (dto.fee !== undefined && (typeof dto.fee !== "number" || !Number.isFinite(dto.fee) || dto.fee < 0)) {
+    throw new Error("Fee cannot be negative.");
   }
 
   const resolvedAssignedTo = dto.assigned_to && isUuid(dto.assigned_to) ? dto.assigned_to : null;
@@ -143,37 +157,56 @@ export async function createTaxCaseRecord(dto: CreateTaxCaseDTO): Promise<TaxCas
   } as TaxCaseRecord;
 }
 
-export async function updateTaxCaseRecord(id: string, updates: Partial<CreateTaxCaseDTO>): Promise<TaxCaseRecord | null> {
+export async function updateTaxCaseRecord(
+  id: string,
+  updates: Partial<CreateTaxCaseDTO>,
+  opts?: { allowedFields?: readonly string[] }
+): Promise<TaxCaseRecord | null> {
   if (!isUuid(id)) return null;
   const supabase = await getAdminDatabaseClient();
 
+  // Mass-assignment guard (API-1): only explicitly allowed fields reach the DB.
+  const allowed = new Set(opts?.allowedFields || []);
+  const picked: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(updates)) {
+    if (allowed.size === 0 || allowed.has(key)) picked[key] = value;
+  }
+
   const sanitizedUpdates: any = {
-    ...updates,
+    ...picked,
     updated_at: new Date().toISOString(),
   };
 
-  if ("client_id" in sanitizedUpdates && !isUuid(sanitizedUpdates.client_id)) {
-    delete sanitizedUpdates.client_id;
-  }
   if ("assigned_to" in sanitizedUpdates && !isUuid(sanitizedUpdates.assigned_to)) {
     sanitizedUpdates.assigned_to = null;
   }
+  if ("fee" in sanitizedUpdates) {
+    const fee = Number(sanitizedUpdates.fee);
+    if (!Number.isFinite(fee) || fee < 0) throw new Error("Fee cannot be negative.");
+    sanitizedUpdates.fee = fee;
+  }
+  // client_id can never be reassigned via PATCH.
+  delete sanitizedUpdates.client_id;
+  delete sanitizedUpdates.case_number;
 
   const { data, error } = await supabase
     .from("tax_cases")
     .update(sanitizedUpdates)
     .eq("id", id)
+    .is("deleted_at", null)
     .select(`
       *,
       client:clients(full_name),
       staff:profiles(full_name)
     `)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("[TaxService] updateTaxCaseRecord error:", error);
     throw new Error(`Failed to update tax case: ${error.message}`);
   }
+
+  if (!data) return null;
 
   return {
     ...data,
@@ -185,7 +218,12 @@ export async function updateTaxCaseRecord(id: string, updates: Partial<CreateTax
 export async function deleteTaxCaseRecord(id: string): Promise<void> {
   if (!isUuid(id)) return;
   const supabase = await getAdminDatabaseClient();
-  const { error } = await supabase.from("tax_cases").delete().eq("id", id);
+  // Soft delete: the row is hidden from lists but retained for history.
+  const { error } = await supabase
+    .from("tax_cases")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null);
   if (error) {
     throw new Error(`Failed to delete tax case: ${error.message}`);
   }

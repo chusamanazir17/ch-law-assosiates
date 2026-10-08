@@ -12,6 +12,8 @@ export const StampSaleModal: React.FC = () => {
   const [clientId, setClientId] = useState('');
   const [account, setAccount] = useState<AccountType | string>('cash');
   const [notes, setNotes] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isStampSaleModalOpen) return null;
 
@@ -30,33 +32,44 @@ export const StampSaleModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (qty <= 0) {
-      alert('Please enter a valid quantity');
+    if (isSubmitting) return;
+    setFormError('');
+
+    if (quantity === '' || qty <= 0 || Number.isNaN(qty)) {
+      setFormError('Please enter a valid quantity greater than zero.');
       return;
     }
     if (qty > availableStock) {
-      alert(`Cannot sell ${qty} stamps. Only ${availableStock} in stock.`);
+      setFormError(`Cannot sell ${qty} stamps. Only ${availableStock} available in the vault.`);
       return;
     }
     if (!clientName.trim()) {
-      alert('Please provide the purchaser / client name');
+      setFormError('Please provide the purchaser / client name.');
       return;
     }
 
-    recordStampSale({
-      denomination,
-      quantity: qty,
-      clientName,
-      clientId: clientId || undefined,
-      paymentAccount: account,
-      notes: notes || `Sale of ${qty}x Rs. ${denomination} stamps`,
-      staff: 'Usama'
-    });
+    setIsSubmitting(true);
+    try {
+      recordStampSale({
+        denomination,
+        quantity: qty,
+        clientName: clientName.trim(),
+        clientId: clientId || undefined,
+        paymentAccount: account,
+        notes: notes || `Sale of ${qty}x Rs. ${denomination} stamps`,
+        staff: 'Usama'
+      });
 
-    setIsStampSaleModalOpen(false);
-    setClientName('');
-    setQuantity(2);
-    setNotes('');
+      setIsStampSaleModalOpen(false);
+      setClientName('');
+      setQuantity(2);
+      setNotes('');
+      setFormError('');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Could not complete the stamp sale.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,6 +96,11 @@ export const StampSaleModal: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {formError && (
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg font-medium">
+              {formError}
+            </div>
+          )}
           {/* Denomination Picker */}
           <div>
             <label className="block text-slate-700 font-semibold mb-1">Select Denomination *</label>
@@ -222,11 +240,11 @@ export const StampSaleModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={qty <= 0 || qty > availableStock}
+              disabled={qty <= 0 || qty > availableStock || isSubmitting}
               className="px-5 py-2 bg-[#B8832A] hover:bg-[#96691B] text-white font-semibold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Complete Stamp Sale</span>
+              <span>{isSubmitting ? 'Completing…' : 'Complete Stamp Sale'}</span>
             </button>
           </div>
         </form>

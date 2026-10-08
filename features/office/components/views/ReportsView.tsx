@@ -4,6 +4,8 @@ import { PageHeader } from '../layout/PageHeader';
 import { KpiCard } from '../common/KpiCard';
 import { IncomeExpenseBarChart } from '../charts/IncomeExpenseBarChart';
 import { MonthlyBarChart } from '../charts/MonthlyBarChart';
+import { exportToCsv } from '../../lib/csv';
+import { pkMonthKey, pkMonthKeyLabel, parseLedgerDate, pkIsoDate } from '../utils/pkDates';
 import {
   BarChart3,
   Download,
@@ -94,7 +96,9 @@ export const ReportsView: React.FC = () => {
       bal: Number(c.outstanding || 0)
     }));
 
-  // Staff performance from the live task list
+  // Staff performance from the live task list.
+  // Note: turnaround-in-days is not derivable from the task data we have, so
+  // it is shown as "—" rather than a fabricated figure (FIN-09).
   const staffRanking = (() => {
     const byStaff = new Map<string, { role: string; completed: number; pending: number }>();
     tasks.forEach(t => {
@@ -103,7 +107,8 @@ export const ReportsView: React.FC = () => {
       if (t.status === 'Completed') entry.completed += 1; else entry.pending += 1;
       byStaff.set(key, entry);
     });
-    return Array.from(byStaff.entries())
+    const uniqueStaff = byStaff.size;
+    const ranked = Array.from(byStaff.entries())
       .sort((a, b) => b[1].completed - a[1].completed)
       .slice(0, 5)
       .map(([staff, s]) => ({
@@ -111,15 +116,116 @@ export const ReportsView: React.FC = () => {
         role: s.role,
         completed: s.completed,
         pending: s.pending,
-        turnaround: s.completed + s.pending > 0
-          ? `${((s.completed + s.pending) / Math.max(1, s.completed)).toFixed(1)} Days`
-          : '—',
+        turnaround: '—',
         score: s.completed + s.pending > 0 ? `${Math.round((s.completed / (s.completed + s.pending)) * 100)}%` : '—'
       }));
+    return { ranked, uniqueStaff };
   })();
+
+  // Monthly income for the last 6 months (live ledger, PK timezone) — replaces
+  // the old hardcoded "1,840 Units" demo chart.
+  const monthlyRevenue = (() => {
+    const buckets = new Map<string, number>();
+    const d = new Date();
+    const keys: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const dd = new Date(d.getFullYear(), d.getMonth() - i, 15);
+      const key = pkMonthKey(dd);
+      keys.push(key);
+      buckets.set(key, 0);
+    }
+    incomeTx.forEach(t => {
+      const parsed = parseLedgerDate(t.dateTime);
+      if (!parsed) return;
+      const key = `${parsed.year}-${String(parsed.month).padStart(2, '0')}`;
+      if (buckets.has(key)) buckets.set(key, (buckets.get(key) || 0) + Number(t.amount || 0));
+    });
+    return keys.map(k => ({ month: pkMonthKeyLabel(k), value: buckets.get(k) || 0 }));
+  })();
+
+  // Real growth: second-half vs first-half of the charted daily buckets.
+  const incomeGrowth = (() => {
+    const buckets = incomeExpenseChartData.map(b => b.income);
+    if (buckets.length < 4) return null;
+    const half = Math.floor(buckets.length / 2);
+    const prev = buckets.slice(0, half).reduce((a, v) => a + v, 0);
+    const curr = buckets.slice(half).reduce((a, v) => a + v, 0);
+    if (prev <= 0) return curr > 0 ? 100 : null;
+    return Math.round(((curr - prev) / prev) * 100);
+  })();
+
+  // Collection channels derived from the live IN ledger by account.
+  const channelSplit = (() => {
+    let cash = 0, bank = 0, wallets = 0;
+    incomeTx.forEach(t => {
+      const a = String(t.account || '').toLowerCase();
+      const amt = Number(t.amount || 0);
+      if (a.includes('bank') || a.includes('hbl') || a.includes('meezan')) bank += amt;
+      else if (a.includes('jazz') || a.includes('easy') || a.includes('paisa') || a.includes('raast')) wallets += amt;
+      else cash += amt;
+    });
+    const total = cash + bank + wallets;
+    const pct = (v: number) => (total > 0 ? Math.round((v / total) * 100) : 0);
+    return {
+      total,
+      cash: { pct: pct(cash), amount: cash },
+      bank: { pct: pct(bank), amount: bank },
+      wallets: { pct: pct(wallets), amount: wallets },
+    };
+  })();
+
+  // P&L line items grouped from live transactions — no hardcoded figures.
+  const groupByCategory = (txs: typeof transactions) => {
+    const map = new Map<string, number>();
+    txs.forEach(t => {
+      const key = t.serviceOrCategory || t.description || 'Other';
+      map.set(key, (map.get(key) || 0) + Number(t.amount || 0));
+    });
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  };
+  const revenueLines = groupByCategory(incomeTx);
+  const expenseLines = groupByCategory(expenseTx);
+  const netMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : null;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  // Real CSV export of the active report tab (the header button is labelled
+  // "Export CSV" — it must export, not print).
+  const handleExportCsv = () => {
+    if (activeReportTab === 'pnl') {
+      exportToCsv(`pnl-statement-${pkIsoDate()}.csv`, ['Section', 'Line Item', 'Amount (PKR)'], [
+        ...revenueLines.map(([n, a]) => ['Revenue', n, a] as Array<string | number>),
+        ['Revenue', 'TOTAL GROSS REVENUE', totalRevenue],
+        ...expenseLines.map(([n, a]) => ['Expense', n, a] as Array<string | number>),
+        ['Expense', 'TOTAL OPERATING EXPENSES', totalExpense],
+        ['Result', 'NET OPERATING SURPLUS', netProfit],
+      ]);
+    } else if (activeReportTab === 'cashflow') {
+      exportToCsv(`cash-balances-${pkIsoDate()}.csv`, ['Account', 'Balance (PKR)'], [
+        ['Cash (Office)', accountBalances.cashOffice || 0],
+        ['Bank (HBL)', accountBalances.bankAccount || 0],
+        ['JazzCash', accountBalances.jazzCash || 0],
+        ['EasyPaisa', accountBalances.easyPaisa || 0],
+      ]);
+    } else if (activeReportTab === 'stamp') {
+      exportToCsv(`stamp-inventory-${pkIsoDate()}.csv`, ['Denomination', 'Purchased', 'Sold', 'In Vault', 'Valuation (PKR)'], stampStock.map(s => [
+        s.denomination, s.purchased || 0, s.sold || 0, s.remaining || 0, s.stockValue || 0,
+      ]));
+    } else if (activeReportTab === 'clients') {
+      exportToCsv(`client-accounts-${pkIsoDate()}.csv`, ['Client', 'Phone', 'Type', 'Total Invoiced', 'Balance Due'], clients.map(c => [
+        c.name, c.mobile || c.phone || 'N/A', c.businessType || c.type || 'Individual', c.totalBilling || 0, c.outstanding || 0,
+      ]));
+    } else if (activeReportTab === 'staff') {
+      exportToCsv(`staff-sla-${pkIsoDate()}.csv`, ['Staff', 'Completed', 'Pending', 'SLA Score'], staffRanking.ranked.map(s => [
+        s.staff, s.completed, s.pending, s.score,
+      ]));
+    } else {
+      exportToCsv(`transactions-${pkIsoDate()}.csv`, ['Date', 'Type', 'Description', 'Client/Payee', 'Category', 'Account', 'Amount (PKR)'], transactions.map(t => [
+        t.dateTime || '', t.type, t.description || '', t.clientOrPayee || '', t.serviceOrCategory || '', t.account || '', t.amount || 0,
+      ]));
+    }
   };
 
   return (
@@ -134,7 +240,7 @@ export const ReportsView: React.FC = () => {
       >
         <div className="flex items-center gap-2">
           <button
-            onClick={handlePrint}
+            onClick={handleExportCsv}
             className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-[#DCE6F1] text-slate-700 text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
@@ -155,9 +261,9 @@ export const ReportsView: React.FC = () => {
         <KpiCard
           label="Gross Revenue"
           value={`Rs. ${totalRevenue.toLocaleString()}`}
-          subValue="Year-to-date collected"
-          change="+18.4% YoY"
-          changeType="positive"
+          subValue="Recorded inflows to date"
+          change={`${incomeTx.length} collections`}
+          changeType="neutral"
           icon={<DollarSign className="w-4 h-4" />}
           iconBgColor="bg-blue-50 text-[#B8832A]"
         />
@@ -173,9 +279,9 @@ export const ReportsView: React.FC = () => {
         <KpiCard
           label="Net Profit"
           value={`Rs. ${netProfit.toLocaleString()}`}
-          subValue="78.9% Net Margin"
-          change="Strong surplus"
-          changeType="positive"
+          subValue={netMargin !== null ? `${netMargin}% net margin` : 'Margin unavailable'}
+          change={netProfit >= 0 ? 'Surplus' : 'Deficit'}
+          changeType={netProfit >= 0 ? 'positive' : 'negative'}
           icon={<TrendingUp className="w-4 h-4" />}
           iconBgColor="bg-emerald-50 text-emerald-600"
         />
@@ -199,10 +305,10 @@ export const ReportsView: React.FC = () => {
         />
         <KpiCard
           label="Avg Turnaround"
-          value={staffRanking.length > 0 ? `${(staffRanking.reduce((a, s) => a + parseFloat(s.turnaround) || 0, 0) / staffRanking.length).toFixed(1)} Days` : "—"}
-          subValue="Filing speed SLA"
-          change="Fast compliance"
-          changeType="positive"
+          value="—"
+          subValue="Completion-time data unavailable"
+          change="Turnaround tracking not set up"
+          changeType="neutral"
           icon={<Award className="w-4 h-4" />}
           iconBgColor="bg-purple-50 text-purple-600"
         />
@@ -245,8 +351,8 @@ export const ReportsView: React.FC = () => {
                   <h4 className="text-xs font-bold text-[#0D2344]">6-Month Revenue vs Expense Performance</h4>
                   <p className="text-[10px] text-slate-400">Monthly fiscal trajectory</p>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                  +24.5% Growth
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${incomeGrowth === null ? 'text-slate-500 bg-slate-100' : incomeGrowth >= 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'}`}>
+                  {incomeGrowth === null ? '— Growth data' : `${incomeGrowth >= 0 ? '+' : ''}${incomeGrowth}% Period Growth`}
                 </span>
               </div>
               <div className="h-48 pt-2">
@@ -267,7 +373,7 @@ export const ReportsView: React.FC = () => {
                   <h4 className="text-xs font-bold text-[#0D2344]">Revenue Sources Breakdown</h4>
                   <p className="text-[10px] text-slate-400">Departmental contributions</p>
                 </div>
-                <span className="text-[10px] text-slate-500 font-medium">PKR 678,200 Total</span>
+                <span className="text-[10px] text-slate-500 font-medium">Rs. {totalRevenue.toLocaleString()} Total</span>
               </div>
               <div className="space-y-3 pt-2 text-xs">
                 {revByCategory.map(item => (
@@ -291,38 +397,48 @@ export const ReportsView: React.FC = () => {
                   <h4 className="text-xs font-bold text-[#0D2344]">Payment Collection Channels</h4>
                   <p className="text-[10px] text-slate-400">Cash vs Electronic settlements</p>
                 </div>
-                <span className="text-[10px] text-blue-600 font-semibold">100% Reconciled</span>
+                <span className="text-[10px] text-slate-500 font-semibold">{incomeTx.length} transactions</span>
               </div>
-              <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
-                  <div className="text-[10px] font-bold text-blue-700 uppercase">Cash at Desk</div>
-                  <div className="text-lg font-black text-[#0D2344] mt-1">68%</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Rs. 461,176</div>
+              {channelSplit.total <= 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400">
+                  No income recorded yet — channels will split here from live data
                 </div>
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
-                  <div className="text-[10px] font-bold text-emerald-700 uppercase">Bank Direct</div>
-                  <div className="text-lg font-black text-[#0D2344] mt-1">24%</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Rs. 162,768</div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+                  <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
+                    <div className="text-[10px] font-bold text-blue-700 uppercase">Cash at Desk</div>
+                    <div className="text-lg font-black text-[#0D2344] mt-1">{channelSplit.cash.pct}%</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">Rs. {channelSplit.cash.amount.toLocaleString()}</div>
+                  </div>
+                  <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
+                    <div className="text-[10px] font-bold text-emerald-700 uppercase">Bank Direct</div>
+                    <div className="text-lg font-black text-[#0D2344] mt-1">{channelSplit.bank.pct}%</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">Rs. {channelSplit.bank.amount.toLocaleString()}</div>
+                  </div>
+                  <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl">
+                    <div className="text-[10px] font-bold text-purple-700 uppercase">Wallets / Raast</div>
+                    <div className="text-lg font-black text-[#0D2344] mt-1">{channelSplit.wallets.pct}%</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">Rs. {channelSplit.wallets.amount.toLocaleString()}</div>
+                  </div>
                 </div>
-                <div className="p-3 bg-purple-50/70 border border-purple-200 rounded-xl">
-                  <div className="text-[10px] font-bold text-purple-700 uppercase">Wallets / Raast</div>
-                  <div className="text-lg font-black text-[#0D2344] mt-1">8%</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Rs. 54,256</div>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Chart 4: Monthly Bar Performance */}
+            {/* Chart 4: Monthly Income Performance — live ledger, last 6 months */}
             <div className="bg-white rounded-xl border border-[#DCE6F1] p-4 shadow-xs space-y-3">
               <div className="flex items-center justify-between border-b border-[#DCE6F1] pb-2.5">
                 <div>
-                  <h4 className="text-xs font-bold text-[#0D2344]">Stamp Paper Turnover Trend</h4>
-                  <p className="text-[10px] text-slate-400">Monthly units consumed</p>
+                  <h4 className="text-xs font-bold text-[#0D2344]">Monthly Income Trend</h4>
+                  <p className="text-[10px] text-slate-400">Live income, last 6 months</p>
                 </div>
-                <span className="text-[10px] text-emerald-600 font-bold">1,840 Units</span>
+                <span className="text-[10px] text-emerald-600 font-bold">
+                  {monthlyRevenue.every(m => m.value === 0)
+                    ? 'No data yet'
+                    : `Rs. ${monthlyRevenue.reduce((a, m) => a + m.value, 0).toLocaleString()} (6 mo)`}
+                </span>
               </div>
               <div className="h-44 pt-2">
-                <MonthlyBarChart />
+                <MonthlyBarChart data={monthlyRevenue} />
               </div>
             </div>
           </div>
@@ -371,7 +487,7 @@ export const ReportsView: React.FC = () => {
                   <Users className="w-3.5 h-3.5 text-[#B8832A]" />
                   <span>Staff Case Filing & SLA Compliance</span>
                 </h4>
-                <span className="text-[10px] text-slate-400">Active Staff (4)</span>
+                <span className="text-[10px] text-slate-400">{staffRanking.uniqueStaff > 0 ? `${staffRanking.uniqueStaff} staff tracked` : 'No staff data yet'}</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -385,7 +501,7 @@ export const ReportsView: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {staffRanking.map(s => (
+                    {staffRanking.ranked.map(s => (
                       <tr key={s.staff} className="hover:bg-slate-50">
                         <td className="py-2.5 px-2.5">
                           <div className="font-bold text-[#0D2344]">{s.staff}</div>
@@ -428,26 +544,16 @@ export const ReportsView: React.FC = () => {
                 1. Operating Revenue
               </div>
               <div className="space-y-1.5 pl-2 font-medium">
-                <div className="flex justify-between text-slate-700">
-                  <span>Income Tax Return Consultancy Fees</span>
-                  <span className="font-semibold">Rs. 320,000</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Sales Tax Returns & E-Filing Services</span>
-                  <span className="font-semibold">Rs. 180,000</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>E-Stamp Counter Sales & Commission</span>
-                  <span className="font-semibold">Rs. 120,400</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Legal Composing & Agreement Drafting</span>
-                  <span className="font-semibold">Rs. 45,600</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>NTN & Business Registration Consultancy</span>
-                  <span className="font-semibold">Rs. 35,000</span>
-                </div>
+                {revenueLines.length === 0 ? (
+                  <div className="py-3 text-center text-slate-400">No revenue lines recorded yet</div>
+                ) : (
+                  revenueLines.map(([name, amount]) => (
+                    <div key={name} className="flex justify-between text-slate-700">
+                      <span>{name}</span>
+                      <span className="font-semibold tabular-nums">Rs. {amount.toLocaleString()}</span>
+                    </div>
+                  ))
+                )}
                 <div className="flex justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
                   <span>Total Gross Revenue</span>
                   <span className="text-blue-700">Rs. {totalRevenue.toLocaleString()}</span>
@@ -460,26 +566,16 @@ export const ReportsView: React.FC = () => {
                 2. Operating Expenses
               </div>
               <div className="space-y-1.5 pl-2 font-medium">
-                <div className="flex justify-between text-slate-700">
-                  <span>Chamber Rent (Chamber 121 Sahiwal)</span>
-                  <span className="font-semibold">Rs. 35,000</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Legal Green Paper, Stationery & Cartridges</span>
-                  <span className="font-semibold">Rs. 18,500</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Chamber Electricity & High-Speed Internet</span>
-                  <span className="font-semibold">Rs. 22,700</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Tea Hotel & Client Hospitality Account</span>
-                  <span className="font-semibold">Rs. 11,300</span>
-                </div>
-                <div className="flex justify-between text-slate-700">
-                  <span>Staff Salaries & Associate Stipends</span>
-                  <span className="font-semibold">Rs. 50,000</span>
-                </div>
+                {expenseLines.length === 0 ? (
+                  <div className="py-3 text-center text-slate-400">No expense lines recorded yet</div>
+                ) : (
+                  expenseLines.map(([name, amount]) => (
+                    <div key={name} className="flex justify-between text-slate-700">
+                      <span>{name}</span>
+                      <span className="font-semibold tabular-nums">Rs. {amount.toLocaleString()}</span>
+                    </div>
+                  ))
+                )}
                 <div className="flex justify-between text-slate-900 font-bold pt-2 border-t border-slate-200 text-sm">
                   <span>Total Operating Expenses</span>
                   <span className="text-rose-700">- Rs. {totalExpense.toLocaleString()}</span>
@@ -611,7 +707,7 @@ export const ReportsView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {staffRanking.map(s => (
+                {staffRanking.ranked.map(s => (
                   <tr key={s.staff}>
                     <td className="py-2.5 px-3 font-bold text-[#0D2344]">{s.staff}</td>
                     <td className="py-2.5 px-3 text-slate-600">{s.role}</td>

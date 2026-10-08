@@ -21,15 +21,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <div className="mb-4">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium select-none">
-        <span className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer">
+      {/* Breadcrumb (decorative labels; not navigational — no pointer affordance, FE-28) */}
+      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">
+        <span className="text-slate-400">
           <svg className="w-3.5 h-3.5 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </span>
         <span className="text-slate-300 dark:text-slate-600">|</span>
-        <span className="text-slate-500 dark:text-slate-400 hover:text-[#B8832A] cursor-pointer">CH Admin Portal</span>
+        <span className="text-slate-500 dark:text-slate-400">CH Admin Portal</span>
         <ChevronRight className="w-3 h-3 text-slate-400" />
-        <span className="text-slate-500 dark:text-slate-400 hover:text-[#B8832A] cursor-pointer">Website CMS</span>
+        <span className="text-slate-500 dark:text-slate-400">Website CMS</span>
         <ChevronRight className="w-3 h-3 text-slate-400" />
         <span className="text-[#B8832A] dark:text-[#E3BA63] font-semibold">{breadcrumb[breadcrumb.length - 1] || 'Office Management'}</span>
       </div>

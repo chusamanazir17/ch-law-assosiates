@@ -37,6 +37,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { PageContentItem } from "@/lib/db/pagesContentStore";
+import { apiFetch } from "@/lib/client/apiFetch";
 import type {
   HomeSectionsData,
   SectionId,
@@ -69,6 +70,16 @@ export default function PagesContentManager() {
 
   // Normal page tab state
   const [activeTab, setActiveTab] = useState<"hero" | "cta" | "content" | "seo">("hero");
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
+
+  // Built-in pages are seeded by the CMS and cannot be deleted (only custom
+  // pages created here can be removed). Mirrors deletePageContent's guard.
+  const BUILT_IN_PAGE_IDS = new Set([
+    "home", "updates", "about",
+    "service-estamping", "service-property", "service-tax", "service-business",
+    "service-trademark", "service-registry-deeds", "service-legal-documentation",
+    "service-family-legal", "service-banking-financial",
+  ]);
 
   // Home sections builder state
   const [isHomeBuilder, setIsHomeBuilder] = useState(false);
@@ -85,8 +96,8 @@ export default function PagesContentManager() {
     setLoadError(null);
     try {
       const [pagesRes, sectionsRes] = await Promise.all([
-        fetch("/api/admin/pages"),
-        fetch("/api/admin/sections"),
+        apiFetch("/api/admin/pages"),
+        apiFetch("/api/admin/sections"),
       ]);
 
       const pagesData = await pagesRes.json();
@@ -114,6 +125,7 @@ export default function PagesContentManager() {
   const openEditor = (page: PageContentItem) => {
     setSelectedPage(page);
     setFormData({ ...page });
+    setIsCreatingPage(false);
     setIsEditing(true);
     setSaveSuccess(null);
     setSaveError(null);
@@ -127,24 +139,92 @@ export default function PagesContentManager() {
     }
   };
 
+  // Start a blank custom page (route + title entered in the editor modal).
+  const openCreatePage = () => {
+    setSelectedPage(null);
+    setFormData({
+      id: "",
+      route: "",
+      title: "",
+      heroBadge: "",
+      heroHeadline: "",
+      heroSubtitle: "",
+      heroImage: "",
+      primaryCtaText: "Contact Us",
+      primaryCtaHref: "/#contact",
+      secondaryCtaText: "WhatsApp",
+      secondaryCtaHref: "",
+      leadContent: "",
+      metaTitle: "",
+      metaDescription: "",
+      canonicalUrl: "",
+      ogImage: "",
+      status: "draft",
+    });
+    setIsCreatingPage(true);
+    setIsHomeBuilder(false);
+    setActiveTab("hero");
+    setIsEditing(true);
+    setSaveSuccess(null);
+    setSaveError(null);
+  };
+
+  // Delete a custom page (built-ins are protected by the API/store).
+  const handleDeletePage = async (page: PageContentItem) => {
+    if (BUILT_IN_PAGE_IDS.has(page.id)) return;
+    const confirmed = window.confirm(
+      `Delete the custom page "${page.title}" (${page.route}) permanently?`
+    );
+    if (!confirmed) return;
+
+    setSaveError(null);
+    try {
+      const params = new URLSearchParams({ id: page.id });
+      const res = await apiFetch(`/api/admin/pages?${params.toString()}`, { method: "DELETE" });
+      const data = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete the page.");
+      }
+      setPages((prev) => prev.filter((p) => p.id !== page.id));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("cms-updated"));
+      }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Failed to delete the page.");
+    }
+  };
+
   const closeEditor = () => {
     setIsEditing(false);
     setSelectedPage(null);
     setFormData({});
     setIsHomeBuilder(false);
+    setIsCreatingPage(false);
   };
 
-  // Save standard page
+  // Save standard page (supports creating a brand-new custom page too)
   const handleSaveStandardPage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.id) return;
+    if (!isCreatingPage && !formData.id) return;
+
+    if (isCreatingPage) {
+      const route = (formData.route || "").trim();
+      if (!route.startsWith("/")) {
+        setSaveError("Page route must start with a forward slash, e.g. /my-page.");
+        return;
+      }
+      if (!(formData.title || "").trim()) {
+        setSaveError("Page title is required.");
+        return;
+      }
+    }
 
     setIsSaving(true);
     setSaveSuccess(null);
     setSaveError(null);
 
     try {
-      const res = await fetch("/api/admin/pages", {
+      const res = await apiFetch("/api/admin/pages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -156,8 +236,15 @@ export default function PagesContentManager() {
         if (typeof window !== "undefined") {
           window.dispatchEvent(new Event("cms-updated"));
         }
-        setPages((prev) => prev.map((p) => (p.id === data.page.id ? data.page : p)));
+        setPages((prev) => {
+          const exists = prev.some((p) => p.id === data.page.id);
+          return exists
+            ? prev.map((p) => (p.id === data.page.id ? data.page : p))
+            : [...prev, data.page];
+        });
         setSelectedPage(data.page);
+        setFormData({ ...data.page });
+        setIsCreatingPage(false);
       } else {
         throw new Error(data.error || "Failed to save changes");
       }
@@ -179,7 +266,7 @@ export default function PagesContentManager() {
 
     try {
       // Save sections data
-      const res = await fetch("/api/admin/sections", {
+      const res = await apiFetch("/api/admin/sections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(homeSections),
@@ -188,7 +275,7 @@ export default function PagesContentManager() {
 
       // If SEO was also changed in formData, save page content too
       if (formData.id) {
-        await fetch("/api/admin/pages", {
+        await apiFetch("/api/admin/pages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -442,8 +529,18 @@ export default function PagesContentManager() {
             className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-9 pr-4 text-xs text-[#0B1F36] placeholder:text-[#94A3B8] focus:border-[#C8973D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8973D]/20 shadow-xs transition"
           />
         </div>
-        <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
-          {filteredPages.length} Pages Available for Editing
+        <div className="flex items-center gap-3">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#64748B]">
+            {filteredPages.length} Pages Available for Editing
+          </div>
+          <button
+            type="button"
+            onClick={openCreatePage}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0B1F36] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#102943] cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5 text-[#C8973D]" />
+            New Page
+          </button>
         </div>
       </div>
 
@@ -532,15 +629,27 @@ export default function PagesContentManager() {
                       <span>{isHome ? "Open Page Builder" : "Edit Content"}</span>
                     </button>
 
-                    <Link
-                      href={page.route}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#52627A] transition hover:bg-[#F8FAFC] hover:text-[#0B1F36]"
-                    >
-                      <span>Live Page</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      {!BUILT_IN_PAGE_IDS.has(page.id) && (
+                        <button
+                          type="button"
+                          onClick={() => void handleDeletePage(page)}
+                          title="Delete this custom page"
+                          className="rounded-lg p-1.5 text-[#94A3B8] hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <Link
+                        href={page.route}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#52627A] transition hover:bg-[#F8FAFC] hover:text-[#0B1F36]"
+                      >
+                        <span>Live Page</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -552,7 +661,7 @@ export default function PagesContentManager() {
       {/* ========================================================================= */}
       {/* INTERACTIVE EDIT MODAL / PAGE BUILDER                                    */}
       {/* ========================================================================= */}
-      {isEditing && selectedPage && (
+      {isEditing && (selectedPage || isCreatingPage) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
           <div className="relative w-full max-w-5xl max-h-[94vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-[#E2E8F0] overflow-hidden">
             {/* Modal Header */}
@@ -564,10 +673,14 @@ export default function PagesContentManager() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-base font-bold text-[#0B1F36] leading-tight">
-                      {isHomeBuilder ? "Homepage Section Builder" : `Edit ${selectedPage.title}`}
+                      {isHomeBuilder
+                        ? "Homepage Section Builder"
+                        : isCreatingPage
+                          ? "Create New Page"
+                          : `Edit ${selectedPage?.title ?? "Page"}`}
                     </h2>
                     <span className="font-mono text-[11px] text-[#52627A] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded">
-                      {selectedPage.route}
+                      {isCreatingPage ? "new route…" : selectedPage?.route}
                     </span>
                   </div>
                   <p className="text-xs text-[#52627A] mt-0.5">
@@ -580,7 +693,7 @@ export default function PagesContentManager() {
 
               <div className="flex items-center gap-2">
                 <Link
-                  href={selectedPage.route}
+                  href={selectedPage?.route || formData.route || "/"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#96641E] hover:underline px-2 py-1"
@@ -1633,6 +1746,33 @@ export default function PagesContentManager() {
                           className="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-800"
                         />
                       </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            Canonical URL (optional)
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.canonicalUrl || ""}
+                            onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                            placeholder="https://chcomposing.pk"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            OG Image URL (optional)
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.ogImage || ""}
+                            onChange={(e) => setFormData({ ...formData, ogImage: e.target.value })}
+                            placeholder="https://..."
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800"
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1645,6 +1785,35 @@ export default function PagesContentManager() {
                 <div>
                   {activeTab === "hero" && (
                     <div className="space-y-4 animate-in fade-in duration-150">
+                      {isCreatingPage && (
+                        <div className="rounded-xl border border-[#C8973D]/40 bg-[#FDF8EE] p-4 space-y-4">
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                              Page Route *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.route || ""}
+                              onChange={(e) => setFormData({ ...formData, route: e.target.value.trimStart() })}
+                              placeholder="/my-new-page"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 font-mono focus:border-emerald-600 focus:outline-none"
+                            />
+                            <p className="mt-1 text-[11px] text-slate-500">Must start with / and be unique.</p>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                              Page Title *
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.title || ""}
+                              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                              placeholder="My New Page"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 font-semibold focus:border-emerald-600 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                           Hero Badge / Tag
@@ -1796,6 +1965,33 @@ export default function PagesContentManager() {
                         />
                       </div>
 
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            Canonical URL (optional)
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.canonicalUrl || ""}
+                            onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                            placeholder="https://chcomposing.pk/my-page"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            OG Image URL (optional)
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.ogImage || ""}
+                            onChange={(e) => setFormData({ ...formData, ogImage: e.target.value })}
+                            placeholder="https://..."
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800"
+                          />
+                        </div>
+                      </div>
+
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                           Publish Status
@@ -1827,7 +2023,7 @@ export default function PagesContentManager() {
 
               <div className="flex items-center gap-2">
                 <Link
-                  href={selectedPage.route || "/"}
+                  href={selectedPage?.route || formData.route || "/"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#52627A] hover:text-[#0B1F36] border border-[#E2E8F0] bg-white px-3 py-2 rounded-lg hover:bg-[#F8FAFC] transition"
