@@ -409,16 +409,6 @@ export default function Header() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-              {settings?.headerSettings?.primaryCtaEnabled !== false && (
-                <Link
-                  href={settings?.headerSettings?.primaryCtaHref || "/#contact"}
-                  className="hidden md:inline-flex items-center gap-1.5 rounded-lg bg-[#C8973D] hover:bg-[#b8862f] text-navy-950 font-bold px-3 py-1.5 text-xs shadow-xs transition"
-                >
-                  <Phone className="h-3 w-3" />
-                  <span>{settings?.headerSettings?.primaryCtaText || (isUrdu ? "مشاورت لیں" : "Book Consultation")}</span>
-                </Link>
-              )}
-
               <button
                 type="button"
                 onClick={toggleTheme}
